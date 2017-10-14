@@ -1,0 +1,27 @@
+{
+  "name": "tree",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack-dev-server --hot",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ronanyeah/tree.git"
+  },
+  "author": "ronanyeah",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/ronanyeah/tree/issues"
+  },
+  "homepage": "https://github.com/ronanyeah/tree#readme",
+  "dependencies": {
+    "elm-hot-loader": "^0.5.4",
+    "elm-webpack-loader": "^4.3.1",
+    "webpack": "^3.7.1",
+    "webpack-dev-server": "^2.9.1"
+  }
+}
