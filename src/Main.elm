@@ -12,7 +12,8 @@ import Style.Border as Border
 
 
 type Msg
-    = SelectPosition Position
+    = SelectPosition String
+    | SelectTech String
 
 
 type Styles
@@ -25,12 +26,21 @@ type Var
     | Bottom
 
 
-type Tech
-    = Tech Var String String (List String)
+type alias Tech =
+    { var : Var
+    , id : String
+    , position : String
+    , name : String
+    , steps : List String
+    }
 
 
-type Position
-    = Position String (List String) (List String)
+type alias Position =
+    { id : String
+    , name : String
+    , attack : List String
+    , defence : List String
+    }
 
 
 type alias Model =
@@ -88,7 +98,8 @@ decodeModel =
 
 decodePosition : Decoder Position
 decodePosition =
-    Decode.map3 Position
+    Decode.map4 Position
+        (Decode.field "id" Decode.string)
         (Decode.field "name" Decode.string)
         (Decode.field "attack" (Decode.list Decode.string))
         (Decode.field "defence" (Decode.list Decode.string))
@@ -106,7 +117,8 @@ decodeTech =
                         else
                             Bottom
                 in
-                    Decode.map3 (Tech var)
+                    Decode.map4 (Tech var)
+                        (Decode.field "id" Decode.string)
                         (Decode.field "position" Decode.string)
                         (Decode.field "name" Decode.string)
                         (Decode.field "steps" (Decode.list Decode.string))
@@ -126,26 +138,47 @@ view model =
                         |> List.map (row None [ center, spacing 5, padding 5, width fill ])
                         |> column None [ center, width fill ]
 
-                ViewPosition p ->
-                    text <| toString p
+                ViewPosition { id, name, attack, defence } ->
+                    let
+                        techs =
+                            model.techs
+                                |> Dict.values
+                                |> List.filter
+                                    (.id >> (==) id)
+                    in
+                        column None
+                            [ center, width fill ]
+                            [ el None [] <| text name
+                            , column None [] <| List.map text attack
+                            , column None [] <| List.map text defence
+                            , column None [] <|
+                                List.map
+                                    (\tech ->
+                                        el None [ onClick <| SelectTech tech.id ] <| text tech.name
+                                    )
+                                    techs
+                            ]
 
-                _ ->
-                    text "err"
+                ViewTech { name, steps } ->
+                    column None
+                        []
+                        [ el None [] <| text name
+                        , column None [] <| List.map text steps
+                        ]
     in
         viewport styling <|
             content
 
 
 viewPosition : Position -> Element Styles vs Msg
-viewPosition position =
+viewPosition { name, id } =
     el SetBox
         [ padding 5
         , height <| px 100
-        , onClick <| SelectPosition position
+        , onClick <| SelectPosition id
         ]
     <|
-        text <|
-            toString position
+        text name
 
 
 
@@ -155,8 +188,27 @@ viewPosition position =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SelectPosition p ->
-            ( { model | view = ViewPosition p }, Cmd.none )
+        SelectPosition id ->
+            let
+                view =
+                    Dict.get id model.positions
+                        |> unwrap ViewAll ViewPosition
+            in
+                ( { model | view = view }, Cmd.none )
+
+        SelectTech id ->
+            let
+                view =
+                    Dict.get id model.techs
+                        |> unwrap ViewAll ViewTech
+            in
+                ( { model | view = view }, Cmd.none )
+
+
+unwrap : b -> (a -> b) -> Maybe a -> b
+unwrap default fn =
+    Maybe.map fn
+        >> Maybe.withDefault default
 
 
 log : a -> Cmd Msg
