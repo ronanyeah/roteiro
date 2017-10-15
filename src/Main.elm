@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Dict exposing (Dict)
 import Element exposing (Element, column, el, html, row, text, viewport)
 import Element.Attributes exposing (center, fill, height, padding, paddingBottom, px, spacing, width)
 import Element.Events exposing (onClick)
@@ -11,7 +12,7 @@ import Style.Border as Border
 
 
 type Msg
-    = SelectSet Set
+    = SelectPosition Position
 
 
 type Styles
@@ -25,26 +26,23 @@ type Var
 
 
 type Tech
-    = Tech String (List String)
+    = Tech Var String String (List String)
 
 
 type Position
-    = HalfGuard Var
-
-
-type Set
-    = Set Position (List String) (List Tech)
+    = Position String (List String) (List String)
 
 
 type alias Model =
-    { techs : List Set
-    , view : View
+    { view : View
+    , positions : Dict String Position
+    , techs : Dict String Tech
     }
 
 
 type View
     = ViewAll
-    | ViewSet Set
+    | ViewPosition Position
     | ViewTech Tech
 
 
@@ -61,7 +59,7 @@ styling =
 
 emptyModel : Model
 emptyModel =
-    Model [] ViewAll
+    Model ViewAll Dict.empty Dict.empty
 
 
 main : Program Decode.Value Model Msg
@@ -69,9 +67,9 @@ main =
     Html.programWithFlags
         { init =
             \json ->
-                case Decode.decodeValue (Decode.list decodeSet) json of
-                    Ok data ->
-                        ( { emptyModel | techs = data }, Cmd.none )
+                case Decode.decodeValue decodeModel json of
+                    Ok model ->
+                        ( model, Cmd.none )
 
                     Err err ->
                         ( emptyModel, log err )
@@ -81,31 +79,37 @@ main =
         }
 
 
+decodeModel : Decoder Model
+decodeModel =
+    Decode.map2 (Model ViewAll)
+        (Decode.field "positions" (Decode.dict decodePosition))
+        (Decode.field "techs" (Decode.dict decodeTech))
+
+
+decodePosition : Decoder Position
+decodePosition =
+    Decode.map3 Position
+        (Decode.field "name" Decode.string)
+        (Decode.field "attack" (Decode.list Decode.string))
+        (Decode.field "defence" (Decode.list Decode.string))
+
+
 decodeTech : Decoder Tech
 decodeTech =
-    Decode.map2 Tech
-        (Decode.field "name" Decode.string)
-        (Decode.field "steps" <| Decode.list Decode.string)
-
-
-decodeSet : Decoder Set
-decodeSet =
-    Decode.field "position" Decode.string
+    Decode.field "top" Decode.bool
         |> Decode.andThen
-            (\str ->
-                case str of
-                    "halfGuardBottom" ->
-                        Decode.map2 (Set (HalfGuard Bottom))
-                            (Decode.field "tips" (Decode.list Decode.string))
-                            (Decode.field "techs" (Decode.list decodeTech))
-
-                    "halfGuardTop" ->
-                        Decode.map2 (Set (HalfGuard Top))
-                            (Decode.field "tips" (Decode.list Decode.string))
-                            (Decode.field "techs" (Decode.list decodeTech))
-
-                    _ ->
-                        Decode.fail "uh oh"
+            (\top ->
+                let
+                    var =
+                        if top then
+                            Top
+                        else
+                            Bottom
+                in
+                    Decode.map3 (Tech var)
+                        (Decode.field "position" Decode.string)
+                        (Decode.field "name" Decode.string)
+                        (Decode.field "steps" (Decode.list Decode.string))
             )
 
 
@@ -115,14 +119,15 @@ view model =
         content =
             case model.view of
                 ViewAll ->
-                    model.techs
-                        |> List.map viewSet
+                    model.positions
+                        |> Dict.values
+                        |> List.map viewPosition
                         |> greedyGroupsOf 3
                         |> List.map (row None [ center, spacing 5, padding 5, width fill ])
                         |> column None [ center, width fill ]
 
-                ViewSet (Set position _ _) ->
-                    text <| toString position
+                ViewPosition p ->
+                    text <| toString p
 
                 _ ->
                     text "err"
@@ -131,12 +136,12 @@ view model =
             content
 
 
-viewSet : Set -> Element Styles vs Msg
-viewSet ((Set position _ _) as s) =
+viewPosition : Position -> Element Styles vs Msg
+viewPosition position =
     el SetBox
         [ padding 5
         , height <| px 100
-        , onClick <| SelectSet s
+        , onClick <| SelectPosition position
         ]
     <|
         text <|
@@ -150,8 +155,8 @@ viewSet ((Set position _ _) as s) =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SelectSet set ->
-            ( { model | view = ViewSet set }, Cmd.none )
+        SelectPosition p ->
+            ( { model | view = ViewPosition p }, Cmd.none )
 
 
 log : a -> Cmd Msg
