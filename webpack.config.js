@@ -1,11 +1,11 @@
 const webpack = require("webpack");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { resolve } = require("path");
 
 module.exports = {
-  entry: "./index.js",
+  entry: "./src/index.js",
   output: {
-    path: resolve("./public/"),
-    filename: "bundle.js"
+    filename: "./public/bundle.js"
   },
   devServer: {
     contentBase: "./public"
@@ -31,6 +31,9 @@ module.exports = {
   },
   plugins: [
     new webpack.NamedModulesPlugin(),
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin(),
+    new HtmlWebpackPlugin({
+      template: "./src/index.html"
+    })
   ]
 };
