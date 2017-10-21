@@ -5,19 +5,27 @@ import Dict exposing (Dict)
 import Element exposing (Element, column, el, empty, row, text, viewport, when)
 import Element.Attributes exposing (center, fill, height, padding, px, spacing, width)
 import Element.Events exposing (onClick)
+import GraphQL.Client.Http as GQLH
+import GraphQL.Request.Builder as GQLB
 import Html exposing (Html)
 import Json.Decode as Decode exposing (Decoder)
 import Style exposing (StyleSheet, style, styleSheet)
 import Style.Border as Border
 import Style.Font as Font
 import Style.Color as Color
+import Task exposing (Task)
+
+
+type Id
+    = Id String
 
 
 type Msg
-    = SelectPosition String
+    = SelectPosition Id
     | SelectTech String
     | SelectNotes
     | Reset
+    | CbData (Result GQLH.Error AllData)
 
 
 type Styles
@@ -44,9 +52,18 @@ type alias Tech =
 
 
 type alias Position =
-    { id : String
+    { id : Id
     , name : String
-    , tips : List String
+    , notes : List String
+    }
+
+
+type alias Submission =
+    { id : Id
+    , name : String
+    , steps : List String
+    , notes : List String
+    , position : Id
     }
 
 
@@ -55,6 +72,25 @@ type alias Model =
     , positions : Dict String Position
     , techs : Dict String Tech
     , notes : Dict String (List String)
+    , transitions : Dict String Transition
+    }
+
+
+type alias Transition =
+    { id : Id
+    , name : String
+    , startPosition : Id
+    , endPosition : Id
+    , notes : List String
+    , steps : List String
+    }
+
+
+type alias AllData =
+    { transitions : List Transition
+    , positions : List Position
+
+    --, submissions : List Submission
     }
 
 
@@ -91,20 +127,18 @@ styling =
 
 emptyModel : Model
 emptyModel =
-    Model ViewAll Dict.empty Dict.empty Dict.empty
+    Model ViewAll Dict.empty Dict.empty Dict.empty Dict.empty
 
 
-main : Program Decode.Value Model Msg
+init : String -> ( Model, Cmd Msg )
+init url =
+    ( emptyModel, Task.attempt CbData (GQLH.sendQuery url fetchData) )
+
+
+main : Program String Model Msg
 main =
     Html.programWithFlags
-        { init =
-            \json ->
-                case Decode.decodeValue decodeModel json of
-                    Ok model ->
-                        ( model, Cmd.none )
-
-                    Err err ->
-                        ( emptyModel, log err )
+        { init = init
         , subscriptions = always Sub.none
         , update = update
         , view = view
@@ -133,21 +167,21 @@ view model =
                                 text "Notes"
                             ]
 
-                ViewPosition { id, name, tips } ->
+                ViewPosition { id, name, notes } ->
                     let
                         ( subs, sweeps ) =
                             model.techs
                                 |> Dict.values
-                                |> List.filter (.position >> (==) id)
+                                --|> List.filter (.position >> (==) id)
                                 |> List.partition (.techType >> (==) Sub)
                     in
                         [ resetButton
                         , el None [] <| text name
-                        , when (not <| List.isEmpty tips) <|
+                        , when (not <| List.isEmpty notes) <|
                             column None
                                 []
                                 [ el None [ center ] <| text "Tips:"
-                                , column None [] <| List.map ((++) "- " >> text) tips
+                                , column None [] <| List.map ((++) "- " >> text) notes
                                 ]
                         , viewTechList "Sweeps:" sweeps
                         , viewTechList "Subs:" subs
@@ -159,29 +193,29 @@ view model =
                             Dict.get position model.positions
                                 |> unwrap "???" .name
 
-                        transition =
-                            case techType of
-                                Sweep id ->
-                                    let
-                                        nameOfTransition =
-                                            Dict.get id model.positions
-                                                |> unwrap "???" .name
-                                    in
-                                        row None
-                                            []
-                                            [ text "Transitions to: "
-                                            , el Link [ onClick <| SelectPosition id ] <|
-                                                text nameOfTransition
-                                            ]
-
-                                Sub ->
-                                    empty
+                        --transition =
+                        --case techType of
+                        --Sweep id ->
+                        --let
+                        --nameOfTransition =
+                        --Dict.get id model.positions
+                        --|> unwrap "???" .name
+                        --in
+                        --row None
+                        --[]
+                        --[ text "Transitions to: "
+                        --, el Link [ onClick <| SelectPosition id ] <|
+                        --text nameOfTransition
+                        --]
+                        --Sub ->
+                        --empty
                     in
                         [ resetButton
                         , row None
                             []
                             [ text (name ++ " from ")
-                            , el Link [ onClick <| SelectPosition position ] <| text positionName
+
+                            --, el Link [ onClick <| SelectPosition position ] <| text positionName
                             ]
                         , column None [] <|
                             List.indexedMap
@@ -193,7 +227,8 @@ view model =
                                         ]
                                 )
                                 steps
-                        , transition
+
+                        --, transition
                         ]
 
                 ViewNotes ->
@@ -249,7 +284,7 @@ viewPosition { name, id } =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SelectPosition id ->
+        SelectPosition (Id id) ->
             let
                 view =
                     Dict.get id model.positions
@@ -271,6 +306,14 @@ update msg model =
         Reset ->
             ( { model | view = ViewAll }, Cmd.none )
 
+        CbData res ->
+            case res of
+                Ok { transitions, positions } ->
+                    ( { model | transitions = listToDict transitions, positions = listToDict positions }, Cmd.none )
+
+                Err err ->
+                    ( model, log err )
+
 
 unwrap : b -> (a -> b) -> Maybe a -> b
 unwrap default fn =
@@ -288,49 +331,67 @@ log a =
 
 
 
--- DECODERS
+-- HELPERS
 
 
-decodeModel : Decoder Model
-decodeModel =
-    let
-        listToDict : List { r | id : String } -> Dict String { r | id : String }
-        listToDict =
-            List.foldl (\r -> Dict.insert r.id r) Dict.empty
-    in
-        Decode.map3 (Model ViewAll)
-            (Decode.field "positions" (Decode.list decodePosition |> Decode.map listToDict))
-            (Decode.field "techs" (Decode.list decodeTech |> Decode.map listToDict))
-            (Decode.field "notes" (Decode.dict (Decode.list Decode.string)))
+listToDict : List { r | id : Id } -> Dict String { r | id : Id }
+listToDict =
+    List.foldl
+        (\r ->
+            let
+                (Id id) =
+                    r.id
+            in
+                Dict.insert id r
+        )
+        Dict.empty
 
 
-decodePosition : Decoder Position
-decodePosition =
-    Decode.map3 Position
-        (Decode.field "id" Decode.string)
-        (Decode.field "name" Decode.string)
-        (Decode.field "tips" (Decode.list Decode.string))
+
+-- API
 
 
-decodeTech : Decoder Tech
-decodeTech =
-    Decode.map5 Tech
-        (Decode.field "sweep-to" decodeTechType)
-        (Decode.field "id" Decode.string)
-        (Decode.field "position" Decode.string)
-        (Decode.field "name" Decode.string)
-        (Decode.field "steps" (Decode.list Decode.string))
+fetchData : GQLB.Request GQLB.Query AllData
+fetchData =
+    (GQLB.object AllData
+        |> GQLB.with (GQLB.field "allTransitions" [] (GQLB.list transition))
+        |> GQLB.with (GQLB.field "allPositions" [] (GQLB.list position))
+    )
+        |> GQLB.queryDocument
+        |> GQLB.request ()
 
 
-decodeTechType : Decoder TechType
-decodeTechType =
-    Decode.nullable Decode.string
-        |> Decode.andThen
-            (\sweep ->
-                case sweep of
-                    Just id ->
-                        Decode.succeed <| Sweep id
+fetchTransitions : GQLB.Request GQLB.Query (List Transition)
+fetchTransitions =
+    GQLB.list transition
+        |> GQLB.field "allTransitions" []
+        |> GQLB.extract
+        |> GQLB.queryDocument
+        |> GQLB.request ()
 
-                    Nothing ->
-                        Decode.succeed <| Sub
+
+position : GQLB.ValueSpec GQLB.NonNull GQLB.ObjectType Position vars
+position =
+    GQLB.object Position
+        |> GQLB.with (GQLB.field "id" [] (GQLB.map Id GQLB.id))
+        |> GQLB.with (GQLB.field "name" [] GQLB.string)
+        |> GQLB.with (GQLB.field "notes" [] (GQLB.list GQLB.string))
+
+
+transition : GQLB.ValueSpec GQLB.NonNull GQLB.ObjectType Transition vars
+transition =
+    GQLB.object Transition
+        |> GQLB.with (GQLB.field "id" [] (GQLB.map Id GQLB.id))
+        |> GQLB.with (GQLB.field "name" [] GQLB.string)
+        |> GQLB.with
+            (GQLB.field "startPosition"
+                []
+                (GQLB.field "id" [] (GQLB.map Id GQLB.id) |> GQLB.extract)
             )
+        |> GQLB.with
+            (GQLB.field "endPosition"
+                []
+                (GQLB.field "id" [] (GQLB.map Id GQLB.id) |> GQLB.extract)
+            )
+        |> GQLB.with (GQLB.field "notes" [] (GQLB.list GQLB.string))
+        |> GQLB.with (GQLB.field "steps" [] (GQLB.list GQLB.string))

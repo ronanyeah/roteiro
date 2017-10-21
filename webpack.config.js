@@ -2,6 +2,8 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { resolve } = require("path");
 
+if (!process.env.GRAPHQL_ENDPOINT) throw "Missing GraphQL endpoint!";
+
 module.exports = {
   entry: "./src/index.js",
   output: {
@@ -30,6 +32,9 @@ module.exports = {
     ]
   },
   plugins: [
+    new webpack.DefinePlugin({
+      GRAPHQL_ENDPOINT: JSON.stringify(process.env.GRAPHQL_ENDPOINT)
+    }),
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new HtmlWebpackPlugin({
