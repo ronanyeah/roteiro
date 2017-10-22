@@ -8,12 +8,11 @@ import Element.Events exposing (onClick)
 import GraphQL.Client.Http as GQLH
 import GraphQL.Request.Builder as GQLB
 import Html exposing (Html)
-import Json.Decode as Decode exposing (Decoder)
 import Style exposing (StyleSheet, style, styleSheet)
 import Style.Border as Border
 import Style.Font as Font
 import Style.Color as Color
-import Task exposing (Task)
+import Task
 
 
 type Id
@@ -36,11 +35,6 @@ type Styles
     | Button
     | Link
     | Line
-
-
-type TechType
-    = Sub
-    | Sweep String
 
 
 type alias Topic =
@@ -152,7 +146,15 @@ view model =
                 ViewAll ->
                     model.positions
                         |> Dict.values
-                        |> List.map viewPosition
+                        |> List.map
+                            (\p ->
+                                el Button
+                                    [ padding 10
+                                    , onClick <| SelectPosition p
+                                    ]
+                                <|
+                                    text p.name
+                            )
                         |> flip (++)
                             [ el Line [ width <| px 100, height <| px 2 ] empty
                             , el Button
@@ -180,7 +182,7 @@ view model =
                         , when (not <| List.isEmpty notes) <|
                             column None
                                 []
-                                [ el None [ center ] <| text "Tips:"
+                                [ el None [ center ] <| text "Notes:"
                                 , column None [] <| List.map ((++) "- " >> text) notes
                                 ]
                         , viewTechList "Transitions" SelectTransition transitions
@@ -197,16 +199,8 @@ view model =
                                     [ text (name ++ " from ")
                                     , el Link [ onClick <| SelectPosition p ] <| text p.name
                                     ]
-                                , column None [] <|
-                                    List.indexedMap
-                                        (\i step ->
-                                            row None
-                                                []
-                                                [ Element.bold <| (toString (i + 1) ++ ".")
-                                                , text <| " " ++ step
-                                                ]
-                                        )
-                                        steps
+                                , viewSteps steps
+                                , viewList "Notes" notes
                                 ]
                             )
 
@@ -221,16 +215,8 @@ view model =
                                 [ text (name ++ " from ")
                                 , el Link [ onClick <| SelectPosition start ] <| text start.name
                                 ]
-                            , column None [] <|
-                                List.indexedMap
-                                    (\i step ->
-                                        row None
-                                            []
-                                            [ Element.bold <| (toString (i + 1) ++ ".")
-                                            , text <| " " ++ step
-                                            ]
-                                    )
-                                    steps
+                            , viewSteps steps
+                            , viewList "Notes" notes
                             , row None
                                 []
                                 [ text "Transitions to: "
@@ -266,16 +252,24 @@ get (Id id) =
 
 viewTopic : Topic -> Element Styles vs Msg
 viewTopic { name, content } =
-    when (List.length content |> flip (>) 0) <|
-        column None
-            [ center ]
-            [ el None [] <| text name
-            , column None [] <| List.map ((++) "- " >> text) content
-            ]
+    viewList name content
 
 
-viewList : ( String, List String ) -> Element Styles vs Msg
-viewList ( title, notes ) =
+viewSteps : List String -> Element Styles vs Msg
+viewSteps =
+    List.indexedMap
+        (\i step ->
+            row None
+                []
+                [ Element.bold <| (toString (i + 1) ++ ".")
+                , text <| " " ++ step
+                ]
+        )
+        >> column None []
+
+
+viewList : String -> List String -> Element Styles vs Msg
+viewList title notes =
     when (List.length notes |> flip (>) 0) <|
         column None
             [ center ]
@@ -289,7 +283,7 @@ viewTechList title msg techs =
     when (List.length techs |> flip (>) 0) <|
         column None
             []
-            [ el None [] <| text title
+            [ el None [] <| text <| title ++ ":"
             , column None [] <|
                 List.map
                     (\t ->
@@ -297,16 +291,6 @@ viewTechList title msg techs =
                     )
                     techs
             ]
-
-
-viewPosition : Position -> Element Styles vs Msg
-viewPosition ({ name, id } as r) =
-    el Button
-        [ padding 10
-        , onClick <| SelectPosition r
-        ]
-    <|
-        text name
 
 
 
@@ -391,21 +375,11 @@ listToDict =
 
 fetchData : GQLB.Request GQLB.Query AllData
 fetchData =
-    (GQLB.object AllData
+    GQLB.object AllData
         |> GQLB.with (GQLB.field "allTransitions" [] (GQLB.list transition))
         |> GQLB.with (GQLB.field "allPositions" [] (GQLB.list position))
         |> GQLB.with (GQLB.field "allSubmissions" [] (GQLB.list submission))
         |> GQLB.with (GQLB.field "allTopics" [] (GQLB.list topic))
-    )
-        |> GQLB.queryDocument
-        |> GQLB.request ()
-
-
-fetchTransitions : GQLB.Request GQLB.Query (List Transition)
-fetchTransitions =
-    GQLB.list transition
-        |> GQLB.field "allTransitions" []
-        |> GQLB.extract
         |> GQLB.queryDocument
         |> GQLB.request ()
 
