@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Color exposing (black)
 import Dict exposing (Dict)
-import Element exposing (Element, column, el, empty, row, text, viewport, when)
+import Element exposing (Element, column, el, empty, paragraph, row, text, viewport, when)
 import Element.Attributes exposing (center, fill, height, padding, px, spacing, width)
 import Element.Events exposing (onClick)
 import GraphQL.Client.Http as GQLH
@@ -179,12 +179,7 @@ view model =
                     in
                         [ resetButton
                         , el None [] <| text name
-                        , when (not <| List.isEmpty notes) <|
-                            column None
-                                []
-                                [ el None [ center ] <| text "Notes:"
-                                , column None [] <| List.map ((++) "- " >> text) notes
-                                ]
+                        , viewList "Notes" notes
                         , viewTechList "Transitions" SelectTransition transitions
                         , viewTechList "Submissions" SelectSubmission submissions
                         ]
@@ -270,11 +265,11 @@ viewSteps =
 
 viewList : String -> List String -> Element Styles vs Msg
 viewList title notes =
-    when (List.length notes |> flip (>) 0) <|
+    when (not (List.isEmpty notes)) <|
         column None
             [ center ]
             [ el None [] <| text <| title ++ ":"
-            , column None [] <| List.map ((++) "- " >> text) notes
+            , column None [] <| List.map ((++) "- " >> text >> List.singleton >> paragraph None []) notes
             ]
 
 
