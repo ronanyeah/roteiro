@@ -15,8 +15,27 @@ import Style.Color as Color
 import Task
 
 
-type Id
-    = Id String
+main : Program String Model Msg
+main =
+    Html.programWithFlags
+        { init =
+            \url ->
+                ( { view = ViewAll
+                  , positions = Dict.empty
+                  , transitions = Dict.empty
+                  , submissions = Dict.empty
+                  , topics = []
+                  }
+                , Task.attempt CbData (GQLH.sendQuery url fetchData)
+                )
+        , subscriptions = always Sub.none
+        , update = update
+        , view = view
+        }
+
+
+
+-- TYPES
 
 
 type Msg
@@ -28,6 +47,14 @@ type Msg
     | CbData (Result GQLH.Error AllData)
 
 
+type View
+    = ViewAll
+    | ViewPosition Position
+    | ViewSubmission Submission
+    | ViewTransition Transition
+    | ViewNotes
+
+
 type Styles
     = None
     | SetBox
@@ -35,6 +62,19 @@ type Styles
     | Button
     | Link
     | Line
+
+
+type Id
+    = Id String
+
+
+type alias Model =
+    { view : View
+    , positions : Dict String Position
+    , transitions : Dict String Transition
+    , submissions : Dict String Submission
+    , topics : List Topic
+    }
 
 
 type alias Topic =
@@ -59,15 +99,6 @@ type alias Submission =
     }
 
 
-type alias Model =
-    { view : View
-    , positions : Dict String Position
-    , transitions : Dict String Transition
-    , submissions : Dict String Submission
-    , topics : List Topic
-    }
-
-
 type alias Transition =
     { id : Id
     , name : String
@@ -86,56 +117,8 @@ type alias AllData =
     }
 
 
-type View
-    = ViewAll
-    | ViewPosition Position
-    | ViewSubmission Submission
-    | ViewTransition Transition
-    | ViewNotes
 
-
-styling : StyleSheet Styles vs
-styling =
-    let
-        pointer =
-            Style.cursor "pointer"
-    in
-        styleSheet
-            [ style None []
-            , style SetBox
-                [ Border.all 2
-                , Border.solid
-                ]
-            , style Button
-                [ Border.all 2
-                , Border.solid
-                , Border.rounded 15
-                , pointer
-                ]
-            , style Body [ Font.typeface [ Font.font "Cuprum", Font.sansSerif ], Font.size 25 ]
-            , style Link [ Font.underline, pointer ]
-            , style Line [ Color.background black ]
-            ]
-
-
-emptyModel : Model
-emptyModel =
-    Model ViewAll Dict.empty Dict.empty Dict.empty []
-
-
-init : String -> ( Model, Cmd Msg )
-init url =
-    ( emptyModel, Task.attempt CbData (GQLH.sendQuery url fetchData) )
-
-
-main : Program String Model Msg
-main =
-    Html.programWithFlags
-        { init = init
-        , subscriptions = always Sub.none
-        , update = update
-        , view = view
-        }
+-- VIEW
 
 
 view : Model -> Html Msg
@@ -240,11 +223,6 @@ oopsView =
     [ resetButton, text "oops!" ]
 
 
-get : Id -> Dict String { r | id : Id } -> Maybe { r | id : Id }
-get (Id id) =
-    Dict.get id
-
-
 viewTopic : Topic -> Element Styles vs Msg
 viewTopic { name, content } =
     viewList name content
@@ -326,6 +304,43 @@ update msg model =
                     ( model, log err )
 
 
+
+-- STYLING
+
+
+styling : StyleSheet Styles vs
+styling =
+    let
+        pointer =
+            Style.cursor "pointer"
+    in
+        styleSheet
+            [ style None []
+            , style SetBox
+                [ Border.all 2
+                , Border.solid
+                ]
+            , style Button
+                [ Border.all 2
+                , Border.solid
+                , Border.rounded 15
+                , pointer
+                ]
+            , style Body [ Font.typeface [ Font.font "Cuprum", Font.sansSerif ], Font.size 25 ]
+            , style Link [ Font.underline, pointer ]
+            , style Line [ Color.background black ]
+            ]
+
+
+
+-- HELPERS
+
+
+get : Id -> Dict String { r | id : Id } -> Maybe { r | id : Id }
+get (Id id) =
+    Dict.get id
+
+
 unwrap : b -> (a -> b) -> Maybe a -> b
 unwrap default fn =
     Maybe.map fn
@@ -347,10 +362,6 @@ log a =
         Cmd.none
 
 
-
--- HELPERS
-
-
 listToDict : List { r | id : Id } -> Dict String { r | id : Id }
 listToDict =
     List.foldl
@@ -365,7 +376,7 @@ listToDict =
 
 
 
--- API
+-- DATA
 
 
 fetchData : GQLB.Request GQLB.Query AllData
