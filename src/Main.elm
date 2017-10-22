@@ -21,8 +21,9 @@ type Id
 
 
 type Msg
-    = SelectPosition Id
-    | SelectTech String
+    = SelectPosition Position
+    | SelectSubmission Submission
+    | SelectTransition Transition
     | SelectNotes
     | Reset
     | CbData (Result GQLH.Error AllData)
@@ -42,12 +43,9 @@ type TechType
     | Sweep String
 
 
-type alias Tech =
-    { techType : TechType
-    , id : String
-    , position : String
-    , name : String
-    , steps : List String
+type alias Topic =
+    { name : String
+    , content : List String
     }
 
 
@@ -70,9 +68,9 @@ type alias Submission =
 type alias Model =
     { view : View
     , positions : Dict String Position
-    , techs : Dict String Tech
-    , notes : Dict String (List String)
     , transitions : Dict String Transition
+    , submissions : Dict String Submission
+    , topics : List Topic
     }
 
 
@@ -89,15 +87,16 @@ type alias Transition =
 type alias AllData =
     { transitions : List Transition
     , positions : List Position
-
-    --, submissions : List Submission
+    , submissions : List Submission
+    , topics : List Topic
     }
 
 
 type View
     = ViewAll
     | ViewPosition Position
-    | ViewTech Tech
+    | ViewSubmission Submission
+    | ViewTransition Transition
     | ViewNotes
 
 
@@ -127,7 +126,7 @@ styling =
 
 emptyModel : Model
 emptyModel =
-    Model ViewAll Dict.empty Dict.empty Dict.empty Dict.empty
+    Model ViewAll Dict.empty Dict.empty Dict.empty []
 
 
 init : String -> ( Model, Cmd Msg )
@@ -169,11 +168,15 @@ view model =
 
                 ViewPosition { id, name, notes } ->
                     let
-                        ( subs, sweeps ) =
-                            model.techs
+                        transitions =
+                            model.transitions
                                 |> Dict.values
-                                --|> List.filter (.position >> (==) id)
-                                |> List.partition (.techType >> (==) Sub)
+                                |> List.filter (.startPosition >> (==) id)
+
+                        submissions =
+                            model.submissions
+                                |> Dict.values
+                                |> List.filter (.position >> (==) id)
                     in
                         [ resetButton
                         , el None [] <| text name
@@ -183,62 +186,61 @@ view model =
                                 [ el None [ center ] <| text "Tips:"
                                 , column None [] <| List.map ((++) "- " >> text) notes
                                 ]
-                        , viewTechList "Sweeps:" sweeps
-                        , viewTechList "Subs:" subs
+                        , viewTechList "Sweeps:" transitions
+                        , viewTechList "Subs:" submissions
                         ]
 
-                ViewTech { name, steps, position, techType } ->
-                    let
-                        positionName =
-                            Dict.get position model.positions
-                                |> unwrap "???" .name
+                ViewSubmission { name, steps, position, notes } ->
+                    case get position model.positions of
+                        Just p ->
+                            [ resetButton
+                            , row None
+                                []
+                                [ text (name ++ " from ")
+                                , el Link [ onClick <| SelectPosition p ] <| text p.name
+                                ]
+                            , column None [] <|
+                                List.indexedMap
+                                    (\i step ->
+                                        row None
+                                            []
+                                            [ Element.bold <| (toString (i + 1) ++ ".")
+                                            , text <| " " ++ step
+                                            ]
+                                    )
+                                    steps
 
-                        --transition =
-                        --case techType of
-                        --Sweep id ->
-                        --let
-                        --nameOfTransition =
-                        --Dict.get id model.positions
-                        --|> unwrap "???" .name
-                        --in
-                        --row None
-                        --[]
-                        --[ text "Transitions to: "
-                        --, el Link [ onClick <| SelectPosition id ] <|
-                        --text nameOfTransition
-                        --]
-                        --Sub ->
-                        --empty
-                    in
-                        [ resetButton
-                        , row None
-                            []
-                            [ text (name ++ " from ")
-
-                            --, el Link [ onClick <| SelectPosition position ] <| text positionName
+                            --, transition
                             ]
-                        , column None [] <|
-                            List.indexedMap
-                                (\i step ->
-                                    row None
-                                        []
-                                        [ Element.bold <| (toString (i + 1) ++ ".")
-                                        , text <| " " ++ step
-                                        ]
-                                )
-                                steps
 
-                        --, transition
-                        ]
+                        Nothing ->
+                            [ text "err" ]
+
+                ViewTransition _ ->
+                    [ text "transition" ]
 
                 ViewNotes ->
-                    model.notes
-                        |> Dict.toList
-                        |> List.map viewList
+                    model.topics
+                        |> List.map viewTopic
                         |> (::) resetButton
     in
         viewport styling <|
             column Body [ center, width fill, spacing 30, padding 15 ] content
+
+
+get : Id -> Dict String { r | id : Id } -> Maybe { r | id : Id }
+get (Id id) =
+    Dict.get id
+
+
+viewTopic : Topic -> Element Styles vs Msg
+viewTopic { name, content } =
+    when (List.length content |> flip (>) 0) <|
+        column None
+            [ center ]
+            [ el None [] <| text name
+            , column None [] <| List.map ((++) "- " >> text) content
+            ]
 
 
 viewList : ( String, List String ) -> Element Styles vs Msg
@@ -251,7 +253,7 @@ viewList ( title, notes ) =
             ]
 
 
-viewTechList : String -> List Tech -> Element Styles vs Msg
+viewTechList : String -> List { r | id : Id, name : String } -> Element Styles vs Msg
 viewTechList title techs =
     when (List.length techs |> flip (>) 0) <|
         column None
@@ -262,16 +264,16 @@ viewTechList title techs =
             ]
 
 
-viewTechLink : Tech -> Element Styles vs Msg
-viewTechLink tech =
-    row None [] [ text "- ", el Link [ onClick <| SelectTech tech.id ] <| text tech.name ]
+viewTechLink : { r | id : Id, name : String } -> Element Styles vs Msg
+viewTechLink { id, name } =
+    row None [] [ text "- ", el Link [] <| text name ]
 
 
 viewPosition : Position -> Element Styles vs Msg
-viewPosition { name, id } =
+viewPosition ({ name, id } as r) =
     el Button
         [ padding 10
-        , onClick <| SelectPosition id
+        , onClick <| SelectPosition r
         ]
     <|
         text name
@@ -284,21 +286,14 @@ viewPosition { name, id } =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SelectPosition (Id id) ->
-            let
-                view =
-                    Dict.get id model.positions
-                        |> unwrap ViewAll ViewPosition
-            in
-                ( { model | view = view }, Cmd.none )
+        SelectPosition p ->
+            ( { model | view = ViewPosition p }, Cmd.none )
 
-        SelectTech id ->
-            let
-                view =
-                    Dict.get id model.techs
-                        |> unwrap ViewAll ViewTech
-            in
-                ( { model | view = view }, Cmd.none )
+        SelectSubmission s ->
+            ( { model | view = ViewSubmission s }, Cmd.none )
+
+        SelectTransition t ->
+            ( { model | view = ViewTransition t }, Cmd.none )
 
         SelectNotes ->
             ( { model | view = ViewNotes }, Cmd.none )
@@ -308,8 +303,15 @@ update msg model =
 
         CbData res ->
             case res of
-                Ok { transitions, positions } ->
-                    ( { model | transitions = listToDict transitions, positions = listToDict positions }, Cmd.none )
+                Ok { transitions, positions, submissions, topics } ->
+                    ( { model
+                        | transitions = listToDict transitions
+                        , positions = listToDict positions
+                        , submissions = listToDict submissions
+                        , topics = topics
+                      }
+                    , Cmd.none
+                    )
 
                 Err err ->
                     ( model, log err )
@@ -356,6 +358,8 @@ fetchData =
     (GQLB.object AllData
         |> GQLB.with (GQLB.field "allTransitions" [] (GQLB.list transition))
         |> GQLB.with (GQLB.field "allPositions" [] (GQLB.list position))
+        |> GQLB.with (GQLB.field "allSubmissions" [] (GQLB.list submission))
+        |> GQLB.with (GQLB.field "allTopics" [] (GQLB.list topic))
     )
         |> GQLB.queryDocument
         |> GQLB.request ()
@@ -370,12 +374,33 @@ fetchTransitions =
         |> GQLB.request ()
 
 
+topic : GQLB.ValueSpec GQLB.NonNull GQLB.ObjectType Topic vars
+topic =
+    GQLB.object Topic
+        |> GQLB.with (GQLB.field "name" [] GQLB.string)
+        |> GQLB.with (GQLB.field "content" [] (GQLB.list GQLB.string))
+
+
 position : GQLB.ValueSpec GQLB.NonNull GQLB.ObjectType Position vars
 position =
     GQLB.object Position
         |> GQLB.with (GQLB.field "id" [] (GQLB.map Id GQLB.id))
         |> GQLB.with (GQLB.field "name" [] GQLB.string)
         |> GQLB.with (GQLB.field "notes" [] (GQLB.list GQLB.string))
+
+
+submission : GQLB.ValueSpec GQLB.NonNull GQLB.ObjectType Submission vars
+submission =
+    GQLB.object Submission
+        |> GQLB.with (GQLB.field "id" [] (GQLB.map Id GQLB.id))
+        |> GQLB.with (GQLB.field "name" [] GQLB.string)
+        |> GQLB.with (GQLB.field "steps" [] (GQLB.list GQLB.string))
+        |> GQLB.with (GQLB.field "notes" [] (GQLB.list GQLB.string))
+        |> GQLB.with
+            (GQLB.field "position"
+                []
+                (GQLB.field "id" [] (GQLB.map Id GQLB.id) |> GQLB.extract)
+            )
 
 
 transition : GQLB.ValueSpec GQLB.NonNull GQLB.ObjectType Transition vars
