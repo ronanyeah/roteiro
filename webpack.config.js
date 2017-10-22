@@ -4,13 +4,16 @@ const { resolve } = require("path");
 
 if (!process.env.GRAPHQL_ENDPOINT) throw "Missing GraphQL endpoint!";
 
+const publicFolder = resolve("./public");
+
 module.exports = {
   entry: "./src/index.js",
   output: {
-    filename: "./public/bundle.js"
+    path: publicFolder,
+    filename: "bundle.js"
   },
   devServer: {
-    contentBase: "./public"
+    contentBase: publicFolder
   },
   module: {
     rules: [
