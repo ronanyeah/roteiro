@@ -147,9 +147,6 @@ main =
 view : Model -> Html Msg
 view model =
     let
-        resetButton =
-            el Button [ padding 10, onClick Reset ] <| text "Positions"
-
         content =
             case model.view of
                 ViewAll ->
@@ -191,13 +188,38 @@ view model =
                         ]
 
                 ViewSubmission { name, steps, position, notes } ->
-                    case get position model.positions of
-                        Just p ->
+                    get position model.positions
+                        |> unwrap oopsView
+                            (\p ->
+                                [ resetButton
+                                , row None
+                                    []
+                                    [ text (name ++ " from ")
+                                    , el Link [ onClick <| SelectPosition p ] <| text p.name
+                                    ]
+                                , column None [] <|
+                                    List.indexedMap
+                                        (\i step ->
+                                            row None
+                                                []
+                                                [ Element.bold <| (toString (i + 1) ++ ".")
+                                                , text <| " " ++ step
+                                                ]
+                                        )
+                                        steps
+                                ]
+                            )
+
+                ViewTransition { name, steps, startPosition, endPosition, notes } ->
+                    unwrap2 oopsView
+                        (get startPosition model.positions)
+                        (get endPosition model.positions)
+                        (\start end ->
                             [ resetButton
                             , row None
                                 []
                                 [ text (name ++ " from ")
-                                , el Link [ onClick <| SelectPosition p ] <| text p.name
+                                , el Link [ onClick <| SelectPosition start ] <| text start.name
                                 ]
                             , column None [] <|
                                 List.indexedMap
@@ -209,15 +231,14 @@ view model =
                                             ]
                                     )
                                     steps
-
-                            --, transition
+                            , row None
+                                []
+                                [ text "Transitions to: "
+                                , el Link [ onClick <| SelectPosition end ] <|
+                                    text end.name
+                                ]
                             ]
-
-                        Nothing ->
-                            [ text "err" ]
-
-                ViewTransition _ ->
-                    [ text "transition" ]
+                        )
 
                 ViewNotes ->
                     model.topics
@@ -226,6 +247,16 @@ view model =
     in
         viewport styling <|
             column Body [ center, width fill, spacing 30, padding 15 ] content
+
+
+resetButton : Element Styles vs Msg
+resetButton =
+    el Button [ padding 10, onClick Reset ] <| text "Positions"
+
+
+oopsView : List (Element Styles vs Msg)
+oopsView =
+    [ resetButton, text "oops!" ]
 
 
 get : Id -> Dict String { r | id : Id } -> Maybe { r | id : Id }
@@ -321,6 +352,12 @@ unwrap : b -> (a -> b) -> Maybe a -> b
 unwrap default fn =
     Maybe.map fn
         >> Maybe.withDefault default
+
+
+unwrap2 : c -> Maybe a -> Maybe b -> (a -> b -> c) -> c
+unwrap2 c maybeA maybeB fn =
+    Maybe.map2 fn maybeA maybeB
+        |> Maybe.withDefault c
 
 
 log : a -> Cmd Msg
