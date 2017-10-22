@@ -183,8 +183,8 @@ view model =
                                 [ el None [ center ] <| text "Tips:"
                                 , column None [] <| List.map ((++) "- " >> text) notes
                                 ]
-                        , viewTechList "Sweeps:" transitions
-                        , viewTechList "Subs:" submissions
+                        , viewTechList "Transitions" SelectTransition transitions
+                        , viewTechList "Submissions" SelectSubmission submissions
                         ]
 
                 ViewSubmission { name, steps, position, notes } ->
@@ -279,25 +279,24 @@ viewList ( title, notes ) =
     when (List.length notes |> flip (>) 0) <|
         column None
             [ center ]
-            [ el None [] <| text title
+            [ el None [] <| text <| title ++ ":"
             , column None [] <| List.map ((++) "- " >> text) notes
             ]
 
 
-viewTechList : String -> List { r | id : Id, name : String } -> Element Styles vs Msg
-viewTechList title techs =
+viewTechList : String -> ({ r | name : String } -> Msg) -> List { r | name : String } -> Element Styles vs Msg
+viewTechList title msg techs =
     when (List.length techs |> flip (>) 0) <|
         column None
             []
             [ el None [] <| text title
             , column None [] <|
-                List.map viewTechLink techs
+                List.map
+                    (\t ->
+                        row None [] [ text "- ", el Link [ onClick <| msg t ] <| text t.name ]
+                    )
+                    techs
             ]
-
-
-viewTechLink : { r | id : Id, name : String } -> Element Styles vs Msg
-viewTechLink { id, name } =
-    row None [] [ text "- ", el Link [] <| text name ]
 
 
 viewPosition : Position -> Element Styles vs Msg
