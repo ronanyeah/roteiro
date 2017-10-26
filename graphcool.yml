@@ -1,0 +1,31 @@
+types: ./types.graphql
+functions: {}
+permissions:
+- operation: File.read
+- operation: File.create
+- operation: File.update
+- operation: File.delete
+- operation: Position.read
+- operation: Position.create
+- operation: Position.update
+- operation: Position.delete
+- operation: Submission.read
+- operation: Submission.create
+- operation: Submission.update
+- operation: Submission.delete
+- operation: Topic.read
+- operation: Topic.create
+- operation: Topic.update
+- operation: Topic.delete
+- operation: Transition.read
+- operation: Transition.create
+- operation: Transition.update
+- operation: Transition.delete
+- operation: User.read
+- operation: User.create
+- operation: User.update
+- operation: User.delete
+- operation: PositionHasSubmissions.*
+- operation: PositionHasTransitionsFrom.*
+- operation: PositionHasTransitionsTo.*
+rootTokens: []
