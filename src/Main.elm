@@ -5,7 +5,7 @@ import Color exposing (black)
 import Dict exposing (Dict)
 import Editable exposing (Editable)
 import Element exposing (Element, column, el, empty, paragraph, row, text, viewport, when)
-import Element.Attributes exposing (center, fill, height, padding, px, spacing, width)
+import Element.Attributes exposing (center, fill, height, maxWidth, padding, px, spacing, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import GraphQL.Client.Http as GQLH
@@ -521,20 +521,20 @@ viewSteps : List String -> Element Styles vs Msg
 viewSteps =
     List.indexedMap
         (\i step ->
-            row None
+            paragraph None
                 []
                 [ Element.bold <| (toString (i + 1) ++ ".")
                 , text <| " " ++ step
                 ]
         )
-        >> column None []
+        >> column None [ maxWidth <| px 700 ]
 
 
 viewList : String -> List String -> Element Styles vs Msg
 viewList title notes =
     when (not (List.isEmpty notes)) <|
         column None
-            [ center ]
+            [ center, maxWidth <| px 500 ]
             [ el None [] <| text <| title ++ ":"
             , column None [] <| List.map ((++) "- " >> text >> List.singleton >> paragraph None []) notes
             ]
