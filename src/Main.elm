@@ -661,7 +661,7 @@ update msg model =
                 Ok data ->
                     ( { model
                         | view = ViewPosition <| Editable.ReadOnly data
-                        , positions = set data.id data model.positions
+                        , positions = set data model.positions
                       }
                     , Cmd.none
                     )
@@ -674,7 +674,7 @@ update msg model =
                 Ok data ->
                     ( { model
                         | view = ViewTransition <| Editable.ReadOnly data
-                        , transitions = set data.id data model.transitions
+                        , transitions = set data model.transitions
                       }
                     , Cmd.none
                     )
@@ -742,9 +742,13 @@ styling =
 -- HELPERS
 
 
-set : Id -> { r | id : Id } -> Dict String { r | id : Id } -> Dict String { r | id : Id }
-set (Id id) =
-    Dict.insert id
+set : { r | id : Id } -> Dict String { r | id : Id } -> Dict String { r | id : Id }
+set ({ id } as r) =
+    let
+        (Id idStr) =
+            id
+    in
+        Dict.insert idStr r
 
 
 get : Id -> Dict String { r | id : Id } -> Maybe { r | id : Id }
