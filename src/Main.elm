@@ -28,7 +28,7 @@ main =
                   , positions = Dict.empty
                   , transitions = Dict.empty
                   , submissions = Dict.empty
-                  , topics = []
+                  , topics = Array.empty
                   , url = url
                   }
                 , Task.attempt CbData (GQLH.sendQuery url fetchData)
@@ -90,7 +90,7 @@ type alias Model =
     , positions : Dict String Position
     , transitions : Dict String Transition
     , submissions : Dict String Submission
-    , topics : List Topic
+    , topics : Array (Editable Topic)
     , url : String
     }
 
@@ -330,7 +330,8 @@ view model =
 
                 ViewNotes ->
                     model.topics
-                        |> List.map viewTopic
+                        |> Array.map viewTopic
+                        |> Array.toList
                         |> (::) resetButton
 
                 ViewNewTransition ({ notes, steps, name, startPosition, endPosition } as form) ->
@@ -512,9 +513,14 @@ oopsView =
     [ resetButton, text "oops!" ]
 
 
-viewTopic : Topic -> Element Styles vs Msg
-viewTopic { name, content } =
-    viewList name content
+viewTopic : Editable Topic -> Element Styles vs Msg
+viewTopic data =
+    case data of
+        Editable.Editable _ _ ->
+            text "yeah"
+
+        Editable.ReadOnly { name, content } ->
+            viewList name content
 
 
 viewSteps : List String -> Element Styles vs Msg
@@ -604,7 +610,7 @@ update msg model =
                         | transitions = listToDict transitions
                         , positions = listToDict positions
                         , submissions = listToDict submissions
-                        , topics = topics
+                        , topics = topics |> List.map Editable.ReadOnly |> Array.fromList
                       }
                     , Cmd.none
                     )
