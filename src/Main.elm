@@ -5,7 +5,7 @@ import Color exposing (black)
 import Dict exposing (Dict)
 import Editable exposing (Editable)
 import Element exposing (Element, column, el, empty, paragraph, row, text, viewport, when)
-import Element.Attributes exposing (center, fill, height, maxWidth, padding, px, spacing, width)
+import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, px, spacing, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import GraphQL.Client.Http as GQLH
@@ -541,7 +541,7 @@ viewList title notes =
     when (not (List.isEmpty notes)) <|
         column None
             [ center, maxWidth <| px 500 ]
-            [ el None [] <| text <| title ++ ":"
+            [ row None [] [ el None [] <| text <| title ++ ":", el None [ class "fa fa-edit" ] empty ]
             , column None [] <| List.map ((++) "- " >> text >> List.singleton >> paragraph None []) notes
             ]
 
