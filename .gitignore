@@ -6,3 +6,8 @@ repl-temp-*
 node_modules
 
 public
+
+dev.env
+prod.env
+
+.graphcoolrc
