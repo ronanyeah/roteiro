@@ -7,34 +7,35 @@ import GraphQL.Client.Http as GQLH
 
 
 type Msg
-    = SelectPosition Position
-    | SelectSubmission Submission
-    | SelectTransition Transition
-    | SelectNotes
-    | Reset
+    = Cancel
     | CbData (Result GQLH.Error AllData)
+    | CbPosition (Result GQLH.Error Position)
+    | CbTransition (Result GQLH.Error Transition)
+    | CreateSubmission Position
+    | CreateTransition Position
     | Edit
     | EditChange View
+    | InputCreatePosition FormCreatePosition
+    | InputCreateSubmission FormCreateSubmission
+    | InputCreateTransition FormCreateTransition
+    | InputTopic Topic
+    | Reset
     | Save
-    | Cancel
-    | SavePosition (Result GQLH.Error Position)
-    | SaveTransition (Result GQLH.Error Transition)
-    | AddTransition Position
-    | AddSubmission Position
-    | NewTransitionInput NewTransitionForm
-    | AddSubmissionInput AddSubmissionForm
-    | NotesInput Topic
+    | SelectPosition Position
+    | SelectSubmission Submission
+    | SelectTopics
+    | SelectTransition Transition
 
 
 type View
     = ViewAll
+    | ViewCreatePosition FormCreatePosition
+    | ViewCreateSubmission FormCreateSubmission
+    | ViewCreateTransition FormCreateTransition
     | ViewPosition (Editable Position)
     | ViewSubmission Submission
+    | ViewTopics (Maybe Topic)
     | ViewTransition (Editable Transition)
-    | ViewNotes (Maybe Topic)
-    | ViewNewPosition NewPositionForm
-    | ViewAddSubmission AddSubmissionForm
-    | ViewNewTransition NewTransitionForm
 
 
 type Styles
@@ -88,7 +89,7 @@ type Picker a
     | Picked a
 
 
-type alias NewTransitionForm =
+type alias FormCreateTransition =
     { name : String
     , startPosition : Position
     , endPosition : Picker Position
@@ -97,13 +98,13 @@ type alias NewTransitionForm =
     }
 
 
-type alias NewPositionForm =
+type alias FormCreatePosition =
     { name : String
     , notes : Array String
     }
 
 
-type alias AddSubmissionForm =
+type alias FormCreateSubmission =
     { name : String
     , position : Position
     , notes : Array String

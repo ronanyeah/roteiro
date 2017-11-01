@@ -43,40 +43,19 @@ main =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        AddSubmissionInput form ->
-            ( { model | view = ViewAddSubmission form }, Cmd.none )
-
-        Edit ->
+        Cancel ->
             case model.view of
-                ViewPosition s ->
-                    ( { model | view = ViewPosition <| Editable.edit s }, Cmd.none )
+                ViewPosition p ->
+                    ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
 
-                ViewTransition t ->
-                    ( { model | view = ViewTransition <| Editable.edit t }, Cmd.none )
+                ViewCreateTransition { startPosition } ->
+                    ( { model | view = ViewPosition <| Editable.ReadOnly startPosition }, Cmd.none )
+
+                ViewCreateSubmission { position } ->
+                    ( { model | view = ViewPosition <| Editable.ReadOnly position }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
-
-        EditChange view ->
-            ( { model | view = view }, Cmd.none )
-
-        NewTransitionInput form ->
-            ( { model | view = ViewNewTransition form }, Cmd.none )
-
-        SelectPosition p ->
-            ( { model | view = ViewPosition (Editable.ReadOnly p) }, Cmd.none )
-
-        SelectSubmission s ->
-            ( { model | view = ViewSubmission s }, Cmd.none )
-
-        SelectTransition t ->
-            ( { model | view = ViewTransition (Editable.ReadOnly t) }, Cmd.none )
-
-        SelectNotes ->
-            ( { model | view = ViewNotes Nothing }, Cmd.none )
-
-        Reset ->
-            ( { model | view = ViewAll }, Cmd.none )
 
         CbData res ->
             case res of
@@ -93,45 +72,7 @@ update msg model =
                 Err err ->
                     ( model, log err )
 
-        Save ->
-            case model.view of
-                ViewPosition p ->
-                    if Editable.isDirty p then
-                        ( model
-                        , Task.attempt SavePosition (GQLH.sendMutation model.url (updatePosition (Editable.value p)))
-                        )
-                    else
-                        ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
-
-                ViewTransition t ->
-                    if Editable.isDirty t then
-                        ( model
-                        , Task.attempt SaveTransition (GQLH.sendMutation model.url (updateTransition (Editable.value t)))
-                        )
-                    else
-                        ( { model | view = ViewTransition <| Editable.cancel t }, Cmd.none )
-
-                ViewNewTransition form ->
-                    ( model, Task.attempt SaveTransition (GQLH.sendMutation model.url (createTransition form)) )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        Cancel ->
-            case model.view of
-                ViewPosition p ->
-                    ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
-
-                ViewNewTransition { startPosition } ->
-                    ( { model | view = ViewPosition <| Editable.ReadOnly startPosition }, Cmd.none )
-
-                ViewAddSubmission { position } ->
-                    ( { model | view = ViewPosition <| Editable.ReadOnly position }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        SavePosition res ->
+        CbPosition res ->
             case res of
                 Ok data ->
                     ( { model
@@ -144,7 +85,7 @@ update msg model =
                 Err err ->
                     ( model, log err )
 
-        SaveTransition res ->
+        CbTransition res ->
             case res of
                 Ok data ->
                     ( { model
@@ -157,10 +98,23 @@ update msg model =
                 Err err ->
                     ( model, log err )
 
-        AddTransition p ->
+        CreateSubmission p ->
             ( { model
                 | view =
-                    ViewNewTransition
+                    ViewCreateSubmission
+                        { name = ""
+                        , position = p
+                        , steps = Array.empty
+                        , notes = Array.empty
+                        }
+              }
+            , Cmd.none
+            )
+
+        CreateTransition p ->
+            ( { model
+                | view =
+                    ViewCreateTransition
                         { name = ""
                         , startPosition = p
                         , endPosition = Waiting
@@ -171,18 +125,67 @@ update msg model =
             , Cmd.none
             )
 
-        AddSubmission p ->
-            ( { model
-                | view =
-                    ViewAddSubmission
-                        { name = ""
-                        , position = p
-                        , steps = Array.empty
-                        , notes = Array.empty
-                        }
-              }
-            , Cmd.none
-            )
+        Edit ->
+            case model.view of
+                ViewPosition s ->
+                    ( { model | view = ViewPosition <| Editable.edit s }, Cmd.none )
 
-        NotesInput t ->
-            ( { model | view = ViewNotes (Just t) }, Cmd.none )
+                ViewTransition t ->
+                    ( { model | view = ViewTransition <| Editable.edit t }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        EditChange view ->
+            ( { model | view = view }, Cmd.none )
+
+        InputCreatePosition form ->
+            ( { model | view = ViewCreatePosition form }, Cmd.none )
+
+        InputCreateSubmission form ->
+            ( { model | view = ViewCreateSubmission form }, Cmd.none )
+
+        InputCreateTransition form ->
+            ( { model | view = ViewCreateTransition form }, Cmd.none )
+
+        InputTopic t ->
+            ( { model | view = ViewTopics (Just t) }, Cmd.none )
+
+        Reset ->
+            ( { model | view = ViewAll }, Cmd.none )
+
+        Save ->
+            case model.view of
+                ViewPosition p ->
+                    if Editable.isDirty p then
+                        ( model
+                        , Task.attempt CbPosition (GQLH.sendMutation model.url (updatePosition (Editable.value p)))
+                        )
+                    else
+                        ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
+
+                ViewTransition t ->
+                    if Editable.isDirty t then
+                        ( model
+                        , Task.attempt CbTransition (GQLH.sendMutation model.url (updateTransition (Editable.value t)))
+                        )
+                    else
+                        ( { model | view = ViewTransition <| Editable.cancel t }, Cmd.none )
+
+                ViewCreateTransition form ->
+                    ( model, Task.attempt CbTransition (GQLH.sendMutation model.url (createTransition form)) )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        SelectPosition p ->
+            ( { model | view = ViewPosition (Editable.ReadOnly p) }, Cmd.none )
+
+        SelectSubmission s ->
+            ( { model | view = ViewSubmission s }, Cmd.none )
+
+        SelectTopics ->
+            ( { model | view = ViewTopics Nothing }, Cmd.none )
+
+        SelectTransition t ->
+            ( { model | view = ViewTransition (Editable.ReadOnly t) }, Cmd.none )

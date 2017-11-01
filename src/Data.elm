@@ -1,7 +1,6 @@
 module Data exposing (..)
 
 import Array exposing (Array)
-import GraphQL.Client.Http as GQLH
 import GraphQL.Request.Builder as GQLB
 import GraphQL.Request.Builder.Arg as Arg
 import Types exposing (..)
@@ -18,7 +17,7 @@ fetchData =
         |> GQLB.request ()
 
 
-createTransition : NewTransitionForm -> GQLB.Request GQLB.Mutation Transition
+createTransition : FormCreateTransition -> GQLB.Request GQLB.Mutation Transition
 createTransition { name, steps, notes, startPosition, endPosition } =
     let
         (Id startId) =

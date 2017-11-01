@@ -34,7 +34,7 @@ view model =
                         ++ [ el Line [ width <| px 100, height <| px 2 ] empty
                            , el Button
                                 [ padding 10
-                                , onClick <| SelectNotes
+                                , onClick <| SelectTopics
                                 ]
                              <|
                                 text "Notes"
@@ -104,14 +104,14 @@ view model =
                                 , viewTechList "Transitions" SelectTransition transitions
                                 , el Button
                                     [ padding 10
-                                    , onClick <| AddTransition p
+                                    , onClick <| CreateTransition p
                                     ]
                                   <|
                                     text "Add Transition"
                                 , viewTechList "Submissions" SelectSubmission submissions
                                 , el Button
                                     [ padding 10
-                                    , onClick <| AddSubmission p
+                                    , onClick <| CreateSubmission p
                                     ]
                                   <|
                                     text "Add Submission"
@@ -179,7 +179,7 @@ view model =
                                     ]
                                 )
 
-                ViewNotes maybeEdit ->
+                ViewTopics maybeEdit ->
                     case maybeEdit of
                         Just topic ->
                             [ Input.text
@@ -187,13 +187,13 @@ view model =
                                 []
                                 { onChange =
                                     \str ->
-                                        NotesInput { topic | name = str }
+                                        InputTopic { topic | name = str }
                                 , value = topic.name
                                 , label = Input.labelAbove <| text "Name:"
                                 , options = []
                                 }
                             ]
-                                ++ (notesEditor topic NotesInput)
+                                ++ (notesEditor topic InputTopic)
 
                         Nothing ->
                             model.topics
@@ -201,13 +201,13 @@ view model =
                                 |> Array.toList
                                 |> (::) resetButton
 
-                ViewNewTransition ({ notes, steps, name, startPosition, endPosition } as form) ->
+                ViewCreateTransition ({ notes, steps, name, startPosition, endPosition } as form) ->
                     [ Input.text
                         None
                         []
                         { onChange =
                             \str ->
-                                NewTransitionInput { form | name = str }
+                                InputCreateTransition { form | name = str }
                         , value = name
                         , label = Input.labelAbove <| text "Name:"
                         , options = []
@@ -215,47 +215,61 @@ view model =
                     , text <| "Start Position: " ++ startPosition.name
                     , case endPosition of
                         Waiting ->
-                            el None [ onClick <| NewTransitionInput { form | endPosition = Picking } ] <| text "Select A Position"
+                            el None [ onClick <| InputCreateTransition { form | endPosition = Picking } ] <| text "Select A Position"
 
                         Picked endP ->
-                            el None [ onClick <| NewTransitionInput { form | endPosition = Picking } ] <| text <| "End Position: " ++ endP.name
+                            el None [ onClick <| InputCreateTransition { form | endPosition = Picking } ] <| text <| "End Position: " ++ endP.name
 
                         Picking ->
                             model.positions
                                 |> Dict.values
                                 |> List.map
                                     (\p ->
-                                        el None [ onClick <| NewTransitionInput { form | endPosition = Picked p } ] <| text p.name
+                                        el None [ onClick <| InputCreateTransition { form | endPosition = Picked p } ] <| text p.name
                                     )
                                 |> column None []
                     ]
-                        ++ (notesEditor form NewTransitionInput)
-                        ++ (stepsEditor form NewTransitionInput)
+                        ++ (notesEditor form InputCreateTransition)
+                        ++ (stepsEditor form InputCreateTransition)
                         ++ [ saveButton
                            , cancelButton
                            ]
 
-                ViewAddSubmission ({ notes, steps, name, position } as form) ->
+                ViewCreateSubmission ({ notes, steps, name, position } as form) ->
                     [ text "Name:"
                     , Input.text
                         None
                         []
                         { onChange =
                             \str ->
-                                AddSubmissionInput { form | name = str }
+                                InputCreateSubmission { form | name = str }
                         , value = name
                         , label = Input.labelAbove <| text "Name:"
                         , options = []
                         }
                     ]
-                        ++ notesEditor form AddSubmissionInput
-                        ++ stepsEditor form AddSubmissionInput
+                        ++ notesEditor form InputCreateSubmission
+                        ++ stepsEditor form InputCreateSubmission
                         ++ [ saveButton
                            , cancelButton
                            ]
 
-                ViewNewPosition _ ->
-                    []
+                ViewCreatePosition form ->
+                    [ Input.text
+                        None
+                        []
+                        { onChange =
+                            \str ->
+                                InputCreatePosition { form | name = str }
+                        , value = form.name
+                        , label = Input.labelAbove <| text "Name:"
+                        , options = []
+                        }
+                    ]
+                        ++ notesEditor form InputCreatePosition
+                        ++ [ saveButton
+                           , cancelButton
+                           ]
     in
         viewport styling <|
             column Body [ center, width fill, spacing 30, padding 15 ] content
