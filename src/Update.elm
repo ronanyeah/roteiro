@@ -2,7 +2,7 @@ module Update exposing (..)
 
 import Array exposing (Array)
 import Editable exposing (Editable)
-import Data exposing (fetchData, updatePosition, createTransition, updateTransition)
+import Data exposing (createPosition, fetchData, updatePosition, createTransition, updateTransition)
 import GraphQL.Client.Http as GQLH
 import Task
 import Types exposing (..)
@@ -66,6 +66,17 @@ update msg model =
 
                 Err err ->
                     ( model, log err )
+
+        CreatePosition ->
+            ( { model
+                | view =
+                    ViewCreatePosition
+                        { name = ""
+                        , notes = Array.empty
+                        }
+              }
+            , Cmd.none
+            )
 
         CreateSubmission p ->
             ( { model
@@ -143,6 +154,9 @@ update msg model =
 
                 ViewCreateTransition form ->
                     ( model, Task.attempt CbTransition (GQLH.sendMutation model.url (createTransition form)) )
+
+                ViewCreatePosition form ->
+                    ( model, Task.attempt CbPosition <| GQLH.sendMutation model.url <| createPosition form )
 
                 _ ->
                     ( model, Cmd.none )

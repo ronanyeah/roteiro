@@ -38,6 +38,12 @@ view model =
                                 ]
                              <|
                                 text "Notes"
+                           , el Button
+                                [ padding 10
+                                , onClick <| CreatePosition
+                                ]
+                             <|
+                                text "Add Position"
                            ]
 
                 ViewPosition data ->

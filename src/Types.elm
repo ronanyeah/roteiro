@@ -11,6 +11,7 @@ type Msg
     | CbData (Result GQLH.Error AllData)
     | CbPosition (Result GQLH.Error Position)
     | CbTransition (Result GQLH.Error Transition)
+    | CreatePosition
     | CreateSubmission Position
     | CreateTransition Position
     | Edit

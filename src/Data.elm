@@ -17,6 +17,18 @@ fetchData =
         |> GQLB.request ()
 
 
+createPosition : FormCreatePosition -> GQLB.Request GQLB.Mutation Position
+createPosition { name, notes } =
+    position
+        |> GQLB.field "createPosition"
+            [ ( "name", Arg.string name )
+            , ( "notes", Arg.list <| Array.toList <| Array.map Arg.string notes )
+            ]
+        |> GQLB.extract
+        |> GQLB.mutationDocument
+        |> GQLB.request ()
+
+
 createTransition : FormCreateTransition -> GQLB.Request GQLB.Mutation Transition
 createTransition { name, steps, notes, startPosition, endPosition } =
     let
