@@ -70,6 +70,7 @@ updateTransition t =
                 [ ( "id", Arg.string id )
                 , ( "name", Arg.string t.name )
                 , ( "notes", Arg.list <| Array.toList <| Array.map Arg.string t.notes )
+                , ( "steps", Arg.list <| Array.toList <| Array.map Arg.string t.steps )
                 ]
             |> GQLB.extract
             |> GQLB.mutationDocument
