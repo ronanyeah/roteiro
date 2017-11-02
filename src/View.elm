@@ -140,27 +140,40 @@ view model =
 
                 ViewTransition data ->
                     case data of
-                        Editable.Editable _ { name, notes } ->
+                        Editable.Editable _ ({ name, notes } as transition) ->
                             [ Input.text
                                 None
                                 []
                                 { onChange =
                                     \str ->
-                                        EditChange <| ViewTransition <| Editable.map (\r -> { r | name = str }) <| data
+                                        EditChange <|
+                                            ViewTransition <|
+                                                Editable.map (\r -> { r | name = str }) <|
+                                                    data
                                 , value = name
-                                , label = Input.hiddenLabel ""
+                                , label = Input.labelAbove <| text "Name:"
                                 , options = []
                                 }
                             ]
-                                ++ (arrayEditor
-                                        (\i str ->
+                                ++ (notesEditor transition
+                                        (\r ->
                                             EditChange <|
                                                 ViewTransition <|
-                                                    Editable.map (\r -> { r | notes = Array.set i str r.notes }) <|
+                                                    Editable.map (always r) <|
                                                         data
                                         )
-                                        notes
                                    )
+                                ++ (stepsEditor transition
+                                        (\r ->
+                                            EditChange <|
+                                                ViewTransition <|
+                                                    Editable.map (always r) <|
+                                                        data
+                                        )
+                                   )
+                                ++ [ saveButton
+                                   , cancelButton
+                                   ]
 
                         Editable.ReadOnly { name, steps, startPosition, endPosition, notes } ->
                             unwrap2 oopsView
@@ -263,7 +276,7 @@ view model =
                 ViewCreatePosition form ->
                     [ Input.text
                         None
-                        []
+                        [ center ]
                         { onChange =
                             \str ->
                                 InputCreatePosition { form | name = str }
@@ -355,7 +368,7 @@ notesEditor form msg =
     form.notes
         |> Array.indexedMap
             (\i v ->
-                Input.text
+                Input.multiline
                     None
                     []
                     { onChange = \str -> msg { form | notes = Array.set i str form.notes }
