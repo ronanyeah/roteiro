@@ -1,6 +1,6 @@
 module Data exposing (..)
 
-import Array exposing (Array)
+import Array
 import GraphQL.Request.Builder as GQLB
 import GraphQL.Request.Builder.Arg as Arg
 import Types exposing (..)
@@ -113,6 +113,23 @@ updatePosition p =
             |> GQLB.request ()
 
 
+updateTopic : Topic -> GQLB.Request GQLB.Mutation Topic
+updateTopic { id, name, notes } =
+    let
+        (Id idStr) =
+            id
+    in
+        topic
+            |> GQLB.field "updateTopic"
+                [ ( "id", Arg.string idStr )
+                , ( "name", Arg.string name )
+                , ( "notes", Arg.list <| Array.toList <| Array.map Arg.string notes )
+                ]
+            |> GQLB.extract
+            |> GQLB.mutationDocument
+            |> GQLB.request ()
+
+
 
 -- SELECTIONS
 
@@ -138,8 +155,8 @@ submission =
     GQLB.object Submission
         |> GQLB.with (GQLB.field "id" [] (GQLB.map Id GQLB.id))
         |> GQLB.with (GQLB.field "name" [] GQLB.string)
-        |> GQLB.with (GQLB.field "steps" [] (GQLB.list GQLB.string))
-        |> GQLB.with (GQLB.field "notes" [] (GQLB.list GQLB.string))
+        |> GQLB.with (GQLB.field "steps" [] (GQLB.list GQLB.string |> GQLB.map Array.fromList))
+        |> GQLB.with (GQLB.field "notes" [] (GQLB.list GQLB.string |> GQLB.map Array.fromList))
         |> GQLB.with
             (GQLB.field "position"
                 []

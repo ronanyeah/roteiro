@@ -1,10 +1,10 @@
 module View exposing (..)
 
 import Array exposing (Array)
-import Dict exposing (Dict)
-import Editable exposing (Editable)
+import Dict
+import Editable
 import Element exposing (Element, column, el, empty, header, paragraph, row, text, viewport, when)
-import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, px, spacing, spread, width)
+import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, px, spacing, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
@@ -33,17 +33,17 @@ view model =
                     )
                         ++ [ plus CreatePosition
                            , el Line [ width <| px 100, height <| px 2 ] empty
-                           , el Button
+                           , el Topics
                                 [ padding 10
                                 , onClick <| SelectTopics
+                                , class "fa fa-book"
                                 ]
-                             <|
-                                text "Notes"
+                                empty
                            ]
 
-                ViewCreateTopic ({ name, notes } as form) ->
+                ViewCreateTopic form ->
                     [ el Title [ center ] <| text "CREATE TOPIC"
-                    , textEdit name
+                    , textEdit form.name
                         (\str ->
                             FormUpdate { form | name = str }
                         )
@@ -51,12 +51,12 @@ view model =
                     , saveCancel
                     ]
 
-                ViewCreateTransition ({ notes, steps, name, startPosition, endPosition } as form) ->
+                ViewCreateTransition ({ name, startPosition, endPosition } as form) ->
                     [ textEdit name
                         (\str ->
                             FormUpdate { form | name = str }
                         )
-                    , case endPosition of
+                    , case startPosition of
                         Waiting ->
                             el None [ onClick <| FormUpdate { form | startPosition = Picking } ] <| text "Select A Position"
 
@@ -68,7 +68,7 @@ view model =
                                 |> Dict.values
                                 |> List.map
                                     (\p ->
-                                        el None [ onClick <| FormUpdate { form | endPosition = Picked p } ] <| text p.name
+                                        el None [ onClick <| FormUpdate { form | startPosition = Picked p } ] <| text p.name
                                     )
                                 |> column None []
                     , case endPosition of
@@ -86,19 +86,18 @@ view model =
                                         el None [ onClick <| FormUpdate { form | endPosition = Picked p } ] <| text p.name
                                     )
                                 |> column None []
+                    , stepsEditor form FormUpdate
+                    , notesEditor form FormUpdate
+                    , saveCancel
                     ]
-                        ++ [ notesEditor form FormUpdate
-                           , stepsEditor form FormUpdate
-                           , saveCancel
-                           ]
 
-                ViewCreateSubmission ({ notes, steps, name } as form) ->
-                    [ textEdit name
+                ViewCreateSubmission form ->
+                    [ textEdit form.name
                         (\str ->
                             FormUpdate { form | name = str }
                         )
-                    , notesEditor form FormUpdate
                     , stepsEditor form FormUpdate
+                    , notesEditor form FormUpdate
                     , saveCancel
                     ]
 
@@ -107,24 +106,26 @@ view model =
                         (\str ->
                             FormUpdate { form | name = str }
                         )
+                    , stepsEditor form FormUpdate
                     , notesEditor form FormUpdate
                     , saveCancel
                     ]
 
                 ViewEditTopic topic ->
-                    [ textEdit topic.name
+                    [ el Title [ center ] <| text "EDIT TOPIC"
+                    , textEdit topic.name
                         (\str ->
-                            InputTopic { topic | name = str }
+                            EditTopic { topic | name = str }
                         )
-                    , notesEditor topic InputTopic
+                    , notesEditor topic EditTopic
                     , saveCancel
                     ]
 
                 ViewPosition data ->
                     case data of
-                        Editable.Editable _ ({ name, notes } as position) ->
+                        Editable.Editable _ position ->
                             [ textEdit
-                                name
+                                position.name
                                 (\str ->
                                     EditChange <|
                                         ViewPosition <|
@@ -141,18 +142,6 @@ view model =
                                         ViewPosition <|
                                             Editable.map (always r) <|
                                                 data
-                                )
-                            , plus
-                                (EditChange <|
-                                    ViewPosition <|
-                                        Editable.map (\r -> { r | notes = Array.push "" r.notes }) <|
-                                            data
-                                )
-                            , minus
-                                (EditChange <|
-                                    ViewPosition <|
-                                        Editable.map (\r -> { r | notes = Array.slice 0 -1 r.notes }) <|
-                                            data
                                 )
                             , saveCancel
                             ]
@@ -171,7 +160,7 @@ view model =
                             in
                                 [ editButton
                                 , el None [] <| text name
-                                , viewList "Notes" <| Array.toList notes
+                                , viewNotes notes
                                 , viewTechList "Transitions" SelectTransition transitions
                                 , el Button
                                     [ padding 10
@@ -200,18 +189,41 @@ view model =
                                             , el Link [ onClick <| SelectPosition p ] <| text p.name
                                             ]
                                         , viewSteps steps
-                                        , viewList "Notes" notes
+                                        , viewNotes notes
                                         ]
                                     )
 
-                        Editable.Editable _ { name, steps, position, notes } ->
-                            []
+                        Editable.Editable _ submission ->
+                            [ textEdit
+                                submission.name
+                                (\str ->
+                                    EditChange <|
+                                        ViewSubmission <|
+                                            Editable.map (\r -> { r | name = str }) <|
+                                                data
+                                )
+                            , notesEditor submission
+                                (\r ->
+                                    EditChange <|
+                                        ViewSubmission <|
+                                            Editable.map (always r) <|
+                                                data
+                                )
+                            , stepsEditor submission
+                                (\r ->
+                                    EditChange <|
+                                        ViewSubmission <|
+                                            Editable.map (always r) <|
+                                                data
+                                )
+                            , saveCancel
+                            ]
 
                 ViewTransition data ->
                     case data of
-                        Editable.Editable _ ({ name, notes } as transition) ->
+                        Editable.Editable _ transition ->
                             [ textEdit
-                                name
+                                transition.name
                                 (\str ->
                                     EditChange <|
                                         ViewTransition <|
@@ -246,8 +258,8 @@ view model =
                                         [ text (name ++ " from ")
                                         , el Link [ onClick <| SelectPosition start ] <| text start.name
                                         ]
-                                    , viewSteps <| Array.toList steps
-                                    , viewList "Notes" <| Array.toList notes
+                                    , viewSteps steps
+                                    , viewNotes notes
                                     , row None
                                         []
                                         [ text "Transitions to: "
@@ -274,7 +286,7 @@ textEdit : String -> (String -> msg) -> Element Styles vs msg
 textEdit value msg =
     Input.text
         None
-        []
+        [ maxWidth <| px 300, center ]
         { onChange = msg
         , value = value
         , label = Input.labelAbove <| el Title [ center ] <| text "NAME"
@@ -347,7 +359,7 @@ stepsEditor form msg =
 
         buttons =
             row None
-                []
+                [ center ]
                 [ plus (msg { form | steps = Array.push "" form.steps })
                 , when (not <| Array.isEmpty form.steps) <|
                     minus (msg { form | steps = Array.slice 0 -1 form.steps })
@@ -421,40 +433,47 @@ viewTopic ({ name, notes } as topic) =
     column None
         [ center, maxWidth <| px 500 ]
         [ row None
-            [ spacing 50 ]
-            [ el None [] <| text name
+            [ spacing 50, verticalCenter ]
+            [ el Subtitle [] <| text name
             , el Icon [ padding 10, class "fa fa-edit", onClick <| EditTopic topic ] empty
             ]
         , column None [] <| List.map ((++) "- " >> text >> List.singleton >> paragraph None []) <| Array.toList notes
         ]
 
 
-viewSteps : List String -> Element Styles vs Msg
-viewSteps =
-    List.indexedMap
-        (\i step ->
-            paragraph None
-                []
-                [ Element.bold <| (toString (i + 1) ++ ".")
-                , text <| " " ++ step
-                ]
+viewSteps : Array String -> Element Styles vs Msg
+viewSteps steps =
+    when (not (Array.isEmpty steps)) <|
+        (steps
+            |> Array.toList
+            |> List.indexedMap
+                (\i step ->
+                    paragraph None
+                        []
+                        [ Element.bold <| (toString (i + 1) ++ ".")
+                        , text <| " " ++ step
+                        ]
+                )
+            |> (::) (el Title [] <| text "STEPS")
+            |> column None [ maxWidth <| px 700 ]
         )
-        >> column None [ maxWidth <| px 700 ]
 
 
-viewList : String -> List String -> Element Styles vs Msg
-viewList title notes =
-    when (not (List.isEmpty notes)) <|
+viewNotes : Array String -> Element Styles vs Msg
+viewNotes notes =
+    when (not (Array.isEmpty notes)) <|
         column None
             [ center, maxWidth <| px 500 ]
-            [ el None [] <| text <| title ++ ":"
-            , column None [] <| List.map ((++) "- " >> text >> List.singleton >> paragraph None []) notes
+            [ el Title [] <| text "NOTES"
+            , column None [] <|
+                List.map ((++) "- " >> text >> List.singleton >> paragraph None [])
+                    (notes |> Array.toList)
             ]
 
 
 viewTechList : String -> ({ r | name : String } -> Msg) -> List { r | name : String } -> Element Styles vs Msg
 viewTechList title msg techs =
-    when (List.length techs |> flip (>) 0) <|
+    when (not (List.isEmpty techs)) <|
         column None
             []
             [ el None [] <| text <| title ++ ":"

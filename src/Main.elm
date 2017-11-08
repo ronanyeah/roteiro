@@ -1,6 +1,5 @@
 module Main exposing (main)
 
-import Array
 import Data exposing (fetchData)
 import Dict
 import GraphQL.Client.Http exposing (sendQuery)

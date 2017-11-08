@@ -1,8 +1,7 @@
 module Styling exposing (..)
 
-import Color exposing (Color, black, rgb)
+import Color exposing (Color, rgb)
 import Style exposing (Property, StyleSheet, hover, style, styleSheet)
-import Style.Background as Bg
 import Style.Border as Border
 import Style.Font as Font
 import Style.Color as Color
@@ -44,7 +43,9 @@ styling =
             , pointer
             , hover [ Color.text a ]
             ]
+        , style Subtitle []
         , style Title [ Color.text e ]
+        , style Topics [ Color.text e, pointer ]
         ]
 
 

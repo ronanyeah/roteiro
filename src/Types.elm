@@ -21,7 +21,6 @@ type Msg
     | EditChange View
     | EditTopic Topic
     | FormUpdate Form
-    | InputTopic Topic
     | Reset
     | Save
     | SelectPosition Position
@@ -52,7 +51,9 @@ type Styles
     | Link
     | None
     | SetBox
+    | Subtitle
     | Title
+    | Topics
 
 
 type Id
@@ -86,8 +87,8 @@ type alias Position =
 type alias Submission =
     { id : Id
     , name : String
-    , steps : List String
-    , notes : List String
+    , steps : Array String
+    , notes : Array String
     , position : Id
     }
 

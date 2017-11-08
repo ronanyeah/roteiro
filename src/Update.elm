@@ -1,12 +1,12 @@
 module Update exposing (..)
 
-import Array exposing (Array)
-import Editable exposing (Editable)
-import Data exposing (createTopic, createPosition, createSubmission, fetchData, updatePosition, createTransition, updateTransition)
+import Array
+import Editable
+import Data exposing (createTopic, createPosition, createSubmission, updatePosition, createTransition, updateTopic, updateTransition)
 import GraphQL.Client.Http as GQLH
 import Task
 import Types exposing (..)
-import Utils exposing (emptyForm, listToDict, log, set)
+import Utils exposing (emptyForm, listToDict, log, set, singleton)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -45,14 +45,14 @@ update msg model =
                 ViewCreateTopic _ ->
                     ( { model | view = ViewTopics }, Cmd.none )
 
-                ViewSubmission _ ->
-                    ( model, Cmd.none )
+                ViewSubmission s ->
+                    ( { model | view = ViewSubmission <| Editable.cancel s }, Cmd.none )
 
                 ViewTopics ->
                     ( model, Cmd.none )
 
-                ViewTransition _ ->
-                    ( model, Cmd.none )
+                ViewTransition t ->
+                    ( { model | view = ViewTransition <| Editable.cancel t }, Cmd.none )
 
         CbData res ->
             case res of
@@ -127,7 +127,7 @@ update msg model =
                     ViewCreatePosition
                         { emptyForm
                             | name = ""
-                            , notes = Array.empty
+                            , notes = singleton ""
                         }
               }
             , Cmd.none
@@ -140,7 +140,7 @@ update msg model =
                         { emptyForm
                             | name = ""
                             , startPosition = Picked p
-                            , steps = Array.empty
+                            , steps = singleton ""
                             , notes = Array.empty
                         }
               }
@@ -153,7 +153,7 @@ update msg model =
                     ViewCreateTopic
                         { emptyForm
                             | name = ""
-                            , notes = Array.empty
+                            , notes = singleton ""
                         }
               }
             , Cmd.none
@@ -166,7 +166,7 @@ update msg model =
                         { name = ""
                         , startPosition = Picked p
                         , endPosition = Waiting
-                        , steps = Array.empty
+                        , steps = singleton ""
                         , notes = Array.empty
                         }
               }
@@ -206,9 +206,6 @@ update msg model =
 
                 _ ->
                     ( model, Cmd.none )
-
-        InputTopic t ->
-            ( { model | topics = set t model.topics }, Cmd.none )
 
         Reset ->
             ( { model | view = ViewAll }, Cmd.none )
@@ -268,11 +265,14 @@ update msg model =
                     in
                         ( model, Task.attempt CbTopic request )
 
+                ViewEditTopic topic ->
+                    ( model, Task.attempt CbTopic (GQLH.sendMutation model.url (updateTopic topic)) )
+
                 _ ->
                     ( model, Cmd.none )
 
         SelectPosition p ->
-            ( { model | view = ViewPosition (Editable.ReadOnly p) }, Cmd.none )
+            ( { model | view = ViewPosition <| Editable.ReadOnly p }, Cmd.none )
 
         SelectSubmission s ->
             ( { model | view = ViewSubmission <| Editable.ReadOnly s }, Cmd.none )

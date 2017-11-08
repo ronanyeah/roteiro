@@ -1,8 +1,13 @@
 module Utils exposing (..)
 
-import Array
+import Array exposing (Array)
 import Dict exposing (Dict)
 import Types exposing (Id(..), Form)
+
+
+singleton : a -> Array a
+singleton =
+    List.singleton >> Array.fromList
 
 
 set : { r | id : Id } -> Dict String { r | id : Id } -> Dict String { r | id : Id }
