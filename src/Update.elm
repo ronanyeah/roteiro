@@ -2,11 +2,11 @@ module Update exposing (..)
 
 import Array exposing (Array)
 import Editable exposing (Editable)
-import Data exposing (createPosition, fetchData, updatePosition, createTransition, updateTransition)
+import Data exposing (createTopic, createPosition, createSubmission, fetchData, updatePosition, createTransition, updateTransition)
 import GraphQL.Client.Http as GQLH
 import Task
 import Types exposing (..)
-import Utils exposing (listToDict, log, set)
+import Utils exposing (emptyForm, listToDict, log, set)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -14,16 +14,44 @@ update msg model =
     case msg of
         Cancel ->
             case model.view of
+                ViewAll ->
+                    ( model, Cmd.none )
+
                 ViewPosition p ->
                     ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
 
+                ViewCreatePosition _ ->
+                    ( { model | view = ViewAll }, Cmd.none )
+
                 ViewCreateTransition { startPosition } ->
-                    ( { model | view = ViewPosition <| Editable.ReadOnly startPosition }, Cmd.none )
+                    case startPosition of
+                        Picked p ->
+                            ( { model | view = ViewPosition <| Editable.ReadOnly p }, Cmd.none )
 
-                ViewCreateSubmission { position } ->
-                    ( { model | view = ViewPosition <| Editable.ReadOnly position }, Cmd.none )
+                        _ ->
+                            ( model, Cmd.none )
 
-                _ ->
+                ViewCreateSubmission { startPosition } ->
+                    case startPosition of
+                        Picked p ->
+                            ( { model | view = ViewPosition <| Editable.ReadOnly p }, Cmd.none )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                ViewEditTopic _ ->
+                    ( { model | view = ViewTopics }, Cmd.none )
+
+                ViewCreateTopic _ ->
+                    ( { model | view = ViewTopics }, Cmd.none )
+
+                ViewSubmission _ ->
+                    ( model, Cmd.none )
+
+                ViewTopics ->
+                    ( model, Cmd.none )
+
+                ViewTransition _ ->
                     ( model, Cmd.none )
 
         CbData res ->
@@ -33,7 +61,7 @@ update msg model =
                         | transitions = listToDict transitions
                         , positions = listToDict positions
                         , submissions = listToDict submissions
-                        , topics = topics |> Array.fromList
+                        , topics = listToDict topics
                       }
                     , Cmd.none
                     )
@@ -54,6 +82,19 @@ update msg model =
                 Err err ->
                     ( model, log err )
 
+        CbTopic res ->
+            case res of
+                Ok data ->
+                    ( { model
+                        | view = ViewTopics
+                        , topics = set data model.topics
+                      }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( model, log err )
+
         CbTransition res ->
             case res of
                 Ok data ->
@@ -67,12 +108,26 @@ update msg model =
                 Err err ->
                     ( model, log err )
 
+        CbSubmission res ->
+            case res of
+                Ok data ->
+                    ( { model
+                        | view = ViewSubmission <| Editable.ReadOnly data
+                        , submissions = set data model.submissions
+                      }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( model, log err )
+
         CreatePosition ->
             ( { model
                 | view =
                     ViewCreatePosition
-                        { name = ""
-                        , notes = Array.empty
+                        { emptyForm
+                            | name = ""
+                            , notes = Array.empty
                         }
               }
             , Cmd.none
@@ -82,10 +137,23 @@ update msg model =
             ( { model
                 | view =
                     ViewCreateSubmission
-                        { name = ""
-                        , position = p
-                        , steps = Array.empty
-                        , notes = Array.empty
+                        { emptyForm
+                            | name = ""
+                            , startPosition = Picked p
+                            , steps = Array.empty
+                            , notes = Array.empty
+                        }
+              }
+            , Cmd.none
+            )
+
+        CreateTopic ->
+            ( { model
+                | view =
+                    ViewCreateTopic
+                        { emptyForm
+                            | name = ""
+                            , notes = Array.empty
                         }
               }
             , Cmd.none
@@ -96,7 +164,7 @@ update msg model =
                 | view =
                     ViewCreateTransition
                         { name = ""
-                        , startPosition = p
+                        , startPosition = Picked p
                         , endPosition = Waiting
                         , steps = Array.empty
                         , notes = Array.empty
@@ -119,17 +187,28 @@ update msg model =
         EditChange view ->
             ( { model | view = view }, Cmd.none )
 
-        InputCreatePosition form ->
-            ( { model | view = ViewCreatePosition form }, Cmd.none )
+        EditTopic t ->
+            ( { model | view = ViewEditTopic t }, Cmd.none )
 
-        InputCreateSubmission form ->
-            ( { model | view = ViewCreateSubmission form }, Cmd.none )
+        FormUpdate form ->
+            case model.view of
+                ViewCreatePosition _ ->
+                    ( { model | view = ViewCreatePosition form }, Cmd.none )
 
-        InputCreateTransition form ->
-            ( { model | view = ViewCreateTransition form }, Cmd.none )
+                ViewCreateSubmission _ ->
+                    ( { model | view = ViewCreateSubmission form }, Cmd.none )
+
+                ViewCreateTopic _ ->
+                    ( { model | view = ViewCreateTopic form }, Cmd.none )
+
+                ViewCreateTransition _ ->
+                    ( { model | view = ViewCreateTransition form }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         InputTopic t ->
-            ( { model | view = ViewTopics (Just t) }, Cmd.none )
+            ( { model | topics = set t model.topics }, Cmd.none )
 
         Reset ->
             ( { model | view = ViewAll }, Cmd.none )
@@ -152,11 +231,42 @@ update msg model =
                     else
                         ( { model | view = ViewTransition <| Editable.cancel t }, Cmd.none )
 
-                ViewCreateTransition form ->
-                    ( model, Task.attempt CbTransition (GQLH.sendMutation model.url (createTransition form)) )
+                ViewCreateTransition { name, steps, notes, startPosition, endPosition } ->
+                    case ( startPosition, endPosition ) of
+                        ( Picked start, Picked end ) ->
+                            let
+                                request =
+                                    createTransition name (Array.toList steps) (Array.toList notes) start.id end.id
+                                        |> GQLH.sendMutation model.url
+                            in
+                                ( model, Task.attempt CbTransition request )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                ViewCreateSubmission { name, steps, notes, startPosition } ->
+                    case startPosition of
+                        Picked { id } ->
+                            let
+                                request =
+                                    createSubmission name (Array.toList steps) (Array.toList notes) id
+                                        |> GQLH.sendMutation model.url
+                            in
+                                ( model, Task.attempt CbSubmission request )
+
+                        _ ->
+                            ( model, Cmd.none )
 
                 ViewCreatePosition form ->
                     ( model, Task.attempt CbPosition <| GQLH.sendMutation model.url <| createPosition form )
+
+                ViewCreateTopic { name, notes } ->
+                    let
+                        request =
+                            createTopic name (Array.toList notes)
+                                |> GQLH.sendMutation model.url
+                    in
+                        ( model, Task.attempt CbTopic request )
 
                 _ ->
                     ( model, Cmd.none )
@@ -165,10 +275,10 @@ update msg model =
             ( { model | view = ViewPosition (Editable.ReadOnly p) }, Cmd.none )
 
         SelectSubmission s ->
-            ( { model | view = ViewSubmission s }, Cmd.none )
+            ( { model | view = ViewSubmission <| Editable.ReadOnly s }, Cmd.none )
 
         SelectTopics ->
-            ( { model | view = ViewTopics Nothing }, Cmd.none )
+            ( { model | view = ViewTopics }, Cmd.none )
 
         SelectTransition t ->
             ( { model | view = ViewTransition (Editable.ReadOnly t) }, Cmd.none )

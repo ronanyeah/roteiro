@@ -10,15 +10,17 @@ type Msg
     = Cancel
     | CbData (Result GQLH.Error AllData)
     | CbPosition (Result GQLH.Error Position)
+    | CbSubmission (Result GQLH.Error Submission)
+    | CbTopic (Result GQLH.Error Topic)
     | CbTransition (Result GQLH.Error Transition)
     | CreatePosition
     | CreateSubmission Position
+    | CreateTopic
     | CreateTransition Position
     | Edit
     | EditChange View
-    | InputCreatePosition FormCreatePosition
-    | InputCreateSubmission FormCreateSubmission
-    | InputCreateTransition FormCreateTransition
+    | EditTopic Topic
+    | FormUpdate Form
     | InputTopic Topic
     | Reset
     | Save
@@ -30,22 +32,27 @@ type Msg
 
 type View
     = ViewAll
-    | ViewCreatePosition FormCreatePosition
-    | ViewCreateSubmission FormCreateSubmission
-    | ViewCreateTransition FormCreateTransition
+    | ViewCreatePosition Form
+    | ViewCreateSubmission Form
+    | ViewCreateTopic Form
+    | ViewCreateTransition Form
+    | ViewEditTopic Topic
     | ViewPosition (Editable Position)
-    | ViewSubmission Submission
-    | ViewTopics (Maybe Topic)
+    | ViewSubmission (Editable Submission)
+    | ViewTopics
     | ViewTransition (Editable Transition)
 
 
 type Styles
-    = None
-    | SetBox
-    | Body
+    = Body
     | Button
-    | Link
+    | Header
+    | Icon
     | Line
+    | Link
+    | None
+    | SetBox
+    | Title
 
 
 type Id
@@ -57,13 +64,14 @@ type alias Model =
     , positions : Dict String Position
     , transitions : Dict String Transition
     , submissions : Dict String Submission
-    , topics : Array Topic
+    , topics : Dict String Topic
     , url : String
     }
 
 
 type alias Topic =
-    { name : String
+    { id : Id
+    , name : String
     , notes : Array String
     }
 
@@ -84,30 +92,18 @@ type alias Submission =
     }
 
 
+{-| REPLACE THIS WITH EDITABLE?
+-}
 type Picker a
     = Waiting
     | Picking
     | Picked a
 
 
-type alias FormCreateTransition =
+type alias Form =
     { name : String
-    , startPosition : Position
+    , startPosition : Picker Position
     , endPosition : Picker Position
-    , notes : Array String
-    , steps : Array String
-    }
-
-
-type alias FormCreatePosition =
-    { name : String
-    , notes : Array String
-    }
-
-
-type alias FormCreateSubmission =
-    { name : String
-    , position : Position
     , notes : Array String
     , steps : Array String
     }

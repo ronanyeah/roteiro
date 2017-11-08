@@ -20,7 +20,7 @@ type Topic @model {
   id: ID! @isUnique
   updatedAt: DateTime!
   name: String!
-  content: [String!]!
+  notes: [String!]!
 }
 
 type Position @model {

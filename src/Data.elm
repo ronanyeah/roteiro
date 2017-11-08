@@ -17,7 +17,11 @@ fetchData =
         |> GQLB.request ()
 
 
-createPosition : FormCreatePosition -> GQLB.Request GQLB.Mutation Position
+
+-- CREATE
+
+
+createPosition : Form -> GQLB.Request GQLB.Mutation Position
 createPosition { name, notes } =
     position
         |> GQLB.field "createPosition"
@@ -29,34 +33,49 @@ createPosition { name, notes } =
         |> GQLB.request ()
 
 
-createTransition : FormCreateTransition -> GQLB.Request GQLB.Mutation Transition
-createTransition { name, steps, notes, startPosition, endPosition } =
-    let
-        (Id startId) =
-            startPosition.id
+createTopic : String -> List String -> GQLB.Request GQLB.Mutation Topic
+createTopic name notes =
+    topic
+        |> GQLB.field "createTopic"
+            [ ( "name", Arg.string name )
+            , ( "notes", Arg.list <| List.map Arg.string notes )
+            ]
+        |> GQLB.extract
+        |> GQLB.mutationDocument
+        |> GQLB.request ()
 
-        (Id endId) =
-            case endPosition of
-                Picked a ->
-                    a.id
 
-                Waiting ->
-                    Id ""
+createTransition : String -> List String -> List String -> Id -> Id -> GQLB.Request GQLB.Mutation Transition
+createTransition name steps notes (Id startId) (Id endId) =
+    transition
+        |> GQLB.field "createTransition"
+            [ ( "name", Arg.string name )
+            , ( "startPositionId", Arg.string startId )
+            , ( "endPositionId", Arg.string endId )
+            , ( "notes", Arg.list <| List.map Arg.string notes )
+            , ( "steps", Arg.list <| List.map Arg.string steps )
+            ]
+        |> GQLB.extract
+        |> GQLB.mutationDocument
+        |> GQLB.request ()
 
-                Picking ->
-                    Id ""
-    in
-        transition
-            |> GQLB.field "createTransition"
-                [ ( "name", Arg.string name )
-                , ( "startPositionId", Arg.string startId )
-                , ( "endPositionId", Arg.string endId )
-                , ( "notes", Arg.list <| Array.toList <| Array.map Arg.string notes )
-                , ( "steps", Arg.list <| Array.toList <| Array.map Arg.string steps )
-                ]
-            |> GQLB.extract
-            |> GQLB.mutationDocument
-            |> GQLB.request ()
+
+createSubmission : String -> List String -> List String -> Id -> GQLB.Request GQLB.Mutation Submission
+createSubmission name steps notes (Id startId) =
+    submission
+        |> GQLB.field "createSubmission"
+            [ ( "name", Arg.string name )
+            , ( "positionId", Arg.string startId )
+            , ( "notes", Arg.list <| List.map Arg.string notes )
+            , ( "steps", Arg.list <| List.map Arg.string steps )
+            ]
+        |> GQLB.extract
+        |> GQLB.mutationDocument
+        |> GQLB.request ()
+
+
+
+-- UPDATE
 
 
 updateTransition : Transition -> GQLB.Request GQLB.Mutation Transition
@@ -94,11 +113,16 @@ updatePosition p =
             |> GQLB.request ()
 
 
+
+-- SELECTIONS
+
+
 topic : GQLB.ValueSpec GQLB.NonNull GQLB.ObjectType Topic vars
 topic =
     GQLB.object Topic
+        |> GQLB.with (GQLB.field "id" [] (GQLB.map Id GQLB.id))
         |> GQLB.with (GQLB.field "name" [] GQLB.string)
-        |> GQLB.with (GQLB.field "content" [] (GQLB.list GQLB.string |> GQLB.map Array.fromList))
+        |> GQLB.with (GQLB.field "notes" [] (GQLB.list GQLB.string |> GQLB.map Array.fromList))
 
 
 position : GQLB.ValueSpec GQLB.NonNull GQLB.ObjectType Position vars

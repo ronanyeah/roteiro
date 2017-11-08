@@ -1,7 +1,8 @@
 module Utils exposing (..)
 
+import Array
 import Dict exposing (Dict)
-import Types exposing (Id(..))
+import Types exposing (Id(..), Form)
 
 
 set : { r | id : Id } -> Dict String { r | id : Id } -> Dict String { r | id : Id }
@@ -50,3 +51,13 @@ listToDict =
                 Dict.insert id r
         )
         Dict.empty
+
+
+emptyForm : Form
+emptyForm =
+    { name = ""
+    , startPosition = Types.Waiting
+    , endPosition = Types.Waiting
+    , steps = Array.empty
+    , notes = Array.empty
+    }

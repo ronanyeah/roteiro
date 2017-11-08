@@ -27,7 +27,7 @@ init url =
       , positions = Dict.empty
       , transitions = Dict.empty
       , submissions = Dict.empty
-      , topics = Array.empty
+      , topics = Dict.empty
       , url = url
       }
     , Task.attempt CbData <| sendQuery url fetchData
