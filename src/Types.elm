@@ -13,13 +13,15 @@ type Msg
     | CbSubmission (Result GQLH.Error Submission)
     | CbTopic (Result GQLH.Error Topic)
     | CbTransition (Result GQLH.Error Transition)
+    | ChoosePosition (Position -> Msg)
     | CreatePosition
     | CreateSubmission Position
     | CreateTopic
     | CreateTransition Position
-    | Edit
-    | EditChange View
+    | EditPosition Position
     | EditTopic Topic
+    | EditSubmission Submission
+    | EditTransition Transition
     | FormUpdate Form
     | Reset
     | Save
@@ -35,10 +37,9 @@ type View
     | ViewCreateSubmission Form
     | ViewCreateTopic Form
     | ViewCreateTransition Form
-    | ViewEditTopic Topic
     | ViewPosition (Editable Position)
     | ViewSubmission (Editable Submission)
-    | ViewTopics
+    | ViewTopics (Maybe Topic)
     | ViewTransition (Editable Transition)
 
 
@@ -67,6 +68,7 @@ type alias Model =
     , submissions : Dict String Submission
     , topics : Dict String Topic
     , url : String
+    , choosingPosition : Picking Position
     }
 
 
@@ -93,18 +95,15 @@ type alias Submission =
     }
 
 
-{-| REPLACE THIS WITH EDITABLE?
--}
-type Picker a
-    = Waiting
-    | Picking
-    | Picked a
+type Picking a
+    = Nah
+    | Yeah (a -> Msg)
 
 
 type alias Form =
     { name : String
-    , startPosition : Picker Position
-    , endPosition : Picker Position
+    , startPosition : Maybe Position
+    , endPosition : Maybe Position
     , notes : Array String
     , steps : Array String
     }

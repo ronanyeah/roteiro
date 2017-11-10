@@ -25,31 +25,28 @@ update msg model =
 
                 ViewCreateTransition { startPosition } ->
                     case startPosition of
-                        Picked p ->
+                        Just p ->
                             ( { model | view = ViewPosition <| Editable.ReadOnly p }, Cmd.none )
 
-                        _ ->
+                        Nothing ->
                             ( model, Cmd.none )
 
                 ViewCreateSubmission { startPosition } ->
                     case startPosition of
-                        Picked p ->
+                        Just p ->
                             ( { model | view = ViewPosition <| Editable.ReadOnly p }, Cmd.none )
 
-                        _ ->
+                        Nothing ->
                             ( model, Cmd.none )
 
-                ViewEditTopic _ ->
-                    ( { model | view = ViewTopics }, Cmd.none )
-
                 ViewCreateTopic _ ->
-                    ( { model | view = ViewTopics }, Cmd.none )
+                    ( { model | view = ViewTopics Nothing }, Cmd.none )
 
                 ViewSubmission s ->
                     ( { model | view = ViewSubmission <| Editable.cancel s }, Cmd.none )
 
-                ViewTopics ->
-                    ( model, Cmd.none )
+                ViewTopics _ ->
+                    ( { model | view = ViewTopics Nothing }, Cmd.none )
 
                 ViewTransition t ->
                     ( { model | view = ViewTransition <| Editable.cancel t }, Cmd.none )
@@ -86,7 +83,7 @@ update msg model =
             case res of
                 Ok data ->
                     ( { model
-                        | view = ViewTopics
+                        | view = ViewTopics Nothing
                         , topics = set data model.topics
                       }
                     , Cmd.none
@@ -121,6 +118,9 @@ update msg model =
                 Err err ->
                     ( model, log err )
 
+        ChoosePosition msg ->
+            ( { model | choosingPosition = Yeah msg }, Cmd.none )
+
         CreatePosition ->
             ( { model
                 | view =
@@ -139,7 +139,7 @@ update msg model =
                     ViewCreateSubmission
                         { emptyForm
                             | name = ""
-                            , startPosition = Picked p
+                            , startPosition = Just p
                             , steps = singleton ""
                             , notes = Array.empty
                         }
@@ -164,8 +164,8 @@ update msg model =
                 | view =
                     ViewCreateTransition
                         { name = ""
-                        , startPosition = Picked p
-                        , endPosition = Waiting
+                        , startPosition = Just p
+                        , endPosition = Nothing
                         , steps = singleton ""
                         , notes = Array.empty
                         }
@@ -173,22 +173,32 @@ update msg model =
             , Cmd.none
             )
 
-        Edit ->
+        EditPosition p ->
             case model.view of
-                ViewPosition s ->
-                    ( { model | view = ViewPosition <| Editable.edit s }, Cmd.none )
-
-                ViewTransition t ->
-                    ( { model | view = ViewTransition <| Editable.edit t }, Cmd.none )
+                ViewPosition editP ->
+                    ( { model | view = ViewPosition <| Editable.map (always p) <| Editable.edit editP }, Cmd.none )
 
                 _ ->
-                    ( model, Cmd.none )
+                    Debug.crash "EditPosition"
 
-        EditChange view ->
-            ( { model | view = view }, Cmd.none )
+        EditSubmission s ->
+            case model.view of
+                ViewSubmission editS ->
+                    ( { model | view = ViewSubmission <| Editable.map (always s) <| Editable.edit editS }, Cmd.none )
+
+                _ ->
+                    Debug.crash "EditSubmission"
+
+        EditTransition t ->
+            case model.view of
+                ViewTransition editT ->
+                    ( { model | view = ViewTransition <| Editable.map (always t) <| Editable.edit editT }, Cmd.none )
+
+                _ ->
+                    Debug.crash "EditTransition"
 
         EditTopic t ->
-            ( { model | view = ViewEditTopic t }, Cmd.none )
+            ( { model | view = ViewTopics <| Just t }, Cmd.none )
 
         FormUpdate form ->
             case model.view of
@@ -205,7 +215,7 @@ update msg model =
                     ( { model | view = ViewCreateTransition form }, Cmd.none )
 
                 _ ->
-                    ( model, Cmd.none )
+                    Debug.crash "FormUpdate"
 
         Reset ->
             ( { model | view = ViewAll }, Cmd.none )
@@ -230,7 +240,7 @@ update msg model =
 
                 ViewCreateTransition { name, steps, notes, startPosition, endPosition } ->
                     case ( startPosition, endPosition ) of
-                        ( Picked start, Picked end ) ->
+                        ( Just start, Just end ) ->
                             let
                                 request =
                                     createTransition name (Array.toList steps) (Array.toList notes) start.id end.id
@@ -239,11 +249,11 @@ update msg model =
                                 ( model, Task.attempt CbTransition request )
 
                         _ ->
-                            ( model, Cmd.none )
+                            ( model, log "missing position" )
 
                 ViewCreateSubmission { name, steps, notes, startPosition } ->
                     case startPosition of
-                        Picked { id } ->
+                        Just { id } ->
                             let
                                 request =
                                     createSubmission name (Array.toList steps) (Array.toList notes) id
@@ -252,7 +262,7 @@ update msg model =
                                 ( model, Task.attempt CbSubmission request )
 
                         _ ->
-                            ( model, Cmd.none )
+                            ( model, log "missing position" )
 
                 ViewCreatePosition form ->
                     ( model, Task.attempt CbPosition <| GQLH.sendMutation model.url <| createPosition form )
@@ -265,11 +275,11 @@ update msg model =
                     in
                         ( model, Task.attempt CbTopic request )
 
-                ViewEditTopic topic ->
+                ViewTopics (Just topic) ->
                     ( model, Task.attempt CbTopic (GQLH.sendMutation model.url (updateTopic topic)) )
 
                 _ ->
-                    ( model, Cmd.none )
+                    Debug.crash "Save"
 
         SelectPosition p ->
             ( { model | view = ViewPosition <| Editable.ReadOnly p }, Cmd.none )
@@ -278,7 +288,7 @@ update msg model =
             ( { model | view = ViewSubmission <| Editable.ReadOnly s }, Cmd.none )
 
         SelectTopics ->
-            ( { model | view = ViewTopics }, Cmd.none )
+            ( { model | view = ViewTopics Nothing }, Cmd.none )
 
         SelectTransition t ->
             ( { model | view = ViewTransition (Editable.ReadOnly t) }, Cmd.none )

@@ -61,8 +61,8 @@ listToDict =
 emptyForm : Form
 emptyForm =
     { name = ""
-    , startPosition = Types.Waiting
-    , endPosition = Types.Waiting
+    , startPosition = Nothing
+    , endPosition = Nothing
     , steps = Array.empty
     , notes = Array.empty
     }

@@ -27,7 +27,6 @@ styling =
                 , Font.sansSerif
                 ]
             , Font.size 25
-            , Color.background c
             ]
         , style Icon
             [ Color.text e
@@ -38,14 +37,17 @@ styling =
         , style Link [ Font.underline, pointer ]
         , style Line [ Color.background e ]
         , style Header
-            [ Font.size 40
+            [ Font.size 55
             , Color.text e
             , pointer
             , hover [ Color.text a ]
             ]
-        , style Subtitle []
-        , style Title [ Color.text e ]
-        , style Topics [ Color.text e, pointer ]
+        , style Subtitle
+            [ Font.size 35
+            , Color.text e
+            ]
+        , style Title [ Font.size 45, Color.text e ]
+        , style Topics [ Color.text e, pointer, hover [ Color.text a ] ]
         ]
 
 
