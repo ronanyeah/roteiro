@@ -118,8 +118,8 @@ update msg model =
                 Err err ->
                     ( model, log err )
 
-        ChoosePosition msg ->
-            ( { model | choosingPosition = Yeah msg }, Cmd.none )
+        ChoosePosition cb ->
+            ( { model | choosingPosition = Just cb }, Cmd.none )
 
         CreatePosition ->
             ( { model
@@ -176,7 +176,12 @@ update msg model =
         EditPosition p ->
             case model.view of
                 ViewPosition editP ->
-                    ( { model | view = ViewPosition <| Editable.map (always p) <| Editable.edit editP }, Cmd.none )
+                    ( { model
+                        | view = ViewPosition <| Editable.map (always p) <| Editable.edit editP
+                        , choosingPosition = Nothing
+                      }
+                    , Cmd.none
+                    )
 
                 _ ->
                     Debug.crash "EditPosition"

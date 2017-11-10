@@ -50,8 +50,8 @@ view model =
 
                 ViewCreateTransition form ->
                     [ nameEdit form FormUpdate
-                    , pickStartPosition (Dict.values model.positions) form
-                    , pickEndPosition (Dict.values model.positions) form
+                    , pickStartPosition form
+                    , pickEndPosition form
                     , stepsEditor form FormUpdate
                     , notesEditor form FormUpdate
                     , saveCancel
@@ -59,6 +59,7 @@ view model =
 
                 ViewCreateSubmission form ->
                     [ nameEdit form FormUpdate
+                    , pickStartPosition form
                     , stepsEditor form FormUpdate
                     , notesEditor form FormUpdate
                     , saveCancel
@@ -79,7 +80,7 @@ view model =
                             , saveCancel
                             ]
 
-                        Editable.ReadOnly ({ id, name, notes } as p) ->
+                        Editable.ReadOnly ({ id, notes } as p) ->
                             let
                                 transitions =
                                     model.transitions
@@ -128,17 +129,22 @@ view model =
 
                         Editable.Editable _ submission ->
                             [ nameEdit submission EditSubmission
-                            , el None
-                                [ onClick <|
-                                    ChoosePosition
-                                        (\{ id } ->
-                                            EditSubmission { submission | position = id }
-                                        )
-                                ]
-                              <|
-                                text <|
-                                    "Start Position: "
-                                        ++ submission.name
+                            , model.positions
+                                |> Dict.get (submission.position |> (\(Id id) -> id))
+                                |> Utils.unwrap empty
+                                    (\p ->
+                                        el None
+                                            [ onClick <|
+                                                ChoosePosition
+                                                    (\{ id } ->
+                                                        EditSubmission { submission | position = id }
+                                                    )
+                                            ]
+                                        <|
+                                            text <|
+                                                "Start Position: "
+                                                    ++ p.name
+                                    )
                             , notesEditor submission EditSubmission
                             , stepsEditor submission EditSubmission
                             , saveCancel
@@ -220,10 +226,17 @@ view model =
 
         picker =
             case model.choosingPosition of
-                Yeah msg ->
-                    modal None [] <| column None [] <| List.map (.name >> text) <| Dict.values model.positions
+                Just msg ->
+                    modal Picker [ center, verticalCenter ] <|
+                        column None [] <|
+                            List.map
+                                (\p ->
+                                    el None [ onClick <| msg p ] <| text p.name
+                                )
+                            <|
+                                Dict.values model.positions
 
-                Nah ->
+                Nothing ->
                     empty
     in
         Html.div []
@@ -246,18 +259,18 @@ view model =
             ]
 
 
-pickStartPosition : List Position -> Form -> Element Styles vs Msg
-pickStartPosition positions form =
+pickStartPosition : Form -> Element Styles vs Msg
+pickStartPosition form =
     case form.startPosition of
         Nothing ->
             el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | startPosition = Just p } ] <| text "Select A Position"
 
-        Just p ->
-            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | startPosition = Just p } ] <| text <| "Start Position: " ++ p.name
+        Just { name } ->
+            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | startPosition = Just p } ] <| text <| "Start Position: " ++ name
 
 
-pickEndPosition : List Position -> Form -> Element Styles vs Msg
-pickEndPosition positions form =
+pickEndPosition : Form -> Element Styles vs Msg
+pickEndPosition form =
     case form.endPosition of
         Nothing ->
             el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | endPosition = Just p } ] <| text "Select A Position"
@@ -285,7 +298,7 @@ nameEdit r msg =
     Input.text
         None
         [ maxWidth <| px 300, center ]
-        { onChange = (\str -> msg { r | name = str })
+        { onChange = \str -> msg { r | name = str }
         , value = r.name
         , label = Input.labelAbove <| el Title [ center ] <| text "NAME"
         , options = []

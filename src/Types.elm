@@ -51,6 +51,7 @@ type Styles
     | Line
     | Link
     | None
+    | Picker
     | SetBox
     | Subtitle
     | Title
@@ -68,7 +69,7 @@ type alias Model =
     , submissions : Dict String Submission
     , topics : Dict String Topic
     , url : String
-    , choosingPosition : Picking Position
+    , choosingPosition : Maybe (Position -> Msg)
     }
 
 
@@ -93,11 +94,6 @@ type alias Submission =
     , notes : Array String
     , position : Id
     }
-
-
-type Picking a
-    = Nah
-    | Yeah (a -> Msg)
 
 
 type alias Form =

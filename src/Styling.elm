@@ -42,6 +42,9 @@ styling =
             , pointer
             , hover [ Color.text a ]
             ]
+        , style Picker
+            [ Color.background c
+            ]
         , style Subtitle
             [ Font.size 35
             , Color.text e
