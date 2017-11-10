@@ -28,6 +28,7 @@ styling =
                 ]
             , Font.size 25
             ]
+        , style Dot [ Color.text e ]
         , style Icon
             [ Color.text e
             , Border.rounded 15

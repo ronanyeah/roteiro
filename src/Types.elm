@@ -46,6 +46,7 @@ type View
 type Styles
     = Body
     | Button
+    | Dot
     | Header
     | Icon
     | Line

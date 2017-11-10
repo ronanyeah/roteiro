@@ -19,21 +19,30 @@ view model =
         content =
             case model.view of
                 ViewAll ->
-                    (model.positions
-                        |> Dict.values
-                        |> List.map
-                            (\p ->
-                                el Button
-                                    [ padding 10
-                                    , onClick <| SelectPosition p
+                    (case
+                        model.positions
+                            |> Dict.values
+                     of
+                        [] ->
+                            []
+
+                        xs ->
+                            xs
+                                |> List.map
+                                    (\p ->
+                                        el Button
+                                            [ padding 10
+                                            , onClick <| SelectPosition p
+                                            ]
+                                        <|
+                                            text p.name
+                                    )
+                                |> flip (++)
+                                    [ plus CreatePosition
+                                    , el Line [ width <| px 100, height <| px 2 ] empty
                                     ]
-                                <|
-                                    text p.name
-                            )
                     )
-                        ++ [ plus CreatePosition
-                           , el Line [ width <| px 100, height <| px 2 ] empty
-                           , el Topics
+                        ++ [ el Topics
                                 [ padding 10
                                 , onClick <| SelectTopics
                                 , class "fa fa-book"
@@ -166,18 +175,18 @@ view model =
                                 (\start end ->
                                     [ editRow t EditTransition
                                     , row None
-                                        []
-                                        [ text (name ++ " from ")
-                                        , el Link [ onClick <| SelectPosition start ] <| text start.name
-                                        ]
-                                    , viewSteps steps
-                                    , viewNotes notes
-                                    , row None
-                                        []
-                                        [ text "Transitions to: "
+                                        [ verticalCenter ]
+                                        [ el Link [ onClick <| SelectPosition start ] <| text start.name
+                                        , el Icon
+                                            [ padding 10
+                                            , class "fa fa-long-arrow-right"
+                                            ]
+                                            empty
                                         , el Link [ onClick <| SelectPosition end ] <|
                                             text end.name
                                         ]
+                                    , viewSteps steps
+                                    , viewNotes notes
                                     ]
                                 )
 
@@ -208,15 +217,7 @@ view model =
                                         column None
                                             [ center, maxWidth <| px 500 ]
                                             [ editRow topic EditTopic
-                                            , column None [] <|
-                                                List.map
-                                                    ((++) "- "
-                                                        >> text
-                                                        >> List.singleton
-                                                        >> paragraph None []
-                                                    )
-                                                <|
-                                                    Array.toList notes
+                                            , viewNotes notes
                                             ]
                             )
                         |> (::) (plus CreateTopic)
@@ -347,9 +348,6 @@ saveCancel =
 stepsEditor : { r | steps : Array String } -> ({ r | steps : Array String } -> Msg) -> Element Styles vs Msg
 stepsEditor form msg =
     let
-        title =
-            el Title [ center ] <| text "STEPS"
-
         steps =
             column None
                 [ spacing 10 ]
@@ -378,7 +376,7 @@ stepsEditor form msg =
     in
         column None
             []
-            [ title
+            [ el Icon [ class "fa fa-cogs" ] empty
             , steps
             , buttons
             ]
@@ -387,9 +385,6 @@ stepsEditor form msg =
 notesEditor : { r | notes : Array String } -> ({ r | notes : Array String } -> Msg) -> Element Styles vs Msg
 notesEditor form msg =
     let
-        title =
-            el Title [ center ] <| text "NOTES"
-
         notes =
             column None
                 [ spacing 10 ]
@@ -418,7 +413,7 @@ notesEditor form msg =
     in
         column None
             []
-            [ title
+            [ el Icon [ class "fa fa-sticky-note-o" ] empty
             , notes
             , buttons
             ]
@@ -442,19 +437,22 @@ viewSteps steps =
                         , text <| " " ++ step
                         ]
                 )
-            |> (::) (el Title [] <| text "STEPS")
+            |> (::) (el Icon [ class "fa fa-cogs" ] empty)
             |> column None [ maxWidth <| px 700 ]
         )
 
 
-viewNotes : Array String -> Element Styles vs Msg
+viewNotes : Array String -> Element Styles vs msg
 viewNotes notes =
     when (not (Array.isEmpty notes)) <|
         column None
             [ center, maxWidth <| px 500 ]
-            [ el Title [] <| text "NOTES"
+            [ el Icon [ class "fa fa-sticky-note-o" ] empty
             , column None [] <|
-                List.map ((++) "- " >> text >> List.singleton >> paragraph None [])
+                List.map
+                    (\x ->
+                        paragraph None [] [ el Dot [] <| text "• ", text x ]
+                    )
                     (notes |> Array.toList)
             ]
 
@@ -468,7 +466,7 @@ viewTechList title msg techs =
             , column None [] <|
                 List.map
                     (\t ->
-                        row None [] [ text "- ", el Link [ onClick <| msg t ] <| text t.name ]
+                        row None [] [ el Dot [] <| text "• ", el Link [ onClick <| msg t ] <| text t.name ]
                     )
                     techs
             ]
