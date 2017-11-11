@@ -37,6 +37,9 @@ styling =
             , Color.background c
             ]
         , style Dot [ Color.text e ]
+        , style MattIcon
+            [ Color.text e
+            ]
         , style Icon
             [ Color.text e
             , Border.rounded 15

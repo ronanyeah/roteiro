@@ -30,9 +30,8 @@ view model =
                             xs
                                 |> List.map
                                     (\p ->
-                                        el Button
-                                            [ padding 10
-                                            , onClick <| SelectPosition p
+                                        el Choice
+                                            [ onClick <| SelectPosition p
                                             ]
                                         <|
                                             text p.name
@@ -103,10 +102,18 @@ view model =
                             in
                                 [ editRow p EditPosition
                                 , viewNotes notes
-                                , el None [] <| text "Transitions"
+                                , el Line [ width <| px 100, height <| px 2 ] empty
+                                , el MattIcon
+                                    [ class "fa fa-long-arrow-right"
+                                    ]
+                                    empty
                                 , viewTechList SelectTransition transitions
                                 , plus <| CreateTransition p
-                                , el None [] <| text "Submissions"
+                                , el Line [ width <| px 100, height <| px 2 ] empty
+                                , el MattIcon
+                                    [ class "fa fa-bolt"
+                                    ]
+                                    empty
                                 , viewTechList SelectSubmission submissions
                                 , plus <| CreateSubmission p
                                 ]
@@ -120,8 +127,8 @@ view model =
                                         [ editRow s EditSubmission
                                         , row None
                                             [ spacing 10 ]
-                                            [ el Icon
-                                                [ class "fa fa-bomb"
+                                            [ el MattIcon
+                                                [ class "fa fa-bolt"
                                                 ]
                                                 empty
                                             , el Link [ onClick <| SelectPosition p ] <| text p.name
@@ -173,7 +180,7 @@ view model =
                                             ]
                                           <|
                                             text start.name
-                                        , el Icon
+                                        , el MattIcon
                                             [ class "fa fa-long-arrow-right"
                                             ]
                                             empty
@@ -202,7 +209,7 @@ view model =
                                     , row None
                                         [ verticalCenter, spacing 10 ]
                                         [ el Link [ onClick <| SelectPosition start ] <| text start.name
-                                        , el Icon
+                                        , el MattIcon
                                             [ class "fa fa-long-arrow-right"
                                             ]
                                             empty
@@ -499,7 +506,7 @@ viewSteps steps =
                 (\i step ->
                     paragraph None
                         []
-                        [ Element.bold <| (toString (i + 1) ++ ".")
+                        [ el Dot [] <| text <| (toString (i + 1) ++ ".")
                         , text <| " " ++ step
                         ]
                 )
@@ -518,13 +525,17 @@ viewNotes =
 
 
 viewTechList : ({ r | name : String } -> Msg) -> List { r | name : String } -> Element Styles vs Msg
-viewTechList msg =
-    List.map
-        (\t ->
-            row None
-                []
-                [ el Dot [] <| text "• "
-                , el Link [ onClick <| msg t ] <| text t.name
-                ]
-        )
-        >> column None []
+viewTechList msg xs =
+    if List.isEmpty xs then
+        el None [] <| text "None!"
+    else
+        xs
+            |> List.map
+                (\t ->
+                    row None
+                        []
+                        [ el Dot [] <| text "• "
+                        , el Link [ onClick <| msg t ] <| text t.name
+                        ]
+                )
+            |> column None []

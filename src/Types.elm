@@ -57,6 +57,7 @@ type Styles
     | Icon
     | Line
     | Link
+    | MattIcon
     | None
     | Picker
     | PickerCancel
