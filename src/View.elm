@@ -119,8 +119,11 @@ view model =
                                     (\p ->
                                         [ editRow s EditSubmission
                                         , row None
-                                            []
-                                            [ text (name ++ " from ")
+                                            [ spacing 10 ]
+                                            [ el Icon
+                                                [ class "fa fa-bomb"
+                                                ]
+                                                empty
                                             , el Link [ onClick <| SelectPosition p ] <| text p.name
                                             ]
                                         , viewSteps steps
@@ -199,11 +202,10 @@ view model =
                                 (\start end ->
                                     [ editRow t EditTransition
                                     , row None
-                                        [ verticalCenter ]
+                                        [ verticalCenter, spacing 10 ]
                                         [ el Link [ onClick <| SelectPosition start ] <| text start.name
                                         , el Icon
-                                            [ padding 10
-                                            , class "fa fa-long-arrow-right"
+                                            [ class "fa fa-long-arrow-right"
                                             ]
                                             empty
                                         , el Link [ onClick <| SelectPosition end ] <|
