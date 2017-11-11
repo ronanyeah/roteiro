@@ -158,38 +158,36 @@ view model =
                     case data of
                         Editable.Editable _ transition ->
                             [ nameEdit transition EditTransition
-                            , model.positions
-                                |> Dict.get (transition.startPosition |> (\(Id id) -> id))
-                                |> flip whenJust
-                                    (\p ->
-                                        el None
+                            , unwrap2 empty
+                                (get transition.startPosition model.positions)
+                                (get transition.endPosition model.positions)
+                                (\start end ->
+                                    row None
+                                        [ verticalCenter, spacing 10 ]
+                                        [ el Link
                                             [ onClick <|
                                                 ChoosePosition
                                                     (\{ id } ->
                                                         EditTransition { transition | startPosition = id }
                                                     )
                                             ]
-                                        <|
-                                            text <|
-                                                "Start Position: "
-                                                    ++ p.name
-                                    )
-                            , model.positions
-                                |> Dict.get (transition.endPosition |> (\(Id id) -> id))
-                                |> flip whenJust
-                                    (\p ->
-                                        el None
+                                          <|
+                                            text start.name
+                                        , el Icon
+                                            [ class "fa fa-long-arrow-right"
+                                            ]
+                                            empty
+                                        , el Link
                                             [ onClick <|
                                                 ChoosePosition
                                                     (\{ id } ->
                                                         EditTransition { transition | endPosition = id }
                                                     )
                                             ]
-                                        <|
-                                            text <|
-                                                "End Position: "
-                                                    ++ p.name
-                                    )
+                                          <|
+                                            text end.name
+                                        ]
+                                )
                             , notesEditor transition EditTransition
                             , stepsEditor transition EditTransition
                             , saveCancel
@@ -396,8 +394,8 @@ minus msg =
 
 saveCancel : Element Styles vs Msg
 saveCancel =
-    row None
-        []
+    row ChooseBox
+        [ spacing 20 ]
         [ el Icon
             [ padding 10
             , onClick Save
@@ -443,8 +441,8 @@ stepsEditor form msg =
                 ]
     in
         column None
-            []
-            [ el Icon [ class "fa fa-cogs", center ] empty
+            [ spacing 10 ]
+            [ el BigIcon [ class "fa fa-cogs", center ] empty
             , steps
             , buttons
             ]
@@ -480,8 +478,8 @@ notesEditor form msg =
                 ]
     in
         column None
-            []
-            [ el Icon [ class "fa fa-sticky-note-o" ] empty
+            [ spacing 10 ]
+            [ el BigIcon [ class "fa fa-sticky-note-o", center ] empty
             , notes
             , buttons
             ]
