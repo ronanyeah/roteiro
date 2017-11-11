@@ -116,19 +116,17 @@ updatePosition p =
 
 updateTopic : Topic -> GQLB.Request GQLB.Mutation Topic
 updateTopic { id, name, notes } =
-    let
-        (Id idStr) =
-            id
-    in
-        topic
-            |> GQLB.field "updateTopic"
-                [ ( "id", Arg.string idStr )
-                , ( "name", Arg.string name )
-                , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
-                ]
-            |> GQLB.extract
-            |> GQLB.mutationDocument
-            |> GQLB.request ()
+    case id of
+        Id idStr ->
+            topic
+                |> GQLB.field "updateTopic"
+                    [ ( "id", Arg.string idStr )
+                    , ( "name", Arg.string name )
+                    , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
+                    ]
+                |> GQLB.extract
+                |> GQLB.mutationDocument
+                |> GQLB.request ()
 
 
 
