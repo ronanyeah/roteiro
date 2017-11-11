@@ -3,7 +3,7 @@ module View exposing (..)
 import Array exposing (Array)
 import Dict
 import Editable
-import Element exposing (Element, column, el, empty, header, layout, modal, paragraph, row, text, when)
+import Element exposing (Element, column, el, empty, header, layout, modal, paragraph, row, text, when, whenJust)
 import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, px, spacing, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
@@ -103,20 +103,12 @@ view model =
                             in
                                 [ editRow p EditPosition
                                 , viewNotes notes
-                                , viewTechList "Transitions" SelectTransition transitions
-                                , el Button
-                                    [ padding 10
-                                    , onClick <| CreateTransition p
-                                    ]
-                                  <|
-                                    text "Add Transition"
-                                , viewTechList "Submissions" SelectSubmission submissions
-                                , el Button
-                                    [ padding 10
-                                    , onClick <| CreateSubmission p
-                                    ]
-                                  <|
-                                    text "Add Submission"
+                                , el None [] <| text "Transitions"
+                                , viewTechList SelectTransition transitions
+                                , plus <| CreateTransition p
+                                , el None [] <| text "Submissions"
+                                , viewTechList SelectSubmission submissions
+                                , plus <| CreateSubmission p
                                 ]
 
                 ViewSubmission data ->
@@ -140,7 +132,7 @@ view model =
                             [ nameEdit submission EditSubmission
                             , model.positions
                                 |> Dict.get (submission.position |> (\(Id id) -> id))
-                                |> Utils.unwrap empty
+                                |> flip whenJust
                                     (\p ->
                                         el None
                                             [ onClick <|
@@ -163,6 +155,38 @@ view model =
                     case data of
                         Editable.Editable _ transition ->
                             [ nameEdit transition EditTransition
+                            , model.positions
+                                |> Dict.get (transition.startPosition |> (\(Id id) -> id))
+                                |> flip whenJust
+                                    (\p ->
+                                        el None
+                                            [ onClick <|
+                                                ChoosePosition
+                                                    (\{ id } ->
+                                                        EditTransition { transition | startPosition = id }
+                                                    )
+                                            ]
+                                        <|
+                                            text <|
+                                                "Start Position: "
+                                                    ++ p.name
+                                    )
+                            , model.positions
+                                |> Dict.get (transition.endPosition |> (\(Id id) -> id))
+                                |> flip whenJust
+                                    (\p ->
+                                        el None
+                                            [ onClick <|
+                                                ChoosePosition
+                                                    (\{ id } ->
+                                                        EditTransition { transition | endPosition = id }
+                                                    )
+                                            ]
+                                        <|
+                                            text <|
+                                                "End Position: "
+                                                    ++ p.name
+                                    )
                             , notesEditor transition EditTransition
                             , stepsEditor transition EditTransition
                             , saveCancel
@@ -376,7 +400,7 @@ stepsEditor form msg =
     in
         column None
             []
-            [ el Icon [ class "fa fa-cogs" ] empty
+            [ el Icon [ class "fa fa-cogs", center ] empty
             , steps
             , buttons
             ]
@@ -437,36 +461,28 @@ viewSteps steps =
                         , text <| " " ++ step
                         ]
                 )
-            |> (::) (el Icon [ class "fa fa-cogs" ] empty)
             |> column None [ maxWidth <| px 700 ]
         )
 
 
 viewNotes : Array String -> Element Styles vs msg
-viewNotes notes =
-    when (not (Array.isEmpty notes)) <|
-        column None
-            [ center, maxWidth <| px 500 ]
-            [ el Icon [ class "fa fa-sticky-note-o" ] empty
-            , column None [] <|
-                List.map
-                    (\x ->
-                        paragraph None [] [ el Dot [] <| text "• ", text x ]
-                    )
-                    (notes |> Array.toList)
-            ]
+viewNotes =
+    Array.toList
+        >> List.map
+            (\x ->
+                paragraph None [] [ el Dot [] <| text "• ", text x ]
+            )
+        >> column None [ center, maxWidth <| px 500 ]
 
 
-viewTechList : String -> ({ r | name : String } -> Msg) -> List { r | name : String } -> Element Styles vs Msg
-viewTechList title msg techs =
-    when (not (List.isEmpty techs)) <|
-        column None
-            []
-            [ el None [] <| text <| title ++ ":"
-            , column None [] <|
-                List.map
-                    (\t ->
-                        row None [] [ el Dot [] <| text "• ", el Link [ onClick <| msg t ] <| text t.name ]
-                    )
-                    techs
-            ]
+viewTechList : ({ r | name : String } -> Msg) -> List { r | name : String } -> Element Styles vs Msg
+viewTechList msg =
+    List.map
+        (\t ->
+            row None
+                []
+                [ el Dot [] <| text "• "
+                , el Link [ onClick <| msg t ] <| text t.name
+                ]
+        )
+        >> column None []
