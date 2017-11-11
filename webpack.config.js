@@ -26,8 +26,8 @@ module.exports = {
             loader: "elm-webpack-loader",
             options: {
               cwd: __dirname,
-              debug: true,
-              warn: true
+              debug: process.env.NODE_ENV === "development",
+              warn: process.env.NODE_ENV === "development"
             }
           }
         ]
