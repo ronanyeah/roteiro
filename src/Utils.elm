@@ -58,6 +58,11 @@ listToDict =
         Dict.empty
 
 
+filterEmpty : List String -> List String
+filterEmpty =
+    List.filter (String.isEmpty >> not)
+
+
 emptyForm : Form
 emptyForm =
     { name = ""

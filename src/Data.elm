@@ -3,6 +3,7 @@ module Data exposing (..)
 import Array
 import GraphQL.Request.Builder as GQLB
 import GraphQL.Request.Builder.Arg as Arg
+import Utils exposing (filterEmpty)
 import Types exposing (..)
 
 
@@ -26,7 +27,7 @@ createPosition { name, notes } =
     position
         |> GQLB.field "createPosition"
             [ ( "name", Arg.string name )
-            , ( "notes", Arg.list <| Array.toList <| Array.map Arg.string notes )
+            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
             ]
         |> GQLB.extract
         |> GQLB.mutationDocument
@@ -38,7 +39,7 @@ createTopic name notes =
     topic
         |> GQLB.field "createTopic"
             [ ( "name", Arg.string name )
-            , ( "notes", Arg.list <| List.map Arg.string notes )
+            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty notes )
             ]
         |> GQLB.extract
         |> GQLB.mutationDocument
@@ -52,8 +53,8 @@ createTransition name steps notes (Id startId) (Id endId) =
             [ ( "name", Arg.string name )
             , ( "startPositionId", Arg.string startId )
             , ( "endPositionId", Arg.string endId )
-            , ( "notes", Arg.list <| List.map Arg.string notes )
-            , ( "steps", Arg.list <| List.map Arg.string steps )
+            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty notes )
+            , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty steps )
             ]
         |> GQLB.extract
         |> GQLB.mutationDocument
@@ -66,8 +67,8 @@ createSubmission name steps notes (Id startId) =
         |> GQLB.field "createSubmission"
             [ ( "name", Arg.string name )
             , ( "positionId", Arg.string startId )
-            , ( "notes", Arg.list <| List.map Arg.string notes )
-            , ( "steps", Arg.list <| List.map Arg.string steps )
+            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty notes )
+            , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty steps )
             ]
         |> GQLB.extract
         |> GQLB.mutationDocument
@@ -88,8 +89,8 @@ updateTransition t =
                     , ( "name", Arg.string t.name )
                     , ( "startPositionId", Arg.string startId )
                     , ( "endPositionId", Arg.string endId )
-                    , ( "notes", Arg.list <| Array.toList <| Array.map Arg.string t.notes )
-                    , ( "steps", Arg.list <| Array.toList <| Array.map Arg.string t.steps )
+                    , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList t.notes )
+                    , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList t.steps )
                     ]
                 |> GQLB.extract
                 |> GQLB.mutationDocument
@@ -106,7 +107,7 @@ updatePosition p =
             |> GQLB.field "updatePosition"
                 [ ( "id", Arg.string id )
                 , ( "name", Arg.string p.name )
-                , ( "notes", Arg.list <| Array.toList <| Array.map Arg.string p.notes )
+                , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList p.notes )
                 ]
             |> GQLB.extract
             |> GQLB.mutationDocument
@@ -123,7 +124,7 @@ updateTopic { id, name, notes } =
             |> GQLB.field "updateTopic"
                 [ ( "id", Arg.string idStr )
                 , ( "name", Arg.string name )
-                , ( "notes", Arg.list <| Array.toList <| Array.map Arg.string notes )
+                , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
                 ]
             |> GQLB.extract
             |> GQLB.mutationDocument
