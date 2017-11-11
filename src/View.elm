@@ -4,7 +4,7 @@ import Array exposing (Array)
 import Dict
 import Editable
 import Element exposing (Element, column, el, empty, header, layout, modal, paragraph, row, text, when, whenJust)
-import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, px, spacing, verticalCenter, width)
+import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, percent, px, spacing, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
@@ -252,14 +252,56 @@ view model =
         picker =
             case model.choosingPosition of
                 Just msg ->
-                    modal Picker [ center, verticalCenter ] <|
-                        column None [] <|
-                            List.map
-                                (\p ->
-                                    el None [ onClick <| msg p ] <| text p.name
-                                )
-                            <|
-                                Dict.values model.positions
+                    case model.device of
+                        Mobile ->
+                            modal Picker [ width fill ] <|
+                                column None
+                                    [ center, width fill, spacing 30 ]
+                                    (Dict.values model.positions
+                                        |> List.map
+                                            (\p ->
+                                                el Choice [ onClick <| msg p ] <| text p.name
+                                            )
+                                        |> (::)
+                                            (el BigIcon
+                                                [ padding 10
+                                                , class "fa fa-question"
+                                                ]
+                                                empty
+                                            )
+                                        |> flip (++)
+                                            [ el PickerCancel
+                                                [ onClick CancelPicker
+                                                , class "fa fa-times"
+                                                ]
+                                                empty
+                                            , el Line [ width fill, height <| px 3 ] empty
+                                            ]
+                                    )
+
+                        Desktop ->
+                            modal ChooseBox [ center, verticalCenter ] <|
+                                column None [ center, width fill, spacing 30, padding 50 ] <|
+                                    (Dict.values model.positions
+                                        |> List.map
+                                            (\p ->
+                                                el Choice [ onClick <| msg p ] <| text p.name
+                                            )
+                                        |> (::)
+                                            (el BigIcon
+                                                [ padding 10
+                                                , class "fa fa-question"
+                                                ]
+                                                empty
+                                            )
+                                        |> flip (++)
+                                            [ el PickerCancel
+                                                [ onClick CancelPicker
+                                                , class "fa fa-times"
+                                                ]
+                                                empty
+                                            ]
+                                    )
 
                 Nothing ->
                     empty
@@ -306,8 +348,8 @@ pickEndPosition form =
 
 editRow : { r | name : String } -> ({ r | name : String } -> msg) -> Element Styles vs msg
 editRow r msg =
-    row None
-        [ spacing 50, verticalCenter ]
+    paragraph None
+        [ spacing 5, verticalCenter ]
         [ el Subtitle [] <| text r.name
         , el Icon
             [ padding 10

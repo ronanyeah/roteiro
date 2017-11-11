@@ -16,17 +16,25 @@ styling =
             [ Border.all 2
             , Border.solid
             ]
+        , style BigIcon
+            [ Color.text e
+            , Font.size 40
+            ]
         , style Button
             [ Border.rounded 15
             , pointer
             , Color.background b
             ]
         , style Body
-            [ Font.typeface
-                [ Font.font "Cuprum"
-                , Font.sansSerif
-                ]
+            [ font
             , Font.size 25
+            ]
+        , style Choice [ Font.size 30, font, pointer, hover [ Color.text e ] ]
+        , style ChooseBox
+            [ Border.rounded 15
+            , Border.all 3
+            , Color.border e
+            , Color.background c
             ]
         , style Dot [ Color.text e ]
         , style Icon
@@ -46,6 +54,12 @@ styling =
         , style Picker
             [ Color.background c
             ]
+        , style PickerCancel
+            [ Color.text e
+            , Font.size 40
+            , pointer
+            , hover [ Color.text a ]
+            ]
         , style Subtitle
             [ Font.size 35
             , Color.text e
@@ -58,6 +72,14 @@ styling =
 pointer : Property class variation
 pointer =
     Style.cursor "pointer"
+
+
+font : Property class variation
+font =
+    Font.typeface
+        [ Font.font "Cuprum"
+        , Font.sansSerif
+        ]
 
 
 a : Color

@@ -9,6 +9,7 @@ import Window
 
 type Msg
     = Cancel
+    | CancelPicker
     | CbData (Result GQLH.Error AllData)
     | CbPosition (Result GQLH.Error Position)
     | CbSubmission (Result GQLH.Error Submission)
@@ -46,8 +47,11 @@ type View
 
 
 type Styles
-    = Body
+    = BigIcon
+    | Body
     | Button
+    | Choice
+    | ChooseBox
     | Dot
     | Header
     | Icon
@@ -55,6 +59,7 @@ type Styles
     | Link
     | None
     | Picker
+    | PickerCancel
     | SetBox
     | Subtitle
     | Title

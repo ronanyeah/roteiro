@@ -52,6 +52,9 @@ update msg model =
                 ViewTransition t ->
                     ( { model | view = ViewTransition <| Editable.cancel t }, Cmd.none )
 
+        CancelPicker ->
+            ( { model | choosingPosition = Nothing }, Cmd.none )
+
         CbData res ->
             case res of
                 Ok { transitions, positions, submissions, topics } ->
