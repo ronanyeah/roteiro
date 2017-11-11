@@ -4,6 +4,7 @@ import Array exposing (Array)
 import Dict exposing (Dict)
 import Editable exposing (Editable)
 import GraphQL.Client.Http as GQLH
+import Window
 
 
 type Msg
@@ -29,6 +30,7 @@ type Msg
     | SelectSubmission Submission
     | SelectTopics
     | SelectTransition Transition
+    | WindowSize Window.Size
 
 
 type View
@@ -71,7 +73,13 @@ type alias Model =
     , topics : Dict String Topic
     , url : String
     , choosingPosition : Maybe (Position -> Msg)
+    , device : Device
     }
+
+
+type Device
+    = Desktop
+    | Mobile
 
 
 type alias Topic =

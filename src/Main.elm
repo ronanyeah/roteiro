@@ -8,6 +8,7 @@ import Task
 import Types exposing (..)
 import Update exposing (update)
 import View exposing (view)
+import Window
 
 
 main : Program String Model Msg
@@ -29,6 +30,10 @@ init url =
       , topics = Dict.empty
       , url = url
       , choosingPosition = Nothing
+      , device = Desktop
       }
-    , Task.attempt CbData <| sendQuery url fetchData
+    , Cmd.batch
+        [ Task.perform WindowSize Window.size
+        , Task.attempt CbData <| sendQuery url fetchData
+        ]
     )

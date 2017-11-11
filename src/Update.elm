@@ -3,6 +3,7 @@ module Update exposing (..)
 import Array
 import Editable
 import Data exposing (createTopic, createPosition, createSubmission, updatePosition, createTransition, updateTopic, updateTransition)
+import Element
 import GraphQL.Client.Http as GQLH
 import Task
 import Types exposing (..)
@@ -178,7 +179,6 @@ update msg model =
                 ViewPosition editP ->
                     ( { model
                         | view = ViewPosition <| Editable.map (always p) <| Editable.edit editP
-                        , choosingPosition = Nothing
                       }
                     , Cmd.none
                     )
@@ -189,7 +189,12 @@ update msg model =
         EditSubmission s ->
             case model.view of
                 ViewSubmission editS ->
-                    ( { model | view = ViewSubmission <| Editable.map (always s) <| Editable.edit editS }, Cmd.none )
+                    ( { model
+                        | view = ViewSubmission <| Editable.map (always s) <| Editable.edit editS
+                        , choosingPosition = Nothing
+                      }
+                    , Cmd.none
+                    )
 
                 _ ->
                     Debug.crash "EditSubmission"
@@ -197,7 +202,12 @@ update msg model =
         EditTransition t ->
             case model.view of
                 ViewTransition editT ->
-                    ( { model | view = ViewTransition <| Editable.map (always t) <| Editable.edit editT }, Cmd.none )
+                    ( { model
+                        | view = ViewTransition <| Editable.map (always t) <| Editable.edit editT
+                        , choosingPosition = Nothing
+                      }
+                    , Cmd.none
+                    )
 
                 _ ->
                     Debug.crash "EditTransition"
@@ -208,16 +218,16 @@ update msg model =
         FormUpdate form ->
             case model.view of
                 ViewCreatePosition _ ->
-                    ( { model | view = ViewCreatePosition form }, Cmd.none )
+                    ( { model | view = ViewCreatePosition form, choosingPosition = Nothing }, Cmd.none )
 
                 ViewCreateSubmission _ ->
-                    ( { model | view = ViewCreateSubmission form }, Cmd.none )
+                    ( { model | view = ViewCreateSubmission form, choosingPosition = Nothing }, Cmd.none )
 
                 ViewCreateTopic _ ->
-                    ( { model | view = ViewCreateTopic form }, Cmd.none )
+                    ( { model | view = ViewCreateTopic form, choosingPosition = Nothing }, Cmd.none )
 
                 ViewCreateTransition _ ->
-                    ( { model | view = ViewCreateTransition form }, Cmd.none )
+                    ( { model | view = ViewCreateTransition form, choosingPosition = Nothing }, Cmd.none )
 
                 _ ->
                     Debug.crash "FormUpdate"
@@ -297,3 +307,13 @@ update msg model =
 
         SelectTransition t ->
             ( { model | view = ViewTransition (Editable.ReadOnly t) }, Cmd.none )
+
+        WindowSize size ->
+            let
+                device =
+                    if Element.classifyDevice size |> .phone then
+                        Mobile
+                    else
+                        Desktop
+            in
+                ( { model | device = device }, Cmd.none )
