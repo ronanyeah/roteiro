@@ -80,20 +80,20 @@ createSubmission name steps notes (Id startId) =
 
 updateTransition : Transition -> GQLB.Request GQLB.Mutation Transition
 updateTransition t =
-    let
-        (Id id) =
-            t.id
-    in
-        transition
-            |> GQLB.field "updateTransition"
-                [ ( "id", Arg.string id )
-                , ( "name", Arg.string t.name )
-                , ( "notes", Arg.list <| Array.toList <| Array.map Arg.string t.notes )
-                , ( "steps", Arg.list <| Array.toList <| Array.map Arg.string t.steps )
-                ]
-            |> GQLB.extract
-            |> GQLB.mutationDocument
-            |> GQLB.request ()
+    case ( t.id, t.startPosition, t.endPosition ) of
+        ( Id id, Id startId, Id endId ) ->
+            transition
+                |> GQLB.field "updateTransition"
+                    [ ( "id", Arg.string id )
+                    , ( "name", Arg.string t.name )
+                    , ( "startPositionId", Arg.string startId )
+                    , ( "endPositionId", Arg.string endId )
+                    , ( "notes", Arg.list <| Array.toList <| Array.map Arg.string t.notes )
+                    , ( "steps", Arg.list <| Array.toList <| Array.map Arg.string t.steps )
+                    ]
+                |> GQLB.extract
+                |> GQLB.mutationDocument
+                |> GQLB.request ()
 
 
 updatePosition : Position -> GQLB.Request GQLB.Mutation Position
