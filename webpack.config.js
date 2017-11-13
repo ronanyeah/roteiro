@@ -36,7 +36,7 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      GRAPHQL_ENDPOINT: JSON.stringify(process.env.GRAPHQL_ENDPOINT)
+      GRAPHQL_ENDPOINT: `"${process.env.GRAPHQL_ENDPOINT}"`
     }),
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
