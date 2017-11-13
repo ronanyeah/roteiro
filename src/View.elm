@@ -3,14 +3,22 @@ module View exposing (..)
 import Array exposing (Array)
 import Dict
 import Editable
-import Element exposing (Element, column, el, empty, header, layout, modal, paragraph, row, text, when, whenJust)
+import Element exposing (Element, column, el, empty, header, layout, modal, newTab, paragraph, row, text, when, whenJust)
 import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, percent, px, spacing, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
+import Regex
 import Styling exposing (styling)
 import Types exposing (..)
 import Utils exposing (get, unwrap, unwrap2)
+
+
+isLink : String -> Bool
+isLink =
+    Regex.contains <|
+        Regex.regex
+            "^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"
 
 
 view : Model -> Html Msg
@@ -519,7 +527,11 @@ viewNotes =
     Array.toList
         >> List.map
             (\x ->
-                paragraph None [] [ el Dot [] <| text "• ", text x ]
+                if isLink x then
+                    newTab x <|
+                        paragraph None [] [ el Dot [] <| text "• ", text <| (++) "LINK: " <| domain x ]
+                else
+                    paragraph None [] [ el Dot [] <| text "• ", text x ]
             )
         >> column None [ center, maxWidth <| px 500 ]
 
@@ -539,3 +551,16 @@ viewTechList msg xs =
                         ]
                 )
             |> column None []
+
+
+domain : String -> String
+domain s =
+    Regex.find (Regex.AtMost 10)
+        (Regex.regex
+            "(?:[-a-zA-Z0-9@:%_\\+~.#=]{2,256}\\.)?([-a-zA-Z0-9@:%_\\+~#=]*)\\.[a-z]{2,6}\\b(?:[-a-zA-Z0-9@:%_\\+.~#?&\\/\\/=]*)"
+        )
+        s
+        |> List.head
+        |> Maybe.andThen (.submatches >> List.head)
+        |> Maybe.andThen identity
+        |> Maybe.withDefault s
