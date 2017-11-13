@@ -1,4 +1,5 @@
 const webpack = require("webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { resolve } = require("path");
 
@@ -40,6 +41,9 @@ module.exports = {
     }),
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
+    new CopyWebpackPlugin([
+      { from: "node_modules/font-awesome", to: "font-awesome" }
+    ]),
     new HtmlWebpackPlugin({
       template: "./src/index.html"
     })
