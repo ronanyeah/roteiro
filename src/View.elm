@@ -83,7 +83,6 @@ view model =
 
                 ViewCreatePosition form ->
                     [ nameEdit form FormUpdate
-                    , stepsEditor form FormUpdate
                     , notesEditor form FormUpdate
                     , saveCancel
                     ]
@@ -259,7 +258,7 @@ view model =
                                             , viewNotes notes
                                             ]
                             )
-                        |> (::) (plus CreateTopic)
+                        |> flip (++) [ plus CreateTopic ]
 
         roteiro =
             header None [] <| el Header [ center, onClick Reset ] <| text "ROTEIRO"
