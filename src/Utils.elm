@@ -74,6 +74,7 @@ emptyModel =
     , token = ""
     , choosingPosition = Nothing
     , device = Desktop
+    , tokenForm = Nothing
     }
 
 

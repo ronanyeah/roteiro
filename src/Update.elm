@@ -4,6 +4,7 @@ import Array
 import Editable
 import Data exposing (createTopic, createPosition, createSubmission, createTransition, mutate, updatePosition, updateTopic, updateTransition)
 import Element
+import Ports
 import Router exposing (router)
 import Task
 import Types exposing (..)
@@ -217,6 +218,17 @@ update msg model =
 
         EditTopic t ->
             ( { model | view = ViewTopics <| Just t }, Cmd.none )
+
+        TokenEdit mT ->
+            case mT of
+                Nothing ->
+                    ( { model | tokenForm = mT }, Cmd.none )
+
+                Just "" ->
+                    ( { model | tokenForm = mT }, Cmd.none )
+
+                Just a ->
+                    ( { model | tokenForm = Nothing }, Ports.saveToken a )
 
         FormUpdate form ->
             case model.view of

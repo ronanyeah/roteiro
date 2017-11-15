@@ -27,6 +27,7 @@ type Msg
     | FormUpdate Form
     | Save
     | SetRoute Route
+    | TokenEdit (Maybe String)
     | WindowSize Window.Size
 
 
@@ -78,6 +79,7 @@ type alias Model =
     , device : Device
     , url : String
     , token : String
+    , tokenForm : Maybe String
     }
 
 

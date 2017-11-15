@@ -4,7 +4,7 @@ import Array exposing (Array)
 import Dict
 import Editable
 import Element exposing (Element, column, el, empty, header, layout, link, modal, newTab, paragraph, row, text, when, whenJust)
-import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, percent, px, spacing, verticalCenter, width)
+import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, percent, px, spacing, spread, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
@@ -262,7 +262,44 @@ view model =
                         |> flip (++) [ plus CreateTopic ]
 
         roteiro =
-            header None [] <| link "/#/ps" <| el Header [ center ] <| text "ROTEIRO"
+            row None
+                [ center, spacing 10, verticalCenter ]
+                [ link "/#/ps" <| el Header [] <| text "ROTEIRO"
+                , el Icon
+                    [ padding 10
+                    , class "fa fa-lock"
+                    , onClick <| TokenEdit <| Just ""
+                    ]
+                    empty
+                ]
+
+        enterToken =
+            whenJust model.tokenForm
+                (\str ->
+                    modal ChooseBox [ center, verticalCenter, padding 10 ] <|
+                        column None
+                            [ center ]
+                            [ Input.text
+                                None
+                                [ maxWidth <| px 300 ]
+                                { onChange = Just >> TokenEdit
+                                , value = str
+                                , label =
+                                    Input.labelAbove <|
+                                        el PickerCancel
+                                            [ class "fa fa-question"
+                                            , center
+                                            ]
+                                            empty
+                                , options = []
+                                }
+                            , el PickerCancel
+                                [ onClick <| TokenEdit Nothing
+                                , class "fa fa-times"
+                                ]
+                                empty
+                            ]
+                )
 
         picker =
             case model.choosingPosition of
@@ -337,7 +374,7 @@ view model =
                     , spacing 30
                     , padding 30
                     ]
-                    (picker :: roteiro :: content)
+                    (enterToken :: picker :: roteiro :: content)
             ]
 
 
