@@ -5,6 +5,7 @@ import Editable
 import Data exposing (createTopic, createPosition, createSubmission, updatePosition, createTransition, updateTopic, updateTransition)
 import Element
 import GraphQL.Client.Http as GQLH
+import Router exposing (router)
 import Task
 import Types exposing (..)
 import Utils exposing (emptyForm, listToDict, log, set, singleton)
@@ -235,8 +236,8 @@ update msg model =
                 _ ->
                     Debug.crash "FormUpdate"
 
-        Reset ->
-            ( { model | view = ViewAll }, Cmd.none )
+        SetRoute route ->
+            router model route
 
         Save ->
             case model.view of
@@ -298,18 +299,6 @@ update msg model =
 
                 _ ->
                     Debug.crash "Save"
-
-        SelectPosition p ->
-            ( { model | view = ViewPosition <| Editable.ReadOnly p }, Cmd.none )
-
-        SelectSubmission s ->
-            ( { model | view = ViewSubmission <| Editable.ReadOnly s }, Cmd.none )
-
-        SelectTopics ->
-            ( { model | view = ViewTopics Nothing }, Cmd.none )
-
-        SelectTransition t ->
-            ( { model | view = ViewTransition (Editable.ReadOnly t) }, Cmd.none )
 
         WindowSize size ->
             let

@@ -25,12 +25,8 @@ type Msg
     | EditSubmission Submission
     | EditTransition Transition
     | FormUpdate Form
-    | Reset
     | Save
-    | SelectPosition Position
-    | SelectSubmission Submission
-    | SelectTopics
-    | SelectTransition Transition
+    | SetRoute Route
     | WindowSize Window.Size
 
 
@@ -86,6 +82,15 @@ type alias Model =
 type Device
     = Desktop
     | Mobile
+
+
+type Route
+    = Ps
+    | P Id
+    | Ts
+    | S Id
+    | T Id
+    | NotFoundRoute
 
 
 type alias Topic =

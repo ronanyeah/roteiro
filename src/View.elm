@@ -3,7 +3,7 @@ module View exposing (..)
 import Array exposing (Array)
 import Dict
 import Editable
-import Element exposing (Element, column, el, empty, header, layout, modal, newTab, paragraph, row, text, when, whenJust)
+import Element exposing (Element, column, el, empty, header, layout, link, modal, newTab, paragraph, row, text, when, whenJust)
 import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, percent, px, spacing, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
@@ -38,23 +38,23 @@ view model =
                             xs
                                 |> List.map
                                     (\p ->
-                                        el Choice
-                                            [ onClick <| SelectPosition p
-                                            ]
-                                        <|
-                                            text p.name
+                                        case p.id of
+                                            Id id ->
+                                                link ("/#/ps/" ++ id) <|
+                                                    el Choice [] <|
+                                                        text p.name
                                     )
                                 |> flip (++)
                                     [ plus CreatePosition
                                     , el Line [ width <| px 100, height <| px 2 ] empty
                                     ]
                     )
-                        ++ [ el Topics
-                                [ padding 10
-                                , onClick <| SelectTopics
-                                , class "fa fa-book"
-                                ]
-                                empty
+                        ++ [ link "/#/ts" <|
+                                el Topics
+                                    [ padding 10
+                                    , class "fa fa-book"
+                                    ]
+                                    empty
                            ]
 
                 ViewCreateTopic form ->
@@ -114,14 +114,14 @@ view model =
                                     [ class "fa fa-long-arrow-right"
                                     ]
                                     empty
-                                , viewTechList SelectTransition transitions
+                                , viewTechList "t" transitions
                                 , plus <| CreateTransition p
                                 , el Line [ width <| px 100, height <| px 2 ] empty
                                 , el MattIcon
                                     [ class "fa fa-bolt"
                                     ]
                                     empty
-                                , viewTechList SelectSubmission submissions
+                                , viewTechList "s" submissions
                                 , plus <| CreateSubmission p
                                 ]
 
@@ -138,7 +138,7 @@ view model =
                                                 [ class "fa fa-bolt"
                                                 ]
                                                 empty
-                                            , el Link [ onClick <| SelectPosition p ] <| text p.name
+                                            , link (p.id |> (\(Id id) -> id) |> (++) "/#/ps/") <| el Link [] <| text p.name
                                             ]
                                         , viewSteps steps
                                         , viewNotes notes
@@ -215,13 +215,14 @@ view model =
                                     [ editRow t EditTransition
                                     , row None
                                         [ verticalCenter, spacing 10 ]
-                                        [ el Link [ onClick <| SelectPosition start ] <| text start.name
+                                        [ link (start.id |> (\(Id id) -> id) |> (++) "/#/ps/") <| el Link [] <| text start.name
                                         , el MattIcon
                                             [ class "fa fa-long-arrow-right"
                                             ]
                                             empty
-                                        , el Link [ onClick <| SelectPosition end ] <|
-                                            text end.name
+                                        , link (end.id |> (\(Id id) -> id) |> (++) "/#/ps/") <|
+                                            el Link [] <|
+                                                text end.name
                                         ]
                                     , viewSteps steps
                                     , viewNotes notes
@@ -261,7 +262,7 @@ view model =
                         |> flip (++) [ plus CreateTopic ]
 
         roteiro =
-            header None [] <| el Header [ center, onClick Reset ] <| text "ROTEIRO"
+            header None [] <| link "/#/ps" <| el Header [ center ] <| text "ROTEIRO"
 
         picker =
             case model.choosingPosition of
@@ -535,19 +536,23 @@ viewNotes =
         >> column None [ center, maxWidth <| px 500 ]
 
 
-viewTechList : ({ r | name : String } -> Msg) -> List { r | name : String } -> Element Styles vs Msg
-viewTechList msg xs =
+viewTechList : String -> List { r | name : String, id : Id } -> Element Styles vs Msg
+viewTechList x xs =
     if List.isEmpty xs then
         el None [] <| text "None!"
     else
         xs
             |> List.map
                 (\t ->
-                    row None
-                        []
-                        [ el Dot [] <| text "• "
-                        , el Link [ onClick <| msg t ] <| text t.name
-                        ]
+                    case t.id of
+                        Id id ->
+                            row None
+                                []
+                                [ el Dot [] <| text "• "
+                                , link ("/#/" ++ x ++ "/" ++ id) <|
+                                    el Link [] <|
+                                        text t.name
+                                ]
                 )
             |> column None []
 
