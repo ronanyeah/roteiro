@@ -1,19 +1,19 @@
 module Main exposing (main)
 
-import Data exposing (fetchData)
+import Data exposing (fetchData, query)
 import Dict
-import GraphQL.Client.Http exposing (sendQuery)
 import Html
 import Navigation exposing (Location)
 import Router exposing (parseLocation, router)
 import Task
 import Types exposing (..)
+import Utils exposing (emptyModel)
 import Update exposing (update)
 import View exposing (view)
 import Window
 
 
-main : Program String Model Msg
+main : Program ( String, String ) Model Msg
 main =
     Navigation.programWithFlags (parseLocation >> SetRoute)
         { init = init
@@ -23,27 +23,18 @@ main =
         }
 
 
-init : String -> Location -> ( Model, Cmd Msg )
-init url location =
+init : ( String, String ) -> Location -> ( Model, Cmd Msg )
+init ( url, token ) location =
     let
         ( model, cmd ) =
             location
                 |> parseLocation
-                |> router
-                    { view = ViewAll
-                    , positions = Dict.empty
-                    , transitions = Dict.empty
-                    , submissions = Dict.empty
-                    , topics = Dict.empty
-                    , url = url
-                    , choosingPosition = Nothing
-                    , device = Desktop
-                    }
+                |> router { emptyModel | url = url, token = token }
     in
         ( model
         , Cmd.batch
             [ Task.perform WindowSize Window.size
-            , Task.attempt CbData <| sendQuery url fetchData
+            , Task.attempt CbData <| query url token fetchData
             , cmd
             ]
         )

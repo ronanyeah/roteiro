@@ -76,6 +76,8 @@ type alias Model =
     , url : String
     , choosingPosition : Maybe (Position -> Msg)
     , device : Device
+    , url : String
+    , token : String
     }
 
 

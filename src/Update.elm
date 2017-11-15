@@ -2,9 +2,8 @@ module Update exposing (..)
 
 import Array
 import Editable
-import Data exposing (createTopic, createPosition, createSubmission, updatePosition, createTransition, updateTopic, updateTransition)
+import Data exposing (createTopic, createPosition, createSubmission, createTransition, mutate, updatePosition, updateTopic, updateTransition)
 import Element
-import GraphQL.Client.Http as GQLH
 import Router exposing (router)
 import Task
 import Types exposing (..)
@@ -244,7 +243,7 @@ update msg model =
                 ViewPosition p ->
                     if Editable.isDirty p then
                         ( model
-                        , Task.attempt CbPosition (GQLH.sendMutation model.url (updatePosition (Editable.value p)))
+                        , Task.attempt CbPosition (mutate model.url model.token (updatePosition (Editable.value p)))
                         )
                     else
                         ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
@@ -252,7 +251,7 @@ update msg model =
                 ViewTransition t ->
                     if Editable.isDirty t then
                         ( model
-                        , Task.attempt CbTransition (GQLH.sendMutation model.url (updateTransition (Editable.value t)))
+                        , Task.attempt CbTransition (mutate model.url model.token (updateTransition (Editable.value t)))
                         )
                     else
                         ( { model | view = ViewTransition <| Editable.cancel t }, Cmd.none )
@@ -263,7 +262,7 @@ update msg model =
                             let
                                 request =
                                     createTransition name (Array.toList steps) (Array.toList notes) start.id end.id
-                                        |> GQLH.sendMutation model.url
+                                        |> mutate model.url model.token
                             in
                                 ( model, Task.attempt CbTransition request )
 
@@ -276,7 +275,7 @@ update msg model =
                             let
                                 request =
                                     createSubmission name (Array.toList steps) (Array.toList notes) id
-                                        |> GQLH.sendMutation model.url
+                                        |> mutate model.url model.token
                             in
                                 ( model, Task.attempt CbSubmission request )
 
@@ -284,18 +283,18 @@ update msg model =
                             ( model, log "missing position" )
 
                 ViewCreatePosition form ->
-                    ( model, Task.attempt CbPosition <| GQLH.sendMutation model.url <| createPosition form )
+                    ( model, Task.attempt CbPosition <| mutate model.url model.token <| createPosition form )
 
                 ViewCreateTopic { name, notes } ->
                     let
                         request =
                             createTopic name (Array.toList notes)
-                                |> GQLH.sendMutation model.url
+                                |> mutate model.url model.token
                     in
                         ( model, Task.attempt CbTopic request )
 
                 ViewTopics (Just topic) ->
-                    ( model, Task.attempt CbTopic (GQLH.sendMutation model.url (updateTopic topic)) )
+                    ( model, Task.attempt CbTopic (mutate model.url model.token (updateTopic topic)) )
 
                 _ ->
                     Debug.crash "Save"

@@ -2,30 +2,64 @@ types: ./types.graphql
 functions: {}
 permissions:
 - operation: File.read
+  authenticated: true
 - operation: File.create
+  authenticated: true
 - operation: File.update
+  authenticated: true
 - operation: File.delete
+  authenticated: true
+
 - operation: Position.read
+  authenticated: false
 - operation: Position.create
+  authenticated: true
 - operation: Position.update
+  authenticated: true
 - operation: Position.delete
+  authenticated: true
+
 - operation: Submission.read
+  authenticated: false
 - operation: Submission.create
+  authenticated: true
 - operation: Submission.update
+  authenticated: true
 - operation: Submission.delete
+  authenticated: true
+
 - operation: Topic.read
+  authenticated: false
 - operation: Topic.create
+  authenticated: true
 - operation: Topic.update
+  authenticated: true
 - operation: Topic.delete
+  authenticated: true
+
 - operation: Transition.read
+  authenticated: false
 - operation: Transition.create
+  authenticated: true
 - operation: Transition.update
+  authenticated: true
 - operation: Transition.delete
+  authenticated: true
+
 - operation: User.read
+  authenticated: true
 - operation: User.create
+  authenticated: true
 - operation: User.update
+  authenticated: true
 - operation: User.delete
+  authenticated: true
+
 - operation: PositionHasSubmissions.*
+  authenticated: true
 - operation: PositionHasTransitionsFrom.*
+  authenticated: true
 - operation: PositionHasTransitionsTo.*
-rootTokens: []
+  authenticated: true
+
+rootTokens: [ronan]

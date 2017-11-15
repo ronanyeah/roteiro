@@ -2,7 +2,7 @@ module Utils exposing (..)
 
 import Array exposing (Array)
 import Dict exposing (Dict)
-import Types exposing (Id(..), Form)
+import Types exposing (Id(..), Device(Desktop), Form, Model, View(..))
 
 
 singleton : a -> Array a
@@ -61,6 +61,20 @@ listToDict =
 filterEmpty : List String -> List String
 filterEmpty =
     List.filter (String.isEmpty >> not)
+
+
+emptyModel : Model
+emptyModel =
+    { view = ViewAll
+    , positions = Dict.empty
+    , transitions = Dict.empty
+    , submissions = Dict.empty
+    , topics = Dict.empty
+    , url = ""
+    , token = ""
+    , choosingPosition = Nothing
+    , device = Desktop
+    }
 
 
 emptyForm : Form
