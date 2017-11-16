@@ -42,7 +42,11 @@ module.exports = {
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new CopyWebpackPlugin([
-      { from: "node_modules/font-awesome", to: "font-awesome" }
+      "static",
+      {
+        from: "node_modules/font-awesome",
+        to: "font-awesome"
+      }
     ]),
     new HtmlWebpackPlugin({
       template: "./src/index.html"

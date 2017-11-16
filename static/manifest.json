@@ -1,0 +1,9 @@
+{
+  "short_name": "Roteiro",
+  "name": "Roteiro",
+  "icons": [],
+  "start_url": "/index.html",
+  "background_color": "#C63031",
+  "theme_color": "#C63031",
+  "display": "standalone"
+}
