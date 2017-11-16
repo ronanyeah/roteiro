@@ -14,6 +14,6 @@ var app = Elm.Main.embed(document.getElementById("roteiro"), [
   token
 ]);
 
-app.ports.saveToken.subscribe(str =>
-  localStorage.setItem("ROTEIRO_TOKEN", str)
-);
+app.ports.saveToken.subscribe(function(str) {
+  return localStorage.setItem("ROTEIRO_TOKEN", str);
+});
