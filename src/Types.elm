@@ -12,17 +12,25 @@ type Msg
     | CancelPicker
     | CbData (Result GQLH.Error AllData)
     | CbPosition (Result GQLH.Error Position)
+    | CbPositionDelete (Result GQLH.Error Id)
     | CbSubmission (Result GQLH.Error Submission)
+    | CbSubmissionDelete (Result GQLH.Error Submission)
     | CbTopic (Result GQLH.Error Topic)
+    | CbTopicDelete (Result GQLH.Error Id)
     | CbTransition (Result GQLH.Error Transition)
+    | CbTransitionDelete (Result GQLH.Error Transition)
     | ChoosePosition (Position -> Msg)
     | CreatePosition
     | CreateSubmission Position
     | CreateTopic
     | CreateTransition Position
+    | DeletePosition Id
+    | DeleteSubmission Id
+    | DeleteTopic Id
+    | DeleteTransition Id
     | EditPosition Position
-    | EditTopic Topic
     | EditSubmission Submission
+    | EditTopic Topic
     | EditTransition Transition
     | FormUpdate Form
     | Save

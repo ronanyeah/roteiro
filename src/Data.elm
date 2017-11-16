@@ -155,6 +155,60 @@ updateTopic { id, name, notes } =
 
 
 
+-- DELETE
+
+
+deletePosition : Id -> B.Request B.Mutation Id
+deletePosition (Id id) =
+    B.id
+        |> B.map Id
+        |> B.field "id" []
+        |> B.extract
+        |> B.field "deletePosition"
+            [ ( "id", Arg.string id )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
+
+
+deleteSubmission : Id -> B.Request B.Mutation Submission
+deleteSubmission (Id id) =
+    submission
+        |> B.field "deleteSubmission"
+            [ ( "id", Arg.string id )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
+
+
+deleteTopic : Id -> B.Request B.Mutation Id
+deleteTopic (Id id) =
+    B.id
+        |> B.map Id
+        |> B.field "id" []
+        |> B.extract
+        |> B.field "deleteTopic"
+            [ ( "id", Arg.string id )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
+
+
+deleteTransition : Id -> B.Request B.Mutation Transition
+deleteTransition (Id id) =
+    transition
+        |> B.field "deleteTransition"
+            [ ( "id", Arg.string id )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
+
+
+
 -- SELECTIONS
 
 

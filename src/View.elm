@@ -3,22 +3,27 @@ module View exposing (..)
 import Array exposing (Array)
 import Dict
 import Editable
-import Element exposing (Element, column, el, empty, header, layout, link, modal, newTab, paragraph, row, text, when, whenJust)
-import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, percent, px, spacing, spread, verticalCenter, width)
+import Element exposing (Element, column, el, empty, layout, link, modal, newTab, paragraph, row, text, when, whenJust)
+import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, px, spacing, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
-import Regex
+import Regex exposing (Regex)
 import Styling exposing (styling)
 import Types exposing (..)
 import Utils exposing (get, unwrap, unwrap2)
 
 
-isLink : String -> Bool
-isLink =
-    Regex.contains <|
-        Regex.regex
-            "^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"
+matchLink : Regex
+matchLink =
+    Regex.regex
+        "^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"
+
+
+matchDomain : Regex
+matchDomain =
+    Regex.regex
+        "(?:[-a-zA-Z0-9@:%_\\+~.#=]{2,256}\\.)?([-a-zA-Z0-9@:%_\\+~#=]*)\\.[a-z]{2,6}\\b(?:[-a-zA-Z0-9@:%_\\+.~#?&\\/\\/=]*)"
 
 
 view : Model -> Html Msg
@@ -90,7 +95,8 @@ view model =
                 ViewPosition data ->
                     case data of
                         Editable.Editable _ position ->
-                            [ nameEdit position EditPosition
+                            [ deleteButton <| DeletePosition position.id
+                            , nameEdit position EditPosition
                             , notesEditor position EditPosition
                             , saveCancel
                             ]
@@ -127,7 +133,36 @@ view model =
 
                 ViewSubmission data ->
                     case data of
-                        Editable.ReadOnly ({ name, steps, position, notes } as s) ->
+                        Editable.Editable _ submission ->
+                            [ deleteButton <| DeleteSubmission submission.id
+                            , nameEdit submission EditSubmission
+                            , model.positions
+                                |> Dict.get (submission.position |> (\(Id id) -> id))
+                                |> flip whenJust
+                                    (\p ->
+                                        row None
+                                            [ spacing 10 ]
+                                            [ el MattIcon
+                                                [ class "fa fa-flag-checkered"
+                                                ]
+                                                empty
+                                            , el None
+                                                [ onClick <|
+                                                    ChoosePosition
+                                                        (\{ id } ->
+                                                            EditSubmission { submission | position = id }
+                                                        )
+                                                ]
+                                              <|
+                                                text p.name
+                                            ]
+                                    )
+                            , notesEditor submission EditSubmission
+                            , stepsEditor submission EditSubmission
+                            , saveCancel
+                            ]
+
+                        Editable.ReadOnly ({ steps, position, notes } as s) ->
                             get position model.positions
                                 |> unwrap oopsView
                                     (\p ->
@@ -145,29 +180,6 @@ view model =
                                         ]
                                     )
 
-                        Editable.Editable _ submission ->
-                            [ nameEdit submission EditSubmission
-                            , model.positions
-                                |> Dict.get (submission.position |> (\(Id id) -> id))
-                                |> flip whenJust
-                                    (\p ->
-                                        el None
-                                            [ onClick <|
-                                                ChoosePosition
-                                                    (\{ id } ->
-                                                        EditSubmission { submission | position = id }
-                                                    )
-                                            ]
-                                        <|
-                                            text <|
-                                                "Start Position: "
-                                                    ++ p.name
-                                    )
-                            , notesEditor submission EditSubmission
-                            , stepsEditor submission EditSubmission
-                            , saveCancel
-                            ]
-
                 ViewTransition data ->
                     case data of
                         Editable.Editable _ transition ->
@@ -178,7 +190,8 @@ view model =
                                 (\start end ->
                                     row None
                                         [ verticalCenter, spacing 10 ]
-                                        [ el Link
+                                        [ deleteButton <| DeleteTransition transition.id
+                                        , el Link
                                             [ onClick <|
                                                 ChoosePosition
                                                     (\{ id } ->
@@ -207,7 +220,7 @@ view model =
                             , saveCancel
                             ]
 
-                        Editable.ReadOnly ({ name, steps, startPosition, endPosition, notes } as t) ->
+                        Editable.ReadOnly ({ steps, startPosition, endPosition, notes } as t) ->
                             unwrap2 oopsView
                                 (get startPosition model.positions)
                                 (get endPosition model.positions)
@@ -232,8 +245,8 @@ view model =
                 ViewTopics maybeEdit ->
                     model.topics
                         |> Dict.values
-                        |> List.indexedMap
-                            (\i ({ id, name, notes } as topic) ->
+                        |> List.map
+                            (\({ id, notes } as topic) ->
                                 case
                                     maybeEdit
                                         |> Maybe.andThen
@@ -247,7 +260,8 @@ view model =
                                     Just edit ->
                                         column None
                                             [ center, maxWidth <| px 500 ]
-                                            [ nameEdit edit EditTopic
+                                            [ deleteButton <| DeleteTopic id
+                                            , nameEdit edit EditTopic
                                             , notesEditor edit EditTopic
                                             , saveCancel
                                             ]
@@ -398,7 +412,7 @@ pickEndPosition form =
             el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | endPosition = Just p } ] <| text <| "End Position: " ++ endP.name
 
 
-editRow : { r | name : String } -> ({ r | name : String } -> msg) -> Element Styles vs msg
+editRow : { r | name : String, id : Id } -> ({ r | name : String, id : Id } -> msg) -> Element Styles vs msg
 editRow r msg =
     paragraph None
         [ spacing 5, verticalCenter ]
@@ -412,6 +426,16 @@ editRow r msg =
         ]
 
 
+deleteButton : Msg -> Element Styles vs Msg
+deleteButton msg =
+    el Icon
+        [ padding 10
+        , class "fa fa-trash"
+        , onClick msg
+        ]
+        empty
+
+
 nameEdit : { r | name : String } -> ({ r | name : String } -> Msg) -> Element Styles vs Msg
 nameEdit r msg =
     Input.text
@@ -419,7 +443,7 @@ nameEdit r msg =
         [ maxWidth <| px 300, center ]
         { onChange = \str -> msg { r | name = str }
         , value = r.name
-        , label = Input.labelAbove <| el Title [ center ] <| text "NAME"
+        , label = Input.labelAbove <| el Title [] <| text "NAME"
         , options = []
         }
 
@@ -564,7 +588,7 @@ viewNotes =
     Array.toList
         >> List.map
             (\x ->
-                if isLink x then
+                if Regex.contains matchLink x then
                     newTab x <|
                         paragraph None [] [ el Dot [] <| text "• ", text <| (++) "LINK: " <| domain x ]
                 else
@@ -596,11 +620,7 @@ viewTechList x xs =
 
 domain : String -> String
 domain s =
-    Regex.find (Regex.AtMost 10)
-        (Regex.regex
-            "(?:[-a-zA-Z0-9@:%_\\+~.#=]{2,256}\\.)?([-a-zA-Z0-9@:%_\\+~#=]*)\\.[a-z]{2,6}\\b(?:[-a-zA-Z0-9@:%_\\+.~#?&\\/\\/=]*)"
-        )
-        s
+    Regex.find (Regex.AtMost 10) matchDomain s
         |> List.head
         |> Maybe.andThen (.submatches >> List.head)
         |> Maybe.andThen identity

@@ -24,6 +24,11 @@ get (Id id) =
     Dict.get id
 
 
+del : Id -> Dict String { r | id : Id } -> Dict String { r | id : Id }
+del (Id id) =
+    Dict.remove id
+
+
 unwrap : b -> (a -> b) -> Maybe a -> b
 unwrap default fn =
     Maybe.map fn

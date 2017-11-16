@@ -8,7 +8,7 @@ import Ports
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (emptyForm, listToDict, log, set, singleton)
+import Utils exposing (del, emptyForm, get, listToDict, log, unwrap, set, singleton)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -84,12 +84,69 @@ update msg model =
                 Err err ->
                     ( model, log err )
 
+        CbPositionDelete res ->
+            case res of
+                Ok id ->
+                    ( { model
+                        | view = ViewAll
+                        , positions = del id model.positions
+                      }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( model, log err )
+
+        CbSubmission res ->
+            case res of
+                Ok data ->
+                    ( { model
+                        | view = ViewSubmission <| Editable.ReadOnly data
+                        , submissions = set data model.submissions
+                      }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( model, log err )
+
+        CbSubmissionDelete res ->
+            case res of
+                Ok data ->
+                    let
+                        view =
+                            get data.position model.positions
+                                |> unwrap ViewAll (Editable.ReadOnly >> ViewPosition)
+                    in
+                        ( { model
+                            | view = view
+                            , submissions = del data.id model.submissions
+                          }
+                        , Cmd.none
+                        )
+
+                Err err ->
+                    ( model, log err )
+
         CbTopic res ->
             case res of
                 Ok data ->
                     ( { model
                         | view = ViewTopics Nothing
                         , topics = set data model.topics
+                      }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( model, log err )
+
+        CbTopicDelete res ->
+            case res of
+                Ok id ->
+                    ( { model
+                        | view = ViewTopics Nothing
+                        , topics = del id model.topics
                       }
                     , Cmd.none
                     )
@@ -110,15 +167,20 @@ update msg model =
                 Err err ->
                     ( model, log err )
 
-        CbSubmission res ->
+        CbTransitionDelete res ->
             case res of
                 Ok data ->
-                    ( { model
-                        | view = ViewSubmission <| Editable.ReadOnly data
-                        , submissions = set data model.submissions
-                      }
-                    , Cmd.none
-                    )
+                    let
+                        view =
+                            get data.startPosition model.positions
+                                |> unwrap ViewAll (Editable.ReadOnly >> ViewPosition)
+                    in
+                        ( { model
+                            | view = view
+                            , transitions = del data.id model.transitions
+                          }
+                        , Cmd.none
+                        )
 
                 Err err ->
                     ( model, log err )
@@ -177,6 +239,38 @@ update msg model =
               }
             , Cmd.none
             )
+
+        DeletePosition id ->
+            let
+                request =
+                    Data.deletePosition id
+                        |> mutate model.url model.token
+            in
+                ( model, Task.attempt CbPositionDelete request )
+
+        DeleteSubmission id ->
+            let
+                request =
+                    Data.deleteSubmission id
+                        |> mutate model.url model.token
+            in
+                ( model, Task.attempt CbSubmissionDelete request )
+
+        DeleteTopic id ->
+            let
+                request =
+                    Data.deleteTopic id
+                        |> mutate model.url model.token
+            in
+                ( model, Task.attempt CbTopicDelete request )
+
+        DeleteTransition id ->
+            let
+                request =
+                    Data.deleteTransition id
+                        |> mutate model.url model.token
+            in
+                ( model, Task.attempt CbTransitionDelete request )
 
         EditPosition p ->
             case model.view of

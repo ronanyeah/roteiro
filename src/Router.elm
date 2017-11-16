@@ -47,8 +47,8 @@ router model route =
 
                 S id ->
                     case Utils.get id model.submissions of
-                        Just s ->
-                            ( ViewSubmission <| Editable.ReadOnly s, Cmd.none )
+                        Just sub ->
+                            ( ViewSubmission <| Editable.ReadOnly sub, Cmd.none )
 
                         Nothing ->
                             ( ViewAll, Navigation.newUrl "/#/ps" )

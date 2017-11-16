@@ -1,8 +1,6 @@
 module Main exposing (main)
 
 import Data exposing (fetchData, query)
-import Dict
-import Html
 import Navigation exposing (Location)
 import Router exposing (parseLocation, router)
 import Task
