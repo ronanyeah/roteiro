@@ -12,7 +12,7 @@ route =
     oneOf
         [ map Ps (s "ps")
         , map Ts (s "ts")
-        , map (Id >> P) (s "ps" </> string)
+        , map (Id >> P) (s "p" </> string)
         , map (Id >> T) (s "t" </> string)
         , map (Id >> S) (s "s" </> string)
         ]

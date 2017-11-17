@@ -45,7 +45,7 @@ view model =
                                     (\p ->
                                         case p.id of
                                             Id id ->
-                                                link ("/#/ps/" ++ id) <|
+                                                link ("/#/p/" ++ id) <|
                                                     el Choice [] <|
                                                         text p.name
                                     )
