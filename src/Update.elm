@@ -8,7 +8,7 @@ import Ports
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (del, emptyForm, get, listToDict, log, unwrap, set, singleton)
+import Utils exposing (del, emptyForm, get, listToDict, log, set, unwrap)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -191,11 +191,7 @@ update msg model =
         CreatePosition ->
             ( { model
                 | view =
-                    ViewCreatePosition
-                        { emptyForm
-                            | name = ""
-                            , notes = singleton ""
-                        }
+                    ViewCreatePosition emptyForm
               }
             , Cmd.none
             )
@@ -204,12 +200,7 @@ update msg model =
             ( { model
                 | view =
                     ViewCreateSubmission
-                        { emptyForm
-                            | name = ""
-                            , startPosition = Just p
-                            , steps = singleton ""
-                            , notes = Array.empty
-                        }
+                        { emptyForm | startPosition = Just p }
               }
             , Cmd.none
             )
@@ -217,11 +208,7 @@ update msg model =
         CreateTopic ->
             ( { model
                 | view =
-                    ViewCreateTopic
-                        { emptyForm
-                            | name = ""
-                            , notes = singleton ""
-                        }
+                    ViewCreateTopic emptyForm
               }
             , Cmd.none
             )
@@ -230,12 +217,7 @@ update msg model =
             ( { model
                 | view =
                     ViewCreateTransition
-                        { name = ""
-                        , startPosition = Just p
-                        , endPosition = Nothing
-                        , steps = singleton ""
-                        , notes = Array.empty
-                        }
+                        { emptyForm | startPosition = Just p }
               }
             , Cmd.none
             )
@@ -321,8 +303,10 @@ update msg model =
                 Just "" ->
                     ( { model | tokenForm = mT }, Cmd.none )
 
-                Just a ->
-                    ( { model | tokenForm = Nothing }, Ports.saveToken a )
+                Just t ->
+                    ( { model | tokenForm = Nothing, token = t }
+                    , Ports.saveToken t
+                    )
 
         FormUpdate form ->
             case model.view of
@@ -376,17 +360,16 @@ update msg model =
                             ( model, log "missing position" )
 
                 ViewCreateSubmission { name, steps, notes, startPosition } ->
-                    case startPosition of
-                        Just { id } ->
-                            let
-                                request =
-                                    createSubmission name (Array.toList steps) (Array.toList notes) id
-                                        |> mutate model.url model.token
-                            in
-                                ( model, Task.attempt CbSubmission request )
-
-                        _ ->
-                            ( model, log "missing position" )
+                    startPosition
+                        |> unwrap ( model, log "missing position" )
+                            (\{ id } ->
+                                let
+                                    request =
+                                        createSubmission name (Array.toList steps) (Array.toList notes) id
+                                            |> mutate model.url model.token
+                                in
+                                    ( model, Task.attempt CbSubmission request )
+                            )
 
                 ViewCreatePosition form ->
                     ( model, Task.attempt CbPosition <| mutate model.url model.token <| createPosition form )
@@ -408,7 +391,7 @@ update msg model =
         WindowSize size ->
             let
                 device =
-                    if Element.classifyDevice size |> .phone then
+                    if size |> Element.classifyDevice |> .phone then
                         Mobile
                     else
                         Desktop

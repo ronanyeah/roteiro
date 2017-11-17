@@ -5,11 +5,6 @@ import Dict exposing (Dict)
 import Types exposing (Id(..), Device(Desktop), Form, Model, View(..))
 
 
-singleton : a -> Array a
-singleton =
-    List.singleton >> Array.fromList
-
-
 set : { r | id : Id } -> Dict String { r | id : Id } -> Dict String { r | id : Id }
 set ({ id } as r) =
     let

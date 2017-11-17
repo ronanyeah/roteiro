@@ -300,8 +300,8 @@ view model =
                                 , value = str
                                 , label =
                                     Input.labelAbove <|
-                                        el PickerCancel
-                                            [ class "fa fa-question"
+                                        el BigIcon
+                                            [ class "fa fa-lock"
                                             , center
                                             ]
                                             empty
@@ -589,8 +589,19 @@ viewNotes =
         >> List.map
             (\x ->
                 if Regex.contains matchLink x then
-                    newTab x <|
-                        paragraph None [] [ el Dot [] <| text "• ", text <| (++) "LINK: " <| domain x ]
+                    paragraph None
+                        [ spacing 5 ]
+                        [ el Dot [] <| text "• "
+                        , newTab x <|
+                            row None
+                                [ spacing 5 ]
+                                [ el MattIcon
+                                    [ class "fa fa-globe"
+                                    ]
+                                    empty
+                                , text <| domain x
+                                ]
+                        ]
                 else
                     paragraph None [] [ el Dot [] <| text "• ", text x ]
             )
