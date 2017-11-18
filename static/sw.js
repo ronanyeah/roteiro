@@ -1,13 +1,17 @@
-const cacheName = "roteiro-cache";
+const cacheName = "roteiro-cache-0";
+
+const assets = [
+  "/",
+  "/index.html",
+  "/bundle.js",
+  "/manifest.json",
+  "map.png",
+  "map.svg",
+  "favicon.ico"
+];
 
 self.addEventListener("install", e =>
-  e.waitUntil(
-    caches
-      .open(cacheName)
-      .then(cache =>
-        cache.addAll(["/", "/index.html", "/bundle.js", "/manifest.json"])
-      )
-  )
+  e.waitUntil(caches.open(cacheName).then(cache => cache.addAll(assets)))
 );
 
 self.addEventListener(
@@ -29,5 +33,7 @@ self.addEventListener(
 );
 
 self.addEventListener("fetch", e =>
-  e.respondWith(fetch(e.request).catch(_err => caches.match(e.request)))
+  e.respondWith(
+    caches.match(e.request).then(response => response || fetch(e.request))
+  )
 );
