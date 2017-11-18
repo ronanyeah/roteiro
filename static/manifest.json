@@ -1,7 +1,18 @@
 {
   "short_name": "Roteiro",
   "name": "Roteiro",
-  "icons": [],
+  "icons": [
+    {
+      "src": "/map.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/map.png",
+      "type": "image/png",
+      "sizes": "144x144"
+    }
+  ],
   "start_url": "/index.html",
   "background_color": "#C63031",
   "theme_color": "#C63031",
