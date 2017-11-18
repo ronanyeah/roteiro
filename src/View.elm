@@ -32,35 +32,19 @@ view model =
         content =
             case model.view of
                 ViewAll ->
-                    (case
-                        model.positions
-                            |> Dict.values
-                     of
-                        [] ->
-                            []
-
-                        xs ->
-                            xs
-                                |> List.map
-                                    (\p ->
-                                        case p.id of
-                                            Id id ->
-                                                link ("/#/p/" ++ id) <|
-                                                    el Choice [] <|
-                                                        text p.name
-                                    )
-                                |> flip (++)
-                                    [ plus CreatePosition
-                                    , el Line [ width <| px 100, height <| px 2 ] empty
-                                    ]
-                    )
-                        ++ [ link "/#/ts" <|
-                                el Topics
-                                    [ padding 10
-                                    , class "fa fa-book"
-                                    ]
-                                    empty
-                           ]
+                    [ link "/#/ps" <|
+                        el Topics
+                            [ padding 10
+                            , class "fa fa-flag-checkered"
+                            ]
+                            empty
+                    , link "/#/ts" <|
+                        el Topics
+                            [ padding 10
+                            , class "fa fa-book"
+                            ]
+                            empty
+                    ]
 
                 ViewCreateTopic form ->
                     [ el Title [ center ] <| text "CREATE TOPIC"
@@ -143,6 +127,21 @@ view model =
                                 , viewTechList "s" submissions
                                 , plus <| CreateSubmission p
                                 ]
+
+                ViewPositions ->
+                    model.positions
+                        |> Dict.values
+                        |> List.map
+                            (\p ->
+                                case p.id of
+                                    Id id ->
+                                        link ("/#/p/" ++ id) <|
+                                            el Choice [] <|
+                                                text p.name
+                            )
+                        |> flip (++)
+                            [ plus CreatePosition
+                            ]
 
                 ViewSubmission data ->
                     case data of
@@ -257,42 +256,32 @@ view model =
                                     ]
                                 )
 
-                ViewTopics maybeEdit ->
+                ViewTopics ->
                     model.topics
                         |> Dict.values
                         |> List.map
-                            (\({ id, notes } as topic) ->
-                                case
-                                    maybeEdit
-                                        |> Maybe.andThen
-                                            (\e ->
-                                                if e.id == id then
-                                                    Just e
-                                                else
-                                                    Nothing
-                                            )
-                                of
-                                    Just edit ->
-                                        column None
-                                            [ center, maxWidth <| px 500 ]
-                                            [ nameEdit edit EditTopic
-                                            , notesEditor edit EditTopic
-                                            , buttons <| Just <| DeleteTopic id
-                                            ]
-
-                                    Nothing ->
-                                        column None
-                                            [ center, maxWidth <| px 500 ]
-                                            [ editRow topic EditTopic
-                                            , viewNotes notes
-                                            ]
+                            (\({ id, name } as topic) ->
+                                link (id |> (\(Id id) -> "/#/to/" ++ id)) <| el Subtitle [] <| text name
                             )
                         |> flip (++) [ plus CreateTopic ]
+
+                ViewTopic data ->
+                    case data of
+                        Editable.Editable _ t ->
+                            [ nameEdit t EditTopic
+                            , notesEditor t EditTopic
+                            , buttons <| Just <| DeleteTopic t.id
+                            ]
+
+                        Editable.ReadOnly t ->
+                            [ editRow t EditTopic
+                            , viewNotes t.notes
+                            ]
 
         roteiro =
             row None
                 [ center, spacing 10, verticalCenter ]
-                [ link "/#/ps" <| el Header [ vary Small <| model.view /= ViewAll ] <| text "ROTEIRO"
+                [ link "/#/" <| el Header [ vary Small <| model.view /= ViewAll ] <| text "ROTEIRO"
                 , when (model.view == ViewAll) <|
                     el Icon
                         [ padding 10

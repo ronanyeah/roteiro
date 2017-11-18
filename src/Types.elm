@@ -47,8 +47,10 @@ type View
     | ViewCreateTopic Form
     | ViewCreateTransition Form
     | ViewPosition (Editable Position)
+    | ViewPositions
     | ViewSubmission (Editable Submission)
-    | ViewTopics (Maybe Topic)
+    | ViewTopics
+    | ViewTopic (Editable Topic)
     | ViewTransition (Editable Transition)
 
 
@@ -109,7 +111,9 @@ type Route
     | Ts
     | S Id
     | T Id
-    | NotFoundRoute
+    | To Id
+    | Top
+    | NotFound
 
 
 type alias Topic =

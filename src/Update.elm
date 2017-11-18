@@ -39,16 +39,22 @@ update msg model =
                             ( model, Cmd.none )
 
                 ViewCreateTopic _ ->
-                    ( { model | view = ViewTopics Nothing }, Cmd.none )
+                    ( { model | view = ViewTopics }, Cmd.none )
 
                 ViewPosition p ->
                     ( { model | view = ViewPosition <| Editable.cancel p, confirm = Nothing }, Cmd.none )
 
+                ViewPositions ->
+                    ( model, Cmd.none )
+
                 ViewSubmission s ->
                     ( { model | view = ViewSubmission <| Editable.cancel s, confirm = Nothing }, Cmd.none )
 
-                ViewTopics _ ->
-                    ( { model | view = ViewTopics Nothing, confirm = Nothing }, Cmd.none )
+                ViewTopics ->
+                    ( model, Cmd.none )
+
+                ViewTopic t ->
+                    ( { model | view = ViewTopic <| Editable.cancel t, confirm = Nothing }, Cmd.none )
 
                 ViewTransition t ->
                     ( { model | view = ViewTransition <| Editable.cancel t, confirm = Nothing }, Cmd.none )
@@ -134,7 +140,7 @@ update msg model =
             case res of
                 Ok data ->
                     ( { model
-                        | view = ViewTopics Nothing
+                        | view = ViewTopic <| Editable.ReadOnly data
                         , topics = set data model.topics
                       }
                     , Cmd.none
@@ -147,7 +153,7 @@ update msg model =
             case res of
                 Ok id ->
                     ( { model
-                        | view = ViewTopics Nothing
+                        | view = ViewTopics
                         , topics = del id model.topics
                         , confirm = Nothing
                       }
@@ -300,7 +306,16 @@ update msg model =
                     Debug.crash "EditTransition"
 
         EditTopic t ->
-            ( { model | view = ViewTopics <| Just t }, Cmd.none )
+            case model.view of
+                ViewTopic editT ->
+                    ( { model
+                        | view = ViewTopic <| Editable.map (always t) <| Editable.edit editT
+                      }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    Debug.crash "EditTopic"
 
         TokenEdit mT ->
             case mT of
@@ -389,8 +404,13 @@ update msg model =
                     in
                         ( model, Task.attempt CbTopic request )
 
-                ViewTopics (Just topic) ->
-                    ( model, Task.attempt CbTopic (mutate model.url model.token (updateTopic topic)) )
+                ViewTopic t ->
+                    if Editable.isDirty t then
+                        ( model
+                        , Task.attempt CbTopic (mutate model.url model.token (updateTopic (Editable.value t)))
+                        )
+                    else
+                        ( { model | view = ViewTopic <| Editable.cancel t }, Cmd.none )
 
                 _ ->
                     Debug.crash "Save"
