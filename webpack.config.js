@@ -1,6 +1,5 @@
 const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { resolve } = require("path");
 
 if (!process.env.GRAPHQL_ENDPOINT) throw "Missing GraphQL endpoint!";
@@ -47,9 +46,6 @@ module.exports = {
         from: "node_modules/font-awesome",
         to: "font-awesome"
       }
-    ]),
-    new HtmlWebpackPlugin({
-      template: "./src/index.html"
-    })
+    ])
   ]
 };
