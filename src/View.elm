@@ -66,7 +66,7 @@ view model =
                     [ el Title [ center ] <| text "CREATE TOPIC"
                     , nameEdit form FormUpdate
                     , notesEditor form FormUpdate
-                    , saveCancel
+                    , buttons Nothing
                     ]
 
                 ViewCreateTransition form ->
@@ -75,7 +75,7 @@ view model =
                     , pickEndPosition form
                     , stepsEditor form FormUpdate
                     , notesEditor form FormUpdate
-                    , saveCancel
+                    , buttons Nothing
                     ]
 
                 ViewCreateSubmission form ->
@@ -83,22 +83,21 @@ view model =
                     , pickStartPosition form
                     , stepsEditor form FormUpdate
                     , notesEditor form FormUpdate
-                    , saveCancel
+                    , buttons Nothing
                     ]
 
                 ViewCreatePosition form ->
                     [ nameEdit form FormUpdate
                     , notesEditor form FormUpdate
-                    , saveCancel
+                    , buttons Nothing
                     ]
 
                 ViewPosition data ->
                     case data of
                         Editable.Editable _ position ->
-                            [ deleteButton <| DeletePosition position.id
-                            , nameEdit position EditPosition
+                            [ nameEdit position EditPosition
                             , notesEditor position EditPosition
-                            , saveCancel
+                            , buttons <| Just <| DeletePosition position.id
                             ]
 
                         Editable.ReadOnly ({ id, notes } as p) ->
@@ -134,8 +133,7 @@ view model =
                 ViewSubmission data ->
                     case data of
                         Editable.Editable _ submission ->
-                            [ deleteButton <| DeleteSubmission submission.id
-                            , nameEdit submission EditSubmission
+                            [ nameEdit submission EditSubmission
                             , model.positions
                                 |> Dict.get (submission.position |> (\(Id id) -> id))
                                 |> flip whenJust
@@ -159,7 +157,7 @@ view model =
                                     )
                             , notesEditor submission EditSubmission
                             , stepsEditor submission EditSubmission
-                            , saveCancel
+                            , buttons <| Just <| DeleteSubmission submission.id
                             ]
 
                         Editable.ReadOnly ({ steps, position, notes } as s) ->
@@ -190,8 +188,7 @@ view model =
                                 (\start end ->
                                     row None
                                         [ verticalCenter, spacing 10 ]
-                                        [ deleteButton <| DeleteTransition transition.id
-                                        , el Link
+                                        [ el Link
                                             [ onClick <|
                                                 ChoosePosition
                                                     (\{ id } ->
@@ -217,7 +214,7 @@ view model =
                                 )
                             , notesEditor transition EditTransition
                             , stepsEditor transition EditTransition
-                            , saveCancel
+                            , buttons <| Just <| DeleteTransition transition.id
                             ]
 
                         Editable.ReadOnly ({ steps, startPosition, endPosition, notes } as t) ->
@@ -260,10 +257,9 @@ view model =
                                     Just edit ->
                                         column None
                                             [ center, maxWidth <| px 500 ]
-                                            [ deleteButton <| DeleteTopic id
-                                            , nameEdit edit EditTopic
+                                            [ nameEdit edit EditTopic
                                             , notesEditor edit EditTopic
-                                            , saveCancel
+                                            , buttons <| Just <| DeleteTopic id
                                             ]
 
                                     Nothing ->
@@ -279,12 +275,13 @@ view model =
             row None
                 [ center, spacing 10, verticalCenter ]
                 [ link "/#/ps" <| el Header [] <| text "ROTEIRO"
-                , el Icon
-                    [ padding 10
-                    , class "fa fa-lock"
-                    , onClick <| TokenEdit <| Just ""
-                    ]
-                    empty
+                , when (model.view == ViewAll) <|
+                    el Icon
+                        [ padding 10
+                        , class "fa fa-lock"
+                        , onClick <| TokenEdit <| Just ""
+                        ]
+                        empty
                 ]
 
         enterToken =
@@ -294,7 +291,7 @@ view model =
                         column None
                             [ center ]
                             [ Input.text
-                                None
+                                Field
                                 [ maxWidth <| px 300 ]
                                 { onChange = Just >> TokenEdit
                                 , value = str
@@ -312,6 +309,33 @@ view model =
                                 , class "fa fa-times"
                                 ]
                                 empty
+                            ]
+                )
+
+        confirm =
+            whenJust model.confirm
+                (\msg ->
+                    modal ChooseBox [ center, verticalCenter, padding 10, spacing 20 ] <|
+                        column None
+                            [ center ]
+                            [ el BigIcon
+                                [ center
+                                , class "fa fa-question"
+                                ]
+                                empty
+                            , row None
+                                [ spacing 40 ]
+                                [ el PickerCancel
+                                    [ onClick msg
+                                    , class "fa fa-check"
+                                    ]
+                                    empty
+                                , el PickerCancel
+                                    [ onClick <| Confirm Nothing
+                                    , class "fa fa-times"
+                                    ]
+                                    empty
+                                ]
                             ]
                 )
 
@@ -388,7 +412,7 @@ view model =
                     , spacing 30
                     , padding 30
                     ]
-                    (enterToken :: picker :: roteiro :: content)
+                    (enterToken :: picker :: confirm :: roteiro :: content)
             ]
 
 
@@ -426,24 +450,14 @@ editRow r msg =
         ]
 
 
-deleteButton : Msg -> Element Styles vs Msg
-deleteButton msg =
-    el Icon
-        [ padding 10
-        , class "fa fa-trash"
-        , onClick msg
-        ]
-        empty
-
-
 nameEdit : { r | name : String } -> ({ r | name : String } -> Msg) -> Element Styles vs Msg
 nameEdit r msg =
     Input.text
-        None
+        Field
         [ maxWidth <| px 300, center ]
         { onChange = \str -> msg { r | name = str }
         , value = r.name
-        , label = Input.labelAbove <| el Title [] <| text "NAME"
+        , label = Input.hiddenLabel "name"
         , options = []
         }
 
@@ -468,8 +482,8 @@ minus msg =
         empty
 
 
-saveCancel : Element Styles vs Msg
-saveCancel =
+buttons : Maybe Msg -> Element Styles vs Msg
+buttons maybeDelete =
     row ChooseBox
         [ spacing 20 ]
         [ el Icon
@@ -484,6 +498,15 @@ saveCancel =
             , class "fa fa-times"
             ]
             empty
+        , whenJust maybeDelete
+            (\msg ->
+                el Icon
+                    [ padding 10
+                    , onClick <| Confirm <| Just msg
+                    , class "fa fa-trash"
+                    ]
+                    empty
+            )
         ]
 
 
@@ -497,7 +520,7 @@ stepsEditor form msg =
                     |> Array.indexedMap
                         (\i v ->
                             Input.multiline
-                                None
+                                Field
                                 []
                                 { onChange = \str -> msg { form | steps = Array.set i str form.steps }
                                 , value = v
@@ -534,7 +557,7 @@ notesEditor form msg =
                     |> Array.indexedMap
                         (\i v ->
                             Input.multiline
-                                None
+                                Field
                                 []
                                 { onChange = \str -> msg { form | notes = Array.set i str form.notes }
                                 , value = v

@@ -20,6 +20,7 @@ type Msg
     | CbTransition (Result GQLH.Error Transition)
     | CbTransitionDelete (Result GQLH.Error Transition)
     | ChoosePosition (Position -> Msg)
+    | Confirm (Maybe Msg)
     | CreatePosition
     | CreateSubmission Position
     | CreateTopic
@@ -58,6 +59,7 @@ type Styles
     | Choice
     | ChooseBox
     | Dot
+    | Field
     | Header
     | Icon
     | Line
@@ -88,6 +90,7 @@ type alias Model =
     , url : String
     , token : String
     , tokenForm : Maybe String
+    , confirm : Maybe Msg
     }
 
 

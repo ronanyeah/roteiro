@@ -1,6 +1,6 @@
 module Utils exposing (..)
 
-import Array exposing (Array)
+import Array
 import Dict exposing (Dict)
 import Types exposing (Id(..), Device(Desktop), Form, Model, View(..))
 
@@ -75,6 +75,7 @@ emptyModel =
     , choosingPosition = Nothing
     , device = Desktop
     , tokenForm = Nothing
+    , confirm = Nothing
     }
 
 

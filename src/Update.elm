@@ -19,9 +19,6 @@ update msg model =
                 ViewAll ->
                     ( model, Cmd.none )
 
-                ViewPosition p ->
-                    ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
-
                 ViewCreatePosition _ ->
                     ( { model | view = ViewAll }, Cmd.none )
 
@@ -44,14 +41,17 @@ update msg model =
                 ViewCreateTopic _ ->
                     ( { model | view = ViewTopics Nothing }, Cmd.none )
 
+                ViewPosition p ->
+                    ( { model | view = ViewPosition <| Editable.cancel p, confirm = Nothing }, Cmd.none )
+
                 ViewSubmission s ->
-                    ( { model | view = ViewSubmission <| Editable.cancel s }, Cmd.none )
+                    ( { model | view = ViewSubmission <| Editable.cancel s, confirm = Nothing }, Cmd.none )
 
                 ViewTopics _ ->
-                    ( { model | view = ViewTopics Nothing }, Cmd.none )
+                    ( { model | view = ViewTopics Nothing, confirm = Nothing }, Cmd.none )
 
                 ViewTransition t ->
-                    ( { model | view = ViewTransition <| Editable.cancel t }, Cmd.none )
+                    ( { model | view = ViewTransition <| Editable.cancel t, confirm = Nothing }, Cmd.none )
 
         CancelPicker ->
             ( { model | choosingPosition = Nothing }, Cmd.none )
@@ -90,6 +90,7 @@ update msg model =
                     ( { model
                         | view = ViewAll
                         , positions = del id model.positions
+                        , confirm = Nothing
                       }
                     , Cmd.none
                     )
@@ -121,6 +122,7 @@ update msg model =
                         ( { model
                             | view = view
                             , submissions = del data.id model.submissions
+                            , confirm = Nothing
                           }
                         , Cmd.none
                         )
@@ -147,6 +149,7 @@ update msg model =
                     ( { model
                         | view = ViewTopics Nothing
                         , topics = del id model.topics
+                        , confirm = Nothing
                       }
                     , Cmd.none
                     )
@@ -178,6 +181,7 @@ update msg model =
                         ( { model
                             | view = view
                             , transitions = del data.id model.transitions
+                            , confirm = Nothing
                           }
                         , Cmd.none
                         )
@@ -187,6 +191,9 @@ update msg model =
 
         ChoosePosition cb ->
             ( { model | choosingPosition = Just cb }, Cmd.none )
+
+        Confirm maybeM ->
+            ( { model | confirm = maybeM }, Cmd.none )
 
         CreatePosition ->
             ( { model

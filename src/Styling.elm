@@ -40,6 +40,10 @@ styling =
         , style MattIcon
             [ Color.text e
             ]
+        , style Field
+            [ Color.text e
+            , Color.background a
+            ]
         , style Icon
             [ Color.text e
             , Border.rounded 15
