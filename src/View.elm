@@ -4,13 +4,13 @@ import Array exposing (Array)
 import Dict
 import Editable
 import Element exposing (Element, column, el, empty, layout, link, modal, newTab, paragraph, row, text, when, whenJust)
-import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, px, spacing, verticalCenter, width)
+import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, px, spacing, vary, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
 import Regex exposing (Regex)
 import Styling exposing (styling)
-import Types exposing (..)
+import Types exposing (Device(..), Form, Id(..), Model, Msg(..), Styles(..), Variations(..), View(..))
 import Utils exposing (get, unwrap, unwrap2)
 
 
@@ -71,8 +71,15 @@ view model =
 
                 ViewCreateTransition form ->
                     [ nameEdit form FormUpdate
-                    , pickStartPosition form
-                    , pickEndPosition form
+                    , row None
+                        [ verticalCenter, spacing 10 ]
+                        [ pickStartPosition form
+                        , el MattIcon
+                            [ class "fa fa-long-arrow-right"
+                            ]
+                            empty
+                        , pickEndPosition form
+                        ]
                     , stepsEditor form FormUpdate
                     , notesEditor form FormUpdate
                     , buttons Nothing
@@ -80,7 +87,14 @@ view model =
 
                 ViewCreateSubmission form ->
                     [ nameEdit form FormUpdate
-                    , pickStartPosition form
+                    , row None
+                        [ spacing 10 ]
+                        [ el MattIcon
+                            [ class "fa fa-flag-checkered"
+                            ]
+                            empty
+                        , pickStartPosition form
+                        ]
                     , stepsEditor form FormUpdate
                     , notesEditor form FormUpdate
                     , buttons Nothing
@@ -168,10 +182,12 @@ view model =
                                         , row None
                                             [ spacing 10 ]
                                             [ el MattIcon
-                                                [ class "fa fa-bolt"
+                                                [ class "fa fa-flag-checkered"
                                                 ]
                                                 empty
-                                            , link (p.id |> (\(Id id) -> id) |> (++) "/#/ps/") <| el Link [] <| text p.name
+                                            , link (p.id |> (\(Id id) -> "/#/p/" ++ id)) <|
+                                                el Link [] <|
+                                                    text p.name
                                             ]
                                         , viewSteps steps
                                         , viewNotes notes
@@ -186,7 +202,7 @@ view model =
                                 (get transition.startPosition model.positions)
                                 (get transition.endPosition model.positions)
                                 (\start end ->
-                                    row None
+                                    paragraph None
                                         [ verticalCenter, spacing 10 ]
                                         [ el Link
                                             [ onClick <|
@@ -223,14 +239,16 @@ view model =
                                 (get endPosition model.positions)
                                 (\start end ->
                                     [ editRow t EditTransition
-                                    , row None
+                                    , paragraph None
                                         [ verticalCenter, spacing 10 ]
-                                        [ link (start.id |> (\(Id id) -> id) |> (++) "/#/ps/") <| el Link [] <| text start.name
+                                        [ link (start.id |> (\(Id id) -> "/#/p/" ++ id)) <|
+                                            el Link [] <|
+                                                text start.name
                                         , el MattIcon
                                             [ class "fa fa-long-arrow-right"
                                             ]
                                             empty
-                                        , link (end.id |> (\(Id id) -> id) |> (++) "/#/ps/") <|
+                                        , link (end.id |> (\(Id id) -> "/#/p/" ++ id)) <|
                                             el Link [] <|
                                                 text end.name
                                         ]
@@ -274,7 +292,7 @@ view model =
         roteiro =
             row None
                 [ center, spacing 10, verticalCenter ]
-                [ link "/#/ps" <| el Header [] <| text "ROTEIRO"
+                [ link "/#/ps" <| el Header [ vary Small <| model.view /= ViewAll ] <| text "ROTEIRO"
                 , when (model.view == ViewAll) <|
                     el Icon
                         [ padding 10
@@ -395,6 +413,14 @@ view model =
 
                 Nothing ->
                     empty
+
+        ws =
+            case model.device of
+                Desktop ->
+                    30
+
+                Mobile ->
+                    10
     in
         Html.div []
             [ Html.node "style"
@@ -409,8 +435,8 @@ view model =
                     [ height fill
                     , center
                     , width fill
-                    , spacing 30
-                    , padding 30
+                    , spacing ws
+                    , padding ws
                     ]
                     (enterToken :: picker :: confirm :: roteiro :: content)
             ]
@@ -420,20 +446,30 @@ pickStartPosition : Form -> Element Styles vs Msg
 pickStartPosition form =
     case form.startPosition of
         Nothing ->
-            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | startPosition = Just p } ] <| text "Select A Position"
+            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | startPosition = Just p } ] <|
+                el MattIcon
+                    [ center
+                    , class "fa fa-question"
+                    ]
+                    empty
 
         Just { name } ->
-            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | startPosition = Just p } ] <| text <| "Start Position: " ++ name
+            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | startPosition = Just p } ] <| paragraph None [] [ text name ]
 
 
 pickEndPosition : Form -> Element Styles vs Msg
 pickEndPosition form =
     case form.endPosition of
         Nothing ->
-            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | endPosition = Just p } ] <| text "Select A Position"
+            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | endPosition = Just p } ] <|
+                el MattIcon
+                    [ center
+                    , class "fa fa-question"
+                    ]
+                    empty
 
-        Just endP ->
-            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | endPosition = Just p } ] <| text <| "End Position: " ++ endP.name
+        Just { name } ->
+            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | endPosition = Just p } ] <| paragraph None [] [ text name ]
 
 
 editRow : { r | name : String, id : Id } -> ({ r | name : String, id : Id } -> msg) -> Element Styles vs msg
@@ -596,10 +632,13 @@ viewSteps steps =
             |> Array.toList
             |> List.indexedMap
                 (\i step ->
-                    paragraph None
-                        []
+                    row None
+                        [ spacing 10 ]
                         [ el Dot [] <| text <| (toString (i + 1) ++ ".")
-                        , text <| " " ++ step
+                        , paragraph None
+                            []
+                            [ text step
+                            ]
                         ]
                 )
             |> column None [ maxWidth <| px 700 ]
@@ -626,7 +665,14 @@ viewNotes =
                                 ]
                         ]
                 else
-                    paragraph None [] [ el Dot [] <| text "• ", text x ]
+                    row None
+                        [ spacing 10 ]
+                        [ el Dot [] <| text "• "
+                        , paragraph None
+                            []
+                            [ text x
+                            ]
+                        ]
             )
         >> column None [ center, maxWidth <| px 500 ]
 

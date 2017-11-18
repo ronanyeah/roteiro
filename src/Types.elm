@@ -74,6 +74,10 @@ type Styles
     | Topics
 
 
+type Variations
+    = Small
+
+
 type Id
     = Id String
 

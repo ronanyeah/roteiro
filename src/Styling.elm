@@ -1,14 +1,14 @@
 module Styling exposing (..)
 
 import Color exposing (Color, rgb)
-import Style exposing (Property, StyleSheet, hover, style, styleSheet)
+import Style exposing (Property, StyleSheet, hover, style, styleSheet, variation)
 import Style.Border as Border
 import Style.Font as Font
 import Style.Color as Color
-import Types exposing (Styles(..))
+import Types exposing (Styles(..), Variations(..))
 
 
-styling : StyleSheet Styles vs
+styling : StyleSheet Styles Variations
 styling =
     styleSheet
         [ style None []
@@ -57,6 +57,7 @@ styling =
             , Color.text e
             , pointer
             , hover [ Color.text a ]
+            , variation Small [ Font.size 45 ]
             ]
         , style Picker
             [ Color.background c
