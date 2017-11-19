@@ -74,7 +74,6 @@ type Styles
     | PickerCancel
     | SetBox
     | Subtitle
-    | Title
     | Topics
 
 

@@ -72,7 +72,6 @@ styling =
             [ Font.size 35
             , Color.text e
             ]
-        , style Title [ Font.size 45, Color.text e ]
         , style Topics [ Color.text e, pointer, hover [ Color.text a ] ]
         ]
 

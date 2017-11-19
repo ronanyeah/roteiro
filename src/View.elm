@@ -59,8 +59,7 @@ view model =
                     ]
 
                 ViewCreateTopic form ->
-                    [ el Title [ center ] <| text "CREATE TOPIC"
-                    , nameEdit form FormUpdate
+                    [ nameEdit form FormUpdate
                     , notesEditor form FormUpdate
                     , buttons Nothing
                     ]
