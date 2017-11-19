@@ -180,8 +180,8 @@ view model =
                                                 text p.name
                                             ]
                                     )
-                            , notesEditor submission EditSubmission
                             , stepsEditor submission EditSubmission
+                            , notesEditor submission EditSubmission
                             , buttons <| Just <| DeleteSubmission submission.id
                             ]
 
@@ -252,8 +252,8 @@ view model =
                                             text end.name
                                         ]
                                 )
-                            , notesEditor transition EditTransition
                             , stepsEditor transition EditTransition
+                            , notesEditor transition EditTransition
                             , buttons <| Just <| DeleteTransition transition.id
                             ]
 
