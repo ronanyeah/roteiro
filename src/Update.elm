@@ -50,6 +50,9 @@ update msg model =
                 ViewSubmission s ->
                     ( { model | view = ViewSubmission <| Editable.cancel s, confirm = Nothing }, Cmd.none )
 
+                ViewSubmissions ->
+                    ( model, Cmd.none )
+
                 ViewTopics ->
                     ( model, Cmd.none )
 
@@ -58,6 +61,9 @@ update msg model =
 
                 ViewTransition t ->
                     ( { model | view = ViewTransition <| Editable.cancel t, confirm = Nothing }, Cmd.none )
+
+                ViewTransitions ->
+                    ( model, Cmd.none )
 
         CancelPicker ->
             ( { model | choosingPosition = Nothing }, Cmd.none )
@@ -213,7 +219,7 @@ update msg model =
             ( { model
                 | view =
                     ViewCreateSubmission
-                        { emptyForm | startPosition = Just p }
+                        { emptyForm | startPosition = p }
               }
             , Cmd.none
             )
@@ -230,7 +236,7 @@ update msg model =
             ( { model
                 | view =
                     ViewCreateTransition
-                        { emptyForm | startPosition = Just p }
+                        { emptyForm | startPosition = p }
               }
             , Cmd.none
             )

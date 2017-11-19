@@ -38,6 +38,18 @@ view model =
                             , class "fa fa-flag-checkered"
                             ]
                             empty
+                    , link "/#/trs" <|
+                        el Topics
+                            [ padding 10
+                            , class "fa fa-long-arrow-right"
+                            ]
+                            empty
+                    , link "/#/ss" <|
+                        el Topics
+                            [ padding 10
+                            , class "fa fa-bolt"
+                            ]
+                            empty
                     , link "/#/ts" <|
                         el Topics
                             [ padding 10
@@ -118,14 +130,14 @@ view model =
                                     ]
                                     empty
                                 , viewTechList "t" transitions
-                                , plus <| CreateTransition p
+                                , plus <| CreateTransition <| Just p
                                 , el Line [ width <| px 100, height <| px 2 ] empty
                                 , el MattIcon
                                     [ class "fa fa-bolt"
                                     ]
                                     empty
                                 , viewTechList "s" submissions
-                                , plus <| CreateSubmission p
+                                , plus <| CreateSubmission <| Just p
                                 ]
 
                 ViewPositions ->
@@ -192,6 +204,19 @@ view model =
                                         , viewNotes notes
                                         ]
                                     )
+
+                ViewSubmissions ->
+                    model.submissions
+                        |> Dict.values
+                        |> List.map
+                            (\s ->
+                                case s.id of
+                                    Id id ->
+                                        link ("/#/s/" ++ id) <|
+                                            el Choice [] <|
+                                                text s.name
+                            )
+                        |> flip (++) [ plus <| CreateSubmission Nothing ]
 
                 ViewTransition data ->
                     case data of
@@ -260,8 +285,12 @@ view model =
                     model.topics
                         |> Dict.values
                         |> List.map
-                            (\({ id, name } as topic) ->
-                                link (id |> (\(Id id) -> "/#/to/" ++ id)) <| el Subtitle [] <| text name
+                            (\t ->
+                                case t.id of
+                                    Id id ->
+                                        link ("/#/to/" ++ id) <|
+                                            el Choice [] <|
+                                                text t.name
                             )
                         |> flip (++) [ plus CreateTopic ]
 
@@ -276,7 +305,26 @@ view model =
                         Editable.ReadOnly t ->
                             [ editRow t EditTopic
                             , viewNotes t.notes
+                            , link "/#/ts" <|
+                                el Topics
+                                    [ padding 10
+                                    , class "fa fa-book"
+                                    ]
+                                    empty
                             ]
+
+                ViewTransitions ->
+                    model.transitions
+                        |> Dict.values
+                        |> List.map
+                            (\t ->
+                                case t.id of
+                                    Id id ->
+                                        link ("/#/t/" ++ id) <|
+                                            el Choice [] <|
+                                                text t.name
+                            )
+                        |> flip (++) [ plus <| CreateTransition Nothing ]
 
         roteiro =
             row None

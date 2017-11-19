@@ -12,6 +12,8 @@ route =
     oneOf
         [ map Ps (s "ps")
         , map Ts (s "ts")
+        , map Trs (s "trs")
+        , map Ss (s "ss")
         , map (Id >> P) (s "p" </> string)
         , map Top top
         , map (Id >> T) (s "t" </> string)
@@ -38,8 +40,14 @@ router model route =
                                 ( ViewPosition <| Editable.ReadOnly p, Cmd.none )
                             )
 
+                Ss ->
+                    ( ViewSubmissions, Cmd.none )
+
                 Ts ->
                     ( ViewTopics, Cmd.none )
+
+                Trs ->
+                    ( ViewTransitions, Cmd.none )
 
                 To id ->
                     Utils.get id model.topics
@@ -56,6 +64,9 @@ router model route =
                         Nothing ->
                             ( ViewAll, Navigation.newUrl "/#/ps" )
 
+                Top ->
+                    ( ViewAll, Cmd.none )
+
                 S id ->
                     case Utils.get id model.submissions of
                         Just sub ->
@@ -63,9 +74,6 @@ router model route =
 
                         Nothing ->
                             ( ViewAll, Navigation.newUrl "/#/ps" )
-
-                Top ->
-                    ( ViewAll, Cmd.none )
 
                 NotFound ->
                     ( ViewAll, Navigation.newUrl "/#/" )

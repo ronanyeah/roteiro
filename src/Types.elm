@@ -22,9 +22,9 @@ type Msg
     | ChoosePosition (Position -> Msg)
     | Confirm (Maybe Msg)
     | CreatePosition
-    | CreateSubmission Position
+    | CreateSubmission (Maybe Position)
     | CreateTopic
-    | CreateTransition Position
+    | CreateTransition (Maybe Position)
     | DeletePosition Id
     | DeleteSubmission Id
     | DeleteTopic Id
@@ -49,9 +49,11 @@ type View
     | ViewPosition (Editable Position)
     | ViewPositions
     | ViewSubmission (Editable Submission)
+    | ViewSubmissions
     | ViewTopics
     | ViewTopic (Editable Topic)
     | ViewTransition (Editable Transition)
+    | ViewTransitions
 
 
 type Styles
@@ -110,9 +112,11 @@ type Route
     | P Id
     | Ts
     | S Id
+    | Ss
     | T Id
     | To Id
     | Top
+    | Trs
     | NotFound
 
 
