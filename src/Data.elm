@@ -104,6 +104,23 @@ createSubmission name steps notes (Id startId) =
 -- UPDATE
 
 
+updateSubmission : Submission -> B.Request B.Mutation Submission
+updateSubmission s =
+    case ( s.id, s.position ) of
+        ( Id id, Id positionId ) ->
+            submission
+                |> B.field "updateSubmission"
+                    [ ( "id", Arg.string id )
+                    , ( "name", Arg.string s.name )
+                    , ( "positionId", Arg.string positionId )
+                    , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList s.notes )
+                    , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList s.steps )
+                    ]
+                |> B.extract
+                |> B.mutationDocument
+                |> B.request ()
+
+
 updateTransition : Transition -> B.Request B.Mutation Transition
 updateTransition t =
     case ( t.id, t.startPosition, t.endPosition ) of

@@ -2,7 +2,7 @@ module Update exposing (..)
 
 import Array
 import Editable
-import Data exposing (createTopic, createPosition, createSubmission, createTransition, mutate, updatePosition, updateTopic, updateTransition)
+import Data exposing (createTopic, createPosition, createSubmission, createTransition, mutate, updatePosition, updateSubmission, updateTopic, updateTransition)
 import Element
 import Ports
 import Router exposing (router)
@@ -365,6 +365,14 @@ update msg model =
                         )
                     else
                         ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
+
+                ViewSubmission s ->
+                    if Editable.isDirty s then
+                        ( model
+                        , Task.attempt CbSubmission (mutate model.url model.token (updateSubmission (Editable.value s)))
+                        )
+                    else
+                        ( { model | view = ViewSubmission <| Editable.cancel s }, Cmd.none )
 
                 ViewTransition t ->
                     if Editable.isDirty t then
