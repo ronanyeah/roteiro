@@ -472,7 +472,7 @@ view model =
                     [ height fill
                     , center
                     , width fill
-                    , spacing ws
+                    , spacing 30
                     , padding ws
                     ]
                     (enterToken :: picker :: confirm :: roteiro :: content)
