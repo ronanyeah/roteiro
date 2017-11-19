@@ -1,4 +1,4 @@
-const cacheName = "roteiro-cache-0";
+const cacheName = "roteiro-cache-1";
 
 const assets = [
   "/",
