@@ -3,22 +3,22 @@ module Types exposing (..)
 import Array exposing (Array)
 import Dict exposing (Dict)
 import Editable exposing (Editable)
-import GraphQL.Client.Http as GQLH
+import Http
 import Window
 
 
 type Msg
     = Cancel
     | CancelPicker
-    | CbData (Result GQLH.Error AllData)
-    | CbPosition (Result GQLH.Error Position)
-    | CbPositionDelete (Result GQLH.Error Id)
-    | CbSubmission (Result GQLH.Error Submission)
-    | CbSubmissionDelete (Result GQLH.Error Submission)
-    | CbTopic (Result GQLH.Error Topic)
-    | CbTopicDelete (Result GQLH.Error Id)
-    | CbTransition (Result GQLH.Error Transition)
-    | CbTransitionDelete (Result GQLH.Error Transition)
+    | CbData (Result GcError AllData)
+    | CbPosition (Result GcError Position)
+    | CbPositionDelete (Result GcError Id)
+    | CbSubmission (Result GcError Submission)
+    | CbSubmissionDelete (Result GcError Submission)
+    | CbTopic (Result GcError Topic)
+    | CbTopicDelete (Result GcError Id)
+    | CbTransition (Result GcError Transition)
+    | CbTransitionDelete (Result GcError Transition)
     | ChoosePosition (Position -> Msg)
     | Confirm (Maybe Msg)
     | CreatePosition
@@ -117,6 +117,11 @@ type Route
     | Top
     | Trs
     | NotFound
+
+
+type GcError
+    = HttpError Http.Error
+    | GcError (List { code : Int, message : String })
 
 
 type alias Topic =

@@ -1,35 +1,93 @@
 module Data exposing (..)
 
 import Array
-import GraphQL.Client.Http exposing (Error, customSendQuery, customSendMutation)
+import GraphQL.Client.Http exposing (Error, customSendQueryRaw, customSendMutationRaw)
 import GraphQL.Request.Builder as B
 import GraphQL.Request.Builder.Arg as Arg
 import Http
+import Json.Decode as Decode exposing (Decoder)
 import Utils exposing (filterEmpty)
 import Task exposing (Task)
 import Types exposing (..)
 
 
-query : String -> String -> B.Request B.Query a -> Task Error a
-query url token =
-    customSendQuery
+decodeGcError : Decoder { code : Int, message : String }
+decodeGcError =
+    Decode.map2 (\c m -> { code = c, message = m })
+        (Decode.field "code" Decode.int)
+        (Decode.field "message" Decode.string)
+
+
+query : String -> String -> B.Request B.Query a -> Task GcError a
+query url token request =
+    customSendQueryRaw
         { method = "POST"
         , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
         , url = url
         , timeout = Nothing
         , withCredentials = False
         }
+        request
+        |> convert request
 
 
-mutate : String -> String -> B.Request B.Mutation a -> Task Error a
-mutate url token =
-    customSendMutation
+mutate : String -> String -> B.Request B.Mutation a -> Task GcError a
+mutate url token request =
+    customSendMutationRaw
         { method = "POST"
         , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
         , url = url
         , timeout = Nothing
         , withCredentials = False
         }
+        request
+        |> convert request
+
+
+convert : B.Request x a -> Task Error (Http.Response String) -> Task GcError a
+convert request =
+    Task.mapError
+        (\e ->
+            case e of
+                GraphQL.Client.Http.HttpError err ->
+                    HttpError err
+
+                GraphQL.Client.Http.GraphQLError xs ->
+                    xs
+                        |> List.map
+                            (\{ message } ->
+                                { code = 999
+                                , message = message
+                                }
+                            )
+                        |> GcError
+        )
+        >> Task.andThen
+            (\response ->
+                let
+                    decoder =
+                        Decode.map2 (,)
+                            (Decode.maybe <| Decode.field "errors" <| Decode.list decodeGcError)
+                            (Decode.maybe <| Decode.field "data" <| B.responseDataDecoder request)
+                in
+                    case Decode.decodeString decoder response.body of
+                        Err err ->
+                            Task.fail <| HttpError <| Http.BadPayload err response
+
+                        Ok res ->
+                            case res of
+                                ( Nothing, Just d ) ->
+                                    Task.succeed d
+
+                                ( Just [], Just d ) ->
+                                    Task.succeed d
+
+                                ( Just errs, _ ) ->
+                                    Task.fail (GcError errs)
+
+                                _ ->
+                                    Debug.crash "GcError"
+            )
 
 
 fetchData : B.Request B.Query AllData
