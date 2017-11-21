@@ -76,17 +76,27 @@ convert request =
 
                         Ok res ->
                             case res of
-                                ( Nothing, Just d ) ->
-                                    Task.succeed d
-
                                 ( Just [], Just d ) ->
                                     Task.succeed d
 
-                                ( Just errs, _ ) ->
+                                ( Just errs, Just d ) ->
+                                    Task.fail
+                                        (GcError
+                                            ({ code = 999
+                                             , message = "data returned with errors"
+                                             }
+                                                :: errs
+                                            )
+                                        )
+
+                                ( Nothing, Just d ) ->
+                                    Task.succeed d
+
+                                ( Just errs, Nothing ) ->
                                     Task.fail (GcError errs)
 
-                                _ ->
-                                    Debug.crash "GcError"
+                                ( Nothing, Nothing ) ->
+                                    Task.fail <| HttpError <| Http.BadPayload "f'kd payload" response
             )
 
 
