@@ -458,24 +458,15 @@ view model =
                 Mobile ->
                     10
     in
-        Html.div []
-            [ Html.node "style"
-                []
-                [ Html.text """
-                    body { background-color: #B63730; }
-                    .style-elements .fa { font-family: FontAwesome; }
-                  """
+        layout styling <|
+            column Body
+                [ height fill
+                , center
+                , width fill
+                , spacing 20
+                , padding ws
                 ]
-            , layout styling <|
-                column Body
-                    [ height fill
-                    , center
-                    , width fill
-                    , spacing 20
-                    , padding ws
-                    ]
-                    (enterToken :: picker :: confirm :: roteiro :: content)
-            ]
+                (enterToken :: picker :: confirm :: roteiro :: content)
 
 
 pickStartPosition : Form -> Element Styles vs Msg

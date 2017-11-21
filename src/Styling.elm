@@ -1,7 +1,7 @@
 module Styling exposing (..)
 
 import Color exposing (Color, rgb)
-import Style exposing (Property, StyleSheet, hover, style, styleSheet, variation)
+import Style exposing (Property, StyleSheet, hover, importUrl, style, styleSheet, variation)
 import Style.Border as Border
 import Style.Font as Font
 import Style.Color as Color
@@ -11,7 +11,10 @@ import Types exposing (Styles(..), Variations(..))
 styling : StyleSheet Styles Variations
 styling =
     styleSheet
-        [ style None []
+        [ importUrl "https://fonts.googleapis.com/css?family=Cuprum"
+        , importUrl "/font-awesome/css/font-awesome.min.css"
+        , importUrl "/style.css"
+        , style None []
         , style SetBox
             [ Border.all 2
             , Border.solid
