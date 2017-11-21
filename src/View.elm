@@ -168,7 +168,7 @@ view model =
                                                 [ class "fa fa-flag-checkered"
                                                 ]
                                                 empty
-                                            , el None
+                                            , el Link
                                                 [ onClick <|
                                                     ChoosePosition
                                                         (\{ id } ->
@@ -471,32 +471,50 @@ view model =
 
 pickStartPosition : Form -> Element Styles vs Msg
 pickStartPosition form =
-    case form.startPosition of
-        Nothing ->
-            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | startPosition = Just p } ] <|
+    let
+        handleClick =
+            ChoosePosition <|
+                \p ->
+                    FormUpdate { form | startPosition = Just p }
+    in
+        case form.startPosition of
+            Nothing ->
                 el MattIcon
                     [ center
                     , class "fa fa-question"
+                    , onClick handleClick
                     ]
                     empty
 
-        Just { name } ->
-            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | startPosition = Just p } ] <| paragraph None [] [ text name ]
+            Just { name } ->
+                paragraph Link
+                    [ onClick handleClick
+                    ]
+                    [ text name ]
 
 
 pickEndPosition : Form -> Element Styles vs Msg
 pickEndPosition form =
-    case form.endPosition of
-        Nothing ->
-            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | endPosition = Just p } ] <|
-                el MattIcon
+    let
+        handleClick =
+            ChoosePosition <|
+                \p ->
+                    FormUpdate { form | endPosition = Just p }
+    in
+        case form.endPosition of
+            Nothing ->
+                el Icon
                     [ center
                     , class "fa fa-question"
+                    , onClick handleClick
                     ]
                     empty
 
-        Just { name } ->
-            el None [ onClick <| ChoosePosition <| \p -> FormUpdate { form | endPosition = Just p } ] <| paragraph None [] [ text name ]
+            Just { name } ->
+                paragraph Link
+                    [ onClick handleClick
+                    ]
+                    [ text name ]
 
 
 editRow : { r | name : String, id : Id } -> ({ r | name : String, id : Id } -> msg) -> Element Styles vs msg
