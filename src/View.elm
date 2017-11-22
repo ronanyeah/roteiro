@@ -4,7 +4,7 @@ import Array exposing (Array)
 import Dict
 import Editable
 import Element exposing (Element, circle, column, decorativeImage, el, empty, layout, link, modal, newTab, paragraph, row, screen, text, when, whenJust)
-import Element.Attributes exposing (alignBottom, center, class, fill, height, maxWidth, moveDown, padding, px, spacing, spread, vary, verticalCenter, width)
+import Element.Attributes exposing (alignBottom, attribute, center, class, fill, height, maxWidth, moveDown, padding, px, spacing, spread, vary, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
@@ -47,7 +47,7 @@ view model =
 
                         Desktop ->
                             column None
-                                []
+                                [ center ]
                                 [ link "/#/ps" <|
                                     el Topics
                                         [ padding 10
@@ -76,7 +76,7 @@ view model =
 
                 ViewCreateTopic form ->
                     column None
-                        []
+                        [ center ]
                         [ nameEdit form FormUpdate
                         , notesEditor form FormUpdate
                         , buttons Nothing
@@ -84,7 +84,7 @@ view model =
 
                 ViewCreateTransition form ->
                     column None
-                        []
+                        [ center ]
                         [ nameEdit form FormUpdate
                         , row None
                             [ verticalCenter, spacing 10 ]
@@ -102,7 +102,7 @@ view model =
 
                 ViewCreateSubmission form ->
                     column None
-                        []
+                        [ center ]
                         [ nameEdit form FormUpdate
                         , row None
                             [ spacing 10 ]
@@ -119,14 +119,14 @@ view model =
 
                 ViewCreatePosition form ->
                     column None
-                        []
+                        [ center ]
                         [ nameEdit form FormUpdate
                         , notesEditor form FormUpdate
                         , buttons Nothing
                         ]
 
                 ViewPosition data ->
-                    column None [] <|
+                    column None [ center ] <|
                         case data of
                             Editable.Editable _ position ->
                                 [ nameEdit position EditPosition
@@ -165,7 +165,7 @@ view model =
                                     ]
 
                 ViewPositions ->
-                    column None [] <|
+                    column None [ center ] <|
                         (model.positions
                             |> Dict.values
                             |> List.map
@@ -182,7 +182,7 @@ view model =
                         )
 
                 ViewSubmission data ->
-                    column None [] <|
+                    column None [ center ] <|
                         case data of
                             Editable.Editable _ submission ->
                                 [ nameEdit submission EditSubmission
@@ -233,7 +233,7 @@ view model =
                                         )
 
                 ViewSubmissions ->
-                    column None [] <|
+                    column None [ center ] <|
                         (model.submissions
                             |> Dict.values
                             |> List.map
@@ -248,7 +248,7 @@ view model =
                         )
 
                 ViewTransition data ->
-                    column None [] <|
+                    column None [ center ] <|
                         case data of
                             Editable.Editable _ transition ->
                                 [ nameEdit transition EditTransition
@@ -312,7 +312,7 @@ view model =
                                     )
 
                 ViewTopics ->
-                    column None [] <|
+                    column None [ center ] <|
                         (model.topics
                             |> Dict.values
                             |> List.map
@@ -327,7 +327,7 @@ view model =
                         )
 
                 ViewTopic data ->
-                    column None [] <|
+                    column None [ center, spacing 20 ] <|
                         case data of
                             Editable.Editable _ t ->
                                 [ nameEdit t EditTopic
@@ -347,7 +347,7 @@ view model =
                                 ]
 
                 ViewTransitions ->
-                    column None [] <|
+                    column None [ center ] <|
                         (model.transitions
                             |> Dict.values
                             |> List.map
@@ -531,6 +531,15 @@ view model =
                 , confirm
                 , roteiro
                 , content
+                , el None
+                    [ height <|
+                        px <|
+                            if model.device == Mobile then
+                                100
+                            else
+                                0
+                    ]
+                    empty
                 ]
 
 
@@ -704,7 +713,7 @@ notesEditor form msg =
                         (\i v ->
                             Input.multiline
                                 Field
-                                []
+                                [ width <| px 300, attribute "rows" "3" ]
                                 { onChange = \str -> msg { form | notes = Array.set i str form.notes }
                                 , value = v
                                 , label = Input.hiddenLabel ""
