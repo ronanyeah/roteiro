@@ -146,6 +146,7 @@ type alias Submission =
     , name : String
     , steps : Array String
     , notes : Array String
+    , when : Maybe String
     , position : Id
     }
 

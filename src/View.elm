@@ -186,6 +186,7 @@ view model =
                         case data of
                             Editable.Editable _ submission ->
                                 [ nameEdit submission EditSubmission
+                                , whenEdit submission EditSubmission
                                 , model.positions
                                     |> Dict.get (submission.position |> (\(Id id) -> id))
                                     |> flip whenJust
@@ -217,6 +218,7 @@ view model =
                                     |> unwrap oopsView
                                         (\p ->
                                             [ editRow s EditSubmission
+                                            , whenJust s.when text
                                             , row None
                                                 [ spacing 10 ]
                                                 [ el MattIcon
@@ -248,7 +250,7 @@ view model =
                         )
 
                 ViewTransition data ->
-                    column None [ center ] <|
+                    column None [ center, spacing 20 ] <|
                         case data of
                             Editable.Editable _ transition ->
                                 [ nameEdit transition EditTransition
@@ -312,7 +314,7 @@ view model =
                                     )
 
                 ViewTopics ->
-                    column None [ center ] <|
+                    column None [ center, spacing 20 ] <|
                         (model.topics
                             |> Dict.values
                             |> List.map
@@ -347,7 +349,7 @@ view model =
                                 ]
 
                 ViewTransitions ->
-                    column None [ center ] <|
+                    column None [ center, spacing 20 ] <|
                         (model.transitions
                             |> Dict.values
                             |> List.map
@@ -613,6 +615,24 @@ nameEdit r msg =
         { onChange = \str -> msg { r | name = str }
         , value = r.name
         , label = Input.hiddenLabel "name"
+        , options = []
+        }
+
+
+whenEdit : { r | when : Maybe String } -> ({ r | when : Maybe String } -> Msg) -> Element Styles vs Msg
+whenEdit r msg =
+    Input.text
+        Field
+        [ maxWidth <| px 300, center ]
+        { onChange =
+            \str ->
+                msg <|
+                    if String.isEmpty str then
+                        { r | when = Nothing }
+                    else
+                        { r | when = Just str }
+        , value = r.when |> Maybe.withDefault ""
+        , label = Input.hiddenLabel "when"
         , options = []
         }
 
