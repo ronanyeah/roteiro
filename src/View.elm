@@ -3,8 +3,8 @@ module View exposing (..)
 import Array exposing (Array)
 import Dict
 import Editable
-import Element exposing (Element, column, el, empty, layout, link, modal, newTab, paragraph, row, text, when, whenJust)
-import Element.Attributes exposing (center, class, fill, height, maxWidth, padding, px, spacing, vary, verticalCenter, width)
+import Element exposing (Element, circle, column, decorativeImage, el, empty, layout, link, modal, newTab, paragraph, row, screen, text, when, whenJust)
+import Element.Attributes exposing (alignBottom, center, class, fill, height, maxWidth, moveDown, padding, px, spacing, spread, vary, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
@@ -32,311 +32,348 @@ view model =
         content =
             case model.view of
                 ViewAll ->
-                    [ link "/#/ps" <|
-                        el Topics
-                            [ padding 10
-                            , class "fa fa-flag-checkered"
-                            ]
-                            empty
-                    , link "/#/trs" <|
-                        el Topics
-                            [ padding 10
-                            , class "fa fa-long-arrow-right"
-                            ]
-                            empty
-                    , link "/#/ss" <|
-                        el Topics
-                            [ padding 10
-                            , class "fa fa-bolt"
-                            ]
-                            empty
-                    , link "/#/ts" <|
-                        el Topics
-                            [ padding 10
-                            , class "fa fa-book"
-                            ]
-                            empty
-                    ]
-
-                ViewCreateTopic form ->
-                    [ nameEdit form FormUpdate
-                    , notesEditor form FormUpdate
-                    , buttons Nothing
-                    ]
-
-                ViewCreateTransition form ->
-                    [ nameEdit form FormUpdate
-                    , row None
-                        [ verticalCenter, spacing 10 ]
-                        [ pickStartPosition form
-                        , el MattIcon
-                            [ class "fa fa-long-arrow-right"
-                            ]
-                            empty
-                        , pickEndPosition form
-                        ]
-                    , stepsEditor form FormUpdate
-                    , notesEditor form FormUpdate
-                    , buttons Nothing
-                    ]
-
-                ViewCreateSubmission form ->
-                    [ nameEdit form FormUpdate
-                    , row None
-                        [ spacing 10 ]
-                        [ el MattIcon
-                            [ class "fa fa-flag-checkered"
-                            ]
-                            empty
-                        , pickStartPosition form
-                        ]
-                    , stepsEditor form FormUpdate
-                    , notesEditor form FormUpdate
-                    , buttons Nothing
-                    ]
-
-                ViewCreatePosition form ->
-                    [ nameEdit form FormUpdate
-                    , notesEditor form FormUpdate
-                    , buttons Nothing
-                    ]
-
-                ViewPosition data ->
-                    case data of
-                        Editable.Editable _ position ->
-                            [ nameEdit position EditPosition
-                            , notesEditor position EditPosition
-                            , buttons <| Just <| DeletePosition position.id
-                            ]
-
-                        Editable.ReadOnly ({ id, notes } as p) ->
-                            let
-                                transitions =
-                                    model.transitions
-                                        |> Dict.values
-                                        |> List.filter (.startPosition >> (==) id)
-
-                                submissions =
-                                    model.submissions
-                                        |> Dict.values
-                                        |> List.filter (.position >> (==) id)
-                            in
-                                [ editRow p EditPosition
-                                , viewNotes notes
-                                , el Line [ width <| px 100, height <| px 2 ] empty
-                                , el MattIcon
-                                    [ class "fa fa-long-arrow-right"
+                    case model.device of
+                        Mobile ->
+                            column None
+                                [ center, spacing 20, moveDown 200 ]
+                                [ decorativeImage None
+                                    [ onClick <| TokenEdit <| Just ""
+                                    , height <| px 100
+                                    , width <| px 100
                                     ]
-                                    empty
-                                , viewTechList "t" transitions
-                                , plus <| CreateTransition <| Just p
-                                , el Line [ width <| px 100, height <| px 2 ] empty
-                                , el MattIcon
-                                    [ class "fa fa-bolt"
-                                    ]
-                                    empty
-                                , viewTechList "s" submissions
-                                , plus <| CreateSubmission <| Just p
+                                    { src = "/map.svg" }
+                                , el Home [] <| text "Roteiro"
                                 ]
 
-                ViewPositions ->
-                    model.positions
-                        |> Dict.values
-                        |> List.map
-                            (\p ->
-                                case p.id of
-                                    Id id ->
-                                        link ("/#/p/" ++ id) <|
-                                            el Choice [] <|
-                                                text p.name
-                            )
-                        |> flip (++)
-                            [ plus CreatePosition
+                        Desktop ->
+                            column None
+                                []
+                                [ link "/#/ps" <|
+                                    el Topics
+                                        [ padding 10
+                                        , class "fa fa-flag-checkered"
+                                        ]
+                                        empty
+                                , link "/#/trs" <|
+                                    el Topics
+                                        [ padding 10
+                                        , class "fa fa-long-arrow-right"
+                                        ]
+                                        empty
+                                , link "/#/ss" <|
+                                    el Topics
+                                        [ padding 10
+                                        , class "fa fa-bolt"
+                                        ]
+                                        empty
+                                , link "/#/ts" <|
+                                    el Topics
+                                        [ padding 10
+                                        , class "fa fa-book"
+                                        ]
+                                        empty
+                                ]
+
+                ViewCreateTopic form ->
+                    column None
+                        []
+                        [ nameEdit form FormUpdate
+                        , notesEditor form FormUpdate
+                        , buttons Nothing
+                        ]
+
+                ViewCreateTransition form ->
+                    column None
+                        []
+                        [ nameEdit form FormUpdate
+                        , row None
+                            [ verticalCenter, spacing 10 ]
+                            [ pickStartPosition form
+                            , el MattIcon
+                                [ class "fa fa-long-arrow-right"
+                                ]
+                                empty
+                            , pickEndPosition form
                             ]
+                        , stepsEditor form FormUpdate
+                        , notesEditor form FormUpdate
+                        , buttons Nothing
+                        ]
+
+                ViewCreateSubmission form ->
+                    column None
+                        []
+                        [ nameEdit form FormUpdate
+                        , row None
+                            [ spacing 10 ]
+                            [ el MattIcon
+                                [ class "fa fa-flag-checkered"
+                                ]
+                                empty
+                            , pickStartPosition form
+                            ]
+                        , stepsEditor form FormUpdate
+                        , notesEditor form FormUpdate
+                        , buttons Nothing
+                        ]
+
+                ViewCreatePosition form ->
+                    column None
+                        []
+                        [ nameEdit form FormUpdate
+                        , notesEditor form FormUpdate
+                        , buttons Nothing
+                        ]
+
+                ViewPosition data ->
+                    column None [] <|
+                        case data of
+                            Editable.Editable _ position ->
+                                [ nameEdit position EditPosition
+                                , notesEditor position EditPosition
+                                , buttons <| Just <| DeletePosition position.id
+                                ]
+
+                            Editable.ReadOnly ({ id, notes } as p) ->
+                                let
+                                    transitions =
+                                        model.transitions
+                                            |> Dict.values
+                                            |> List.filter (.startPosition >> (==) id)
+
+                                    submissions =
+                                        model.submissions
+                                            |> Dict.values
+                                            |> List.filter (.position >> (==) id)
+                                in
+                                    [ editRow p EditPosition
+                                    , viewNotes notes
+                                    , el Line [ width <| px 100, height <| px 2 ] empty
+                                    , el MattIcon
+                                        [ class "fa fa-long-arrow-right"
+                                        ]
+                                        empty
+                                    , viewTechList "t" transitions
+                                    , plus <| CreateTransition <| Just p
+                                    , el Line [ width <| px 100, height <| px 2 ] empty
+                                    , el MattIcon
+                                        [ class "fa fa-bolt"
+                                        ]
+                                        empty
+                                    , viewTechList "s" submissions
+                                    , plus <| CreateSubmission <| Just p
+                                    ]
+
+                ViewPositions ->
+                    column None [] <|
+                        (model.positions
+                            |> Dict.values
+                            |> List.map
+                                (\p ->
+                                    case p.id of
+                                        Id id ->
+                                            link ("/#/p/" ++ id) <|
+                                                el Choice [] <|
+                                                    text p.name
+                                )
+                            |> flip (++)
+                                [ plus CreatePosition
+                                ]
+                        )
 
                 ViewSubmission data ->
-                    case data of
-                        Editable.Editable _ submission ->
-                            [ nameEdit submission EditSubmission
-                            , model.positions
-                                |> Dict.get (submission.position |> (\(Id id) -> id))
-                                |> flip whenJust
-                                    (\p ->
-                                        row None
-                                            [ spacing 10 ]
-                                            [ el MattIcon
-                                                [ class "fa fa-flag-checkered"
+                    column None [] <|
+                        case data of
+                            Editable.Editable _ submission ->
+                                [ nameEdit submission EditSubmission
+                                , model.positions
+                                    |> Dict.get (submission.position |> (\(Id id) -> id))
+                                    |> flip whenJust
+                                        (\p ->
+                                            row None
+                                                [ spacing 10 ]
+                                                [ el MattIcon
+                                                    [ class "fa fa-flag-checkered"
+                                                    ]
+                                                    empty
+                                                , el Link
+                                                    [ onClick <|
+                                                        ChoosePosition
+                                                            (\{ id } ->
+                                                                EditSubmission { submission | position = id }
+                                                            )
+                                                    ]
+                                                  <|
+                                                    text p.name
+                                                ]
+                                        )
+                                , stepsEditor submission EditSubmission
+                                , notesEditor submission EditSubmission
+                                , buttons <| Just <| DeleteSubmission submission.id
+                                ]
+
+                            Editable.ReadOnly ({ steps, position, notes } as s) ->
+                                get position model.positions
+                                    |> unwrap oopsView
+                                        (\p ->
+                                            [ editRow s EditSubmission
+                                            , row None
+                                                [ spacing 10 ]
+                                                [ el MattIcon
+                                                    [ class "fa fa-flag-checkered"
+                                                    ]
+                                                    empty
+                                                , link (p.id |> (\(Id id) -> "/#/p/" ++ id)) <|
+                                                    el Link [] <|
+                                                        text p.name
+                                                ]
+                                            , viewSteps steps
+                                            , viewNotes notes
+                                            ]
+                                        )
+
+                ViewSubmissions ->
+                    column None [] <|
+                        (model.submissions
+                            |> Dict.values
+                            |> List.map
+                                (\s ->
+                                    case s.id of
+                                        Id id ->
+                                            link ("/#/s/" ++ id) <|
+                                                el Choice [] <|
+                                                    text s.name
+                                )
+                            |> flip (++) [ plus <| CreateSubmission Nothing ]
+                        )
+
+                ViewTransition data ->
+                    column None [] <|
+                        case data of
+                            Editable.Editable _ transition ->
+                                [ nameEdit transition EditTransition
+                                , unwrap2 empty
+                                    (get transition.startPosition model.positions)
+                                    (get transition.endPosition model.positions)
+                                    (\start end ->
+                                        paragraph None
+                                            [ verticalCenter, spacing 10 ]
+                                            [ el Link
+                                                [ onClick <|
+                                                    ChoosePosition
+                                                        (\{ id } ->
+                                                            EditTransition { transition | startPosition = id }
+                                                        )
+                                                ]
+                                              <|
+                                                text start.name
+                                            , el MattIcon
+                                                [ class "fa fa-long-arrow-right"
                                                 ]
                                                 empty
                                             , el Link
                                                 [ onClick <|
                                                     ChoosePosition
                                                         (\{ id } ->
-                                                            EditSubmission { submission | position = id }
+                                                            EditTransition { transition | endPosition = id }
                                                         )
                                                 ]
                                               <|
-                                                text p.name
+                                                text end.name
                                             ]
                                     )
-                            , stepsEditor submission EditSubmission
-                            , notesEditor submission EditSubmission
-                            , buttons <| Just <| DeleteSubmission submission.id
-                            ]
+                                , stepsEditor transition EditTransition
+                                , notesEditor transition EditTransition
+                                , buttons <| Just <| DeleteTransition transition.id
+                                ]
 
-                        Editable.ReadOnly ({ steps, position, notes } as s) ->
-                            get position model.positions
-                                |> unwrap oopsView
-                                    (\p ->
-                                        [ editRow s EditSubmission
-                                        , row None
-                                            [ spacing 10 ]
-                                            [ el MattIcon
-                                                [ class "fa fa-flag-checkered"
+                            Editable.ReadOnly ({ steps, startPosition, endPosition, notes } as t) ->
+                                unwrap2 oopsView
+                                    (get startPosition model.positions)
+                                    (get endPosition model.positions)
+                                    (\start end ->
+                                        [ editRow t EditTransition
+                                        , paragraph None
+                                            [ verticalCenter, spacing 10 ]
+                                            [ link (start.id |> (\(Id id) -> "/#/p/" ++ id)) <|
+                                                el Link [] <|
+                                                    text start.name
+                                            , el MattIcon
+                                                [ class "fa fa-long-arrow-right"
                                                 ]
                                                 empty
-                                            , link (p.id |> (\(Id id) -> "/#/p/" ++ id)) <|
+                                            , link (end.id |> (\(Id id) -> "/#/p/" ++ id)) <|
                                                 el Link [] <|
-                                                    text p.name
+                                                    text end.name
                                             ]
                                         , viewSteps steps
                                         , viewNotes notes
                                         ]
                                     )
 
-                ViewSubmissions ->
-                    model.submissions
-                        |> Dict.values
-                        |> List.map
-                            (\s ->
-                                case s.id of
-                                    Id id ->
-                                        link ("/#/s/" ++ id) <|
-                                            el Choice [] <|
-                                                text s.name
-                            )
-                        |> flip (++) [ plus <| CreateSubmission Nothing ]
-
-                ViewTransition data ->
-                    case data of
-                        Editable.Editable _ transition ->
-                            [ nameEdit transition EditTransition
-                            , unwrap2 empty
-                                (get transition.startPosition model.positions)
-                                (get transition.endPosition model.positions)
-                                (\start end ->
-                                    paragraph None
-                                        [ verticalCenter, spacing 10 ]
-                                        [ el Link
-                                            [ onClick <|
-                                                ChoosePosition
-                                                    (\{ id } ->
-                                                        EditTransition { transition | startPosition = id }
-                                                    )
-                                            ]
-                                          <|
-                                            text start.name
-                                        , el MattIcon
-                                            [ class "fa fa-long-arrow-right"
-                                            ]
-                                            empty
-                                        , el Link
-                                            [ onClick <|
-                                                ChoosePosition
-                                                    (\{ id } ->
-                                                        EditTransition { transition | endPosition = id }
-                                                    )
-                                            ]
-                                          <|
-                                            text end.name
-                                        ]
-                                )
-                            , stepsEditor transition EditTransition
-                            , notesEditor transition EditTransition
-                            , buttons <| Just <| DeleteTransition transition.id
-                            ]
-
-                        Editable.ReadOnly ({ steps, startPosition, endPosition, notes } as t) ->
-                            unwrap2 oopsView
-                                (get startPosition model.positions)
-                                (get endPosition model.positions)
-                                (\start end ->
-                                    [ editRow t EditTransition
-                                    , paragraph None
-                                        [ verticalCenter, spacing 10 ]
-                                        [ link (start.id |> (\(Id id) -> "/#/p/" ++ id)) <|
-                                            el Link [] <|
-                                                text start.name
-                                        , el MattIcon
-                                            [ class "fa fa-long-arrow-right"
-                                            ]
-                                            empty
-                                        , link (end.id |> (\(Id id) -> "/#/p/" ++ id)) <|
-                                            el Link [] <|
-                                                text end.name
-                                        ]
-                                    , viewSteps steps
-                                    , viewNotes notes
-                                    ]
-                                )
-
                 ViewTopics ->
-                    model.topics
-                        |> Dict.values
-                        |> List.map
-                            (\t ->
-                                case t.id of
-                                    Id id ->
-                                        link ("/#/to/" ++ id) <|
-                                            el Choice [] <|
-                                                text t.name
-                            )
-                        |> flip (++) [ plus CreateTopic ]
+                    column None [] <|
+                        (model.topics
+                            |> Dict.values
+                            |> List.map
+                                (\t ->
+                                    case t.id of
+                                        Id id ->
+                                            link ("/#/to/" ++ id) <|
+                                                el Choice [] <|
+                                                    text t.name
+                                )
+                            |> flip (++) [ plus CreateTopic ]
+                        )
 
                 ViewTopic data ->
-                    case data of
-                        Editable.Editable _ t ->
-                            [ nameEdit t EditTopic
-                            , notesEditor t EditTopic
-                            , buttons <| Just <| DeleteTopic t.id
-                            ]
+                    column None [] <|
+                        case data of
+                            Editable.Editable _ t ->
+                                [ nameEdit t EditTopic
+                                , notesEditor t EditTopic
+                                , buttons <| Just <| DeleteTopic t.id
+                                ]
 
-                        Editable.ReadOnly t ->
-                            [ editRow t EditTopic
-                            , viewNotes t.notes
-                            , link "/#/ts" <|
-                                el Topics
-                                    [ padding 10
-                                    , class "fa fa-book"
-                                    ]
-                                    empty
-                            ]
+                            Editable.ReadOnly t ->
+                                [ editRow t EditTopic
+                                , viewNotes t.notes
+                                , link "/#/ts" <|
+                                    el Topics
+                                        [ padding 10
+                                        , class "fa fa-book"
+                                        ]
+                                        empty
+                                ]
 
                 ViewTransitions ->
-                    model.transitions
-                        |> Dict.values
-                        |> List.map
-                            (\t ->
-                                case t.id of
-                                    Id id ->
-                                        link ("/#/t/" ++ id) <|
-                                            el Choice [] <|
-                                                text t.name
-                            )
-                        |> flip (++) [ plus <| CreateTransition Nothing ]
+                    column None [] <|
+                        (model.transitions
+                            |> Dict.values
+                            |> List.map
+                                (\t ->
+                                    case t.id of
+                                        Id id ->
+                                            link ("/#/t/" ++ id) <|
+                                                el Choice [] <|
+                                                    text t.name
+                                )
+                            |> flip (++) [ plus <| CreateTransition Nothing ]
+                        )
 
         roteiro =
-            row None
-                [ center, spacing 10, verticalCenter ]
-                [ link "/#/" <| el Header [ vary Small <| model.view /= ViewAll ] <| text "ROTEIRO"
-                , when (model.view == ViewAll) <|
-                    el Icon
-                        [ padding 10
-                        , class "fa fa-lock"
-                        , onClick <| TokenEdit <| Just ""
-                        ]
-                        empty
-                ]
+            when (not (model.view == ViewAll && model.device == Mobile)) <|
+                row None
+                    [ center, spacing 10, verticalCenter ]
+                    [ link "/#/" <| el Header [ vary Small <| model.view /= ViewAll ] <| text "ROTEIRO"
+                    , when (model.view == ViewAll) <|
+                        el Icon
+                            [ padding 10
+                            , class "fa fa-lock"
+                            , onClick <| TokenEdit <| Just ""
+                            ]
+                            empty
+                    ]
 
         enterToken =
             whenJust model.tokenForm
@@ -450,6 +487,28 @@ view model =
                 Nothing ->
                     empty
 
+        ball lnk clss =
+            link lnk <|
+                circle 40 Ball [] <|
+                    el BallIcon
+                        [ class <| "fa " ++ clss
+                        , center
+                        , verticalCenter
+                        ]
+                        empty
+
+        balls =
+            when (model.device == Mobile) <|
+                screen <|
+                    el None [ alignBottom, width fill ] <|
+                        row None
+                            [ spread, width fill, padding 10 ]
+                            [ ball "/#/ps" "fa-flag-checkered"
+                            , ball "/#/trs" "fa-long-arrow-right"
+                            , ball "/#/ss" "fa-bolt"
+                            , ball "/#/ts" "fa-book"
+                            ]
+
         ws =
             case model.device of
                 Desktop ->
@@ -466,7 +525,13 @@ view model =
                 , spacing 20
                 , padding ws
                 ]
-                (enterToken :: picker :: confirm :: roteiro :: content)
+                [ enterToken
+                , picker
+                , balls
+                , confirm
+                , roteiro
+                , content
+                ]
 
 
 pickStartPosition : Form -> Element Styles vs Msg

@@ -57,7 +57,9 @@ type View
 
 
 type Styles
-    = BigIcon
+    = Ball
+    | BallIcon
+    | BigIcon
     | Body
     | Button
     | Choice
@@ -65,6 +67,7 @@ type Styles
     | Dot
     | Field
     | Header
+    | Home
     | Icon
     | Line
     | Link

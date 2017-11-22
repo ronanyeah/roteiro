@@ -75,7 +75,10 @@ styling =
             [ Font.size 35
             , Color.text e
             ]
+        , style Home [ Font.size 55, Color.text e ]
         , style Topics [ Color.text e, pointer, hover [ Color.text a ] ]
+        , style BallIcon [ Font.size 35, Color.text c ]
+        , style Ball [ Color.background e, pointer ]
         ]
 
 
