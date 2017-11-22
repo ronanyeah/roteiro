@@ -806,7 +806,7 @@ viewTechList x xs =
                 (\t ->
                     case t.id of
                         Id id ->
-                            row None
+                            paragraph None
                                 []
                                 [ el Dot [] <| text "• "
                                 , link ("/#/" ++ x ++ "/" ++ id) <|
