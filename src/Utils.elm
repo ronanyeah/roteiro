@@ -2,7 +2,28 @@ module Utils exposing (..)
 
 import Array
 import Dict exposing (Dict)
-import Types exposing (Id(..), Device(Desktop), Form, Model, View(..))
+import Element.Input as Input
+import Types exposing (Id(..), Device(Desktop), Editor(..), Form, Model, Msg(SelectStartPosition), Submission, View(..))
+
+
+validateSubmission : Editor Submission -> Maybe Submission
+validateSubmission e =
+    case e of
+        Editing { startPosition, steps, name, notes, when } { id } ->
+            startPosition
+                |> Maybe.map
+                    (\p ->
+                        { id = id
+                        , position = p.id
+                        , steps = steps
+                        , notes = notes
+                        , name = name
+                        , when = Just when
+                        }
+                    )
+
+        ReadOnly _ ->
+            Nothing
 
 
 set : { r | id : Id } -> Dict String { r | id : Id } -> Dict String { r | id : Id }
@@ -72,7 +93,6 @@ emptyModel =
     , topics = Dict.empty
     , url = ""
     , token = ""
-    , choosingPosition = Nothing
     , device = Desktop
     , tokenForm = Nothing
     , confirm = Nothing
@@ -82,8 +102,10 @@ emptyModel =
 emptyForm : Form
 emptyForm =
     { name = ""
+    , startTest = Input.autocomplete Nothing SelectStartPosition
     , startPosition = Nothing
     , endPosition = Nothing
     , steps = Array.empty
     , notes = Array.empty
+    , when = ""
     }

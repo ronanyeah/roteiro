@@ -3,13 +3,13 @@ module Types exposing (..)
 import Array exposing (Array)
 import Dict exposing (Dict)
 import Editable exposing (Editable)
+import Element.Input exposing (SelectMsg, SelectWith)
 import Http
 import Window
 
 
 type Msg
     = Cancel
-    | CancelPicker
     | CbData (Result GcError AllData)
     | CbPosition (Result GcError Position)
     | CbPositionDelete (Result GcError Id)
@@ -19,7 +19,6 @@ type Msg
     | CbTopicDelete (Result GcError Id)
     | CbTransition (Result GcError Transition)
     | CbTransitionDelete (Result GcError Transition)
-    | ChoosePosition (Position -> Msg)
     | Confirm (Maybe Msg)
     | CreatePosition
     | CreateSubmission (Maybe Position)
@@ -29,14 +28,15 @@ type Msg
     | DeleteSubmission Id
     | DeleteTopic Id
     | DeleteTransition Id
+    | Edit
     | EditPosition Position
-    | EditSubmission Submission
     | EditTopic Topic
     | EditTransition Transition
-    | FormUpdate Form
     | Save
+    | SelectStartPosition (SelectMsg Position)
     | SetRoute Route
     | TokenEdit (Maybe String)
+    | Update Form
     | WindowSize Window.Size
 
 
@@ -48,7 +48,7 @@ type View
     | ViewCreateTransition Form
     | ViewPosition (Editable Position)
     | ViewPositions
-    | ViewSubmission (Editable Submission)
+    | ViewSubmission (Editor Submission)
     | ViewSubmissions
     | ViewTopics
     | ViewTopic (Editable Topic)
@@ -88,6 +88,11 @@ type Id
     = Id String
 
 
+type Editor a
+    = Editing Form a
+    | ReadOnly a
+
+
 type alias Model =
     { view : View
     , positions : Dict String Position
@@ -95,7 +100,6 @@ type alias Model =
     , submissions : Dict String Submission
     , topics : Dict String Topic
     , url : String
-    , choosingPosition : Maybe (Position -> Msg)
     , device : Device
     , url : String
     , token : String
@@ -153,10 +157,12 @@ type alias Submission =
 
 type alias Form =
     { name : String
+    , startTest : SelectWith Position Msg
     , startPosition : Maybe Position
     , endPosition : Maybe Position
     , notes : Array String
     , steps : Array String
+    , when : String
     }
 
 

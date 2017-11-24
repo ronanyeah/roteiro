@@ -2,8 +2,10 @@ module Update exposing (..)
 
 import Array
 import Editable
+import Editor
 import Data exposing (createTopic, createPosition, createSubmission, createTransition, mutate, updatePosition, updateSubmission, updateTopic, updateTransition)
 import Element
+import Element.Input as Input
 import Ports
 import Router exposing (router)
 import Task
@@ -20,7 +22,7 @@ update msg model =
                     ( model, Cmd.none )
 
                 ViewCreatePosition _ ->
-                    ( { model | view = ViewAll }, Cmd.none )
+                    ( { model | view = ViewPositions }, Cmd.none )
 
                 ViewCreateTransition { startPosition } ->
                     case startPosition of
@@ -48,7 +50,7 @@ update msg model =
                     ( model, Cmd.none )
 
                 ViewSubmission s ->
-                    ( { model | view = ViewSubmission <| Editable.cancel s, confirm = Nothing }, Cmd.none )
+                    ( { model | view = ViewSubmission <| Editor.cancel s, confirm = Nothing }, Cmd.none )
 
                 ViewSubmissions ->
                     ( model, Cmd.none )
@@ -64,9 +66,6 @@ update msg model =
 
                 ViewTransitions ->
                     ( model, Cmd.none )
-
-        CancelPicker ->
-            ( { model | choosingPosition = Nothing }, Cmd.none )
 
         CbData res ->
             case res of
@@ -114,7 +113,7 @@ update msg model =
             case res of
                 Ok data ->
                     ( { model
-                        | view = ViewSubmission <| Editable.ReadOnly data
+                        | view = ViewSubmission <| ReadOnly data
                         , submissions = set data model.submissions
                       }
                     , Cmd.none
@@ -201,9 +200,6 @@ update msg model =
                 Err err ->
                     ( model, log err )
 
-        ChoosePosition cb ->
-            ( { model | choosingPosition = Just cb }, Cmd.none )
-
         Confirm maybeM ->
             ( { model | confirm = maybeM }, Cmd.none )
 
@@ -273,6 +269,14 @@ update msg model =
             in
                 ( model, Task.attempt CbTransitionDelete request )
 
+        Edit ->
+            case model.view of
+                ViewSubmission (ReadOnly a) ->
+                    ( { model | view = ViewSubmission (Editing emptyForm a) }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
         EditPosition p ->
             case model.view of
                 ViewPosition editP ->
@@ -285,25 +289,11 @@ update msg model =
                 _ ->
                     Debug.crash "EditPosition"
 
-        EditSubmission s ->
-            case model.view of
-                ViewSubmission editS ->
-                    ( { model
-                        | view = ViewSubmission <| Editable.map (always s) <| Editable.edit editS
-                        , choosingPosition = Nothing
-                      }
-                    , Cmd.none
-                    )
-
-                _ ->
-                    Debug.crash "EditSubmission"
-
         EditTransition t ->
             case model.view of
                 ViewTransition editT ->
                     ( { model
                         | view = ViewTransition <| Editable.map (always t) <| Editable.edit editT
-                        , choosingPosition = Nothing
                       }
                     , Cmd.none
                     )
@@ -336,22 +326,34 @@ update msg model =
                     , Ports.saveToken t
                     )
 
-        FormUpdate form ->
+        Update form ->
             case model.view of
                 ViewCreatePosition _ ->
-                    ( { model | view = ViewCreatePosition form, choosingPosition = Nothing }, Cmd.none )
+                    ( { model | view = ViewCreatePosition form }, Cmd.none )
 
                 ViewCreateSubmission _ ->
-                    ( { model | view = ViewCreateSubmission form, choosingPosition = Nothing }, Cmd.none )
+                    ( { model | view = ViewCreateSubmission form }, Cmd.none )
 
                 ViewCreateTopic _ ->
-                    ( { model | view = ViewCreateTopic form, choosingPosition = Nothing }, Cmd.none )
+                    ( { model | view = ViewCreateTopic form }, Cmd.none )
 
                 ViewCreateTransition _ ->
-                    ( { model | view = ViewCreateTransition form, choosingPosition = Nothing }, Cmd.none )
+                    ( { model | view = ViewCreateTransition form }, Cmd.none )
+
+                ViewPosition p ->
+                    ( { model | view = ViewPosition <| Editable.cancel p, confirm = Nothing }, Cmd.none )
+
+                ViewSubmission s ->
+                    ( { model | view = ViewSubmission <| Editor.cancel s, confirm = Nothing }, Cmd.none )
+
+                ViewTopic t ->
+                    ( { model | view = ViewTopic <| Editable.cancel t, confirm = Nothing }, Cmd.none )
+
+                ViewTransition t ->
+                    ( { model | view = ViewTransition <| Editable.cancel t, confirm = Nothing }, Cmd.none )
 
                 _ ->
-                    Debug.crash "FormUpdate"
+                    Debug.crash "!"
 
         SetRoute route ->
             router model route
@@ -367,12 +369,14 @@ update msg model =
                         ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
 
                 ViewSubmission s ->
-                    if Editable.isDirty s then
-                        ( model
-                        , Task.attempt CbSubmission (mutate model.url model.token (updateSubmission (Editable.value s)))
-                        )
-                    else
-                        ( { model | view = ViewSubmission <| Editable.cancel s }, Cmd.none )
+                    case Utils.validateSubmission s of
+                        Just value ->
+                            ( model
+                            , Task.attempt CbSubmission (mutate model.url model.token (updateSubmission value))
+                            )
+
+                        Nothing ->
+                            ( { model | view = ViewSubmission s }, Cmd.none )
 
                 ViewTransition t ->
                     if Editable.isDirty t then
@@ -428,6 +432,14 @@ update msg model =
 
                 _ ->
                     Debug.crash "Save"
+
+        SelectStartPosition m ->
+            case model.view of
+                ViewSubmission (Editing f s) ->
+                    ( { model | view = ViewSubmission <| Editing { f | startTest = Input.updateSelection m f.startTest } s }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         WindowSize size ->
             let
