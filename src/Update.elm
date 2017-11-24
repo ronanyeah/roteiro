@@ -369,14 +369,21 @@ update msg model =
                         ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
 
                 ViewSubmission s ->
-                    case Utils.validateSubmission s of
-                        Just value ->
-                            ( model
-                            , Task.attempt CbSubmission (mutate model.url model.token (updateSubmission value))
-                            )
+                    case s of
+                        Editing f a ->
+                            case Utils.validateSubmission a.id f of
+                                Ok value ->
+                                    ( model
+                                    , Task.attempt CbSubmission <|
+                                        mutate model.url model.token <|
+                                            updateSubmission value
+                                    )
 
-                        Nothing ->
-                            ( { model | view = ViewSubmission s }, Cmd.none )
+                                Err _ ->
+                                    ( { model | view = ViewSubmission s }, Cmd.none )
+
+                        ReadOnly a ->
+                            ( model, Cmd.none )
 
                 ViewTransition t ->
                     if Editable.isDirty t then
