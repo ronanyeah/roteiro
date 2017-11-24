@@ -6,22 +6,6 @@ import Element.Input as Input
 import Types exposing (Id(..), Device(Desktop), Editor(..), Form, Model, Msg(SelectStartPosition), Submission, View(..))
 
 
-validateSubmission : Id -> Form -> Result (List String) Submission
-validateSubmission id { startPosition, steps, name, notes, when } =
-    startPosition
-        |> Maybe.map
-            (\p ->
-                { id = id
-                , position = p.id
-                , steps = steps
-                , notes = notes
-                , name = name
-                , when = Just when
-                }
-            )
-        |> Result.fromMaybe []
-
-
 set : { r | id : Id } -> Dict String { r | id : Id } -> Dict String { r | id : Id }
 set ({ id } as r) =
     let

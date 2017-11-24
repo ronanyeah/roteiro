@@ -4,6 +4,16 @@ import Types exposing (..)
 import Utils
 
 
+validate : (Id -> Form -> Result (List String) r) -> Editor { r | id : Id } -> Result (List String) r
+validate fn e =
+    case e of
+        ReadOnly a ->
+            Err []
+
+        Editing f { id } ->
+            fn id f
+
+
 update : (Form -> Form) -> Editor a -> Editor a
 update fn e =
     case e of

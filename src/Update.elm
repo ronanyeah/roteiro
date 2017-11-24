@@ -11,6 +11,7 @@ import Router exposing (router)
 import Task
 import Types exposing (..)
 import Utils exposing (del, emptyForm, get, listToDict, log, set, unwrap)
+import Validate
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -369,21 +370,16 @@ update msg model =
                         ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
 
                 ViewSubmission s ->
-                    case s of
-                        Editing f a ->
-                            case Utils.validateSubmission a.id f of
-                                Ok value ->
-                                    ( model
-                                    , Task.attempt CbSubmission <|
-                                        mutate model.url model.token <|
-                                            updateSubmission value
-                                    )
+                    case Editor.validate Validate.submission s of
+                        Ok value ->
+                            ( model
+                            , Task.attempt CbSubmission <|
+                                mutate model.url model.token <|
+                                    updateSubmission value
+                            )
 
-                                Err _ ->
-                                    ( { model | view = ViewSubmission s }, Cmd.none )
-
-                        ReadOnly a ->
-                            ( model, Cmd.none )
+                        Err _ ->
+                            ( { model | view = ViewSubmission s }, Cmd.none )
 
                 ViewTransition t ->
                     if Editable.isDirty t then
