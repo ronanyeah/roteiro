@@ -2,8 +2,7 @@ module Utils exposing (..)
 
 import Array
 import Dict exposing (Dict)
-import Element.Input as Input
-import Types exposing (Id(..), Device(Desktop), Editor(..), Form, Model, Msg(SelectStartPosition), Submission, View(..))
+import Types exposing (Id(..), Device(Desktop), Form, Model, Picker(..), View(..))
 
 
 set : { r | id : Id } -> Dict String { r | id : Id } -> Dict String { r | id : Id }
@@ -76,15 +75,15 @@ emptyModel =
     , device = Desktop
     , tokenForm = Nothing
     , confirm = Nothing
+    , form = emptyForm
     }
 
 
 emptyForm : Form
 emptyForm =
     { name = ""
-    , startTest = Input.autocomplete Nothing SelectStartPosition
-    , startPosition = Nothing
-    , endPosition = Nothing
+    , startPosition = Pending
+    , endPosition = Pending
     , steps = Array.empty
     , notes = Array.empty
     , when = ""

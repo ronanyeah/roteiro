@@ -1,6 +1,6 @@
 module Data exposing (..)
 
-import Array
+import Array exposing (Array)
 import GraphQL.Client.Http exposing (Error, customSendQueryRaw, customSendMutationRaw)
 import GraphQL.Request.Builder as B
 import GraphQL.Request.Builder.Arg as Arg
@@ -79,7 +79,7 @@ convert request =
                                 ( Just [], Just d ) ->
                                     Task.succeed d
 
-                                ( Just errs, Just d ) ->
+                                ( Just errs, Just _ ) ->
                                     Task.fail
                                         (GcError
                                             ({ code = 999
@@ -115,8 +115,8 @@ fetchData =
 -- CREATE
 
 
-createPosition : Form -> B.Request B.Mutation Position
-createPosition { name, notes } =
+createPosition : String -> Array String -> B.Request B.Mutation Position
+createPosition name notes =
     position
         |> B.field "createPosition"
             [ ( "name", Arg.string name )
@@ -127,41 +127,41 @@ createPosition { name, notes } =
         |> B.request ()
 
 
-createTopic : String -> List String -> B.Request B.Mutation Topic
+createTopic : String -> Array String -> B.Request B.Mutation Topic
 createTopic name notes =
     topic
         |> B.field "createTopic"
             [ ( "name", Arg.string name )
-            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty notes )
+            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
             ]
         |> B.extract
         |> B.mutationDocument
         |> B.request ()
 
 
-createTransition : String -> List String -> List String -> Id -> Id -> B.Request B.Mutation Transition
+createTransition : String -> Array String -> Array String -> Id -> Id -> B.Request B.Mutation Transition
 createTransition name steps notes (Id startId) (Id endId) =
     transition
         |> B.field "createTransition"
             [ ( "name", Arg.string name )
             , ( "startPositionId", Arg.string startId )
             , ( "endPositionId", Arg.string endId )
-            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty notes )
-            , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty steps )
+            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
+            , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList steps )
             ]
         |> B.extract
         |> B.mutationDocument
         |> B.request ()
 
 
-createSubmission : String -> List String -> List String -> Id -> B.Request B.Mutation Submission
+createSubmission : String -> Array String -> Array String -> Id -> B.Request B.Mutation Submission
 createSubmission name steps notes (Id startId) =
     submission
         |> B.field "createSubmission"
             [ ( "name", Arg.string name )
             , ( "positionId", Arg.string startId )
-            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty notes )
-            , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty steps )
+            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
+            , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList steps )
             , ( "when", Arg.null )
             ]
         |> B.extract

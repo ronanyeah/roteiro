@@ -2,7 +2,6 @@ module Types exposing (..)
 
 import Array exposing (Array)
 import Dict exposing (Dict)
-import Editable exposing (Editable)
 import Element.Input exposing (SelectMsg, SelectWith)
 import Http
 import Window
@@ -29,30 +28,28 @@ type Msg
     | DeleteTopic Id
     | DeleteTransition Id
     | Edit
-    | EditPosition Position
-    | EditTopic Topic
-    | EditTransition Transition
     | Save
-    | SelectStartPosition (SelectMsg Position)
     | SetRoute Route
     | TokenEdit (Maybe String)
     | Update Form
+    | UpdateEndPosition (SelectMsg Position)
+    | UpdateStartPosition (SelectMsg Position)
     | WindowSize Window.Size
 
 
 type View
     = ViewAll
-    | ViewCreatePosition Form
-    | ViewCreateSubmission Form
-    | ViewCreateTopic Form
-    | ViewCreateTransition Form
-    | ViewPosition (Editable Position)
+    | ViewCreatePosition
+    | ViewCreateSubmission
+    | ViewCreateTopic
+    | ViewCreateTransition
+    | ViewPosition Bool Position
     | ViewPositions
-    | ViewSubmission (Editor Submission)
+    | ViewSubmission Bool Submission
     | ViewSubmissions
+    | ViewTopic Bool Topic
     | ViewTopics
-    | ViewTopic (Editable Topic)
-    | ViewTransition (Editable Transition)
+    | ViewTransition Bool Transition
     | ViewTransitions
 
 
@@ -88,9 +85,10 @@ type Id
     = Id String
 
 
-type Editor a
-    = Editing Form a
-    | ReadOnly a
+type Picker a
+    = Picking (SelectWith a Msg)
+    | Picked a
+    | Pending
 
 
 type alias Model =
@@ -105,6 +103,7 @@ type alias Model =
     , token : String
     , tokenForm : Maybe String
     , confirm : Maybe Msg
+    , form : Form
     }
 
 
@@ -126,6 +125,8 @@ type Route
     | NotFound
 
 
+{-| An error from Graphcool.
+-}
 type GcError
     = HttpError Http.Error
     | GcError (List { code : Int, message : String })
@@ -157,9 +158,8 @@ type alias Submission =
 
 type alias Form =
     { name : String
-    , startTest : SelectWith Position Msg
-    , startPosition : Maybe Position
-    , endPosition : Maybe Position
+    , startPosition : Picker Position
+    , endPosition : Picker Position
     , notes : Array String
     , steps : Array String
     , when : String

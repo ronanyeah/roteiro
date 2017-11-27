@@ -1,8 +1,5 @@
 module Update exposing (..)
 
-import Array
-import Editable
-import Editor
 import Data exposing (createTopic, createPosition, createSubmission, createTransition, mutate, updatePosition, updateSubmission, updateTopic, updateTransition)
 import Element
 import Element.Input as Input
@@ -15,58 +12,46 @@ import Validate
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg ({ form } as model) =
     case msg of
         Cancel ->
             case model.view of
-                ViewAll ->
-                    ( model, Cmd.none )
-
-                ViewCreatePosition _ ->
+                ViewCreatePosition ->
                     ( { model | view = ViewPositions }, Cmd.none )
 
-                ViewCreateTransition { startPosition } ->
-                    case startPosition of
-                        Just p ->
-                            ( { model | view = ViewPosition <| Editable.ReadOnly p }, Cmd.none )
+                ViewCreateSubmission ->
+                    case form.startPosition of
+                        Picked p ->
+                            ( { model | view = ViewPosition False p }, Cmd.none )
 
-                        Nothing ->
-                            ( model, Cmd.none )
+                        _ ->
+                            Debug.crash "!"
 
-                ViewCreateSubmission { startPosition } ->
-                    case startPosition of
-                        Just p ->
-                            ( { model | view = ViewPosition <| Editable.ReadOnly p }, Cmd.none )
+                ViewCreateTransition ->
+                    case form.startPosition of
+                        Picked p ->
+                            ( { model | view = ViewPosition False p }, Cmd.none )
 
-                        Nothing ->
-                            ( model, Cmd.none )
+                        _ ->
+                            Debug.crash "!"
 
-                ViewCreateTopic _ ->
+                ViewCreateTopic ->
                     ( { model | view = ViewTopics }, Cmd.none )
 
-                ViewPosition p ->
-                    ( { model | view = ViewPosition <| Editable.cancel p, confirm = Nothing }, Cmd.none )
+                ViewPosition _ p ->
+                    ( { model | view = ViewPosition False p, confirm = Nothing }, Cmd.none )
 
-                ViewPositions ->
-                    ( model, Cmd.none )
+                ViewSubmission _ s ->
+                    ( { model | view = ViewSubmission False s, confirm = Nothing }, Cmd.none )
 
-                ViewSubmission s ->
-                    ( { model | view = ViewSubmission <| Editor.cancel s, confirm = Nothing }, Cmd.none )
+                ViewTopic _ t ->
+                    ( { model | view = ViewTopic False t, confirm = Nothing }, Cmd.none )
 
-                ViewSubmissions ->
-                    ( model, Cmd.none )
+                ViewTransition _ t ->
+                    ( { model | view = ViewTransition False t, confirm = Nothing }, Cmd.none )
 
-                ViewTopics ->
-                    ( model, Cmd.none )
-
-                ViewTopic t ->
-                    ( { model | view = ViewTopic <| Editable.cancel t, confirm = Nothing }, Cmd.none )
-
-                ViewTransition t ->
-                    ( { model | view = ViewTransition <| Editable.cancel t, confirm = Nothing }, Cmd.none )
-
-                ViewTransitions ->
-                    ( model, Cmd.none )
+                _ ->
+                    Debug.crash "!"
 
         CbData res ->
             case res of
@@ -87,7 +72,7 @@ update msg model =
             case res of
                 Ok data ->
                     ( { model
-                        | view = ViewPosition <| Editable.ReadOnly data
+                        | view = ViewPosition False data
                         , positions = set data model.positions
                       }
                     , Cmd.none
@@ -114,7 +99,7 @@ update msg model =
             case res of
                 Ok data ->
                     ( { model
-                        | view = ViewSubmission <| ReadOnly data
+                        | view = ViewSubmission False data
                         , submissions = set data model.submissions
                       }
                     , Cmd.none
@@ -129,7 +114,7 @@ update msg model =
                     let
                         view =
                             get data.position model.positions
-                                |> unwrap ViewAll (Editable.ReadOnly >> ViewPosition)
+                                |> unwrap ViewAll (ViewPosition False)
                     in
                         ( { model
                             | view = view
@@ -146,7 +131,7 @@ update msg model =
             case res of
                 Ok data ->
                     ( { model
-                        | view = ViewTopic <| Editable.ReadOnly data
+                        | view = ViewTopic False data
                         , topics = set data model.topics
                       }
                     , Cmd.none
@@ -173,7 +158,7 @@ update msg model =
             case res of
                 Ok data ->
                     ( { model
-                        | view = ViewTransition <| Editable.ReadOnly data
+                        | view = ViewTransition False data
                         , transitions = set data model.transitions
                       }
                     , Cmd.none
@@ -188,7 +173,7 @@ update msg model =
                     let
                         view =
                             get data.startPosition model.positions
-                                |> unwrap ViewAll (Editable.ReadOnly >> ViewPosition)
+                                |> unwrap ViewAll (ViewPosition False)
                     in
                         ( { model
                             | view = view
@@ -207,7 +192,8 @@ update msg model =
         CreatePosition ->
             ( { model
                 | view =
-                    ViewCreatePosition emptyForm
+                    ViewCreatePosition
+                , form = emptyForm
               }
             , Cmd.none
             )
@@ -216,7 +202,7 @@ update msg model =
             ( { model
                 | view =
                     ViewCreateSubmission
-                        { emptyForm | startPosition = p }
+                , form = { emptyForm | startPosition = unwrap Pending Picked p }
               }
             , Cmd.none
             )
@@ -224,7 +210,8 @@ update msg model =
         CreateTopic ->
             ( { model
                 | view =
-                    ViewCreateTopic emptyForm
+                    ViewCreateTopic
+                , form = emptyForm
               }
             , Cmd.none
             )
@@ -233,7 +220,7 @@ update msg model =
             ( { model
                 | view =
                     ViewCreateTransition
-                        { emptyForm | startPosition = p }
+                , form = { emptyForm | startPosition = unwrap Pending Picked p }
               }
             , Cmd.none
             )
@@ -272,47 +259,158 @@ update msg model =
 
         Edit ->
             case model.view of
-                ViewSubmission (ReadOnly a) ->
-                    ( { model | view = ViewSubmission (Editing emptyForm a) }, Cmd.none )
+                ViewPosition _ p ->
+                    let
+                        form_ =
+                            { emptyForm
+                                | name = p.name
+                                , notes = p.notes
+                            }
+                    in
+                        ( { model | view = ViewPosition True p, form = form_ }, Cmd.none )
+
+                ViewSubmission _ s ->
+                    let
+                        form_ =
+                            { emptyForm
+                                | name = s.name
+                                , steps = s.steps
+                                , notes = s.notes
+                                , when = Maybe.withDefault "" s.when
+                                , startPosition =
+                                    get s.position model.positions
+                                        |> unwrap Pending Picked
+                            }
+                    in
+                        ( { model | view = ViewSubmission True s, form = form_ }, Cmd.none )
+
+                ViewTopic _ t ->
+                    let
+                        form_ =
+                            { emptyForm
+                                | name = t.name
+                                , notes = t.notes
+                            }
+                    in
+                        ( { model | view = ViewTopic True t, form = form_ }, Cmd.none )
+
+                ViewTransition _ t ->
+                    let
+                        form_ =
+                            { emptyForm
+                                | name = t.name
+                                , steps = t.steps
+                                , notes = t.notes
+                                , startPosition =
+                                    get t.startPosition model.positions
+                                        |> unwrap Pending Picked
+                                , endPosition =
+                                    get t.endPosition model.positions
+                                        |> unwrap Pending Picked
+                            }
+                    in
+                        ( { model | view = ViewTransition True t, form = form_ }, Cmd.none )
 
                 _ ->
-                    ( model, Cmd.none )
+                    Debug.crash "!"
 
-        EditPosition p ->
+        Save ->
             case model.view of
-                ViewPosition editP ->
-                    ( { model
-                        | view = ViewPosition <| Editable.map (always p) <| Editable.edit editP
-                      }
-                    , Cmd.none
+                ViewCreatePosition ->
+                    ( model
+                    , createPosition form.name form.notes
+                        |> mutate model.url model.token
+                        |> Task.attempt CbPosition
                     )
 
-                _ ->
-                    Debug.crash "EditPosition"
-
-        EditTransition t ->
-            case model.view of
-                ViewTransition editT ->
-                    ( { model
-                        | view = ViewTransition <| Editable.map (always t) <| Editable.edit editT
-                      }
-                    , Cmd.none
+                ViewCreateTopic ->
+                    ( model
+                    , createTopic form.name form.notes
+                        |> mutate model.url model.token
+                        |> Task.attempt CbTopic
                     )
 
-                _ ->
-                    Debug.crash "EditTransition"
+                ViewCreateSubmission ->
+                    case form.startPosition of
+                        Picked { id } ->
+                            ( model
+                            , createSubmission form.name form.steps form.notes id
+                                |> mutate model.url model.token
+                                |> Task.attempt CbSubmission
+                            )
 
-        EditTopic t ->
-            case model.view of
-                ViewTopic editT ->
-                    ( { model
-                        | view = ViewTopic <| Editable.map (always t) <| Editable.edit editT
-                      }
-                    , Cmd.none
-                    )
+                        _ ->
+                            ( model, log "missing position" )
+
+                ViewCreateTransition ->
+                    case ( form.startPosition, form.endPosition ) of
+                        ( Picked start, Picked end ) ->
+                            ( model
+                            , createTransition form.name
+                                form.steps
+                                form.notes
+                                start.id
+                                end.id
+                                |> mutate model.url model.token
+                                |> Task.attempt CbTransition
+                            )
+
+                        _ ->
+                            ( model, log "missing position" )
+
+                ViewPosition _ p ->
+                    case Validate.position p.id form of
+                        Ok value ->
+                            ( model
+                            , updatePosition value
+                                |> mutate model.url model.token
+                                |> Task.attempt CbPosition
+                            )
+
+                        Err _ ->
+                            ( { model | view = ViewPosition True p }, Cmd.none )
+
+                ViewSubmission _ s ->
+                    case Validate.submission s.id form of
+                        Ok value ->
+                            ( model
+                            , updateSubmission value
+                                |> mutate model.url model.token
+                                |> Task.attempt CbSubmission
+                            )
+
+                        Err _ ->
+                            ( { model | view = ViewSubmission True s }, Cmd.none )
+
+                ViewTransition _ t ->
+                    case Validate.transition t.id form of
+                        Ok value ->
+                            ( model
+                            , updateTransition value
+                                |> mutate model.url model.token
+                                |> Task.attempt CbTransition
+                            )
+
+                        Err _ ->
+                            ( { model | view = ViewTransition True t }, Cmd.none )
+
+                ViewTopic _ t ->
+                    case Validate.topic t.id form of
+                        Ok value ->
+                            ( model
+                            , updateTopic value
+                                |> mutate model.url model.token
+                                |> Task.attempt CbTopic
+                            )
+
+                        Err _ ->
+                            ( { model | view = ViewTopic True t }, Cmd.none )
 
                 _ ->
-                    Debug.crash "EditTopic"
+                    Debug.crash "!"
+
+        SetRoute route ->
+            router model route
 
         TokenEdit mT ->
             case mT of
@@ -327,122 +425,76 @@ update msg model =
                     , Ports.saveToken t
                     )
 
-        Update form ->
-            case model.view of
-                ViewCreatePosition _ ->
-                    ( { model | view = ViewCreatePosition form }, Cmd.none )
+        Update f ->
+            ( { model | form = f }, Cmd.none )
 
-                ViewCreateSubmission _ ->
-                    ( { model | view = ViewCreateSubmission form }, Cmd.none )
-
-                ViewCreateTopic _ ->
-                    ( { model | view = ViewCreateTopic form }, Cmd.none )
-
-                ViewCreateTransition _ ->
-                    ( { model | view = ViewCreateTransition form }, Cmd.none )
-
-                ViewPosition p ->
-                    ( { model | view = ViewPosition <| Editable.cancel p, confirm = Nothing }, Cmd.none )
-
-                ViewSubmission s ->
-                    ( { model | view = ViewSubmission <| Editor.cancel s, confirm = Nothing }, Cmd.none )
-
-                ViewTopic t ->
-                    ( { model | view = ViewTopic <| Editable.cancel t, confirm = Nothing }, Cmd.none )
-
-                ViewTransition t ->
-                    ( { model | view = ViewTransition <| Editable.cancel t, confirm = Nothing }, Cmd.none )
-
-                _ ->
-                    Debug.crash "!"
-
-        SetRoute route ->
-            router model route
-
-        Save ->
-            case model.view of
-                ViewPosition p ->
-                    if Editable.isDirty p then
-                        ( model
-                        , Task.attempt CbPosition (mutate model.url model.token (updatePosition (Editable.value p)))
-                        )
-                    else
-                        ( { model | view = ViewPosition <| Editable.cancel p }, Cmd.none )
-
-                ViewSubmission s ->
-                    case Editor.validate Validate.submission s of
-                        Ok value ->
-                            ( model
-                            , Task.attempt CbSubmission <|
-                                mutate model.url model.token <|
-                                    updateSubmission value
-                            )
-
-                        Err _ ->
-                            ( { model | view = ViewSubmission s }, Cmd.none )
-
-                ViewTransition t ->
-                    if Editable.isDirty t then
-                        ( model
-                        , Task.attempt CbTransition (mutate model.url model.token (updateTransition (Editable.value t)))
-                        )
-                    else
-                        ( { model | view = ViewTransition <| Editable.cancel t }, Cmd.none )
-
-                ViewCreateTransition { name, steps, notes, startPosition, endPosition } ->
-                    case ( startPosition, endPosition ) of
-                        ( Just start, Just end ) ->
-                            let
-                                request =
-                                    createTransition name (Array.toList steps) (Array.toList notes) start.id end.id
-                                        |> mutate model.url model.token
-                            in
-                                ( model, Task.attempt CbTransition request )
-
-                        _ ->
-                            ( model, log "missing position" )
-
-                ViewCreateSubmission { name, steps, notes, startPosition } ->
-                    startPosition
-                        |> unwrap ( model, log "missing position" )
-                            (\{ id } ->
-                                let
-                                    request =
-                                        createSubmission name (Array.toList steps) (Array.toList notes) id
-                                            |> mutate model.url model.token
-                                in
-                                    ( model, Task.attempt CbSubmission request )
-                            )
-
-                ViewCreatePosition form ->
-                    ( model, Task.attempt CbPosition <| mutate model.url model.token <| createPosition form )
-
-                ViewCreateTopic { name, notes } ->
+        UpdateEndPosition selectMsg ->
+            case form.endPosition of
+                Picking state ->
                     let
-                        request =
-                            createTopic name (Array.toList notes)
-                                |> mutate model.url model.token
+                        newState =
+                            Input.updateSelection selectMsg state
+
+                        picker =
+                            case Input.selected newState of
+                                Just pos ->
+                                    Picked pos
+
+                                Nothing ->
+                                    Picking newState
+
+                        form_ =
+                            model.form |> (\f -> { f | endPosition = picker })
                     in
-                        ( model, Task.attempt CbTopic request )
-
-                ViewTopic t ->
-                    if Editable.isDirty t then
-                        ( model
-                        , Task.attempt CbTopic (mutate model.url model.token (updateTopic (Editable.value t)))
-                        )
-                    else
-                        ( { model | view = ViewTopic <| Editable.cancel t }, Cmd.none )
+                        ( { model | form = form_ }, Cmd.none )
 
                 _ ->
-                    Debug.crash "Save"
+                    ( { model
+                        | form =
+                            model.form
+                                |> (\f ->
+                                        { f
+                                            | endPosition =
+                                                Picking <| Input.autocomplete Nothing UpdateEndPosition
+                                        }
+                                   )
+                      }
+                    , Cmd.none
+                    )
 
-        SelectStartPosition m ->
-            case model.view of
-                ViewSubmission (Editing f s) ->
-                    ( { model | view = ViewSubmission <| Editing { f | startTest = Input.updateSelection m f.startTest } s }, Cmd.none )
+        UpdateStartPosition selectMsg ->
+            case form.startPosition of
+                Picking state ->
+                    let
+                        newState =
+                            Input.updateSelection selectMsg state
+
+                        picker =
+                            case Input.selected newState of
+                                Just pos ->
+                                    Picked pos
+
+                                Nothing ->
+                                    Picking newState
+
+                        form_ =
+                            model.form |> (\f -> { f | startPosition = picker })
+                    in
+                        ( { model | form = form_ }, Cmd.none )
 
                 _ ->
-                    ( model, Cmd.none )
+                    ( { model
+                        | form =
+                            model.form
+                                |> (\f ->
+                                        { f
+                                            | startPosition =
+                                                Picking <| Input.autocomplete Nothing UpdateStartPosition
+                                        }
+                                   )
+                      }
+                    , Cmd.none
+                    )
 
         WindowSize size ->
             let

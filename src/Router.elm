@@ -1,6 +1,5 @@
 module Router exposing (parseLocation, router)
 
-import Editable
 import Navigation exposing (Location)
 import Types exposing (..)
 import UrlParser exposing (Parser, (</>), map, oneOf, parseHash, s, string, top)
@@ -37,7 +36,7 @@ router model route =
                     Utils.get id model.positions
                         |> unwrap err
                             (\p ->
-                                ( ViewPosition <| Editable.ReadOnly p, Cmd.none )
+                                ( ViewPosition False p, Cmd.none )
                             )
 
                 Ss ->
@@ -53,13 +52,13 @@ router model route =
                     Utils.get id model.topics
                         |> unwrap err
                             (\p ->
-                                ( ViewTopic <| Editable.ReadOnly p, Cmd.none )
+                                ( ViewTopic False p, Cmd.none )
                             )
 
                 T id ->
                     case Utils.get id model.transitions of
                         Just t ->
-                            ( ViewTransition <| Editable.ReadOnly t, Cmd.none )
+                            ( ViewTransition False t, Cmd.none )
 
                         Nothing ->
                             ( ViewAll, Navigation.newUrl "/#/ps" )
@@ -70,13 +69,13 @@ router model route =
                 S id ->
                     case Utils.get id model.submissions of
                         Just sub ->
-                            ( ViewSubmission <| ReadOnly sub, Cmd.none )
+                            ( ViewSubmission False sub, Cmd.none )
 
                         Nothing ->
                             ( ViewAll, Navigation.newUrl "/#/ps" )
 
                 NotFound ->
-                    ( ViewAll, Navigation.newUrl "/#/" )
+                    err
     in
         ( { model | view = view }, cmd )
 
