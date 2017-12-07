@@ -2,7 +2,9 @@ const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const { resolve } = require("path");
 
-if (!process.env.GRAPHQL_ENDPOINT) throw "Missing GraphQL endpoint!";
+const { GRAPHQL_ENDPOINT, DEBUG, NODE_ENV } = process.env;
+
+if (!GRAPHQL_ENDPOINT) throw "Missing GraphQL endpoint!";
 
 const publicFolder = resolve("./public");
 
@@ -26,8 +28,8 @@ module.exports = {
             loader: "elm-webpack-loader",
             options: {
               cwd: __dirname,
-              debug: process.env.NODE_ENV === "development",
-              warn: process.env.NODE_ENV === "development"
+              debug: DEBUG === "true",
+              warn: NODE_ENV === "development"
             }
           }
         ]
