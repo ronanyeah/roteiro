@@ -173,8 +173,10 @@ view ({ form } as model) =
                                     case p.id of
                                         Id id ->
                                             link ("/#/p/" ++ id) <|
-                                                el Choice [] <|
-                                                    text p.name
+                                                paragraph Choice
+                                                    []
+                                                    [ text p.name
+                                                    ]
                                 )
                             |> flip (++)
                                 [ plus CreatePosition
@@ -228,8 +230,10 @@ view ({ form } as model) =
                                     case s.id of
                                         Id id ->
                                             link ("/#/s/" ++ id) <|
-                                                el Choice [] <|
-                                                    text s.name
+                                                paragraph Choice
+                                                    []
+                                                    [ text s.name
+                                                    ]
                                 )
                             |> flip (++) [ plus <| CreateSubmission Nothing ]
                         )

@@ -25,7 +25,7 @@ update msg ({ form } as model) =
                             ( { model | view = ViewPosition False p }, Cmd.none )
 
                         _ ->
-                            Debug.crash "!"
+                            ( { model | view = ViewSubmissions }, Cmd.none )
 
                 ViewCreateTransition ->
                     case form.startPosition of
@@ -483,18 +483,7 @@ update msg ({ form } as model) =
                         ( { model | form = form_ }, Cmd.none )
 
                 _ ->
-                    ( { model
-                        | form =
-                            model.form
-                                |> (\f ->
-                                        { f
-                                            | startPosition =
-                                                Picking <| Input.autocomplete Nothing UpdateStartPosition
-                                        }
-                                   )
-                      }
-                    , Cmd.none
-                    )
+                    ( model, Cmd.none )
 
         WindowSize size ->
             let
