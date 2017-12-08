@@ -4,7 +4,7 @@ const { resolve } = require("path");
 
 const { GRAPHQL_ENDPOINT, DEBUG, NODE_ENV } = process.env;
 
-if (!GRAPHQL_ENDPOINT) throw "Missing GraphQL endpoint!";
+if (!GRAPHQL_ENDPOINT) throw Error("Missing GraphQL endpoint!");
 
 const publicFolder = resolve("./public");
 
@@ -38,7 +38,7 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      GRAPHQL_ENDPOINT: `"${process.env.GRAPHQL_ENDPOINT}"`
+      GRAPHQL_ENDPOINT: `"${GRAPHQL_ENDPOINT}"`
     }),
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
