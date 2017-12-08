@@ -5,6 +5,25 @@ import Dict exposing (Dict)
 import Types exposing (Id(..), Device(Desktop), Form, Model, Picker(..), View(..))
 
 
+notEditing : View -> Bool
+notEditing view =
+    case view of
+        ViewPosition True _ ->
+            False
+
+        ViewSubmission True _ ->
+            False
+
+        ViewTopic True _ ->
+            False
+
+        ViewTransition True _ ->
+            False
+
+        _ ->
+            True
+
+
 set : { r | id : Id } -> Dict String { r | id : Id } -> Dict String { r | id : Id }
 set ({ id } as r) =
     let

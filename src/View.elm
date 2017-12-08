@@ -407,7 +407,7 @@ view ({ form } as model) =
                         empty
 
         balls =
-            when (model.device == Mobile) <|
+            when (model.device == Mobile && Utils.notEditing model.view) <|
                 screen <|
                     el None [ alignBottom, width fill ] <|
                         row None
