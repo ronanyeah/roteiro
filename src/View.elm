@@ -3,14 +3,15 @@ module View exposing (..)
 import Array exposing (Array)
 import Dict exposing (Dict)
 import Element exposing (Element, circle, column, decorativeImage, el, empty, layout, link, modal, newTab, paragraph, row, screen, text, when, whenJust)
-import Element.Attributes exposing (alignBottom, attribute, center, class, fill, height, maxWidth, moveDown, padding, px, spacing, spread, vary, verticalCenter, width)
+import Element.Attributes exposing (alignBottom, alignLeft, attribute, center, class, fill, height, maxWidth, moveDown, padding, px, spacing, spread, vary, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
 import Regex exposing (Regex)
+import Router
 import Styling exposing (styling)
 import Types exposing (Device(..), Form, Id(..), Model, Msg(..), Picker(..), Position, Styles(..), Variations(..), View(..))
-import Utils exposing (get, unwrap, unwrap2)
+import Utils exposing (get, sort, unwrap, unwrap2)
 
 
 matchLink : Regex
@@ -75,7 +76,7 @@ view ({ form } as model) =
 
                 ViewCreateTopic ->
                     column None
-                        [ center, spacing 20 ]
+                        [ center, spacing 20, width fill ]
                         [ nameEdit form
                         , notesEditor form
                         , buttons Nothing
@@ -83,7 +84,7 @@ view ({ form } as model) =
 
                 ViewCreateTransition ->
                     column None
-                        [ center, spacing 20 ]
+                        [ center, spacing 20, width fill ]
                         [ nameEdit form
                         , row None
                             [ verticalCenter, spacing 10 ]
@@ -101,7 +102,7 @@ view ({ form } as model) =
 
                 ViewCreateSubmission ->
                     column None
-                        [ center, spacing 20 ]
+                        [ center, spacing 20, width fill ]
                         [ nameEdit form
                         , row None
                             [ spacing 10 ]
@@ -118,14 +119,14 @@ view ({ form } as model) =
 
                 ViewCreatePosition ->
                     column None
-                        [ center, spacing 20 ]
+                        [ center, spacing 20, width fill ]
                         [ nameEdit form
                         , notesEditor form
                         , buttons Nothing
                         ]
 
                 ViewPosition editing position ->
-                    column None [ center, spacing 20 ] <|
+                    column None [ center, spacing 20, width fill ] <|
                         if editing then
                             [ nameEdit form
                             , notesEditor form
@@ -165,26 +166,31 @@ view ({ form } as model) =
                                 ]
 
                 ViewPositions ->
-                    column None [ center, spacing 20 ] <|
-                        (model.positions
-                            |> Dict.values
-                            |> List.map
-                                (\p ->
-                                    case p.id of
-                                        Id id ->
-                                            link ("/#/p/" ++ id) <|
-                                                paragraph Choice
-                                                    []
-                                                    [ text p.name
-                                                    ]
-                                )
-                            |> flip (++)
-                                [ plus CreatePosition
-                                ]
-                        )
+                    column None
+                        [ center ]
+                        [ el Topics
+                            [ padding 10
+                            , class "fa fa-flag-checkered"
+                            ]
+                            empty
+                        , column None [ alignLeft, spacing 20 ] <|
+                            (model.positions
+                                |> Dict.values
+                                |> sort
+                                |> List.map
+                                    (\p ->
+                                        link (Router.position p.id) <|
+                                            paragraph Choice
+                                                []
+                                                [ text p.name
+                                                ]
+                                    )
+                            )
+                        , plus CreatePosition
+                        ]
 
                 ViewSubmission editing ({ notes, steps, position } as s) ->
-                    column None [ center, spacing 20 ] <|
+                    column None [ center, spacing 20, width fill ] <|
                         if editing then
                             [ nameEdit model.form
                             , whenEdit model.form
@@ -212,7 +218,7 @@ view ({ form } as model) =
                                                 [ class "fa fa-flag-checkered"
                                                 ]
                                                 empty
-                                            , link (p.id |> (\(Id id) -> "/#/p/" ++ id)) <|
+                                            , link (Router.position p.id) <|
                                                 el Link [] <|
                                                     text p.name
                                             ]
@@ -227,19 +233,48 @@ view ({ form } as model) =
                             |> Dict.values
                             |> List.map
                                 (\s ->
-                                    case s.id of
-                                        Id id ->
-                                            link ("/#/s/" ++ id) <|
-                                                paragraph Choice
-                                                    []
-                                                    [ text s.name
-                                                    ]
+                                    link (Router.submission s.id) <|
+                                        paragraph Choice
+                                            []
+                                            [ text s.name
+                                            ]
                                 )
                             |> flip (++) [ plus <| CreateSubmission Nothing ]
                         )
 
-                ViewTransition editing ({ steps, startPosition, endPosition, notes } as t) ->
+                ViewTopics ->
                     column None [ center, spacing 20 ] <|
+                        (model.topics
+                            |> Dict.values
+                            |> List.map
+                                (\t ->
+                                    link (Router.topic t.id) <|
+                                        el Choice [] <|
+                                            text t.name
+                                )
+                            |> flip (++) [ plus CreateTopic ]
+                        )
+
+                ViewTopic editing t ->
+                    column None [ center, spacing 20, width fill ] <|
+                        if editing then
+                            [ nameEdit form
+                            , notesEditor form
+                            , buttons <| Just <| DeleteTopic t.id
+                            ]
+                        else
+                            [ editRow t.name
+                            , viewNotes t.notes
+                            , link "/#/ts" <|
+                                el Topics
+                                    [ padding 10
+                                    , class "fa fa-book"
+                                    ]
+                                    empty
+                            ]
+
+                ViewTransition editing ({ steps, startPosition, endPosition, notes } as t) ->
+                    column None [ center, spacing 20, width fill ] <|
                         if editing then
                             [ nameEdit form
                             , paragraph None
@@ -263,14 +298,14 @@ view ({ form } as model) =
                                     [ editRow t.name
                                     , paragraph None
                                         [ verticalCenter, spacing 10 ]
-                                        [ link (start.id |> (\(Id id) -> "/#/p/" ++ id)) <|
+                                        [ link (Router.position start.id) <|
                                             el Link [] <|
                                                 text start.name
                                         , el MattIcon
                                             [ class "fa fa-long-arrow-right"
                                             ]
                                             empty
-                                        , link (end.id |> (\(Id id) -> "/#/p/" ++ id)) <|
+                                        , link (Router.position end.id) <|
                                             el Link [] <|
                                                 text end.name
                                         ]
@@ -279,50 +314,15 @@ view ({ form } as model) =
                                     ]
                                 )
 
-                ViewTopics ->
-                    column None [ center, spacing 20 ] <|
-                        (model.topics
-                            |> Dict.values
-                            |> List.map
-                                (\t ->
-                                    case t.id of
-                                        Id id ->
-                                            link ("/#/to/" ++ id) <|
-                                                el Choice [] <|
-                                                    text t.name
-                                )
-                            |> flip (++) [ plus CreateTopic ]
-                        )
-
-                ViewTopic editing t ->
-                    column None [ center, spacing 20 ] <|
-                        if editing then
-                            [ nameEdit form
-                            , notesEditor form
-                            , buttons <| Just <| DeleteTopic t.id
-                            ]
-                        else
-                            [ editRow t.name
-                            , viewNotes t.notes
-                            , link "/#/ts" <|
-                                el Topics
-                                    [ padding 10
-                                    , class "fa fa-book"
-                                    ]
-                                    empty
-                            ]
-
                 ViewTransitions ->
                     column None [ center, spacing 20 ] <|
                         (model.transitions
                             |> Dict.values
                             |> List.map
                                 (\t ->
-                                    case t.id of
-                                        Id id ->
-                                            link ("/#/t/" ++ id) <|
-                                                el Choice [] <|
-                                                    text t.name
+                                    link (Router.transition t.id) <|
+                                        el Choice [] <|
+                                            text t.name
                                 )
                             |> flip (++) [ plus <| CreateTransition Nothing ]
                         )
@@ -660,7 +660,7 @@ stepsEditor form =
                         (\i v ->
                             Input.multiline
                                 Field
-                                []
+                                [ width fill, attribute "rows" "4" ]
                                 { onChange = \str -> Update { form | steps = Array.set i str form.steps }
                                 , value = v
                                 , label = Input.hiddenLabel ""
@@ -679,7 +679,7 @@ stepsEditor form =
                 ]
     in
         column None
-            [ spacing 10 ]
+            [ spacing 10, width fill, maxWidth <| px 500 ]
             [ el BigIcon [ class "fa fa-cogs", center ] empty
             , steps
             , buttons
@@ -697,7 +697,7 @@ notesEditor form =
                         (\i v ->
                             Input.multiline
                                 Field
-                                [ width <| px 300, attribute "rows" "3" ]
+                                [ width fill, attribute "rows" "4" ]
                                 { onChange = \str -> Update { form | notes = Array.set i str form.notes }
                                 , value = v
                                 , label = Input.hiddenLabel ""
@@ -716,7 +716,7 @@ notesEditor form =
                 ]
     in
         column None
-            [ spacing 10 ]
+            [ spacing 10, width fill, maxWidth <| px 500 ]
             [ el BigIcon [ class "fa fa-sticky-note-o", center ] empty
             , notes
             , buttons

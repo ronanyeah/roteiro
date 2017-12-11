@@ -4,6 +4,7 @@ import Data exposing (createTopic, createPosition, createSubmission, createTrans
 import Element
 import Element.Input as Input
 import Ports
+import Navigation
 import Router exposing (router)
 import Task
 import Types exposing (..)
@@ -75,7 +76,7 @@ update msg ({ form } as model) =
                         | view = ViewPosition False data
                         , positions = set data model.positions
                       }
-                    , Cmd.none
+                    , Navigation.modifyUrl <| Router.position data.id
                     )
 
                 Err err ->
@@ -102,7 +103,7 @@ update msg ({ form } as model) =
                         | view = ViewSubmission False data
                         , submissions = set data model.submissions
                       }
-                    , Cmd.none
+                    , Navigation.modifyUrl <| Router.submission data.id
                     )
 
                 Err err ->
@@ -110,19 +111,13 @@ update msg ({ form } as model) =
 
         CbSubmissionDelete res ->
             case res of
-                Ok data ->
-                    let
-                        view =
-                            get data.position model.positions
-                                |> unwrap ViewAll (ViewPosition False)
-                    in
-                        ( { model
-                            | view = view
-                            , submissions = del data.id model.submissions
-                            , confirm = Nothing
-                          }
-                        , Cmd.none
-                        )
+                Ok id ->
+                    ( { model
+                        | submissions = del id model.submissions
+                        , confirm = Nothing
+                      }
+                    , Navigation.back 1
+                    )
 
                 Err err ->
                     ( model, log err )
@@ -134,7 +129,7 @@ update msg ({ form } as model) =
                         | view = ViewTopic False data
                         , topics = set data model.topics
                       }
-                    , Cmd.none
+                    , Navigation.modifyUrl <| Router.topic data.id
                     )
 
                 Err err ->
@@ -161,7 +156,7 @@ update msg ({ form } as model) =
                         | view = ViewTransition False data
                         , transitions = set data model.transitions
                       }
-                    , Cmd.none
+                    , Navigation.modifyUrl <| Router.transition data.id
                     )
 
                 Err err ->
@@ -169,19 +164,13 @@ update msg ({ form } as model) =
 
         CbTransitionDelete res ->
             case res of
-                Ok data ->
-                    let
-                        view =
-                            get data.startPosition model.positions
-                                |> unwrap ViewAll (ViewPosition False)
-                    in
-                        ( { model
-                            | view = view
-                            , transitions = del data.id model.transitions
-                            , confirm = Nothing
-                          }
-                        , Cmd.none
-                        )
+                Ok id ->
+                    ( { model
+                        | transitions = del id model.transitions
+                        , confirm = Nothing
+                      }
+                    , Navigation.back 1
+                    )
 
                 Err err ->
                     ( model, log err )
@@ -449,18 +438,7 @@ update msg ({ form } as model) =
                         ( { model | form = form_ }, Cmd.none )
 
                 _ ->
-                    ( { model
-                        | form =
-                            model.form
-                                |> (\f ->
-                                        { f
-                                            | endPosition =
-                                                Picking <| Input.autocomplete Nothing UpdateEndPosition
-                                        }
-                                   )
-                      }
-                    , Cmd.none
-                    )
+                    ( model, Cmd.none )
 
         UpdateStartPosition selectMsg ->
             case form.startPosition of

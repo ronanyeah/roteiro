@@ -13,11 +13,11 @@ type Msg
     | CbPosition (Result GcError Position)
     | CbPositionDelete (Result GcError Id)
     | CbSubmission (Result GcError Submission)
-    | CbSubmissionDelete (Result GcError Submission)
+    | CbSubmissionDelete (Result GcError Id)
     | CbTopic (Result GcError Topic)
     | CbTopicDelete (Result GcError Id)
     | CbTransition (Result GcError Transition)
-    | CbTransitionDelete (Result GcError Transition)
+    | CbTransitionDelete (Result GcError Id)
     | Confirm (Maybe Msg)
     | CreatePosition
     | CreateSubmission (Maybe Position)

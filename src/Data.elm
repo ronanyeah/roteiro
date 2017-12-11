@@ -259,9 +259,12 @@ deletePosition (Id id) =
         |> B.request ()
 
 
-deleteSubmission : Id -> B.Request B.Mutation Submission
+deleteSubmission : Id -> B.Request B.Mutation Id
 deleteSubmission (Id id) =
-    submission
+    B.id
+        |> B.map Id
+        |> B.field "id" []
+        |> B.extract
         |> B.field "deleteSubmission"
             [ ( "id", Arg.string id )
             ]
@@ -284,9 +287,12 @@ deleteTopic (Id id) =
         |> B.request ()
 
 
-deleteTransition : Id -> B.Request B.Mutation Transition
+deleteTransition : Id -> B.Request B.Mutation Id
 deleteTransition (Id id) =
-    transition
+    B.id
+        |> B.map Id
+        |> B.field "id" []
+        |> B.extract
         |> B.field "deleteTransition"
             [ ( "id", Arg.string id )
             ]

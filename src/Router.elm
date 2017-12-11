@@ -1,9 +1,29 @@
-module Router exposing (parseLocation, router)
+module Router exposing (..)
 
 import Navigation exposing (Location)
 import Types exposing (..)
 import UrlParser exposing (Parser, (</>), map, oneOf, parseHash, s, string, top)
 import Utils exposing (unwrap)
+
+
+position : Id -> String
+position (Id id) =
+    "/#/p/" ++ id
+
+
+submission : Id -> String
+submission (Id id) =
+    "/#/s/" ++ id
+
+
+topic : Id -> String
+topic (Id id) =
+    "/#/to/" ++ id
+
+
+transition : Id -> String
+transition (Id id) =
+    "/#/t/" ++ id
 
 
 route : Parser (Route -> a) a

@@ -5,6 +5,11 @@ import Dict exposing (Dict)
 import Types exposing (Id(..), Device(Desktop), Form, Model, Picker(..), View(..))
 
 
+sort : List { r | name : String } -> List { r | name : String }
+sort =
+    List.sortBy (.name >> String.toLower)
+
+
 notEditing : View -> Bool
 notEditing view =
     case view of
