@@ -77,6 +77,24 @@ type Styles
     | Topics
 
 
+type FaIcon
+    = Flag
+    | Arrow
+    | Write
+    | Trash
+    | Cross
+    | Tick
+    | Bolt
+    | Lock
+    | Book
+    | Notes
+    | Plus
+    | Minus
+    | Question
+    | Globe
+    | Cogs
+
+
 type Variations
     = Small
 

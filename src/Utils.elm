@@ -2,7 +2,65 @@ module Utils exposing (..)
 
 import Array
 import Dict exposing (Dict)
-import Types exposing (Id(..), Device(Desktop), Form, Model, Picker(..), View(..))
+import Element exposing (Attribute, Element, empty, el)
+import Element.Attributes exposing (class)
+import Types exposing (Id(..), Device(Desktop), FaIcon(..), Form, Model, Picker(..), View(..))
+
+
+icon : FaIcon -> s -> List (Attribute vs msg) -> Element s vs msg
+icon fa s attrs =
+    let
+        faClass =
+            (case fa of
+                Flag ->
+                    "fa-flag-checkered"
+
+                Arrow ->
+                    "fa-long-arrow-right"
+
+                Bolt ->
+                    "fa-bolt"
+
+                Lock ->
+                    "fa-lock"
+
+                Book ->
+                    "fa-book"
+
+                Plus ->
+                    "fa-plus"
+
+                Globe ->
+                    "fa-globe"
+
+                Minus ->
+                    "fa-minus"
+
+                Notes ->
+                    "fa-sticky-note-o"
+
+                Cross ->
+                    "fa-times"
+
+                Tick ->
+                    "fa-check"
+
+                Question ->
+                    "fa-question"
+
+                Trash ->
+                    "fa-trash"
+
+                Write ->
+                    "fa-edit"
+
+                Cogs ->
+                    "fa-cogs"
+            )
+                |> (++) "fa "
+                |> class
+    in
+        el s (faClass :: attrs) empty
 
 
 sort : List { r | name : String } -> List { r | name : String }
@@ -52,12 +110,6 @@ unwrap : b -> (a -> b) -> Maybe a -> b
 unwrap default fn =
     Maybe.map fn
         >> Maybe.withDefault default
-
-
-unwrap2 : c -> Maybe a -> Maybe b -> (a -> b -> c) -> c
-unwrap2 c maybeA maybeB fn =
-    Maybe.map2 fn maybeA maybeB
-        |> Maybe.withDefault c
 
 
 log : a -> Cmd msg

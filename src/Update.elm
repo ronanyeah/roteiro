@@ -34,7 +34,7 @@ update msg ({ form } as model) =
                             ( { model | view = ViewPosition False p }, Cmd.none )
 
                         _ ->
-                            Debug.crash "!"
+                            ( { model | view = ViewTransitions }, Cmd.none )
 
                 ViewCreateTopic ->
                     ( { model | view = ViewTopics }, Cmd.none )
@@ -52,7 +52,7 @@ update msg ({ form } as model) =
                     ( { model | view = ViewTransition False t, confirm = Nothing }, Cmd.none )
 
                 _ ->
-                    Debug.crash "!"
+                    ( model, Cmd.none )
 
         CbData res ->
             case res of
@@ -301,7 +301,7 @@ update msg ({ form } as model) =
                         ( { model | view = ViewTransition True t, form = form_ }, Cmd.none )
 
                 _ ->
-                    Debug.crash "!"
+                    ( model, Cmd.none )
 
         Save ->
             case model.view of
@@ -310,13 +310,6 @@ update msg ({ form } as model) =
                     , createPosition form.name form.notes
                         |> mutate model.url model.token
                         |> Task.attempt CbPosition
-                    )
-
-                ViewCreateTopic ->
-                    ( model
-                    , createTopic form.name form.notes
-                        |> mutate model.url model.token
-                        |> Task.attempt CbTopic
                     )
 
                 ViewCreateSubmission ->
@@ -330,6 +323,13 @@ update msg ({ form } as model) =
 
                         _ ->
                             ( model, log "missing position" )
+
+                ViewCreateTopic ->
+                    ( model
+                    , createTopic form.name form.notes
+                        |> mutate model.url model.token
+                        |> Task.attempt CbTopic
+                    )
 
                 ViewCreateTransition ->
                     case ( form.startPosition, form.endPosition ) of
@@ -371,18 +371,6 @@ update msg ({ form } as model) =
                         Err _ ->
                             ( { model | view = ViewSubmission True s }, Cmd.none )
 
-                ViewTransition _ t ->
-                    case Validate.transition t.id form of
-                        Ok value ->
-                            ( model
-                            , updateTransition value
-                                |> mutate model.url model.token
-                                |> Task.attempt CbTransition
-                            )
-
-                        Err _ ->
-                            ( { model | view = ViewTransition True t }, Cmd.none )
-
                 ViewTopic _ t ->
                     case Validate.topic t.id form of
                         Ok value ->
@@ -395,23 +383,35 @@ update msg ({ form } as model) =
                         Err _ ->
                             ( { model | view = ViewTopic True t }, Cmd.none )
 
+                ViewTransition _ t ->
+                    case Validate.transition t.id form of
+                        Ok value ->
+                            ( model
+                            , updateTransition value
+                                |> mutate model.url model.token
+                                |> Task.attempt CbTransition
+                            )
+
+                        Err _ ->
+                            ( { model | view = ViewTransition True t }, Cmd.none )
+
                 _ ->
-                    Debug.crash "!"
+                    ( model, Cmd.none )
 
         SetRoute route ->
             router model route
 
-        TokenEdit mT ->
-            case mT of
+        TokenEdit maybeStr ->
+            case maybeStr of
                 Nothing ->
-                    ( { model | tokenForm = mT }, Cmd.none )
+                    ( { model | tokenForm = Nothing }, Cmd.none )
 
                 Just "" ->
-                    ( { model | tokenForm = mT }, Cmd.none )
+                    ( { model | tokenForm = Just "" }, Cmd.none )
 
-                Just t ->
-                    ( { model | tokenForm = Nothing, token = t }
-                    , Ports.saveToken t
+                Just token ->
+                    ( { model | tokenForm = Nothing, token = token }
+                    , Ports.saveToken token
                     )
 
         Update f ->

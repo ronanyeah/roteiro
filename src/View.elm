@@ -3,15 +3,16 @@ module View exposing (..)
 import Array exposing (Array)
 import Dict exposing (Dict)
 import Element exposing (Element, circle, column, decorativeImage, el, empty, layout, link, modal, newTab, paragraph, row, screen, text, when, whenJust)
-import Element.Attributes exposing (alignBottom, alignLeft, attribute, center, class, fill, height, maxWidth, moveDown, padding, px, spacing, spread, vary, verticalCenter, width)
+import Element.Attributes exposing (alignBottom, alignLeft, attribute, center, fill, height, maxWidth, moveDown, padding, px, spacing, spread, vary, verticalCenter, width)
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
+import List.Extra exposing (groupWhile)
 import Regex exposing (Regex)
 import Router
 import Styling exposing (styling)
-import Types exposing (Device(..), Form, Id(..), Model, Msg(..), Picker(..), Position, Styles(..), Variations(..), View(..))
-import Utils exposing (get, sort, unwrap, unwrap2)
+import Types exposing (Device(..), FaIcon(..), Form, Id(..), Model, Msg(..), Picker(..), Position, Styles(..), Variations(..), View(..))
+import Utils exposing (get, icon, sort)
 
 
 matchLink : Regex
@@ -42,36 +43,20 @@ view ({ form } as model) =
                                     , width <| px 100
                                     ]
                                     { src = "/map.svg" }
-                                , el Home [] <| text "Roteiro"
+                                , el Home [] <| text "ROTEIRO"
                                 ]
 
                         Desktop ->
                             column None
                                 [ center ]
                                 [ link "/#/ps" <|
-                                    el Topics
-                                        [ padding 10
-                                        , class "fa fa-flag-checkered"
-                                        ]
-                                        empty
+                                    icon Flag Topics [ padding 10 ]
                                 , link "/#/trs" <|
-                                    el Topics
-                                        [ padding 10
-                                        , class "fa fa-long-arrow-right"
-                                        ]
-                                        empty
+                                    icon Arrow Topics [ padding 10 ]
                                 , link "/#/ss" <|
-                                    el Topics
-                                        [ padding 10
-                                        , class "fa fa-bolt"
-                                        ]
-                                        empty
+                                    icon Bolt Topics [ padding 10 ]
                                 , link "/#/ts" <|
-                                    el Topics
-                                        [ padding 10
-                                        , class "fa fa-book"
-                                        ]
-                                        empty
+                                    icon Book Topics [ padding 10 ]
                                 ]
 
                 ViewCreateTopic ->
@@ -89,10 +74,7 @@ view ({ form } as model) =
                         , row None
                             [ verticalCenter, spacing 10 ]
                             [ pickStartPosition model.positions form
-                            , el MattIcon
-                                [ class "fa fa-long-arrow-right"
-                                ]
-                                empty
+                            , icon Arrow MattIcon []
                             , pickEndPosition model.positions form
                             ]
                         , stepsEditor form
@@ -106,10 +88,7 @@ view ({ form } as model) =
                         [ nameEdit form
                         , row None
                             [ spacing 10 ]
-                            [ el MattIcon
-                                [ class "fa fa-flag-checkered"
-                                ]
-                                empty
+                            [ icon Flag MattIcon []
                             , pickStartPosition model.positions form
                             ]
                         , stepsEditor form
@@ -125,18 +104,15 @@ view ({ form } as model) =
                         , buttons Nothing
                         ]
 
-                ViewPosition editing position ->
+                ViewPosition editing ({ id, name, notes } as position) ->
                     column None [ center, spacing 20, width fill ] <|
                         if editing then
                             [ nameEdit form
                             , notesEditor form
-                            , buttons <| Just <| DeletePosition position.id
+                            , buttons <| Just <| DeletePosition id
                             ]
                         else
                             let
-                                ({ id, notes } as p) =
-                                    position
-
                                 transitions =
                                     model.transitions
                                         |> Dict.values
@@ -147,33 +123,23 @@ view ({ form } as model) =
                                         |> Dict.values
                                         |> List.filter (.position >> (==) id)
                             in
-                                [ editRow p.name
+                                [ editRow name
                                 , viewNotes notes
                                 , el Line [ width <| px 100, height <| px 2 ] empty
-                                , el MattIcon
-                                    [ class "fa fa-long-arrow-right"
-                                    ]
-                                    empty
-                                , viewTechList "t" transitions
-                                , plus <| CreateTransition <| Just p
+                                , icon Arrow MattIcon []
+                                , viewTechList Router.transition transitions
+                                , plus <| CreateTransition <| Just position
                                 , el Line [ width <| px 100, height <| px 2 ] empty
-                                , el MattIcon
-                                    [ class "fa fa-bolt"
-                                    ]
-                                    empty
-                                , viewTechList "s" submissions
-                                , plus <| CreateSubmission <| Just p
+                                , icon Bolt MattIcon []
+                                , viewTechList Router.submission submissions
+                                , plus <| CreateSubmission <| Just position
                                 ]
 
                 ViewPositions ->
                     column None
-                        [ center ]
-                        [ el Topics
-                            [ padding 10
-                            , class "fa fa-flag-checkered"
-                            ]
-                            empty
-                        , column None [ alignLeft, spacing 20 ] <|
+                        [ alignLeft, center, spacing 20 ]
+                        [ icon Flag Topics []
+                        , column None [] <|
                             (model.positions
                                 |> Dict.values
                                 |> sort
@@ -189,71 +155,85 @@ view ({ form } as model) =
                         , plus CreatePosition
                         ]
 
-                ViewSubmission editing ({ notes, steps, position } as s) ->
+                ViewSubmission editing sub ->
                     column None [ center, spacing 20, width fill ] <|
                         if editing then
-                            [ nameEdit model.form
-                            , whenEdit model.form
+                            [ nameEdit form
+                            , whenEdit form
                             , row None
                                 [ spacing 10 ]
-                                [ el MattIcon
-                                    [ class "fa fa-flag-checkered"
-                                    ]
-                                    empty
+                                [ icon Flag MattIcon []
                                 , pickStartPosition model.positions form
                                 ]
                             , stepsEditor form
                             , notesEditor form
-                            , buttons <| Just <| DeleteSubmission s.id
+                            , buttons <| Just <| DeleteSubmission sub.id
                             ]
                         else
-                            get position model.positions
-                                |> unwrap oopsView
-                                    (\p ->
-                                        [ editRow s.name
-                                        , whenJust s.when text
-                                        , row None
-                                            [ spacing 10 ]
-                                            [ el MattIcon
-                                                [ class "fa fa-flag-checkered"
-                                                ]
-                                                empty
-                                            , link (Router.position p.id) <|
+                            [ editRow sub.name
+                            , whenJust sub.when text
+                            , row None
+                                [ spacing 10 ]
+                                [ icon Flag MattIcon []
+                                , get sub.position model.positions
+                                    |> flip whenJust
+                                        (\pos ->
+                                            link (Router.position pos.id) <|
                                                 el Link [] <|
-                                                    text p.name
-                                            ]
-                                        , viewSteps steps
-                                        , viewNotes notes
-                                        ]
-                                    )
+                                                    text pos.name
+                                        )
+                                ]
+                            , viewSteps sub.steps
+                            , viewNotes sub.notes
+                            ]
 
                 ViewSubmissions ->
-                    column None [ center, spacing 20 ] <|
-                        (model.submissions
-                            |> Dict.values
-                            |> List.map
-                                (\s ->
-                                    link (Router.submission s.id) <|
-                                        paragraph Choice
+                    column None
+                        [ alignLeft, center, spacing 20 ]
+                        [ icon Bolt MattIcon []
+                        , column None [ spacing 20 ] <|
+                            (model.submissions
+                                |> Dict.values
+                                |> groupWhile (\a b -> a.position == b.position)
+                                |> List.map
+                                    (\g ->
+                                        column None
                                             []
-                                            [ text s.name
+                                            [ g
+                                                |> List.head
+                                                |> Maybe.andThen
+                                                    (\{ position } ->
+                                                        get position model.positions
+                                                    )
+                                                |> flip whenJust
+                                                    (\{ id, name } ->
+                                                        link (Router.position id) <|
+                                                            el Link [ center ] <|
+                                                                text name
+                                                    )
+                                            , viewTechList Router.submission g
                                             ]
-                                )
-                            |> flip (++) [ plus <| CreateSubmission Nothing ]
-                        )
+                                    )
+                            )
+                        , plus <| CreateSubmission Nothing
+                        ]
 
                 ViewTopics ->
-                    column None [ center, spacing 20 ] <|
-                        (model.topics
-                            |> Dict.values
-                            |> List.map
-                                (\t ->
-                                    link (Router.topic t.id) <|
-                                        el Choice [] <|
-                                            text t.name
-                                )
-                            |> flip (++) [ plus CreateTopic ]
-                        )
+                    column None
+                        [ alignLeft, center, spacing 20 ]
+                        [ icon Bolt MattIcon []
+                        , column None [] <|
+                            (model.topics
+                                |> Dict.values
+                                |> List.map
+                                    (\t ->
+                                        link (Router.topic t.id) <|
+                                            el Choice [] <|
+                                                text t.name
+                                    )
+                            )
+                        , plus CreateTopic
+                        ]
 
                 ViewTopic editing t ->
                     column None [ center, spacing 20, width fill ] <|
@@ -266,11 +246,7 @@ view ({ form } as model) =
                             [ editRow t.name
                             , viewNotes t.notes
                             , link "/#/ts" <|
-                                el Topics
-                                    [ padding 10
-                                    , class "fa fa-book"
-                                    ]
-                                    empty
+                                icon Book Topics []
                             ]
 
                 ViewTransition editing ({ steps, startPosition, endPosition, notes } as t) ->
@@ -280,10 +256,7 @@ view ({ form } as model) =
                             , paragraph None
                                 [ verticalCenter, spacing 10 ]
                                 [ pickStartPosition model.positions form
-                                , el MattIcon
-                                    [ class "fa fa-long-arrow-right"
-                                    ]
-                                    empty
+                                , icon Arrow MattIcon []
                                 , pickEndPosition model.positions form
                                 ]
                             , stepsEditor form
@@ -291,41 +264,57 @@ view ({ form } as model) =
                             , buttons <| Just <| DeleteTransition t.id
                             ]
                         else
-                            unwrap2 oopsView
-                                (get startPosition model.positions)
-                                (get endPosition model.positions)
+                            [ editRow t.name
+                            , Maybe.map2
                                 (\start end ->
-                                    [ editRow t.name
-                                    , paragraph None
+                                    paragraph None
                                         [ verticalCenter, spacing 10 ]
                                         [ link (Router.position start.id) <|
                                             el Link [] <|
                                                 text start.name
-                                        , el MattIcon
-                                            [ class "fa fa-long-arrow-right"
-                                            ]
-                                            empty
+                                        , icon Arrow MattIcon []
                                         , link (Router.position end.id) <|
                                             el Link [] <|
                                                 text end.name
                                         ]
-                                    , viewSteps steps
-                                    , viewNotes notes
-                                    ]
                                 )
+                                (get startPosition model.positions)
+                                (get endPosition model.positions)
+                                |> Maybe.withDefault empty
+                            , viewSteps steps
+                            , viewNotes notes
+                            ]
 
                 ViewTransitions ->
-                    column None [ center, spacing 20 ] <|
-                        (model.transitions
-                            |> Dict.values
-                            |> List.map
-                                (\t ->
-                                    link (Router.transition t.id) <|
-                                        el Choice [] <|
-                                            text t.name
-                                )
-                            |> flip (++) [ plus <| CreateTransition Nothing ]
-                        )
+                    column None
+                        [ alignLeft, center, spacing 20 ]
+                        [ icon Bolt MattIcon []
+                        , column None [ spacing 20 ] <|
+                            (model.transitions
+                                |> Dict.values
+                                |> groupWhile (\a b -> a.startPosition == b.startPosition)
+                                |> List.map
+                                    (\g ->
+                                        column None
+                                            []
+                                            [ g
+                                                |> List.head
+                                                |> Maybe.andThen
+                                                    (\{ startPosition } ->
+                                                        get startPosition model.positions
+                                                    )
+                                                |> flip whenJust
+                                                    (\{ id, name } ->
+                                                        link (Router.position id) <|
+                                                            el Link [ center ] <|
+                                                                text name
+                                                    )
+                                            , viewTechList Router.transition g
+                                            ]
+                                    )
+                            )
+                        , plus <| CreateTransition Nothing
+                        ]
 
         roteiro =
             when (not (model.view == ViewAll && model.device == Mobile)) <|
@@ -333,12 +322,11 @@ view ({ form } as model) =
                     [ center, spacing 10, verticalCenter ]
                     [ link "/#/" <| el Header [ vary Small <| model.view /= ViewAll ] <| text "ROTEIRO"
                     , when (model.view == ViewAll) <|
-                        el Icon
+                        icon Lock
+                            Icon
                             [ padding 10
-                            , class "fa fa-lock"
                             , onClick <| TokenEdit <| Just ""
                             ]
-                            empty
                     ]
 
         enterToken =
@@ -354,18 +342,10 @@ view ({ form } as model) =
                                 , value = str
                                 , label =
                                     Input.labelAbove <|
-                                        el BigIcon
-                                            [ class "fa fa-lock"
-                                            , center
-                                            ]
-                                            empty
+                                        icon Lock BigIcon [ center ]
                                 , options = []
                                 }
-                            , el PickerCancel
-                                [ onClick <| TokenEdit Nothing
-                                , class "fa fa-times"
-                                ]
-                                empty
+                            , icon Cross PickerCancel [ onClick <| TokenEdit Nothing ]
                             ]
                 )
 
@@ -375,36 +355,23 @@ view ({ form } as model) =
                     modal ChooseBox [ center, verticalCenter, padding 10, spacing 20 ] <|
                         column None
                             [ center ]
-                            [ el BigIcon
-                                [ center
-                                , class "fa fa-question"
-                                ]
-                                empty
+                            [ icon Question BigIcon [ center ]
                             , row None
                                 [ spacing 40 ]
-                                [ el PickerCancel
-                                    [ onClick msg
-                                    , class "fa fa-check"
-                                    ]
-                                    empty
-                                , el PickerCancel
-                                    [ onClick <| Confirm Nothing
-                                    , class "fa fa-times"
-                                    ]
-                                    empty
+                                [ icon Tick PickerCancel [ onClick msg ]
+                                , icon Cross PickerCancel [ onClick <| Confirm Nothing ]
                                 ]
                             ]
                 )
 
-        ball lnk clss =
+        ball lnk fa =
             link lnk <|
                 circle 40 Ball [] <|
-                    el BallIcon
-                        [ class <| "fa " ++ clss
-                        , center
+                    icon fa
+                        BallIcon
+                        [ center
                         , verticalCenter
                         ]
-                        empty
 
         balls =
             when (model.device == Mobile && Utils.notEditing model.view) <|
@@ -412,10 +379,10 @@ view ({ form } as model) =
                     el None [ alignBottom, width fill ] <|
                         row None
                             [ spread, width fill, padding 10 ]
-                            [ ball "/#/ps" "fa-flag-checkered"
-                            , ball "/#/trs" "fa-long-arrow-right"
-                            , ball "/#/ss" "fa-bolt"
-                            , ball "/#/ts" "fa-book"
+                            [ ball "/#/ps" Flag
+                            , ball "/#/trs" Arrow
+                            , ball "/#/ss" Bolt
+                            , ball "/#/ts" Book
                             ]
 
         ws =
@@ -455,9 +422,9 @@ pickStartPosition : Dict String Position -> Form -> Element Styles vs Msg
 pickStartPosition positions form =
     case form.startPosition of
         Pending ->
-            el Icon
+            icon Question
+                Icon
                 [ center
-                , class "fa fa-question"
                 , onClick <|
                     Update
                         { form
@@ -466,7 +433,6 @@ pickStartPosition positions form =
                                     Input.autocomplete Nothing UpdateStartPosition
                         }
                 ]
-                empty
 
         Picking state ->
             Input.select None
@@ -510,9 +476,9 @@ pickEndPosition : Dict String Position -> Form -> Element Styles vs Msg
 pickEndPosition positions form =
     case form.endPosition of
         Pending ->
-            el Icon
+            icon Question
+                Icon
                 [ center
-                , class "fa fa-question"
                 , onClick <|
                     Update
                         { form
@@ -521,7 +487,6 @@ pickEndPosition positions form =
                                     Input.autocomplete Nothing UpdateEndPosition
                         }
                 ]
-                empty
 
         Picking state ->
             Input.select None
@@ -566,12 +531,11 @@ editRow name =
     paragraph None
         [ spacing 5, verticalCenter ]
         [ el Subtitle [] <| text name
-        , el Icon
+        , icon Write
+            Icon
             [ padding 10
-            , class "fa fa-edit"
             , onClick Edit
             ]
-            empty
         ]
 
 
@@ -603,48 +567,43 @@ whenEdit r =
 
 plus : msg -> Element Styles vs msg
 plus msg =
-    el Icon
+    icon Plus
+        Icon
         [ padding 10
         , onClick msg
-        , class "fa fa-plus"
         ]
-        empty
 
 
 minus : msg -> Element Styles vs msg
 minus msg =
-    el Icon
+    icon Minus
+        Icon
         [ padding 10
         , onClick msg
-        , class "fa fa-minus"
         ]
-        empty
 
 
 buttons : Maybe Msg -> Element Styles vs Msg
 buttons maybeDelete =
     row ChooseBox
         [ spacing 20 ]
-        [ el Icon
+        [ icon Tick
+            Icon
             [ padding 10
             , onClick Save
-            , class "fa fa-check"
             ]
-            empty
-        , el Icon
+        , icon Cross
+            Icon
             [ padding 10
             , onClick Cancel
-            , class "fa fa-times"
             ]
-            empty
         , whenJust maybeDelete
             (\msg ->
-                el Icon
+                icon Trash
+                    Icon
                     [ padding 10
                     , onClick <| Confirm <| Just msg
-                    , class "fa fa-trash"
                     ]
-                    empty
             )
         ]
 
@@ -661,7 +620,10 @@ stepsEditor form =
                             Input.multiline
                                 Field
                                 [ width fill, attribute "rows" "4" ]
-                                { onChange = \str -> Update { form | steps = Array.set i str form.steps }
+                                { onChange =
+                                    \str ->
+                                        Update
+                                            { form | steps = Array.set i str form.steps }
                                 , value = v
                                 , label = Input.hiddenLabel ""
                                 , options = []
@@ -680,7 +642,7 @@ stepsEditor form =
     in
         column None
             [ spacing 10, width fill, maxWidth <| px 500 ]
-            [ el BigIcon [ class "fa fa-cogs", center ] empty
+            [ icon Cogs BigIcon [ center ]
             , steps
             , buttons
             ]
@@ -698,7 +660,10 @@ notesEditor form =
                             Input.multiline
                                 Field
                                 [ width fill, attribute "rows" "4" ]
-                                { onChange = \str -> Update { form | notes = Array.set i str form.notes }
+                                { onChange =
+                                    \str ->
+                                        Update
+                                            { form | notes = Array.set i str form.notes }
                                 , value = v
                                 , label = Input.hiddenLabel ""
                                 , options = []
@@ -717,20 +682,16 @@ notesEditor form =
     in
         column None
             [ spacing 10, width fill, maxWidth <| px 500 ]
-            [ el BigIcon [ class "fa fa-sticky-note-o", center ] empty
+            [ icon Notes BigIcon [ center ]
             , notes
             , buttons
             ]
 
 
-oopsView : List (Element Styles vs Msg)
-oopsView =
-    [ text "oops!" ]
-
-
 viewSteps : Array String -> Element Styles vs Msg
 viewSteps steps =
-    when (not (Array.isEmpty steps)) <|
+    column None
+        [ maxWidth <| px 700 ]
         (steps
             |> Array.toList
             |> List.indexedMap
@@ -744,59 +705,56 @@ viewSteps steps =
                             ]
                         ]
                 )
-            |> column None [ maxWidth <| px 700 ]
         )
 
 
 viewNotes : Array String -> Element Styles vs msg
-viewNotes =
-    Array.toList
-        >> List.map
-            (\x ->
-                if Regex.contains matchLink x then
-                    paragraph None
-                        [ spacing 5 ]
-                        [ el Dot [] <| text "• "
-                        , newTab x <|
-                            row None
-                                [ spacing 5 ]
-                                [ el MattIcon
-                                    [ class "fa fa-globe"
+viewNotes notes =
+    column None
+        [ center, maxWidth <| px 500 ]
+        (notes
+            |> Array.toList
+            |> List.map
+                (\x ->
+                    if Regex.contains matchLink x then
+                        paragraph None
+                            [ spacing 5 ]
+                            [ el Dot [] <| text "• "
+                            , newTab x <|
+                                row None
+                                    [ spacing 5 ]
+                                    [ icon Globe MattIcon []
+                                    , text <| domain x
                                     ]
-                                    empty
-                                , text <| domain x
-                                ]
-                        ]
-                else
-                    row None
-                        [ spacing 10 ]
-                        [ el Dot [] <| text "• "
-                        , paragraph None
-                            []
-                            [ text x
                             ]
-                        ]
-            )
-        >> column None [ center, maxWidth <| px 500 ]
+                    else
+                        row None
+                            [ spacing 10 ]
+                            [ el Dot [] <| text "• "
+                            , paragraph None
+                                []
+                                [ text x
+                                ]
+                            ]
+                )
+        )
 
 
-viewTechList : String -> List { r | name : String, id : Id } -> Element Styles vs Msg
-viewTechList x xs =
+viewTechList : (Id -> String) -> List { r | name : String, id : Id } -> Element Styles vs Msg
+viewTechList fn xs =
     if List.isEmpty xs then
         el None [] <| text "None!"
     else
         xs
             |> List.map
                 (\t ->
-                    case t.id of
-                        Id id ->
-                            paragraph None
-                                []
-                                [ el Dot [] <| text "• "
-                                , link ("/#/" ++ x ++ "/" ++ id) <|
-                                    el Link [] <|
-                                        text t.name
-                                ]
+                    paragraph None
+                        []
+                        [ el Dot [] <| text "• "
+                        , link (fn t.id) <|
+                            el Link [] <|
+                                text t.name
+                        ]
                 )
             |> column None []
 
