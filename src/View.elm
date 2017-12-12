@@ -48,16 +48,38 @@ view ({ form } as model) =
 
                         Desktop ->
                             column None
-                                [ center ]
+                                [ center, spacing 40 ]
                                 [ link "/#/ps" <|
-                                    icon Flag Topics [ padding 10 ]
+                                    icon Flag ActionIcon []
                                 , link "/#/trs" <|
-                                    icon Arrow Topics [ padding 10 ]
+                                    icon Arrow ActionIcon []
                                 , link "/#/ss" <|
-                                    icon Bolt Topics [ padding 10 ]
+                                    icon Bolt ActionIcon []
                                 , link "/#/ts" <|
-                                    icon Book Topics [ padding 10 ]
+                                    icon Book ActionIcon []
                                 ]
+
+                ViewCreatePosition ->
+                    column None
+                        [ center, spacing 20, width fill ]
+                        [ nameEdit form
+                        , notesEditor form
+                        , buttons Nothing
+                        ]
+
+                ViewCreateSubmission ->
+                    column None
+                        [ center, spacing 20, width fill ]
+                        [ nameEdit form
+                        , row None
+                            [ spacing 10 ]
+                            [ icon Flag MattIcon []
+                            , pickStartPosition model.positions form
+                            ]
+                        , stepsEditor form
+                        , notesEditor form
+                        , buttons Nothing
+                        ]
 
                 ViewCreateTopic ->
                     column None
@@ -78,28 +100,6 @@ view ({ form } as model) =
                             , pickEndPosition model.positions form
                             ]
                         , stepsEditor form
-                        , notesEditor form
-                        , buttons Nothing
-                        ]
-
-                ViewCreateSubmission ->
-                    column None
-                        [ center, spacing 20, width fill ]
-                        [ nameEdit form
-                        , row None
-                            [ spacing 10 ]
-                            [ icon Flag MattIcon []
-                            , pickStartPosition model.positions form
-                            ]
-                        , stepsEditor form
-                        , notesEditor form
-                        , buttons Nothing
-                        ]
-
-                ViewCreatePosition ->
-                    column None
-                        [ center, spacing 20, width fill ]
-                        [ nameEdit form
                         , notesEditor form
                         , buttons Nothing
                         ]
@@ -138,7 +138,7 @@ view ({ form } as model) =
                 ViewPositions ->
                     column None
                         [ alignLeft, center, spacing 20 ]
-                        [ icon Flag Topics []
+                        [ icon Flag MattIcon []
                         , column None [] <|
                             (model.positions
                                 |> Dict.values
@@ -218,10 +218,24 @@ view ({ form } as model) =
                         , plus <| CreateSubmission Nothing
                         ]
 
+                ViewTopic editing t ->
+                    column None [ center, spacing 20, width fill ] <|
+                        if editing then
+                            [ nameEdit form
+                            , notesEditor form
+                            , buttons <| Just <| DeleteTopic t.id
+                            ]
+                        else
+                            [ editRow t.name
+                            , viewNotes t.notes
+                            , link "/#/ts" <|
+                                icon Book ActionIcon []
+                            ]
+
                 ViewTopics ->
                     column None
                         [ alignLeft, center, spacing 20 ]
-                        [ icon Bolt MattIcon []
+                        [ icon Book MattIcon []
                         , column None [] <|
                             (model.topics
                                 |> Dict.values
@@ -234,20 +248,6 @@ view ({ form } as model) =
                             )
                         , plus CreateTopic
                         ]
-
-                ViewTopic editing t ->
-                    column None [ center, spacing 20, width fill ] <|
-                        if editing then
-                            [ nameEdit form
-                            , notesEditor form
-                            , buttons <| Just <| DeleteTopic t.id
-                            ]
-                        else
-                            [ editRow t.name
-                            , viewNotes t.notes
-                            , link "/#/ts" <|
-                                icon Book Topics []
-                            ]
 
                 ViewTransition editing ({ steps, startPosition, endPosition, notes } as t) ->
                     column None [ center, spacing 20, width fill ] <|
@@ -288,7 +288,7 @@ view ({ form } as model) =
                 ViewTransitions ->
                     column None
                         [ alignLeft, center, spacing 20 ]
-                        [ icon Bolt MattIcon []
+                        [ icon Arrow MattIcon []
                         , column None [ spacing 20 ] <|
                             (model.transitions
                                 |> Dict.values
@@ -320,10 +320,12 @@ view ({ form } as model) =
             when (not (model.view == ViewAll && model.device == Mobile)) <|
                 row None
                     [ center, spacing 10, verticalCenter ]
-                    [ link "/#/" <| el Header [ vary Small <| model.view /= ViewAll ] <| text "ROTEIRO"
+                    [ link "/#/" <|
+                        el Header [ vary Small <| model.view /= ViewAll ] <|
+                            text "ROTEIRO"
                     , when (model.view == ViewAll) <|
                         icon Lock
-                            Icon
+                            ActionIcon
                             [ padding 10
                             , onClick <| TokenEdit <| Just ""
                             ]
@@ -345,7 +347,7 @@ view ({ form } as model) =
                                         icon Lock BigIcon [ center ]
                                 , options = []
                                 }
-                            , icon Cross PickerCancel [ onClick <| TokenEdit Nothing ]
+                            , icon Cross ActionIcon [ onClick <| TokenEdit Nothing ]
                             ]
                 )
 
@@ -358,8 +360,8 @@ view ({ form } as model) =
                             [ icon Question BigIcon [ center ]
                             , row None
                                 [ spacing 40 ]
-                                [ icon Tick PickerCancel [ onClick msg ]
-                                , icon Cross PickerCancel [ onClick <| Confirm Nothing ]
+                                [ icon Tick ActionIcon [ onClick msg ]
+                                , icon Cross ActionIcon [ onClick <| Confirm Nothing ]
                                 ]
                             ]
                 )
@@ -423,7 +425,7 @@ pickStartPosition positions form =
     case form.startPosition of
         Pending ->
             icon Question
-                Icon
+                ActionIcon
                 [ center
                 , onClick <|
                     Update
@@ -437,7 +439,7 @@ pickStartPosition positions form =
         Picking state ->
             Input.select None
                 []
-                { label = Input.hiddenLabel "sub"
+                { label = Input.hiddenLabel ""
                 , with = state
                 , max = 5
                 , options = []
@@ -453,23 +455,18 @@ pickStartPosition positions form =
                         )
                 }
 
-        Picked position ->
-            positions
-                |> Dict.get (position |> .id |> (\(Id id) -> id))
-                |> flip whenJust
-                    (\p ->
-                        paragraph Link
-                            [ onClick <|
-                                Update
-                                    { form
-                                        | startPosition =
-                                            Picking <|
-                                                Input.autocomplete Nothing UpdateStartPosition
-                                    }
-                            ]
-                            [ text p.name
-                            ]
-                    )
+        Picked { name } ->
+            paragraph Link
+                [ onClick <|
+                    Update
+                        { form
+                            | startPosition =
+                                Picking <|
+                                    Input.autocomplete Nothing UpdateStartPosition
+                        }
+                ]
+                [ text name
+                ]
 
 
 pickEndPosition : Dict String Position -> Form -> Element Styles vs Msg
@@ -477,7 +474,7 @@ pickEndPosition positions form =
     case form.endPosition of
         Pending ->
             icon Question
-                Icon
+                ActionIcon
                 [ center
                 , onClick <|
                     Update
@@ -491,7 +488,7 @@ pickEndPosition positions form =
         Picking state ->
             Input.select None
                 []
-                { label = Input.hiddenLabel "sub"
+                { label = Input.hiddenLabel ""
                 , with = state
                 , max = 5
                 , options = []
@@ -507,23 +504,18 @@ pickEndPosition positions form =
                         )
                 }
 
-        Picked position ->
-            positions
-                |> Dict.get (position |> .id |> (\(Id id) -> id))
-                |> flip whenJust
-                    (\p ->
-                        paragraph Link
-                            [ onClick <|
-                                Update
-                                    { form
-                                        | endPosition =
-                                            Picking <|
-                                                Input.autocomplete Nothing UpdateEndPosition
-                                    }
-                            ]
-                            [ text p.name
-                            ]
-                    )
+        Picked { name } ->
+            paragraph Link
+                [ onClick <|
+                    Update
+                        { form
+                            | endPosition =
+                                Picking <|
+                                    Input.autocomplete Nothing UpdateEndPosition
+                        }
+                ]
+                [ text name
+                ]
 
 
 editRow : String -> Element Styles vs Msg
@@ -532,7 +524,7 @@ editRow name =
         [ spacing 5, verticalCenter ]
         [ el Subtitle [] <| text name
         , icon Write
-            Icon
+            ActionIcon
             [ padding 10
             , onClick Edit
             ]
@@ -546,7 +538,7 @@ nameEdit form =
         [ maxWidth <| px 300, center ]
         { onChange = \str -> Update { form | name = str }
         , value = form.name
-        , label = Input.hiddenLabel "name"
+        , label = Input.hiddenLabel ""
         , options = []
         }
 
@@ -560,7 +552,7 @@ whenEdit r =
             \str ->
                 Update { r | when = str }
         , value = r.when
-        , label = Input.hiddenLabel "when"
+        , label = Input.hiddenLabel ""
         , options = []
         }
 
@@ -568,7 +560,7 @@ whenEdit r =
 plus : msg -> Element Styles vs msg
 plus msg =
     icon Plus
-        Icon
+        ActionIcon
         [ padding 10
         , onClick msg
         ]
@@ -577,7 +569,7 @@ plus msg =
 minus : msg -> Element Styles vs msg
 minus msg =
     icon Minus
-        Icon
+        ActionIcon
         [ padding 10
         , onClick msg
         ]
@@ -588,19 +580,19 @@ buttons maybeDelete =
     row ChooseBox
         [ spacing 20 ]
         [ icon Tick
-            Icon
+            ActionIcon
             [ padding 10
             , onClick Save
             ]
         , icon Cross
-            Icon
+            ActionIcon
             [ padding 10
             , onClick Cancel
             ]
         , whenJust maybeDelete
             (\msg ->
                 icon Trash
-                    Icon
+                    ActionIcon
                     [ padding 10
                     , onClick <| Confirm <| Just msg
                     ]
@@ -716,25 +708,22 @@ viewNotes notes =
             |> Array.toList
             |> List.map
                 (\x ->
-                    if Regex.contains matchLink x then
+                    let
+                        content =
+                            if Regex.contains matchLink x then
+                                newTab x <|
+                                    paragraph None
+                                        [ spacing 5 ]
+                                        [ icon Globe MattIcon []
+                                        , text <| domain x
+                                        ]
+                            else
+                                text x
+                    in
                         paragraph None
                             [ spacing 5 ]
                             [ el Dot [] <| text "• "
-                            , newTab x <|
-                                row None
-                                    [ spacing 5 ]
-                                    [ icon Globe MattIcon []
-                                    , text <| domain x
-                                    ]
-                            ]
-                    else
-                        row None
-                            [ spacing 10 ]
-                            [ el Dot [] <| text "• "
-                            , paragraph None
-                                []
-                                [ text x
-                                ]
+                            , content
                             ]
                 )
         )

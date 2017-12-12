@@ -15,10 +15,6 @@ styling =
         , importUrl "/font-awesome/css/font-awesome.min.css"
         , importUrl "/style.css"
         , style None []
-        , style SetBox
-            [ Border.all 2
-            , Border.solid
-            ]
         , style BigIcon
             [ Color.text e
             , Font.size 40
@@ -32,7 +28,12 @@ styling =
             [ font
             , Font.size 25
             ]
-        , style Choice [ Font.size 30, font, pointer, hover [ Color.text e ] ]
+        , style Choice
+            [ Font.size 30
+            , font
+            , pointer
+            , hover [ Color.text e ]
+            ]
         , style ChooseBox
             [ Border.rounded 15
             , Border.all 3
@@ -47,12 +48,6 @@ styling =
             [ Color.text e
             , Color.background a
             ]
-        , style Icon
-            [ Color.text e
-            , Border.rounded 15
-            , pointer
-            , hover [ Color.text a ]
-            ]
         , style Link [ Font.underline, pointer ]
         , style Line [ Color.background e ]
         , style Header
@@ -65,18 +60,17 @@ styling =
         , style Picker
             [ Color.background c
             ]
-        , style PickerCancel
-            [ Color.text e
-            , Font.size 40
-            , pointer
-            , hover [ Color.text a ]
-            ]
         , style Subtitle
             [ Font.size 35
             , Color.text e
             ]
         , style Home [ Font.size 55, Color.text e ]
-        , style Topics [ Color.text e, pointer, hover [ Color.text a ] ]
+        , style ActionIcon
+            [ Color.text e
+            , Font.size 35
+            , pointer
+            , hover [ Color.text a ]
+            ]
         , style BallIcon [ Font.size 35, Color.text c ]
         , style Ball [ Color.background e, pointer ]
         ]

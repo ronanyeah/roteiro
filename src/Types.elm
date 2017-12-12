@@ -65,16 +65,13 @@ type Styles
     | Field
     | Header
     | Home
-    | Icon
     | Line
     | Link
     | MattIcon
     | None
     | Picker
-    | PickerCancel
-    | SetBox
     | Subtitle
-    | Topics
+    | ActionIcon
 
 
 type FaIcon
