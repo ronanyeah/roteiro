@@ -745,18 +745,20 @@ viewTechList fn xs =
     if List.isEmpty xs then
         el None [] <| text "None!"
     else
-        xs
-            |> List.map
-                (\t ->
-                    paragraph None
-                        []
-                        [ el Dot [] <| text "• "
-                        , link (fn t.id) <|
-                            el Link [] <|
-                                text t.name
-                        ]
-                )
-            |> column None []
+        column None
+            []
+            (xs
+                |> List.map
+                    (\t ->
+                        link (fn t.id) <|
+                            paragraph None
+                                []
+                                [ el Dot [] <| text "• "
+                                , el Link [] <|
+                                    text t.name
+                                ]
+                    )
+            )
 
 
 domain : String -> String
