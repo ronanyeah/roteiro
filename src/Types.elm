@@ -166,7 +166,6 @@ type alias Submission =
     , name : String
     , steps : Array String
     , notes : Array String
-    , when : Maybe String
     , position : Id
     }
 
@@ -177,7 +176,6 @@ type alias Form =
     , endPosition : Picker Position
     , notes : Array String
     , steps : Array String
-    , when : String
     }
 
 

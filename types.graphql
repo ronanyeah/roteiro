@@ -41,7 +41,6 @@ type Submission @model {
   name: String!
   steps: [String!]!
   notes: [String!]!
-  when: String
   position: Position! @relation(name: "PositionHasSubmissions")
 }
 
@@ -52,7 +51,6 @@ type Transition @model {
   name: String!
   steps: [String!]!
   notes: [String!]!
-  when: String
   startPosition: Position! @relation(name: "PositionHasTransitionsFrom")
   endPosition: Position! @relation(name: "PositionHasTransitionsTo")
 }

@@ -265,7 +265,6 @@ update msg ({ form } as model) =
                                 | name = s.name
                                 , steps = s.steps
                                 , notes = s.notes
-                                , when = Maybe.withDefault "" s.when
                                 , startPosition =
                                     get s.position model.positions
                                         |> unwrap Pending Picked

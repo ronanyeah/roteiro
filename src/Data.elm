@@ -162,7 +162,6 @@ createSubmission name steps notes (Id startId) =
             , ( "positionId", Arg.string startId )
             , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
             , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList steps )
-            , ( "when", Arg.null )
             ]
         |> B.extract
         |> B.mutationDocument
@@ -184,7 +183,6 @@ updateSubmission s =
                     , ( "positionId", Arg.string positionId )
                     , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList s.notes )
                     , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList s.steps )
-                    , ( "when", unwrap Arg.null Arg.string s.when )
                     ]
                 |> B.extract
                 |> B.mutationDocument
@@ -328,7 +326,6 @@ submission =
         |> B.with (B.field "name" [] B.string)
         |> B.with (B.field "steps" [] (B.list B.string |> B.map Array.fromList))
         |> B.with (B.field "notes" [] (B.list B.string |> B.map Array.fromList))
-        |> B.with (B.field "when" [] (B.nullable B.string))
         |> B.with
             (B.field "position"
                 []

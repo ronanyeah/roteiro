@@ -159,7 +159,6 @@ view ({ form } as model) =
                     column None [ center, spacing 20, width fill ] <|
                         if editing then
                             [ nameEdit form
-                            , whenEdit form
                             , row None
                                 [ spacing 10 ]
                                 [ icon Flag MattIcon []
@@ -171,7 +170,6 @@ view ({ form } as model) =
                             ]
                         else
                             [ editRow sub.name
-                            , whenJust sub.when text
                             , row None
                                 [ spacing 10 ]
                                 [ icon Flag MattIcon []
@@ -538,20 +536,6 @@ nameEdit form =
         [ maxWidth <| px 300, center ]
         { onChange = \str -> Update { form | name = str }
         , value = form.name
-        , label = Input.hiddenLabel ""
-        , options = []
-        }
-
-
-whenEdit : Form -> Element Styles vs Msg
-whenEdit r =
-    Input.text
-        Field
-        [ maxWidth <| px 300, center ]
-        { onChange =
-            \str ->
-                Update { r | when = str }
-        , value = r.when
         , label = Input.hiddenLabel ""
         , options = []
         }

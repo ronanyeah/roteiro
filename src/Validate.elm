@@ -4,7 +4,7 @@ import Types exposing (Id(..), Form, Picker(..), Position, Submission, Topic, Tr
 
 
 submission : Id -> Form -> Result (List String) Submission
-submission id { startPosition, steps, name, notes, when } =
+submission id { startPosition, steps, name, notes } =
     case startPosition of
         Picked p ->
             Ok
@@ -13,7 +13,6 @@ submission id { startPosition, steps, name, notes, when } =
                 , steps = steps
                 , notes = notes
                 , name = name
-                , when = Just when
                 }
 
         _ ->

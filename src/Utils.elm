@@ -162,5 +162,4 @@ emptyForm =
     , endPosition = Pending
     , steps = Array.empty
     , notes = Array.empty
-    , when = ""
     }
