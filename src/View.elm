@@ -197,7 +197,7 @@ view ({ form } as model) =
                                 |> List.map
                                     (\g ->
                                         column None
-                                            []
+                                            [ center ]
                                             [ g
                                                 |> List.head
                                                 |> Maybe.andThen
@@ -207,8 +207,9 @@ view ({ form } as model) =
                                                 |> flip whenJust
                                                     (\{ id, name } ->
                                                         link (Router.position id) <|
-                                                            el Link [ center ] <|
-                                                                text name
+                                                            paragraph Choice
+                                                                []
+                                                                [ text name ]
                                                     )
                                             , viewTechList Router.submission g
                                             ]
@@ -296,7 +297,7 @@ view ({ form } as model) =
                                 |> List.map
                                     (\g ->
                                         column None
-                                            []
+                                            [ center ]
                                             [ g
                                                 |> List.head
                                                 |> Maybe.andThen
@@ -306,8 +307,9 @@ view ({ form } as model) =
                                                 |> flip whenJust
                                                     (\{ id, name } ->
                                                         link (Router.position id) <|
-                                                            el Link [ center ] <|
-                                                                text name
+                                                            paragraph Choice
+                                                                []
+                                                                [ text name ]
                                                     )
                                             , viewTechList Router.transition g
                                             ]
