@@ -1,4 +1,4 @@
-const cacheName = "roteiro-cache-2";
+const cacheName = "roteiro-cache-3";
 
 const assets = [
   "/",
@@ -34,6 +34,8 @@ self.addEventListener(
 
 self.addEventListener("fetch", e =>
   e.respondWith(
-    caches.match(e.request).then(response => response || fetch(e.request))
+    fetch(e.request).catch(err =>
+      caches.match(e.request).then(response => response || err)
+    )
   )
 );
