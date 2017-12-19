@@ -192,6 +192,7 @@ view ({ form } as model) =
                         , column None [ spacing 20 ] <|
                             (model.submissions
                                 |> Dict.values
+                                |> List.sortBy (.position >> (\(Id id) -> id))
                                 |> groupWhile (\a b -> a.position == b.position)
                                 |> List.map
                                     (\g ->
@@ -290,6 +291,7 @@ view ({ form } as model) =
                         , column None [ spacing 20 ] <|
                             (model.transitions
                                 |> Dict.values
+                                |> List.sortBy (.startPosition >> (\(Id id) -> id))
                                 |> groupWhile (\a b -> a.startPosition == b.startPosition)
                                 |> List.map
                                     (\g ->
