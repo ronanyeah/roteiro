@@ -1,8 +1,7 @@
-const cacheName = "roteiro-cache-3";
+const cacheName = "roteiro-cache-4";
 
 const assets = [
   "/",
-  "/index.html",
   "/bundle.js",
   "/manifest.json",
   "map.png",
