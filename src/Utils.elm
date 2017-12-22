@@ -2,9 +2,9 @@ module Utils exposing (..)
 
 import Array
 import Dict exposing (Dict)
-import Element exposing (Attribute, Element, empty, el)
+import Element exposing (Attribute, Element, el, empty)
 import Element.Attributes exposing (class)
-import Types exposing (Id(..), Device(Desktop), FaIcon(..), Form, Model, Picker(..), View(..))
+import Types exposing (Device(Desktop), FaIcon(..), Form, Id(..), Model, Picker(..), View(..))
 
 
 icon : FaIcon -> s -> List (Attribute vs msg) -> Element s vs msg
@@ -60,7 +60,7 @@ icon fa s attrs =
                 |> (++) "fa "
                 |> class
     in
-        el s (faClass :: attrs) empty
+    el s (faClass :: attrs) empty
 
 
 sort : List { r | name : String } -> List { r | name : String }
@@ -93,7 +93,7 @@ set ({ id } as r) =
         (Id idStr) =
             id
     in
-        Dict.insert idStr r
+    Dict.insert idStr r
 
 
 get : Id -> Dict String { r | id : Id } -> Maybe { r | id : Id }
@@ -118,7 +118,7 @@ log a =
         _ =
             Debug.log "Log" a
     in
-        Cmd.none
+    Cmd.none
 
 
 listToDict : List { r | id : Id } -> Dict String { r | id : Id }
@@ -129,7 +129,7 @@ listToDict =
                 (Id id) =
                     r.id
             in
-                Dict.insert id r
+            Dict.insert id r
         )
         Dict.empty
 

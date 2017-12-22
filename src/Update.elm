@@ -1,10 +1,10 @@
 module Update exposing (..)
 
-import Data exposing (createTopic, createPosition, createSubmission, createTransition, mutate, updatePosition, updateSubmission, updateTopic, updateTransition)
+import Data exposing (createPosition, createSubmission, createTopic, createTransition, mutate, updatePosition, updateSubmission, updateTopic, updateTransition)
 import Element
 import Element.Input as Input
-import Ports
 import Navigation
+import Ports
 import Router exposing (router)
 import Task
 import Types exposing (..)
@@ -220,7 +220,7 @@ update msg ({ form } as model) =
                     Data.deletePosition id
                         |> mutate model.url model.token
             in
-                ( model, Task.attempt CbPositionDelete request )
+            ( model, Task.attempt CbPositionDelete request )
 
         DeleteSubmission id ->
             let
@@ -228,7 +228,7 @@ update msg ({ form } as model) =
                     Data.deleteSubmission id
                         |> mutate model.url model.token
             in
-                ( model, Task.attempt CbSubmissionDelete request )
+            ( model, Task.attempt CbSubmissionDelete request )
 
         DeleteTopic id ->
             let
@@ -236,7 +236,7 @@ update msg ({ form } as model) =
                     Data.deleteTopic id
                         |> mutate model.url model.token
             in
-                ( model, Task.attempt CbTopicDelete request )
+            ( model, Task.attempt CbTopicDelete request )
 
         DeleteTransition id ->
             let
@@ -244,7 +244,7 @@ update msg ({ form } as model) =
                     Data.deleteTransition id
                         |> mutate model.url model.token
             in
-                ( model, Task.attempt CbTransitionDelete request )
+            ( model, Task.attempt CbTransitionDelete request )
 
         Edit ->
             case model.view of
@@ -256,7 +256,7 @@ update msg ({ form } as model) =
                                 , notes = p.notes
                             }
                     in
-                        ( { model | view = ViewPosition True p, form = form_ }, Cmd.none )
+                    ( { model | view = ViewPosition True p, form = form_ }, Cmd.none )
 
                 ViewSubmission _ s ->
                     let
@@ -270,7 +270,7 @@ update msg ({ form } as model) =
                                         |> unwrap Pending Picked
                             }
                     in
-                        ( { model | view = ViewSubmission True s, form = form_ }, Cmd.none )
+                    ( { model | view = ViewSubmission True s, form = form_ }, Cmd.none )
 
                 ViewTopic _ t ->
                     let
@@ -280,7 +280,7 @@ update msg ({ form } as model) =
                                 , notes = t.notes
                             }
                     in
-                        ( { model | view = ViewTopic True t, form = form_ }, Cmd.none )
+                    ( { model | view = ViewTopic True t, form = form_ }, Cmd.none )
 
                 ViewTransition _ t ->
                     let
@@ -297,7 +297,7 @@ update msg ({ form } as model) =
                                         |> unwrap Pending Picked
                             }
                     in
-                        ( { model | view = ViewTransition True t, form = form_ }, Cmd.none )
+                    ( { model | view = ViewTransition True t, form = form_ }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -434,7 +434,7 @@ update msg ({ form } as model) =
                         form_ =
                             model.form |> (\f -> { f | endPosition = picker })
                     in
-                        ( { model | form = form_ }, Cmd.none )
+                    ( { model | form = form_ }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -457,7 +457,7 @@ update msg ({ form } as model) =
                         form_ =
                             model.form |> (\f -> { f | startPosition = picker })
                     in
-                        ( { model | form = form_ }, Cmd.none )
+                    ( { model | form = form_ }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
@@ -470,4 +470,4 @@ update msg ({ form } as model) =
                     else
                         Desktop
             in
-                ( { model | device = device }, Cmd.none )
+            ( { model | device = device }, Cmd.none )

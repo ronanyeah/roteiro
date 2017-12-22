@@ -3,8 +3,8 @@ module Styling exposing (..)
 import Color exposing (Color, rgb)
 import Style exposing (Property, StyleSheet, hover, importUrl, style, styleSheet, variation)
 import Style.Border as Border
-import Style.Font as Font
 import Style.Color as Color
+import Style.Font as Font
 import Types exposing (Styles(..), Variations(..))
 
 

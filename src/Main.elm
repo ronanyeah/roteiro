@@ -5,8 +5,8 @@ import Navigation exposing (Location)
 import Router exposing (parseLocation, router)
 import Task
 import Types exposing (..)
-import Utils exposing (emptyModel)
 import Update exposing (update)
+import Utils exposing (emptyModel)
 import View exposing (view)
 import Window
 
@@ -29,10 +29,10 @@ init ( url, token ) location =
                 |> parseLocation
                 |> router { emptyModel | url = url, token = token }
     in
-        ( model
-        , Cmd.batch
-            [ Task.perform WindowSize Window.size
-            , Task.attempt CbData <| query url token fetchData
-            , cmd
-            ]
-        )
+    ( model
+    , Cmd.batch
+        [ Task.perform WindowSize Window.size
+        , Task.attempt CbData <| query url token fetchData
+        , cmd
+        ]
+    )

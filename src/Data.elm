@@ -1,14 +1,14 @@
 module Data exposing (..)
 
 import Array exposing (Array)
-import GraphQL.Client.Http exposing (Error, customSendQueryRaw, customSendMutationRaw)
+import GraphQL.Client.Http exposing (Error, customSendMutationRaw, customSendQueryRaw)
 import GraphQL.Request.Builder as B
 import GraphQL.Request.Builder.Arg as Arg
 import Http
 import Json.Decode as Decode exposing (Decoder)
-import Utils exposing (filterEmpty, unwrap)
 import Task exposing (Task)
 import Types exposing (..)
+import Utils exposing (filterEmpty)
 
 
 decodeGcError : Decoder { code : Int, message : String }
@@ -70,33 +70,33 @@ convert request =
                             (Decode.maybe <| Decode.field "errors" <| Decode.list decodeGcError)
                             (Decode.maybe <| Decode.field "data" <| B.responseDataDecoder request)
                 in
-                    case Decode.decodeString decoder response.body of
-                        Err err ->
-                            Task.fail <| HttpError <| Http.BadPayload err response
+                case Decode.decodeString decoder response.body of
+                    Err err ->
+                        Task.fail <| HttpError <| Http.BadPayload err response
 
-                        Ok res ->
-                            case res of
-                                ( Just [], Just d ) ->
-                                    Task.succeed d
+                    Ok res ->
+                        case res of
+                            ( Just [], Just d ) ->
+                                Task.succeed d
 
-                                ( Just errs, Just _ ) ->
-                                    Task.fail
-                                        (GcError
-                                            ({ code = 999
-                                             , message = "data returned with errors"
-                                             }
-                                                :: errs
-                                            )
+                            ( Just errs, Just _ ) ->
+                                Task.fail
+                                    (GcError
+                                        ({ code = 999
+                                         , message = "data returned with errors"
+                                         }
+                                            :: errs
                                         )
+                                    )
 
-                                ( Nothing, Just d ) ->
-                                    Task.succeed d
+                            ( Nothing, Just d ) ->
+                                Task.succeed d
 
-                                ( Just errs, Nothing ) ->
-                                    Task.fail (GcError errs)
+                            ( Just errs, Nothing ) ->
+                                Task.fail (GcError errs)
 
-                                ( Nothing, Nothing ) ->
-                                    Task.fail <| HttpError <| Http.BadPayload "f'kd payload" response
+                            ( Nothing, Nothing ) ->
+                                Task.fail <| HttpError <| Http.BadPayload "f'kd payload" response
             )
 
 
@@ -213,15 +213,15 @@ updatePosition p =
         (Id id) =
             p.id
     in
-        position
-            |> B.field "updatePosition"
-                [ ( "id", Arg.string id )
-                , ( "name", Arg.string p.name )
-                , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList p.notes )
-                ]
-            |> B.extract
-            |> B.mutationDocument
-            |> B.request ()
+    position
+        |> B.field "updatePosition"
+            [ ( "id", Arg.string id )
+            , ( "name", Arg.string p.name )
+            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList p.notes )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
 
 
 updateTopic : Topic -> B.Request B.Mutation Topic

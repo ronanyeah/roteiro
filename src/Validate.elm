@@ -1,6 +1,6 @@
 module Validate exposing (..)
 
-import Types exposing (Id(..), Form, Picker(..), Position, Submission, Topic, Transition)
+import Types exposing (Form, Id(..), Picker(..), Position, Submission, Topic, Transition)
 
 
 submission : Id -> Form -> Result (List String) Submission

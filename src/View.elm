@@ -123,17 +123,17 @@ view ({ form } as model) =
                                         |> Dict.values
                                         |> List.filter (.position >> (==) id)
                             in
-                                [ editRow name
-                                , viewNotes notes
-                                , el Line [ width <| px 100, height <| px 2 ] empty
-                                , icon Arrow MattIcon []
-                                , viewTechList Router.transition transitions
-                                , plus <| CreateTransition <| Just position
-                                , el Line [ width <| px 100, height <| px 2 ] empty
-                                , icon Bolt MattIcon []
-                                , viewTechList Router.submission submissions
-                                , plus <| CreateSubmission <| Just position
-                                ]
+                            [ editRow name
+                            , viewNotes notes
+                            , el Line [ width <| px 100, height <| px 2 ] empty
+                            , icon Arrow MattIcon []
+                            , viewTechList Router.transition transitions
+                            , plus <| CreateTransition <| Just position
+                            , el Line [ width <| px 100, height <| px 2 ] empty
+                            , icon Bolt MattIcon []
+                            , viewTechList Router.submission submissions
+                            , plus <| CreateSubmission <| Just position
+                            ]
 
                 ViewPositions ->
                     column None
@@ -397,29 +397,29 @@ view ({ form } as model) =
                 Mobile ->
                     10
     in
-        layout styling <|
-            column Body
-                [ height fill
-                , center
-                , width fill
-                , spacing 20
-                , padding ws
+    layout styling <|
+        column Body
+            [ height fill
+            , center
+            , width fill
+            , spacing 20
+            , padding ws
+            ]
+            [ enterToken
+            , balls
+            , confirm
+            , roteiro
+            , content
+            , el None
+                [ height <|
+                    px <|
+                        if model.device == Mobile then
+                            100
+                        else
+                            0
                 ]
-                [ enterToken
-                , balls
-                , confirm
-                , roteiro
-                , content
-                , el None
-                    [ height <|
-                        px <|
-                            if model.device == Mobile then
-                                100
-                            else
-                                0
-                    ]
-                    empty
-                ]
+                empty
+            ]
 
 
 pickStartPosition : Dict String Position -> Form -> Element Styles vs Msg
@@ -620,12 +620,12 @@ stepsEditor form =
                     minus (Update { form | steps = Array.slice 0 -1 form.steps })
                 ]
     in
-        column None
-            [ spacing 10, width fill, maxWidth <| px 500 ]
-            [ icon Cogs BigIcon [ center ]
-            , steps
-            , buttons
-            ]
+    column None
+        [ spacing 10, width fill, maxWidth <| px 500 ]
+        [ icon Cogs BigIcon [ center ]
+        , steps
+        , buttons
+        ]
 
 
 notesEditor : Form -> Element Styles vs Msg
@@ -660,12 +660,12 @@ notesEditor form =
                     minus (Update { form | notes = Array.slice 0 -1 form.notes })
                 ]
     in
-        column None
-            [ spacing 10, width fill, maxWidth <| px 500 ]
-            [ icon Notes BigIcon [ center ]
-            , notes
-            , buttons
-            ]
+    column None
+        [ spacing 10, width fill, maxWidth <| px 500 ]
+        [ icon Notes BigIcon [ center ]
+        , notes
+        , buttons
+        ]
 
 
 viewSteps : Array String -> Element Styles vs Msg
@@ -708,11 +708,11 @@ viewNotes notes =
                             else
                                 text x
                     in
-                        paragraph None
-                            [ spacing 5 ]
-                            [ el Dot [] <| text "• "
-                            , content
-                            ]
+                    paragraph None
+                        [ spacing 5 ]
+                        [ el Dot [] <| text "• "
+                        , content
+                        ]
                 )
         )
 
