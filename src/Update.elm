@@ -1,10 +1,11 @@
 module Update exposing (..)
 
-import Data exposing (createPosition, createSubmission, createTopic, createTransition, mutate, updatePosition, updateSubmission, updateTopic, updateTransition)
+import Data exposing (createPosition, createSubmission, createTopic, createTransition, mutation, mutationTask, updatePosition, updateSubmission, updateTopic, updateTransition)
 import Element
 import Element.Input as Input
 import Navigation
 import Ports
+import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Task
 import Types exposing (..)
@@ -18,7 +19,7 @@ update msg ({ form } as model) =
         Cancel ->
             case model.view of
                 ViewCreatePosition ->
-                    ( { model | view = ViewPositions }, Cmd.none )
+                    ( model, Navigation.newUrl "/#/ps" )
 
                 ViewCreateSubmission ->
                     case form.startPosition of
@@ -26,7 +27,7 @@ update msg ({ form } as model) =
                             ( { model | view = ViewPosition False p }, Cmd.none )
 
                         _ ->
-                            ( { model | view = ViewSubmissions }, Cmd.none )
+                            ( model, Navigation.newUrl "/#/ss" )
 
                 ViewCreateTransition ->
                     case form.startPosition of
@@ -56,7 +57,7 @@ update msg ({ form } as model) =
 
         CbData res ->
             case res of
-                Ok { transitions, positions, submissions, topics } ->
+                Success { transitions, positions, submissions, topics } ->
                     ( { model
                         | transitions = listToDict transitions
                         , positions = listToDict positions
@@ -66,12 +67,15 @@ update msg ({ form } as model) =
                     , Cmd.none
                     )
 
-                Err err ->
+                Failure err ->
                     ( model, log err )
+
+                _ ->
+                    ( model, Cmd.none )
 
         CbPosition res ->
             case res of
-                Ok data ->
+                Success data ->
                     ( { model
                         | view = ViewPosition False data
                         , positions = set data model.positions
@@ -79,8 +83,18 @@ update msg ({ form } as model) =
                     , Navigation.modifyUrl <| Router.position data.id
                     )
 
-                Err err ->
+                Failure err ->
                     ( model, log err )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        CbPositions res ->
+            ( { model
+                | view = ViewPositions res
+              }
+            , Cmd.none
+            )
 
         CbPositionDelete res ->
             case res of
@@ -98,7 +112,7 @@ update msg ({ form } as model) =
 
         CbSubmission res ->
             case res of
-                Ok data ->
+                Success data ->
                     ( { model
                         | view = ViewSubmission False data
                         , submissions = set data model.submissions
@@ -106,8 +120,18 @@ update msg ({ form } as model) =
                     , Navigation.modifyUrl <| Router.submission data.id
                     )
 
-                Err err ->
+                Failure err ->
                     ( model, log err )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        CbSubmissions res ->
+            ( { model
+                | view = ViewSubmissions res
+              }
+            , Cmd.none
+            )
 
         CbSubmissionDelete res ->
             case res of
@@ -124,7 +148,7 @@ update msg ({ form } as model) =
 
         CbTopic res ->
             case res of
-                Ok data ->
+                Success data ->
                     ( { model
                         | view = ViewTopic False data
                         , topics = set data model.topics
@@ -132,8 +156,11 @@ update msg ({ form } as model) =
                     , Navigation.modifyUrl <| Router.topic data.id
                     )
 
-                Err err ->
+                Failure err ->
                     ( model, log err )
+
+                _ ->
+                    ( model, Cmd.none )
 
         CbTopicDelete res ->
             case res of
@@ -151,7 +178,7 @@ update msg ({ form } as model) =
 
         CbTransition res ->
             case res of
-                Ok data ->
+                Success data ->
                     ( { model
                         | view = ViewTransition False data
                         , transitions = set data model.transitions
@@ -159,8 +186,11 @@ update msg ({ form } as model) =
                     , Navigation.modifyUrl <| Router.transition data.id
                     )
 
-                Err err ->
+                Failure err ->
                     ( model, log err )
+
+                _ ->
+                    ( model, Cmd.none )
 
         CbTransitionDelete res ->
             case res of
@@ -218,7 +248,7 @@ update msg ({ form } as model) =
             let
                 request =
                     Data.deletePosition id
-                        |> mutate model.url model.token
+                        |> mutationTask model.url model.token
             in
             ( model, Task.attempt CbPositionDelete request )
 
@@ -226,7 +256,7 @@ update msg ({ form } as model) =
             let
                 request =
                     Data.deleteSubmission id
-                        |> mutate model.url model.token
+                        |> mutationTask model.url model.token
             in
             ( model, Task.attempt CbSubmissionDelete request )
 
@@ -234,7 +264,7 @@ update msg ({ form } as model) =
             let
                 request =
                     Data.deleteTopic id
-                        |> mutate model.url model.token
+                        |> mutationTask model.url model.token
             in
             ( model, Task.attempt CbTopicDelete request )
 
@@ -242,7 +272,7 @@ update msg ({ form } as model) =
             let
                 request =
                     Data.deleteTransition id
-                        |> mutate model.url model.token
+                        |> mutationTask model.url model.token
             in
             ( model, Task.attempt CbTransitionDelete request )
 
@@ -307,8 +337,7 @@ update msg ({ form } as model) =
                 ViewCreatePosition ->
                     ( model
                     , createPosition form.name form.notes
-                        |> mutate model.url model.token
-                        |> Task.attempt CbPosition
+                        |> mutation model.url model.token CbPosition
                     )
 
                 ViewCreateSubmission ->
@@ -316,8 +345,7 @@ update msg ({ form } as model) =
                         Picked { id } ->
                             ( model
                             , createSubmission form.name form.steps form.notes id
-                                |> mutate model.url model.token
-                                |> Task.attempt CbSubmission
+                                |> mutation model.url model.token CbSubmission
                             )
 
                         _ ->
@@ -326,8 +354,7 @@ update msg ({ form } as model) =
                 ViewCreateTopic ->
                     ( model
                     , createTopic form.name form.notes
-                        |> mutate model.url model.token
-                        |> Task.attempt CbTopic
+                        |> mutation model.url model.token CbTopic
                     )
 
                 ViewCreateTransition ->
@@ -339,8 +366,7 @@ update msg ({ form } as model) =
                                 form.notes
                                 start.id
                                 end.id
-                                |> mutate model.url model.token
-                                |> Task.attempt CbTransition
+                                |> mutation model.url model.token CbTransition
                             )
 
                         _ ->
@@ -351,8 +377,7 @@ update msg ({ form } as model) =
                         Ok value ->
                             ( model
                             , updatePosition value
-                                |> mutate model.url model.token
-                                |> Task.attempt CbPosition
+                                |> mutation model.url model.token CbPosition
                             )
 
                         Err _ ->
@@ -363,8 +388,7 @@ update msg ({ form } as model) =
                         Ok value ->
                             ( model
                             , updateSubmission value
-                                |> mutate model.url model.token
-                                |> Task.attempt CbSubmission
+                                |> mutation model.url model.token CbSubmission
                             )
 
                         Err _ ->
@@ -375,8 +399,7 @@ update msg ({ form } as model) =
                         Ok value ->
                             ( model
                             , updateTopic value
-                                |> mutate model.url model.token
-                                |> Task.attempt CbTopic
+                                |> mutation model.url model.token CbTopic
                             )
 
                         Err _ ->
@@ -387,8 +410,7 @@ update msg ({ form } as model) =
                         Ok value ->
                             ( model
                             , updateTransition value
-                                |> mutate model.url model.token
-                                |> Task.attempt CbTransition
+                                |> mutation model.url model.token CbTransition
                             )
 
                         Err _ ->

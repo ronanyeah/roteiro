@@ -42,6 +42,9 @@ icon fa s attrs =
                 Cross ->
                     "fa-times"
 
+                Waiting ->
+                    "fa-exclamation"
+
                 Tick ->
                     "fa-check"
 

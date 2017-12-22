@@ -1,6 +1,8 @@
 module Router exposing (..)
 
+import Data exposing (fetchPositions, fetchSubmissions, query)
 import Navigation exposing (Location)
+import RemoteData
 import Types exposing (..)
 import UrlParser exposing ((</>), Parser, map, oneOf, parseHash, s, string)
 import Utils exposing (unwrap)
@@ -50,7 +52,9 @@ router model route =
         ( view, cmd ) =
             case route of
                 Ps ->
-                    ( ViewPositions, Cmd.none )
+                    ( ViewPositions RemoteData.Loading
+                    , fetchPositions |> query model.url model.token CbPositions
+                    )
 
                 P id ->
                     model.positions
@@ -61,7 +65,9 @@ router model route =
                             )
 
                 Ss ->
-                    ( ViewSubmissions, Cmd.none )
+                    ( ViewSubmissions RemoteData.Loading
+                    , fetchSubmissions |> query model.url model.token CbSubmissions
+                    )
 
                 Ts ->
                     ( ViewTopics, Cmd.none )

@@ -32,7 +32,7 @@ init ( url, token ) location =
     ( model
     , Cmd.batch
         [ Task.perform WindowSize Window.size
-        , Task.attempt CbData <| query url token fetchData
+        , fetchData |> query url token CbData
         , cmd
         ]
     )

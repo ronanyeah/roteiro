@@ -6,6 +6,7 @@ import GraphQL.Request.Builder as B
 import GraphQL.Request.Builder.Arg as Arg
 import Http
 import Json.Decode as Decode exposing (Decoder)
+import RemoteData
 import Task exposing (Task)
 import Types exposing (..)
 import Utils exposing (filterEmpty)
@@ -18,8 +19,8 @@ decodeGcError =
         (Decode.field "message" Decode.string)
 
 
-query : String -> String -> B.Request B.Query a -> Task GcError a
-query url token request =
+queryTask : String -> String -> B.Request B.Query a -> Task GcError a
+queryTask url token request =
     customSendQueryRaw
         { method = "POST"
         , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
@@ -31,8 +32,15 @@ query url token request =
         |> convert request
 
 
-mutate : String -> String -> B.Request B.Mutation a -> Task GcError a
-mutate url token request =
+query : String -> String -> (GcData a -> msg) -> B.Request B.Query a -> Cmd msg
+query url token msg request =
+    queryTask url token request
+        |> RemoteData.asCmd
+        |> Cmd.map msg
+
+
+mutationTask : String -> String -> B.Request B.Mutation a -> Task GcError a
+mutationTask url token request =
     customSendMutationRaw
         { method = "POST"
         , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
@@ -42,6 +50,13 @@ mutate url token request =
         }
         request
         |> convert request
+
+
+mutation : String -> String -> (GcData a -> msg) -> B.Request B.Mutation a -> Cmd msg
+mutation url token msg request =
+    mutationTask url token request
+        |> RemoteData.asCmd
+        |> Cmd.map msg
 
 
 convert : B.Request x a -> Task Error (Http.Response String) -> Task GcError a
@@ -107,6 +122,24 @@ fetchData =
         |> B.with (B.field "allPositions" [] (B.list position))
         |> B.with (B.field "allSubmissions" [] (B.list submission))
         |> B.with (B.field "allTopics" [] (B.list topic))
+        |> B.queryDocument
+        |> B.request ()
+
+
+fetchPositions : B.Request B.Query (List Position)
+fetchPositions =
+    B.list position
+        |> B.field "allPositions" []
+        |> B.extract
+        |> B.queryDocument
+        |> B.request ()
+
+
+fetchSubmissions : B.Request B.Query (List Submission)
+fetchSubmissions =
+    B.list submission
+        |> B.field "allSubmissions" []
+        |> B.extract
         |> B.queryDocument
         |> B.request ()
 

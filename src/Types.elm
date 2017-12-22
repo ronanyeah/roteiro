@@ -4,19 +4,22 @@ import Array exposing (Array)
 import Dict exposing (Dict)
 import Element.Input exposing (SelectMsg, SelectWith)
 import Http
+import RemoteData exposing (RemoteData)
 import Window
 
 
 type Msg
     = Cancel
-    | CbData (Result GcError AllData)
-    | CbPosition (Result GcError Position)
+    | CbData (GcData AllData)
+    | CbPosition (GcData Position)
+    | CbPositions (GcData (List Position))
     | CbPositionDelete (Result GcError Id)
-    | CbSubmission (Result GcError Submission)
+    | CbSubmission (GcData Submission)
+    | CbSubmissions (GcData (List Submission))
     | CbSubmissionDelete (Result GcError Id)
-    | CbTopic (Result GcError Topic)
+    | CbTopic (GcData Topic)
     | CbTopicDelete (Result GcError Id)
-    | CbTransition (Result GcError Transition)
+    | CbTransition (GcData Transition)
     | CbTransitionDelete (Result GcError Id)
     | Confirm (Maybe Msg)
     | CreatePosition
@@ -44,9 +47,9 @@ type View
     | ViewCreateTopic
     | ViewCreateTransition
     | ViewPosition Bool Position
-    | ViewPositions
+    | ViewPositions (GcData (List Position))
     | ViewSubmission Bool Submission
-    | ViewSubmissions
+    | ViewSubmissions (GcData (List Submission))
     | ViewTopic Bool Topic
     | ViewTopics
     | ViewTransition Bool Transition
@@ -83,6 +86,7 @@ type FaIcon
     | Tick
     | Bolt
     | Lock
+    | Waiting
     | Book
     | Notes
     | Plus
@@ -104,6 +108,10 @@ type Picker a
     = Picking (SelectWith a Msg)
     | Picked a
     | Pending
+
+
+type alias GcData a =
+    RemoteData GcError a
 
 
 type alias Model =

@@ -9,6 +9,7 @@ import Element.Input as Input
 import Html exposing (Html)
 import List.Extra exposing (groupWhile)
 import Regex exposing (Regex)
+import RemoteData exposing (RemoteData(..))
 import Router
 import Styling exposing (styling)
 import Types exposing (Device(..), FaIcon(..), Form, Id(..), Model, Msg(..), Picker(..), Position, Styles(..), Variations(..), View(..))
@@ -135,25 +136,35 @@ view ({ form } as model) =
                             , plus <| CreateSubmission <| Just position
                             ]
 
-                ViewPositions ->
-                    column None
-                        [ alignLeft, center, spacing 20 ]
-                        [ icon Flag MattIcon []
-                        , column None [] <|
-                            (model.positions
-                                |> Dict.values
-                                |> sort
-                                |> List.map
-                                    (\p ->
-                                        link (Router.position p.id) <|
-                                            paragraph Choice
-                                                []
-                                                [ text p.name
-                                                ]
+                ViewPositions data ->
+                    case data of
+                        NotAsked ->
+                            text "not asked"
+
+                        Loading ->
+                            icon Waiting MattIcon []
+
+                        Failure _ ->
+                            text "error"
+
+                        Success positions ->
+                            column None
+                                [ alignLeft, center, spacing 20 ]
+                                [ icon Flag MattIcon []
+                                , column None [] <|
+                                    (positions
+                                        |> sort
+                                        |> List.map
+                                            (\p ->
+                                                link (Router.position p.id) <|
+                                                    paragraph Choice
+                                                        []
+                                                        [ text p.name
+                                                        ]
+                                            )
                                     )
-                            )
-                        , plus CreatePosition
-                        ]
+                                , plus CreatePosition
+                                ]
 
                 ViewSubmission editing sub ->
                     column None [ center, spacing 20, width fill ] <|
@@ -185,38 +196,48 @@ view ({ form } as model) =
                             , viewNotes sub.notes
                             ]
 
-                ViewSubmissions ->
-                    column None
-                        [ alignLeft, center, spacing 20 ]
-                        [ icon Bolt MattIcon []
-                        , column None [ spacing 20 ] <|
-                            (model.submissions
-                                |> Dict.values
-                                |> List.sortBy (.position >> (\(Id id) -> id))
-                                |> groupWhile (\a b -> a.position == b.position)
-                                |> List.map
-                                    (\g ->
-                                        column None
-                                            [ center ]
-                                            [ g
-                                                |> List.head
-                                                |> Maybe.andThen
-                                                    (\{ position } ->
-                                                        get position model.positions
-                                                    )
-                                                |> flip whenJust
-                                                    (\{ id, name } ->
-                                                        link (Router.position id) <|
-                                                            paragraph Choice
-                                                                []
-                                                                [ text name ]
-                                                    )
-                                            , viewTechList Router.submission g
-                                            ]
+                ViewSubmissions data ->
+                    case data of
+                        NotAsked ->
+                            text "not asked"
+
+                        Loading ->
+                            icon Waiting MattIcon []
+
+                        Failure _ ->
+                            text "error"
+
+                        Success submissions ->
+                            column None
+                                [ alignLeft, center, spacing 20 ]
+                                [ icon Bolt MattIcon []
+                                , column None [ spacing 20 ] <|
+                                    (submissions
+                                        |> List.sortBy (.position >> (\(Id id) -> id))
+                                        |> groupWhile (\a b -> a.position == b.position)
+                                        |> List.map
+                                            (\g ->
+                                                column None
+                                                    [ center ]
+                                                    [ g
+                                                        |> List.head
+                                                        |> Maybe.andThen
+                                                            (\{ position } ->
+                                                                get position model.positions
+                                                            )
+                                                        |> flip whenJust
+                                                            (\{ id, name } ->
+                                                                link (Router.position id) <|
+                                                                    paragraph Choice
+                                                                        []
+                                                                        [ text name ]
+                                                            )
+                                                    , viewTechList Router.submission g
+                                                    ]
+                                            )
                                     )
-                            )
-                        , plus <| CreateSubmission Nothing
-                        ]
+                                , plus <| CreateSubmission Nothing
+                                ]
 
                 ViewTopic editing t ->
                     column None [ center, spacing 20, width fill ] <|
