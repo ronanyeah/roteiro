@@ -2,7 +2,7 @@ module Router exposing (..)
 
 import Navigation exposing (Location)
 import Types exposing (..)
-import UrlParser exposing (Parser, (</>), map, oneOf, parseHash, s, string, top)
+import UrlParser exposing ((</>), Parser, map, oneOf, parseHash, s, string, top)
 import Utils exposing (unwrap)
 
 
@@ -34,7 +34,7 @@ route =
         , map Trs (s "trs")
         , map Ss (s "ss")
         , map (Id >> P) (s "p" </> string)
-        , map Top top
+        , map Start (s "start")
         , map (Id >> T) (s "t" </> string)
         , map (Id >> To) (s "to" </> string)
         , map (Id >> S) (s "s" </> string)
@@ -45,7 +45,7 @@ router : Model -> Route -> ( Model, Cmd Msg )
 router model route =
     let
         err =
-            ( model.view, Navigation.newUrl "/#/" )
+            ( model.view, Navigation.newUrl "/#/start" )
 
         ( view, cmd ) =
             case route of
@@ -81,10 +81,10 @@ router model route =
                             ( ViewTransition False t, Cmd.none )
 
                         Nothing ->
-                            ( ViewAll, Navigation.newUrl "/#/ps" )
+                            err
 
                 Top ->
-                    ( ViewAll, Cmd.none )
+                    err
 
                 S id ->
                     case Utils.get id model.submissions of
@@ -92,12 +92,15 @@ router model route =
                             ( ViewSubmission False sub, Cmd.none )
 
                         Nothing ->
-                            ( ViewAll, Navigation.newUrl "/#/ps" )
+                            err
+
+                Start ->
+                    ( ViewAll, Cmd.none )
 
                 NotFound ->
                     err
     in
-        ( { model | view = view }, cmd )
+    ( { model | view = view }, cmd )
 
 
 parseLocation : Location -> Route

@@ -133,6 +133,7 @@ type Route
     | Ts
     | S Id
     | Ss
+    | Start
     | T Id
     | To Id
     | Top
