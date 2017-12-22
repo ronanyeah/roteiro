@@ -5,6 +5,13 @@ if (window.navigator.serviceWorker) {
     .catch(console.error);
 }
 
+if (
+  window.URLSearchParams &&
+  new URLSearchParams(document.location.search).get("applaunch") === "true"
+) {
+  console.log("App Launch!");
+}
+
 var Elm = require("./Main.elm");
 
 var token = localStorage.getItem("ROTEIRO_TOKEN") || "";
