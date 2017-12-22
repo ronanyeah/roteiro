@@ -2,7 +2,7 @@ module Router exposing (..)
 
 import Navigation exposing (Location)
 import Types exposing (..)
-import UrlParser exposing ((</>), Parser, map, oneOf, parseHash, s, string, top)
+import UrlParser exposing ((</>), Parser, map, oneOf, parseHash, s, string)
 import Utils exposing (unwrap)
 
 
@@ -44,7 +44,7 @@ route =
 router : Model -> Route -> ( Model, Cmd Msg )
 router model route =
     let
-        err =
+        default =
             ( model.view, Navigation.newUrl "/#/start" )
 
         ( view, cmd ) =
@@ -53,8 +53,9 @@ router model route =
                     ( ViewPositions, Cmd.none )
 
                 P id ->
-                    Utils.get id model.positions
-                        |> unwrap err
+                    model.positions
+                        |> Utils.get id
+                        |> unwrap default
                             (\p ->
                                 ( ViewPosition False p, Cmd.none )
                             )
@@ -69,36 +70,37 @@ router model route =
                     ( ViewTransitions, Cmd.none )
 
                 To id ->
-                    Utils.get id model.topics
-                        |> unwrap err
+                    model.topics
+                        |> Utils.get id
+                        |> unwrap default
                             (\p ->
                                 ( ViewTopic False p, Cmd.none )
                             )
 
                 T id ->
-                    case Utils.get id model.transitions of
-                        Just t ->
-                            ( ViewTransition False t, Cmd.none )
-
-                        Nothing ->
-                            err
+                    model.transitions
+                        |> Utils.get id
+                        |> unwrap default
+                            (\t ->
+                                ( ViewTransition False t, Cmd.none )
+                            )
 
                 Top ->
-                    err
+                    default
 
                 S id ->
-                    case Utils.get id model.submissions of
-                        Just sub ->
-                            ( ViewSubmission False sub, Cmd.none )
-
-                        Nothing ->
-                            err
+                    model.submissions
+                        |> Utils.get id
+                        |> unwrap default
+                            (\s ->
+                                ( ViewSubmission False s, Cmd.none )
+                            )
 
                 Start ->
                     ( ViewAll, Cmd.none )
 
                 NotFound ->
-                    err
+                    default
     in
     ( { model | view = view }, cmd )
 
