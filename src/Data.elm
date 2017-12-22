@@ -126,9 +126,18 @@ fetchData =
         |> B.request ()
 
 
-fetchPositions : B.Request B.Query (List Position)
+fetchPosition : Id -> B.Request B.Query Position
+fetchPosition (Id id) =
+    position
+        |> B.field "Position" [ ( "id", Arg.string id ) ]
+        |> B.extract
+        |> B.queryDocument
+        |> B.request ()
+
+
+fetchPositions : B.Request B.Query (List Info)
 fetchPositions =
-    B.list position
+    B.list info
         |> B.field "allPositions" []
         |> B.extract
         |> B.queryDocument
@@ -336,6 +345,13 @@ deleteTransition (Id id) =
 -- SELECTIONS
 
 
+info : B.ValueSpec B.NonNull B.ObjectType Info vars
+info =
+    B.object Info
+        |> B.with (B.field "id" [] (B.map Id B.id))
+        |> B.with (B.field "name" [] B.string)
+
+
 topic : B.ValueSpec B.NonNull B.ObjectType Topic vars
 topic =
     B.object Topic
@@ -350,6 +366,8 @@ position =
         |> B.with (B.field "id" [] (B.id |> B.map Id))
         |> B.with (B.field "name" [] B.string)
         |> B.with (B.field "notes" [] (B.list B.string |> B.map Array.fromList))
+        |> B.with (B.field "submissions" [] (B.list info))
+        |> B.with (B.field "transitionsFrom" [] (B.list info))
 
 
 submission : B.ValueSpec B.NonNull B.ObjectType Submission vars

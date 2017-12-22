@@ -1,6 +1,6 @@
 module Router exposing (..)
 
-import Data exposing (fetchPositions, fetchSubmissions, query)
+import Data exposing (fetchPosition, fetchPositions, fetchSubmissions, query)
 import Navigation exposing (Location)
 import RemoteData
 import Types exposing (..)
@@ -57,12 +57,10 @@ router model route =
                     )
 
                 P id ->
-                    model.positions
-                        |> Utils.get id
-                        |> unwrap default
-                            (\position ->
-                                ( ViewPosition False position, Cmd.none )
-                            )
+                    ( ViewPosition False RemoteData.Loading
+                    , fetchPosition id
+                        |> query model.url model.token CbPosition
+                    )
 
                 Ss ->
                     ( ViewSubmissions RemoteData.Loading

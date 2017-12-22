@@ -51,4 +51,6 @@ position id { name, notes } =
         { id = id
         , name = name
         , notes = notes
+        , submissions = []
+        , transitions = []
         }

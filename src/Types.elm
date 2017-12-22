@@ -12,7 +12,7 @@ type Msg
     = Cancel
     | CbData (GcData AllData)
     | CbPosition (GcData Position)
-    | CbPositions (GcData (List Position))
+    | CbPositions (GcData (List Info))
     | CbPositionDelete (Result GcError Id)
     | CbSubmission (GcData Submission)
     | CbSubmissions (GcData (List Submission))
@@ -46,8 +46,8 @@ type View
     | ViewCreateSubmission
     | ViewCreateTopic
     | ViewCreateTransition
-    | ViewPosition Bool Position
-    | ViewPositions (GcData (List Position))
+    | ViewPosition Bool (GcData Position)
+    | ViewPositions (GcData (List Info))
     | ViewSubmission Bool Submission
     | ViewSubmissions (GcData (List Submission))
     | ViewTopic Bool Topic
@@ -114,6 +114,12 @@ type alias GcData a =
     RemoteData GcError a
 
 
+type alias Info =
+    { id : Id
+    , name : String
+    }
+
+
 type alias Model =
     { view : View
     , positions : Dict String Position
@@ -167,6 +173,8 @@ type alias Position =
     { id : Id
     , name : String
     , notes : Array String
+    , submissions : List Info
+    , transitions : List Info
     }
 
 

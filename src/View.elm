@@ -105,36 +105,47 @@ view ({ form } as model) =
                         , buttons Nothing
                         ]
 
-                ViewPosition editing ({ id, name, notes } as position) ->
-                    column None [ center, spacing 20, width fill ] <|
-                        if editing then
-                            [ nameEdit form
-                            , notesEditor form
-                            , buttons <| Just <| DeletePosition id
-                            ]
-                        else
-                            let
-                                transitions =
-                                    model.transitions
-                                        |> Dict.values
-                                        |> List.filter (.startPosition >> (==) id)
+                ViewPosition editing data ->
+                    case data of
+                        NotAsked ->
+                            text "not asked"
 
-                                submissions =
-                                    model.submissions
-                                        |> Dict.values
-                                        |> List.filter (.position >> (==) id)
-                            in
-                            [ editRow name
-                            , viewNotes notes
-                            , el Line [ width <| px 100, height <| px 2 ] empty
-                            , icon Arrow MattIcon []
-                            , viewTechList Router.transition transitions
-                            , plus <| CreateTransition <| Just position
-                            , el Line [ width <| px 100, height <| px 2 ] empty
-                            , icon Bolt MattIcon []
-                            , viewTechList Router.submission submissions
-                            , plus <| CreateSubmission <| Just position
-                            ]
+                        Loading ->
+                            icon Waiting MattIcon []
+
+                        Failure e ->
+                            paragraph None [] [ text <| toString e ]
+
+                        Success ({ id, name, notes } as position) ->
+                            column None [ center, spacing 20, width fill ] <|
+                                if editing then
+                                    [ nameEdit form
+                                    , notesEditor form
+                                    , buttons <| Just <| DeletePosition id
+                                    ]
+                                else
+                                    let
+                                        transitions =
+                                            model.transitions
+                                                |> Dict.values
+                                                |> List.filter (.startPosition >> (==) id)
+
+                                        submissions =
+                                            model.submissions
+                                                |> Dict.values
+                                                |> List.filter (.position >> (==) id)
+                                    in
+                                    [ editRow name
+                                    , viewNotes notes
+                                    , el Line [ width <| px 100, height <| px 2 ] empty
+                                    , icon Arrow MattIcon []
+                                    , viewTechList Router.transition transitions
+                                    , plus <| CreateTransition <| Just position
+                                    , el Line [ width <| px 100, height <| px 2 ] empty
+                                    , icon Bolt MattIcon []
+                                    , viewTechList Router.submission submissions
+                                    , plus <| CreateSubmission <| Just position
+                                    ]
 
                 ViewPositions data ->
                     case data of

@@ -22,20 +22,10 @@ update msg ({ form } as model) =
                     ( model, Navigation.newUrl "/#/ps" )
 
                 ViewCreateSubmission ->
-                    case form.startPosition of
-                        Picked p ->
-                            ( { model | view = ViewPosition False p }, Cmd.none )
-
-                        _ ->
-                            ( model, Navigation.newUrl "/#/ss" )
+                    ( model, Navigation.newUrl "/#/ss" )
 
                 ViewCreateTransition ->
-                    case form.startPosition of
-                        Picked p ->
-                            ( { model | view = ViewPosition False p }, Cmd.none )
-
-                        _ ->
-                            ( { model | view = ViewTransitions }, Cmd.none )
+                    ( model, Navigation.newUrl "/#/trs" )
 
                 ViewCreateTopic ->
                     ( { model | view = ViewTopics }, Cmd.none )
@@ -74,20 +64,11 @@ update msg ({ form } as model) =
                     ( model, Cmd.none )
 
         CbPosition res ->
-            case res of
-                Success data ->
-                    ( { model
-                        | view = ViewPosition False data
-                        , positions = set data model.positions
-                      }
-                    , Navigation.modifyUrl <| Router.position data.id
-                    )
-
-                Failure err ->
-                    ( model, log err )
-
-                _ ->
-                    ( model, Cmd.none )
+            ( { model
+                | view = ViewPosition False res
+              }
+            , Cmd.none
+            )
 
         CbPositions res ->
             ( { model
@@ -278,7 +259,7 @@ update msg ({ form } as model) =
 
         Edit ->
             case model.view of
-                ViewPosition _ p ->
+                ViewPosition _ (Success p) ->
                     let
                         form_ =
                             { emptyForm
@@ -286,7 +267,7 @@ update msg ({ form } as model) =
                                 , notes = p.notes
                             }
                     in
-                    ( { model | view = ViewPosition True p, form = form_ }, Cmd.none )
+                    ( { model | view = ViewPosition True (Success p), form = form_ }, Cmd.none )
 
                 ViewSubmission _ s ->
                     let
@@ -372,7 +353,7 @@ update msg ({ form } as model) =
                         _ ->
                             ( model, log "missing position" )
 
-                ViewPosition _ p ->
+                ViewPosition _ (Success p) ->
                     case Validate.position p.id form of
                         Ok value ->
                             ( model
@@ -381,7 +362,7 @@ update msg ({ form } as model) =
                             )
 
                         Err _ ->
-                            ( { model | view = ViewPosition True p }, Cmd.none )
+                            ( { model | view = ViewPosition True (Success p) }, Cmd.none )
 
                 ViewSubmission _ s ->
                     case Validate.submission s.id form of
