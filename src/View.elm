@@ -32,7 +32,7 @@ view ({ form } as model) =
     let
         content =
             case model.view of
-                ViewAll ->
+                ViewStart ->
                     case model.device of
                         Mobile ->
                             column None
@@ -319,13 +319,13 @@ view ({ form } as model) =
                         ]
 
         roteiro =
-            when (not (model.view == ViewAll && model.device == Mobile)) <|
+            when (not (model.view == ViewStart && model.device == Mobile)) <|
                 row None
                     [ center, spacing 10, verticalCenter ]
                     [ link "/#/" <|
-                        el Header [ vary Small <| model.view /= ViewAll ] <|
+                        el Header [ vary Small <| model.view /= ViewStart ] <|
                             text "ROTEIRO"
-                    , when (model.view == ViewAll) <|
+                    , when (model.view == ViewStart) <|
                         icon Lock
                             ActionIcon
                             [ padding 10

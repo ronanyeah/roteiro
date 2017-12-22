@@ -38,7 +38,7 @@ type Msg
 
 
 type View
-    = ViewAll
+    = ViewStart
     | ViewCreatePosition
     | ViewCreateSubmission
     | ViewCreateTopic

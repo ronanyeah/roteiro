@@ -141,7 +141,7 @@ filterEmpty =
 
 emptyModel : Model
 emptyModel =
-    { view = ViewAll
+    { view = ViewStart
     , positions = Dict.empty
     , transitions = Dict.empty
     , submissions = Dict.empty

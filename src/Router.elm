@@ -97,7 +97,7 @@ router model route =
                             )
 
                 Start ->
-                    ( ViewAll, Cmd.none )
+                    ( ViewStart, Cmd.none )
 
                 NotFound ->
                     default

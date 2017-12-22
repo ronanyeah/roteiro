@@ -86,7 +86,7 @@ update msg ({ form } as model) =
             case res of
                 Ok id ->
                     ( { model
-                        | view = ViewAll
+                        | view = ViewStart
                         , positions = del id model.positions
                         , confirm = Nothing
                       }
