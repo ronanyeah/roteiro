@@ -56,8 +56,8 @@ router model route =
                     model.positions
                         |> Utils.get id
                         |> unwrap default
-                            (\p ->
-                                ( ViewPosition False p, Cmd.none )
+                            (\position ->
+                                ( ViewPosition False position, Cmd.none )
                             )
 
                 Ss ->
@@ -73,16 +73,16 @@ router model route =
                     model.topics
                         |> Utils.get id
                         |> unwrap default
-                            (\p ->
-                                ( ViewTopic False p, Cmd.none )
+                            (\topic ->
+                                ( ViewTopic False topic, Cmd.none )
                             )
 
                 T id ->
                     model.transitions
                         |> Utils.get id
                         |> unwrap default
-                            (\t ->
-                                ( ViewTransition False t, Cmd.none )
+                            (\transition ->
+                                ( ViewTransition False transition, Cmd.none )
                             )
 
                 Top ->
@@ -92,8 +92,8 @@ router model route =
                     model.submissions
                         |> Utils.get id
                         |> unwrap default
-                            (\s ->
-                                ( ViewSubmission False s, Cmd.none )
+                            (\submission ->
+                                ( ViewSubmission False submission, Cmd.none )
                             )
 
                 Start ->
