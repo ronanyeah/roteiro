@@ -1,7 +1,8 @@
 {
-  "checks" : {
+  "checks": {
     "ExposeAll": false,
     "ImportAll": false,
-    "CoreArrayUsage": false
+    "CoreArrayUsage": false,
+    "DebugLog": false
   }
 }
