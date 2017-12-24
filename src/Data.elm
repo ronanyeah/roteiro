@@ -115,17 +115,6 @@ convert request =
             )
 
 
-fetchData : B.Request B.Query AllData
-fetchData =
-    B.object AllData
-        |> B.with (B.field "allTransitions" [] (B.list transition))
-        |> B.with (B.field "allPositions" [] (B.list position))
-        |> B.with (B.field "allSubmissions" [] (B.list submission))
-        |> B.with (B.field "allTopics" [] (B.list topic))
-        |> B.queryDocument
-        |> B.request ()
-
-
 fetchPosition : Id -> B.Request B.Query Position
 fetchPosition (Id id) =
     position
@@ -135,9 +124,18 @@ fetchPosition (Id id) =
         |> B.request ()
 
 
-fetchPositions : B.Request B.Query (List Info)
-fetchPositions =
+fetchInfo : String -> B.Request B.Query (List Info)
+fetchInfo field =
     B.list info
+        |> B.field field []
+        |> B.extract
+        |> B.queryDocument
+        |> B.request ()
+
+
+fetchPositions : B.Request B.Query (List Position)
+fetchPositions =
+    B.list position
         |> B.field "allPositions" []
         |> B.extract
         |> B.queryDocument
@@ -148,6 +146,47 @@ fetchSubmissions : B.Request B.Query (List Submission)
 fetchSubmissions =
     B.list submission
         |> B.field "allSubmissions" []
+        |> B.extract
+        |> B.queryDocument
+        |> B.request ()
+
+
+fetchTopics : B.Request B.Query (List Info)
+fetchTopics =
+    fetchInfo "allTopics"
+
+
+fetchTransitions : B.Request B.Query (List Transition)
+fetchTransitions =
+    B.list transition
+        |> B.field "allTransitions" []
+        |> B.extract
+        |> B.queryDocument
+        |> B.request ()
+
+
+fetchSubmission : Id -> B.Request B.Query Submission
+fetchSubmission (Id id) =
+    submission
+        |> B.field "Submission" [ ( "id", Arg.string id ) ]
+        |> B.extract
+        |> B.queryDocument
+        |> B.request ()
+
+
+fetchTopic : Id -> B.Request B.Query Topic
+fetchTopic (Id id) =
+    topic
+        |> B.field "Topic" [ ( "id", Arg.string id ) ]
+        |> B.extract
+        |> B.queryDocument
+        |> B.request ()
+
+
+fetchTransition : Id -> B.Request B.Query Transition
+fetchTransition (Id id) =
+    transition
+        |> B.field "Transition" [ ( "id", Arg.string id ) ]
         |> B.extract
         |> B.queryDocument
         |> B.request ()
@@ -216,7 +255,7 @@ createSubmission name steps notes (Id startId) =
 
 updateSubmission : Submission -> B.Request B.Mutation Submission
 updateSubmission s =
-    case ( s.id, s.position ) of
+    case ( s.id, s.position.id ) of
         ( Id id, Id positionId ) ->
             submission
                 |> B.field "updateSubmission"
@@ -233,7 +272,7 @@ updateSubmission s =
 
 updateTransition : Transition -> B.Request B.Mutation Transition
 updateTransition t =
-    case ( t.id, t.startPosition, t.endPosition ) of
+    case ( t.id, t.startPosition.id, t.endPosition.id ) of
         ( Id id, Id startId, Id endId ) ->
             transition
                 |> B.field "updateTransition"
@@ -377,11 +416,7 @@ submission =
         |> B.with (B.field "name" [] B.string)
         |> B.with (B.field "steps" [] (B.list B.string |> B.map Array.fromList))
         |> B.with (B.field "notes" [] (B.list B.string |> B.map Array.fromList))
-        |> B.with
-            (B.field "position"
-                []
-                (B.field "id" [] (B.map Id B.id) |> B.extract)
-            )
+        |> B.with (B.field "position" [] info)
 
 
 transition : B.ValueSpec B.NonNull B.ObjectType Transition vars
@@ -389,15 +424,7 @@ transition =
     B.object Transition
         |> B.with (B.field "id" [] (B.map Id B.id))
         |> B.with (B.field "name" [] B.string)
-        |> B.with
-            (B.field "startPosition"
-                []
-                (B.field "id" [] (B.map Id B.id) |> B.extract)
-            )
-        |> B.with
-            (B.field "endPosition"
-                []
-                (B.field "id" [] (B.map Id B.id) |> B.extract)
-            )
+        |> B.with (B.field "startPosition" [] info)
+        |> B.with (B.field "endPosition" [] info)
         |> B.with (B.field "notes" [] (B.list B.string |> B.map Array.fromList))
         |> B.with (B.field "steps" [] (B.list B.string |> B.map Array.fromList))

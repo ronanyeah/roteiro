@@ -1,6 +1,5 @@
 module Main exposing (main)
 
-import Data exposing (fetchData, query)
 import Navigation exposing (Location)
 import Router exposing (parseLocation, router)
 import Task
@@ -22,17 +21,13 @@ main =
 
 
 init : ( String, String ) -> Location -> ( Model, Cmd Msg )
-init ( url, token ) location =
-    let
-        ( model, cmd ) =
-            location
-                |> parseLocation
-                |> router { emptyModel | url = url, token = token }
-    in
-    ( model
-    , Cmd.batch
-        [ Task.perform WindowSize Window.size
-        , fetchData |> query url token CbData
-        , cmd
-        ]
-    )
+init ( url, token ) =
+    parseLocation
+        >> router { emptyModel | url = url, token = token }
+        >> Tuple.mapSecond
+            (\cmd ->
+                Cmd.batch
+                    [ Task.perform WindowSize Window.size
+                    , cmd
+                    ]
+            )

@@ -10,17 +10,15 @@ import Window
 
 type Msg
     = Cancel
-    | CbData (GcData AllData)
+    | CbDelete (Result GcError Id)
     | CbPosition (GcData Position)
-    | CbPositions (GcData (List Info))
-    | CbPositionDelete (Result GcError Id)
+    | CbPositions (GcData (List Position))
     | CbSubmission (GcData Submission)
     | CbSubmissions (GcData (List Submission))
-    | CbSubmissionDelete (Result GcError Id)
     | CbTopic (GcData Topic)
-    | CbTopicDelete (Result GcError Id)
+    | CbTopics (GcData (List Info))
     | CbTransition (GcData Transition)
-    | CbTransitionDelete (Result GcError Id)
+    | CbTransitions (GcData (List Transition))
     | Confirm (Maybe Msg)
     | CreatePosition
     | CreateSubmission (Maybe Position)
@@ -34,26 +32,30 @@ type Msg
     | Save
     | SetRoute Route
     | TokenEdit (Maybe String)
-    | Update Form
-    | UpdateEndPosition (SelectMsg Position)
-    | UpdateStartPosition (SelectMsg Position)
+    | UpdateEndPosition (SelectMsg Info)
+    | UpdateForm Form
+    | UpdateStartPosition (SelectMsg Info)
     | WindowSize Window.Size
 
 
 type View
     = ViewStart
     | ViewCreatePosition
-    | ViewCreateSubmission
-    | ViewCreateTopic
-    | ViewCreateTransition
-    | ViewPosition Bool (GcData Position)
-    | ViewPositions (GcData (List Info))
-    | ViewSubmission Bool Submission
+    | ViewCreateSubmission View
+    | ViewCreateTopic View
+    | ViewCreateTransition View
+    | ViewEditPosition Position
+    | ViewEditSubmission Submission
+    | ViewEditTopic Topic
+    | ViewEditTransition Transition
+    | ViewPosition (GcData Position)
+    | ViewPositions
+    | ViewSubmission (GcData Submission)
     | ViewSubmissions (GcData (List Submission))
-    | ViewTopic Bool Topic
-    | ViewTopics
-    | ViewTransition Bool Transition
-    | ViewTransitions
+    | ViewTopic (GcData Topic)
+    | ViewTopics (GcData (List Info))
+    | ViewTransition (GcData Transition)
+    | ViewTransitions (GcData (List Transition))
 
 
 type Styles
@@ -114,6 +116,13 @@ type alias GcData a =
     RemoteData GcError a
 
 
+{-| An error from Graphcool.
+-}
+type GcError
+    = HttpError Http.Error
+    | GcError (List { code : Int, message : String })
+
+
 type alias Info =
     { id : Id
     , name : String
@@ -122,10 +131,7 @@ type alias Info =
 
 type alias Model =
     { view : View
-    , positions : Dict String Position
-    , transitions : Dict String Transition
-    , submissions : Dict String Submission
-    , topics : Dict String Topic
+    , positions : GcData (Dict String Position)
     , url : String
     , device : Device
     , url : String
@@ -155,13 +161,6 @@ type Route
     | NotFound
 
 
-{-| An error from Graphcool.
--}
-type GcError
-    = HttpError Http.Error
-    | GcError (List { code : Int, message : String })
-
-
 type alias Topic =
     { id : Id
     , name : String
@@ -183,14 +182,14 @@ type alias Submission =
     , name : String
     , steps : Array String
     , notes : Array String
-    , position : Id
+    , position : Info
     }
 
 
 type alias Form =
     { name : String
-    , startPosition : Picker Position
-    , endPosition : Picker Position
+    , startPosition : Picker Info
+    , endPosition : Picker Info
     , notes : Array String
     , steps : Array String
     }
@@ -199,8 +198,8 @@ type alias Form =
 type alias Transition =
     { id : Id
     , name : String
-    , startPosition : Id
-    , endPosition : Id
+    , startPosition : Info
+    , endPosition : Info
     , notes : Array String
     , steps : Array String
     }

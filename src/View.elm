@@ -8,24 +8,12 @@ import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
 import List.Extra exposing (groupWhile)
-import Regex exposing (Regex)
+import Regex
 import RemoteData exposing (RemoteData(..))
 import Router
 import Styling exposing (styling)
-import Types exposing (Device(..), FaIcon(..), Form, Id(..), Model, Msg(..), Picker(..), Position, Styles(..), Variations(..), View(..))
-import Utils exposing (get, icon, sort)
-
-
-matchLink : Regex
-matchLink =
-    Regex.regex
-        "^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"
-
-
-matchDomain : Regex
-matchDomain =
-    Regex.regex
-        "(?:[-a-zA-Z0-9@:%_\\+~.#=]{2,256}\\.)?([-a-zA-Z0-9@:%_\\+~#=]*)\\.[a-z]{2,6}\\b(?:[-a-zA-Z0-9@:%_\\+.~#?&\\/\\/=]*)"
+import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Position, Styles(..), Variations(..), View(..))
+import Utils exposing (icon, matchDomain, matchLink, remoteUnwrap, sort)
 
 
 view : Model -> Html Msg
@@ -68,7 +56,7 @@ view ({ form } as model) =
                         , buttons Nothing
                         ]
 
-                ViewCreateSubmission ->
+                ViewCreateSubmission _ ->
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form
@@ -82,7 +70,7 @@ view ({ form } as model) =
                         , buttons Nothing
                         ]
 
-                ViewCreateTopic ->
+                ViewCreateTopic _ ->
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form
@@ -90,7 +78,7 @@ view ({ form } as model) =
                         , buttons Nothing
                         ]
 
-                ViewCreateTransition ->
+                ViewCreateTransition _ ->
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form
@@ -105,36 +93,57 @@ view ({ form } as model) =
                         , buttons Nothing
                         ]
 
-                ViewPosition editing data ->
-                    case data of
-                        NotAsked ->
-                            text "not asked"
+                ViewEditPosition { id } ->
+                    column None
+                        [ center, spacing 20, width fill ]
+                        [ nameEdit form
+                        , notesEditor form
+                        , buttons <| Just <| DeletePosition id
+                        ]
 
-                        Loading ->
-                            icon Waiting MattIcon []
+                ViewEditSubmission { id } ->
+                    column None
+                        [ center, spacing 20, width fill ]
+                        [ nameEdit form
+                        , row None
+                            [ spacing 10 ]
+                            [ icon Flag MattIcon []
+                            , pickStartPosition model.positions form
+                            ]
+                        , stepsEditor form
+                        , notesEditor form
+                        , buttons <| Just <| DeleteSubmission id
+                        ]
 
-                        Failure e ->
-                            paragraph None [] [ text <| toString e ]
+                ViewEditTopic { id } ->
+                    column None
+                        [ center, spacing 20, width fill ]
+                        [ nameEdit form
+                        , notesEditor form
+                        , buttons <| Just <| DeleteTopic id
+                        ]
 
-                        Success ({ id, name, notes } as position) ->
-                            column None [ center, spacing 20, width fill ] <|
-                                if editing then
-                                    [ nameEdit form
-                                    , notesEditor form
-                                    , buttons <| Just <| DeletePosition id
-                                    ]
-                                else
-                                    let
-                                        transitions =
-                                            model.transitions
-                                                |> Dict.values
-                                                |> List.filter (.startPosition >> (==) id)
+                ViewEditTransition { id } ->
+                    column None
+                        [ center, spacing 20, width fill ]
+                        [ nameEdit form
+                        , paragraph None
+                            [ verticalCenter, spacing 10 ]
+                            [ pickStartPosition model.positions form
+                            , icon Arrow MattIcon []
+                            , pickEndPosition model.positions form
+                            ]
+                        , stepsEditor form
+                        , notesEditor form
+                        , buttons <| Just <| DeleteTransition id
+                        ]
 
-                                        submissions =
-                                            model.submissions
-                                                |> Dict.values
-                                                |> List.filter (.position >> (==) id)
-                                    in
+                ViewPosition data ->
+                    data
+                        |> viewRemote
+                            (\({ name, notes, submissions, transitions } as position) ->
+                                column None
+                                    [ center, spacing 20, width fill ]
                                     [ editRow name
                                     , viewNotes notes
                                     , el Line [ width <| px 100, height <| px 2 ] empty
@@ -146,209 +155,171 @@ view ({ form } as model) =
                                     , viewTechList Router.submission submissions
                                     , plus <| CreateSubmission <| Just position
                                     ]
+                            )
 
-                ViewPositions data ->
-                    case data of
-                        NotAsked ->
-                            text "not asked"
-
-                        Loading ->
-                            icon Waiting MattIcon []
-
-                        Failure _ ->
-                            text "error"
-
-                        Success positions ->
-                            column None
-                                [ alignLeft, center, spacing 20 ]
-                                [ icon Flag MattIcon []
-                                , column None [] <|
-                                    (positions
-                                        |> sort
-                                        |> List.map
-                                            (\p ->
-                                                link (Router.position p.id) <|
-                                                    paragraph Choice
-                                                        []
-                                                        [ text p.name
-                                                        ]
-                                            )
-                                    )
-                                , plus CreatePosition
-                                ]
-
-                ViewSubmission editing sub ->
-                    column None [ center, spacing 20, width fill ] <|
-                        if editing then
-                            [ nameEdit form
-                            , row None
-                                [ spacing 10 ]
-                                [ icon Flag MattIcon []
-                                , pickStartPosition model.positions form
-                                ]
-                            , stepsEditor form
-                            , notesEditor form
-                            , buttons <| Just <| DeleteSubmission sub.id
-                            ]
-                        else
-                            [ editRow sub.name
-                            , row None
-                                [ spacing 10 ]
-                                [ icon Flag MattIcon []
-                                , get sub.position model.positions
-                                    |> flip whenJust
-                                        (\pos ->
-                                            link (Router.position pos.id) <|
-                                                el Link [] <|
-                                                    text pos.name
+                ViewPositions ->
+                    model.positions
+                        |> viewRemote
+                            (\positions ->
+                                column None
+                                    [ alignLeft, center, spacing 20 ]
+                                    [ icon Flag MattIcon []
+                                    , column None [] <|
+                                        (positions
+                                            |> Dict.values
+                                            |> sort
+                                            |> List.map
+                                                (\p ->
+                                                    link (Router.position p.id) <|
+                                                        paragraph Choice
+                                                            []
+                                                            [ text p.name
+                                                            ]
+                                                )
                                         )
-                                ]
-                            , viewSteps sub.steps
-                            , viewNotes sub.notes
-                            ]
+                                    , plus CreatePosition
+                                    ]
+                            )
+
+                ViewSubmission data ->
+                    data
+                        |> viewRemote
+                            (\sub ->
+                                column None
+                                    [ center, spacing 20, width fill ]
+                                    [ editRow sub.name
+                                    , row None
+                                        [ spacing 10 ]
+                                        [ icon Flag MattIcon []
+                                        , link (Router.position sub.position.id) <|
+                                            el Link [] <|
+                                                text sub.position.name
+                                        ]
+                                    , viewSteps sub.steps
+                                    , viewNotes sub.notes
+                                    ]
+                            )
 
                 ViewSubmissions data ->
-                    case data of
-                        NotAsked ->
-                            text "not asked"
-
-                        Loading ->
-                            icon Waiting MattIcon []
-
-                        Failure _ ->
-                            text "error"
-
-                        Success submissions ->
-                            column None
-                                [ alignLeft, center, spacing 20 ]
-                                [ icon Bolt MattIcon []
-                                , column None [ spacing 20 ] <|
-                                    (submissions
-                                        |> List.sortBy (.position >> (\(Id id) -> id))
-                                        |> groupWhile (\a b -> a.position == b.position)
-                                        |> List.map
-                                            (\g ->
-                                                column None
-                                                    [ center ]
-                                                    [ g
-                                                        |> List.head
-                                                        |> Maybe.andThen
-                                                            (\{ position } ->
-                                                                get position model.positions
-                                                            )
-                                                        |> flip whenJust
-                                                            (\{ id, name } ->
-                                                                link (Router.position id) <|
-                                                                    paragraph Choice
-                                                                        []
-                                                                        [ text name ]
-                                                            )
-                                                    , viewTechList Router.submission g
-                                                    ]
-                                            )
-                                    )
-                                , plus <| CreateSubmission Nothing
-                                ]
-
-                ViewTopic editing t ->
-                    column None [ center, spacing 20, width fill ] <|
-                        if editing then
-                            [ nameEdit form
-                            , notesEditor form
-                            , buttons <| Just <| DeleteTopic t.id
-                            ]
-                        else
-                            [ editRow t.name
-                            , viewNotes t.notes
-                            , link "/#/ts" <|
-                                icon Book ActionIcon []
-                            ]
-
-                ViewTopics ->
-                    column None
-                        [ alignLeft, center, spacing 20 ]
-                        [ icon Book MattIcon []
-                        , column None [] <|
-                            (model.topics
-                                |> Dict.values
-                                |> List.map
-                                    (\t ->
-                                        link (Router.topic t.id) <|
-                                            el Choice [] <|
-                                                text t.name
-                                    )
+                    data
+                        |> viewRemote
+                            (\submissions ->
+                                column None
+                                    [ alignLeft, center, spacing 20 ]
+                                    [ icon Bolt MattIcon []
+                                    , column None [ spacing 20 ] <|
+                                        (submissions
+                                            |> List.sortBy (.position >> .id >> (\(Id id) -> id))
+                                            |> groupWhile (\a b -> a.position.id == b.position.id)
+                                            |> List.map
+                                                (\g ->
+                                                    column None
+                                                        [ center ]
+                                                        [ g
+                                                            |> List.head
+                                                            |> Maybe.map .position
+                                                            |> flip whenJust
+                                                                (\{ id, name } ->
+                                                                    link (Router.position id) <|
+                                                                        paragraph Choice
+                                                                            []
+                                                                            [ text name ]
+                                                                )
+                                                        , viewTechList Router.submission g
+                                                        ]
+                                                )
+                                        )
+                                    , plus <| CreateSubmission Nothing
+                                    ]
                             )
-                        , plus CreateTopic
-                        ]
 
-                ViewTransition editing ({ steps, startPosition, endPosition, notes } as t) ->
-                    column None [ center, spacing 20, width fill ] <|
-                        if editing then
-                            [ nameEdit form
-                            , paragraph None
-                                [ verticalCenter, spacing 10 ]
-                                [ pickStartPosition model.positions form
-                                , icon Arrow MattIcon []
-                                , pickEndPosition model.positions form
-                                ]
-                            , stepsEditor form
-                            , notesEditor form
-                            , buttons <| Just <| DeleteTransition t.id
-                            ]
-                        else
-                            [ editRow t.name
-                            , Maybe.map2
-                                (\start end ->
-                                    paragraph None
+                ViewTopic data ->
+                    data
+                        |> viewRemote
+                            (\t ->
+                                column None
+                                    [ center, spacing 20, width fill ]
+                                    [ editRow t.name
+                                    , viewNotes t.notes
+                                    , link "/#/ts" <|
+                                        icon Book ActionIcon []
+                                    ]
+                            )
+
+                ViewTopics data ->
+                    data
+                        |> viewRemote
+                            (\topics ->
+                                column None
+                                    [ alignLeft, center, spacing 20 ]
+                                    [ icon Book MattIcon []
+                                    , column None [] <|
+                                        (topics
+                                            |> List.map
+                                                (\t ->
+                                                    link (Router.topic t.id) <|
+                                                        el Choice [] <|
+                                                            text t.name
+                                                )
+                                        )
+                                    , plus CreateTopic
+                                    ]
+                            )
+
+                ViewTransition data ->
+                    data
+                        |> viewRemote
+                            (\({ steps, startPosition, endPosition, notes } as t) ->
+                                column None
+                                    [ center, spacing 20, width fill ]
+                                    [ editRow t.name
+                                    , paragraph None
                                         [ verticalCenter, spacing 10 ]
-                                        [ link (Router.position start.id) <|
+                                        [ link (Router.position startPosition.id) <|
                                             el Link [] <|
-                                                text start.name
+                                                text startPosition.name
                                         , icon Arrow MattIcon []
-                                        , link (Router.position end.id) <|
+                                        , link (Router.position endPosition.id) <|
                                             el Link [] <|
-                                                text end.name
+                                                text endPosition.name
                                         ]
-                                )
-                                (get startPosition model.positions)
-                                (get endPosition model.positions)
-                                |> Maybe.withDefault empty
-                            , viewSteps steps
-                            , viewNotes notes
-                            ]
-
-                ViewTransitions ->
-                    column None
-                        [ alignLeft, center, spacing 20 ]
-                        [ icon Arrow MattIcon []
-                        , column None [ spacing 20 ] <|
-                            (model.transitions
-                                |> Dict.values
-                                |> List.sortBy (.startPosition >> (\(Id id) -> id))
-                                |> groupWhile (\a b -> a.startPosition == b.startPosition)
-                                |> List.map
-                                    (\g ->
-                                        column None
-                                            [ center ]
-                                            [ g
-                                                |> List.head
-                                                |> Maybe.andThen
-                                                    (\{ startPosition } ->
-                                                        get startPosition model.positions
-                                                    )
-                                                |> flip whenJust
-                                                    (\{ id, name } ->
-                                                        link (Router.position id) <|
-                                                            paragraph Choice
-                                                                []
-                                                                [ text name ]
-                                                    )
-                                            , viewTechList Router.transition g
-                                            ]
-                                    )
+                                    , viewSteps steps
+                                    , viewNotes notes
+                                    ]
                             )
-                        , plus <| CreateTransition Nothing
-                        ]
+
+                ViewTransitions data ->
+                    data
+                        |> viewRemote
+                            (\transitions ->
+                                column None
+                                    [ alignLeft, center, spacing 20 ]
+                                    [ icon Arrow MattIcon []
+                                    , column None [ spacing 20 ] <|
+                                        (transitions
+                                            |> List.sortBy (.startPosition >> .id >> (\(Id id) -> id))
+                                            |> groupWhile (\a b -> a.startPosition.id == b.startPosition.id)
+                                            |> List.map
+                                                (\g ->
+                                                    column None
+                                                        [ center ]
+                                                        [ g
+                                                            |> List.head
+                                                            |> Maybe.map .startPosition
+                                                            |> flip whenJust
+                                                                (\{ id, name } ->
+                                                                    link (Router.position id) <|
+                                                                        paragraph Choice
+                                                                            []
+                                                                            [ text name ]
+                                                                )
+                                                        , viewTechList Router.transition g
+                                                        ]
+                                                )
+                                        )
+                                    , plus <| CreateTransition Nothing
+                                    ]
+                            )
 
         roteiro =
             when (not (model.view == ViewStart && model.device == Mobile)) <|
@@ -454,15 +425,36 @@ view ({ form } as model) =
             ]
 
 
-pickStartPosition : Dict String Position -> Form -> Element Styles vs Msg
+viewRemote : (a -> Element Styles Variations Msg) -> GcData a -> Element Styles Variations Msg
+viewRemote fn data =
+    case data of
+        NotAsked ->
+            text "not asked"
+
+        Loading ->
+            icon Waiting MattIcon []
+
+        Failure _ ->
+            text "error"
+
+        Success a ->
+            fn a
+
+
+pickStartPosition : GcData (Dict String Position) -> Form -> Element Styles vs Msg
 pickStartPosition positions form =
+    let
+        ps =
+            positions
+                |> remoteUnwrap [] (Dict.values >> List.map (\{ id, name } -> Info id name))
+    in
     case form.startPosition of
         Pending ->
             icon Question
                 ActionIcon
                 [ center
                 , onClick <|
-                    Update
+                    UpdateForm
                         { form
                             | startPosition =
                                 Picking <|
@@ -480,8 +472,7 @@ pickStartPosition positions form =
                 , menu =
                     Input.menu None
                         []
-                        (positions
-                            |> Dict.values
+                        (ps
                             |> List.map
                                 (\p ->
                                     Input.choice p <| text p.name
@@ -492,7 +483,7 @@ pickStartPosition positions form =
         Picked { name } ->
             paragraph Link
                 [ onClick <|
-                    Update
+                    UpdateForm
                         { form
                             | startPosition =
                                 Picking <|
@@ -503,15 +494,20 @@ pickStartPosition positions form =
                 ]
 
 
-pickEndPosition : Dict String Position -> Form -> Element Styles vs Msg
+pickEndPosition : GcData (Dict String Position) -> Form -> Element Styles vs Msg
 pickEndPosition positions form =
+    let
+        ps =
+            positions
+                |> remoteUnwrap [] (Dict.values >> List.map (\{ id, name } -> Info id name))
+    in
     case form.endPosition of
         Pending ->
             icon Question
                 ActionIcon
                 [ center
                 , onClick <|
-                    Update
+                    UpdateForm
                         { form
                             | endPosition =
                                 Picking <|
@@ -529,8 +525,7 @@ pickEndPosition positions form =
                 , menu =
                     Input.menu None
                         []
-                        (positions
-                            |> Dict.values
+                        (ps
                             |> List.map
                                 (\p ->
                                     Input.choice p <| text p.name
@@ -541,7 +536,7 @@ pickEndPosition positions form =
         Picked { name } ->
             paragraph Link
                 [ onClick <|
-                    Update
+                    UpdateForm
                         { form
                             | endPosition =
                                 Picking <|
@@ -570,7 +565,7 @@ nameEdit form =
     Input.text
         Field
         [ maxWidth <| px 300, center ]
-        { onChange = \str -> Update { form | name = str }
+        { onChange = \str -> UpdateForm { form | name = str }
         , value = form.name
         , label = Input.hiddenLabel ""
         , options = []
@@ -634,7 +629,7 @@ stepsEditor form =
                                 [ width fill, attribute "rows" "4" ]
                                 { onChange =
                                     \str ->
-                                        Update
+                                        UpdateForm
                                             { form | steps = Array.set i str form.steps }
                                 , value = v
                                 , label = Input.hiddenLabel ""
@@ -647,9 +642,9 @@ stepsEditor form =
         buttons =
             row None
                 [ center ]
-                [ plus (Update { form | steps = Array.push "" form.steps })
+                [ plus (UpdateForm { form | steps = Array.push "" form.steps })
                 , when (not <| Array.isEmpty form.steps) <|
-                    minus (Update { form | steps = Array.slice 0 -1 form.steps })
+                    minus (UpdateForm { form | steps = Array.slice 0 -1 form.steps })
                 ]
     in
     column None
@@ -674,7 +669,7 @@ notesEditor form =
                                 [ width fill, attribute "rows" "4" ]
                                 { onChange =
                                     \str ->
-                                        Update
+                                        UpdateForm
                                             { form | notes = Array.set i str form.notes }
                                 , value = v
                                 , label = Input.hiddenLabel ""
@@ -687,9 +682,9 @@ notesEditor form =
         buttons =
             row None
                 [ center ]
-                [ plus (Update { form | notes = Array.push "" form.notes })
+                [ plus (UpdateForm { form | notes = Array.push "" form.notes })
                 , when (not <| Array.isEmpty form.notes) <|
-                    minus (Update { form | notes = Array.slice 0 -1 form.notes })
+                    minus (UpdateForm { form | notes = Array.slice 0 -1 form.notes })
                 ]
     in
     column None

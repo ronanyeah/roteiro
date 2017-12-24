@@ -4,7 +4,9 @@ import Array
 import Dict exposing (Dict)
 import Element exposing (Attribute, Element, el, empty)
 import Element.Attributes exposing (class)
-import Types exposing (Device(Desktop), FaIcon(..), Form, Id(..), Model, Picker(..), View(..))
+import Regex exposing (Regex)
+import RemoteData
+import Types exposing (Device(Desktop), FaIcon(..), Form, GcData, Id(..), Model, Picker(..), View(..))
 
 
 icon : FaIcon -> s -> List (Attribute vs msg) -> Element s vs msg
@@ -43,7 +45,7 @@ icon fa s attrs =
                     "fa-times"
 
                 Waiting ->
-                    "fa-exclamation"
+                    "fa-refresh"
 
                 Tick ->
                     "fa-check"
@@ -74,16 +76,16 @@ sort =
 notEditing : View -> Bool
 notEditing view =
     case view of
-        ViewPosition True _ ->
+        ViewEditPosition _ ->
             False
 
-        ViewSubmission True _ ->
+        ViewEditSubmission _ ->
             False
 
-        ViewTopic True _ ->
+        ViewEditTopic _ ->
             False
 
-        ViewTransition True _ ->
+        ViewEditTransition _ ->
             False
 
         _ ->
@@ -109,6 +111,12 @@ del (Id id) =
     Dict.remove id
 
 
+remoteUnwrap : a -> (b -> a) -> GcData b -> a
+remoteUnwrap default fn =
+    RemoteData.map fn
+        >> RemoteData.withDefault default
+
+
 unwrap : b -> (a -> b) -> Maybe a -> b
 unwrap default fn =
     Maybe.map fn
@@ -128,11 +136,9 @@ listToDict : List { r | id : Id } -> Dict String { r | id : Id }
 listToDict =
     List.foldl
         (\r ->
-            let
-                (Id id) =
-                    r.id
-            in
-            Dict.insert id r
+            case r.id of
+                Id idStr ->
+                    Dict.insert idStr r
         )
         Dict.empty
 
@@ -145,10 +151,7 @@ filterEmpty =
 emptyModel : Model
 emptyModel =
     { view = ViewStart
-    , positions = Dict.empty
-    , transitions = Dict.empty
-    , submissions = Dict.empty
-    , topics = Dict.empty
+    , positions = RemoteData.NotAsked
     , url = ""
     , token = ""
     , device = Desktop
@@ -166,3 +169,15 @@ emptyForm =
     , steps = Array.empty
     , notes = Array.empty
     }
+
+
+matchLink : Regex
+matchLink =
+    Regex.regex
+        "^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"
+
+
+matchDomain : Regex
+matchDomain =
+    Regex.regex
+        "(?:[-a-zA-Z0-9@:%_\\+~.#=]{2,256}\\.)?([-a-zA-Z0-9@:%_\\+~#=]*)\\.[a-z]{2,6}\\b(?:[-a-zA-Z0-9@:%_\\+.~#?&\\/\\/=]*)"
