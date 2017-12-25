@@ -241,8 +241,6 @@ view ({ form } as model) =
                                     [ center, spacing 20, width fill ]
                                     [ editRow t.name
                                     , viewNotes t.notes
-                                    , link "/#/ts" <|
-                                        icon Book ActionIcon []
                                     ]
                             )
 
