@@ -7,7 +7,10 @@ import Utils exposing (filterEmpty)
 
 createPosition : Form -> Result (List String) ( String, List String )
 createPosition { name, notes } =
-    Ok ( name, notes |> Array.toList |> filterEmpty )
+    if String.isEmpty name then
+        Err [ "Name field is empty." ]
+    else
+        Ok ( name, notes |> Array.toList |> filterEmpty )
 
 
 updatePosition : Form -> Result (List String) Position

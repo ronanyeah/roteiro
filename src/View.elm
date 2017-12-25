@@ -52,7 +52,8 @@ view ({ form } as model) =
                 ViewCreatePosition ->
                     column None
                         [ center, spacing 20, width fill ]
-                        [ nameEdit form
+                        [ viewErrors form.errors
+                        , nameEdit form
                         , notesEditor form
                         , buttons Nothing
                         ]
@@ -768,6 +769,16 @@ viewTechList fn xs =
                                 ]
                     )
             )
+
+
+viewErrors : List String -> Element Styles Variations Msg
+viewErrors errs =
+    when (errs |> List.isEmpty |> not) <|
+        column None
+            [ center, spacing 15 ]
+            [ icon Warning ActionIcon []
+            , errs |> Array.fromList |> viewNotes
+            ]
 
 
 domain : String -> String

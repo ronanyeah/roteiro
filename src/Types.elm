@@ -96,6 +96,7 @@ type FaIcon
     | Question
     | Globe
     | Cogs
+    | Warning
 
 
 type Variations

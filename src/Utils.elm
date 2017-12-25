@@ -10,6 +10,16 @@ import Types exposing (Device(Desktop), FaIcon(..), Form, GcData, Id(..), Model,
 import Window
 
 
+addErrors : List String -> Form -> Form
+addErrors errs f =
+    { f | errors = errs }
+
+
+clearErrors : Form -> Form
+clearErrors f =
+    { f | errors = [] }
+
+
 appendCmd : Cmd msg -> ( model, Cmd msg ) -> ( model, Cmd msg )
 appendCmd newCmd =
     Tuple.mapSecond
@@ -66,6 +76,9 @@ icon fa s attrs =
 
                 Waiting ->
                     "fa-refresh"
+
+                Warning ->
+                    "fa-exclamation"
 
                 Tick ->
                     "fa-check"

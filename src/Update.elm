@@ -9,7 +9,7 @@ import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (emptyForm, listToDict, log, logError, unwrap)
+import Utils exposing (addErrors, clearErrors, emptyForm, listToDict, log, logError, unwrap)
 import Validate
 
 
@@ -262,19 +262,13 @@ update msg model =
                 ViewCreatePosition ->
                     case Validate.createPosition model.form of
                         Ok args ->
-                            ( model
+                            ( { model | form = clearErrors model.form }
                             , uncurry createPosition args
                                 |> mutation model.url model.token CbPosition
                             )
 
                         Err errs ->
-                            ( { model
-                                | form =
-                                    model.form
-                                        |> (\f ->
-                                                { f | errors = errs }
-                                           )
-                              }
+                            ( { model | form = addErrors errs model.form }
                             , Cmd.none
                             )
 
