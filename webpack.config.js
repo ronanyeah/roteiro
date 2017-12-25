@@ -1,6 +1,6 @@
-const webpack = require("webpack");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
+const copyWebpackPlugin = require("copy-webpack-plugin");
 const { resolve } = require("path");
+const webpack = require("webpack");
 
 const { GRAPHQL_ENDPOINT, DEBUG, NODE_ENV } = process.env;
 
@@ -42,7 +42,7 @@ module.exports = {
     }),
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
-    new CopyWebpackPlugin([
+    new copyWebpackPlugin([
       "static",
       {
         from: "node_modules/font-awesome",
