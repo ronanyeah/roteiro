@@ -88,16 +88,16 @@ notEditing view =
         ViewCreateTransition ->
             False
 
-        ViewEditPosition _ ->
+        ViewEditPosition ->
             False
 
-        ViewEditSubmission _ ->
+        ViewEditSubmission ->
             False
 
-        ViewEditTopic _ ->
+        ViewEditTopic ->
             False
 
-        ViewEditTransition _ ->
+        ViewEditTransition ->
             False
 
         _ ->
@@ -177,6 +177,7 @@ emptyModel =
 emptyForm : Form
 emptyForm =
     { name = ""
+    , id = Id ""
     , startPosition = Pending
     , endPosition = Pending
     , steps = Array.empty

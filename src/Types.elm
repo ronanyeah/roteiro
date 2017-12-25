@@ -44,10 +44,10 @@ type View
     | ViewCreateSubmission
     | ViewCreateTopic
     | ViewCreateTransition
-    | ViewEditPosition Position
-    | ViewEditSubmission Submission
-    | ViewEditTopic Topic
-    | ViewEditTransition Transition
+    | ViewEditPosition
+    | ViewEditSubmission
+    | ViewEditTopic
+    | ViewEditTransition
     | ViewPosition (GcData Position)
     | ViewPositions
     | ViewSubmission (GcData Submission)
@@ -189,6 +189,7 @@ type alias Submission =
 
 type alias Form =
     { name : String
+    , id : Id
     , startPosition : Picker Info
     , endPosition : Picker Info
     , notes : Array String

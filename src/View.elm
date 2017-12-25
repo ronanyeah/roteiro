@@ -93,15 +93,15 @@ view ({ form } as model) =
                         , buttons Nothing
                         ]
 
-                ViewEditPosition { id } ->
+                ViewEditPosition ->
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form
                         , notesEditor form
-                        , buttons <| Just <| DeletePosition id
+                        , buttons <| Just <| DeletePosition form.id
                         ]
 
-                ViewEditSubmission { id } ->
+                ViewEditSubmission ->
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form
@@ -112,18 +112,18 @@ view ({ form } as model) =
                             ]
                         , stepsEditor form
                         , notesEditor form
-                        , buttons <| Just <| DeleteSubmission id
+                        , buttons <| Just <| DeleteSubmission form.id
                         ]
 
-                ViewEditTopic { id } ->
+                ViewEditTopic ->
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form
                         , notesEditor form
-                        , buttons <| Just <| DeleteTopic id
+                        , buttons <| Just <| DeleteTopic form.id
                         ]
 
-                ViewEditTransition { id } ->
+                ViewEditTransition ->
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form
@@ -135,7 +135,7 @@ view ({ form } as model) =
                             ]
                         , stepsEditor form
                         , notesEditor form
-                        , buttons <| Just <| DeleteTransition id
+                        , buttons <| Just <| DeleteTransition form.id
                         ]
 
                 ViewPosition data ->

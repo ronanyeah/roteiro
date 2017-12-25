@@ -3,8 +3,8 @@ module Validate exposing (..)
 import Types exposing (Form, Id(..), Info, Picker(..), Position, Submission, Topic, Transition)
 
 
-submission : Id -> Form -> Result (List String) Submission
-submission id { startPosition, steps, name, notes } =
+submission : Form -> Result (List String) Submission
+submission { id, startPosition, steps, name, notes } =
     case startPosition of
         Picked p ->
             Ok
@@ -19,8 +19,8 @@ submission id { startPosition, steps, name, notes } =
             Err []
 
 
-transition : Id -> Form -> Result (List String) Transition
-transition id { startPosition, endPosition, steps, name, notes } =
+transition : Form -> Result (List String) Transition
+transition { id, startPosition, endPosition, steps, name, notes } =
     case ( startPosition, endPosition ) of
         ( Picked start, Picked end ) ->
             Ok
@@ -36,8 +36,8 @@ transition id { startPosition, endPosition, steps, name, notes } =
             Err []
 
 
-topic : Id -> Form -> Result (List String) Topic
-topic id { name, notes } =
+topic : Form -> Result (List String) Topic
+topic { id, name, notes } =
     Ok
         { id = id
         , name = name
@@ -45,8 +45,8 @@ topic id { name, notes } =
         }
 
 
-position : Id -> Form -> Result (List String) Position
-position id { name, notes } =
+position : Form -> Result (List String) Position
+position { id, name, notes } =
     Ok
         { id = id
         , name = name

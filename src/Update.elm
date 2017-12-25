@@ -182,13 +182,18 @@ update msg model =
             case model.view of
                 ViewPosition (Success p) ->
                     let
-                        form_ =
+                        form =
                             { emptyForm
                                 | name = p.name
                                 , notes = p.notes
+                                , id = p.id
                             }
                     in
-                    ( { model | view = ViewEditPosition p, form = form_ }
+                    ( { model
+                        | view = ViewEditPosition
+                        , previousView = model.view
+                        , form = form
+                      }
                     , Cmd.none
                     )
 
@@ -200,9 +205,14 @@ update msg model =
                                 , steps = s.steps
                                 , notes = s.notes
                                 , startPosition = Picked s.position
+                                , id = s.id
                             }
                     in
-                    ( { model | view = ViewEditSubmission s, form = form }
+                    ( { model
+                        | view = ViewEditSubmission
+                        , previousView = model.view
+                        , form = form
+                      }
                     , fetchPositions |> query model.url model.token CbPositions
                     )
 
@@ -212,22 +222,34 @@ update msg model =
                             { emptyForm
                                 | name = t.name
                                 , notes = t.notes
+                                , id = t.id
                             }
                     in
-                    ( { model | view = ViewEditTopic t, form = form }, Cmd.none )
+                    ( { model
+                        | view = ViewEditTopic
+                        , previousView = model.view
+                        , form = form
+                      }
+                    , Cmd.none
+                    )
 
                 ViewTransition (Success t) ->
                     let
                         form =
                             { emptyForm
                                 | name = t.name
+                                , id = t.id
                                 , steps = t.steps
                                 , notes = t.notes
                                 , startPosition = Picked t.startPosition
                                 , endPosition = Picked t.endPosition
                             }
                     in
-                    ( { model | view = ViewEditTransition t, form = form }
+                    ( { model
+                        | view = ViewEditTransition
+                        , previousView = model.view
+                        , form = form
+                      }
                     , fetchPositions |> query model.url model.token CbPositions
                     )
 
@@ -275,8 +297,8 @@ update msg model =
                         _ ->
                             ( model, log "missing position" )
 
-                ViewEditPosition { id } ->
-                    case Validate.position id model.form of
+                ViewEditPosition ->
+                    case Validate.position model.form of
                         Ok value ->
                             ( model
                             , updatePosition value
@@ -286,8 +308,8 @@ update msg model =
                         Err _ ->
                             ( model, Cmd.none )
 
-                ViewEditSubmission { id } ->
-                    case Validate.submission id model.form of
+                ViewEditSubmission ->
+                    case Validate.submission model.form of
                         Ok value ->
                             ( model
                             , updateSubmission value
@@ -297,8 +319,8 @@ update msg model =
                         Err _ ->
                             ( model, Cmd.none )
 
-                ViewEditTopic { id } ->
-                    case Validate.topic id model.form of
+                ViewEditTopic ->
+                    case Validate.topic model.form of
                         Ok value ->
                             ( model
                             , updateTopic value
@@ -308,8 +330,8 @@ update msg model =
                         Err _ ->
                             ( model, Cmd.none )
 
-                ViewEditTransition { id } ->
-                    case Validate.transition id model.form of
+                ViewEditTransition ->
+                    case Validate.transition model.form of
                         Ok value ->
                             ( model
                             , updateTransition value
@@ -379,10 +401,10 @@ update msg model =
                                 Nothing ->
                                     Picking newState
 
-                        form_ =
+                        form =
                             model.form |> (\f -> { f | startPosition = picker })
                     in
-                    ( { model | form = form_ }, Cmd.none )
+                    ( { model | form = form }, Cmd.none )
 
                 _ ->
                     ( model, Cmd.none )
