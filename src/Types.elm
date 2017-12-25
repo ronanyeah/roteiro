@@ -143,6 +143,7 @@ type alias Model =
     , positions : GcData (Dict String Position)
     , url : String
     , device : Device
+    , size : Window.Size
     , url : String
     , token : String
     , tokenForm : Maybe String

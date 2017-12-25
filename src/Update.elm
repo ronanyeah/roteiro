@@ -418,4 +418,4 @@ update msg model =
                     else
                         Desktop
             in
-            ( { model | device = device }, Cmd.none )
+            ( { model | device = device, size = size }, Cmd.none )

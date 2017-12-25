@@ -14,6 +14,7 @@ import Router
 import Styling exposing (styling)
 import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Position, Styles(..), Variations(..), View(..))
 import Utils exposing (icon, isPicking, matchDomain, matchLink, remoteUnwrap, sort)
+import Window exposing (Size)
 
 
 view : Model -> Html Msg
@@ -124,14 +125,17 @@ view ({ form } as model) =
                         ]
 
                 ViewEditTransition ->
+                    let
+                        pickersLayout =
+                            if isPicking form.startPosition || isPicking form.endPosition then
+                                column
+                            else
+                                paragraph
+                    in
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form
-                        , (if isPicking form.startPosition || isPicking form.endPosition then
-                            column
-                           else
-                            paragraph
-                          )
+                        , pickersLayout
                             None
                             [ verticalCenter, spacing 10, center ]
                             [ pickStartPosition model.positions form
@@ -324,6 +328,9 @@ view ({ form } as model) =
                                     ]
                             )
 
+        shortcutsEnabled =
+            model.device == Mobile && Utils.notEditing model.view
+
         roteiro =
             when (not (model.view == ViewStart && model.device == Mobile)) <|
                 row None
@@ -374,27 +381,6 @@ view ({ form } as model) =
                             ]
                 )
 
-        ball lnk fa =
-            link lnk <|
-                circle 40 Ball [] <|
-                    icon fa
-                        BallIcon
-                        [ center
-                        , verticalCenter
-                        ]
-
-        balls =
-            when (model.device == Mobile && Utils.notEditing model.view) <|
-                screen <|
-                    el None [ alignBottom, width fill ] <|
-                        row None
-                            [ spread, width fill, padding 10 ]
-                            [ ball "/#/ps" Flag
-                            , ball "/#/trs" Arrow
-                            , ball "/#/ss" Bolt
-                            , ball "/#/ts" Book
-                            ]
-
         ws =
             case model.device of
                 Desktop ->
@@ -412,19 +398,12 @@ view ({ form } as model) =
             , padding ws
             ]
             [ enterToken
-            , balls
+            , when shortcutsEnabled <| viewShortcuts model.size
             , confirm
             , roteiro
             , content
-            , el None
-                [ height <|
-                    px <|
-                        if model.device == Mobile then
-                            100
-                        else
-                            0
-                ]
-                empty
+            , when shortcutsEnabled <|
+                el None [ height <| px <| (toFloat model.size.width / 12) + 20 ] empty
             ]
 
 
@@ -442,6 +421,29 @@ viewRemote fn data =
 
         Success a ->
             fn a
+
+
+viewShortcuts : Size -> Element Styles Variations Msg
+viewShortcuts size =
+    let
+        ball lnk fa =
+            link lnk <|
+                circle (toFloat size.width / 12) Ball [] <|
+                    icon fa
+                        BallIcon
+                        [ center
+                        , verticalCenter
+                        ]
+    in
+    screen <|
+        el None [ alignBottom, width fill ] <|
+            row None
+                [ spread, width fill, padding 10 ]
+                [ ball "/#/ps" Flag
+                , ball "/#/trs" Arrow
+                , ball "/#/ss" Bolt
+                , ball "/#/ts" Book
+                ]
 
 
 pickStartPosition : GcData (Dict String Position) -> Form -> Element Styles vs Msg

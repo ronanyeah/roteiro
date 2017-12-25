@@ -7,6 +7,7 @@ import Element.Attributes exposing (class)
 import Regex exposing (Regex)
 import RemoteData
 import Types exposing (Device(Desktop), FaIcon(..), Form, GcData, Id(..), Model, Picker(..), View(..))
+import Window
 
 
 isPicking : Picker a -> Bool
@@ -191,6 +192,7 @@ emptyModel =
     , url = ""
     , token = ""
     , device = Desktop
+    , size = Window.Size 0 0
     , tokenForm = Nothing
     , confirm = Nothing
     , form = emptyForm
