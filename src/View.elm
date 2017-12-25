@@ -411,13 +411,13 @@ viewRemote : (a -> Element Styles Variations Msg) -> GcData a -> Element Styles 
 viewRemote fn data =
     case data of
         NotAsked ->
-            text "not asked"
+            el None [ center ] <| text "not asked"
 
         Loading ->
             icon Waiting MattIcon []
 
-        Failure _ ->
-            text "error"
+        Failure err ->
+            paragraph None [ center ] [ text <| toString err ]
 
         Success a ->
             fn a
