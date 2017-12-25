@@ -1,7 +1,7 @@
 module Data exposing (..)
 
 import Array exposing (Array)
-import GraphQL.Client.Http exposing (Error, customSendMutationRaw, customSendQueryRaw)
+import GraphQL.Client.Http exposing (customSendMutationRaw, customSendQueryRaw)
 import GraphQL.Request.Builder as B
 import GraphQL.Request.Builder.Arg as Arg
 import Http
@@ -59,7 +59,7 @@ mutation url token msg request =
         |> Cmd.map msg
 
 
-convert : Decoder a -> Task Error (Http.Response String) -> Task GcError a
+convert : Decoder a -> Task GraphQL.Client.Http.Error (Http.Response String) -> Task GcError a
 convert resDecoder =
     Task.mapError
         (\e ->
