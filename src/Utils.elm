@@ -79,13 +79,13 @@ notEditing view =
         ViewCreatePosition ->
             False
 
-        ViewCreateSubmission _ ->
+        ViewCreateSubmission ->
             False
 
-        ViewCreateTopic _ ->
+        ViewCreateTopic ->
             False
 
-        ViewCreateTransition _ ->
+        ViewCreateTransition ->
             False
 
         ViewEditPosition _ ->
@@ -163,6 +163,7 @@ filterEmpty =
 emptyModel : Model
 emptyModel =
     { view = ViewStart
+    , previousView = ViewStart
     , positions = RemoteData.NotAsked
     , url = ""
     , token = ""

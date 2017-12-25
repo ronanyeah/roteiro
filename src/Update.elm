@@ -17,33 +17,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Cancel ->
-            case model.view of
-                ViewCreatePosition ->
-                    ( { model | view = ViewPositions, confirm = Nothing }, Cmd.none )
-
-                ViewCreateSubmission view ->
-                    ( { model | view = view, confirm = Nothing }, Cmd.none )
-
-                ViewCreateTopic view ->
-                    ( { model | view = view, confirm = Nothing }, Cmd.none )
-
-                ViewCreateTransition view ->
-                    ( { model | view = view, confirm = Nothing }, Cmd.none )
-
-                ViewEditPosition p ->
-                    ( { model | view = ViewPosition <| Success p, confirm = Nothing }, Cmd.none )
-
-                ViewEditSubmission s ->
-                    ( { model | view = ViewSubmission <| Success s, confirm = Nothing }, Cmd.none )
-
-                ViewEditTopic t ->
-                    ( { model | view = ViewTopic <| Success t, confirm = Nothing }, Cmd.none )
-
-                ViewEditTransition t ->
-                    ( { model | view = ViewTransition <| Success t, confirm = Nothing }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
+            ( { model | view = model.previousView, confirm = Nothing }, Cmd.none )
 
         CbDelete res ->
             case res of
@@ -116,9 +90,9 @@ update msg model =
 
         CreatePosition ->
             ( { model
-                | view =
-                    ViewCreatePosition
+                | view = ViewCreatePosition
                 , form = emptyForm
+                , previousView = model.view
               }
             , Cmd.none
             )
@@ -136,8 +110,8 @@ update msg model =
                     }
             in
             ( { model
-                | view =
-                    ViewCreateSubmission model.view
+                | view = ViewCreateSubmission
+                , previousView = model.view
                 , form = form
               }
             , Cmd.none
@@ -145,8 +119,8 @@ update msg model =
 
         CreateTopic ->
             ( { model
-                | view =
-                    ViewCreateTopic model.view
+                | view = ViewCreateTopic
+                , previousView = model.view
                 , form = emptyForm
               }
             , Cmd.none
@@ -165,8 +139,8 @@ update msg model =
                     }
             in
             ( { model
-                | view =
-                    ViewCreateTransition model.view
+                | view = ViewCreateTransition
+                , previousView = model.view
                 , form = form
               }
             , Cmd.none
@@ -268,7 +242,7 @@ update msg model =
                         |> mutation model.url model.token CbPosition
                     )
 
-                ViewCreateSubmission _ ->
+                ViewCreateSubmission ->
                     case model.form.startPosition of
                         Picked { id } ->
                             ( model
@@ -279,13 +253,13 @@ update msg model =
                         _ ->
                             ( model, log "missing position" )
 
-                ViewCreateTopic _ ->
+                ViewCreateTopic ->
                     ( model
                     , createTopic model.form.name model.form.notes
                         |> mutation model.url model.token CbTopic
                     )
 
-                ViewCreateTransition _ ->
+                ViewCreateTransition ->
                     case ( model.form.startPosition, model.form.endPosition ) of
                         ( Picked start, Picked end ) ->
                             ( model

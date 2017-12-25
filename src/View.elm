@@ -56,7 +56,7 @@ view ({ form } as model) =
                         , buttons Nothing
                         ]
 
-                ViewCreateSubmission _ ->
+                ViewCreateSubmission ->
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form
@@ -70,7 +70,7 @@ view ({ form } as model) =
                         , buttons Nothing
                         ]
 
-                ViewCreateTopic _ ->
+                ViewCreateTopic ->
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form
@@ -78,7 +78,7 @@ view ({ form } as model) =
                         , buttons Nothing
                         ]
 
-                ViewCreateTransition _ ->
+                ViewCreateTransition ->
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form

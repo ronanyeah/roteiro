@@ -41,9 +41,9 @@ type Msg
 type View
     = ViewStart
     | ViewCreatePosition
-    | ViewCreateSubmission View
-    | ViewCreateTopic View
-    | ViewCreateTransition View
+    | ViewCreateSubmission
+    | ViewCreateTopic
+    | ViewCreateTransition
     | ViewEditPosition Position
     | ViewEditSubmission Submission
     | ViewEditTopic Topic
@@ -131,6 +131,7 @@ type alias Info =
 
 type alias Model =
     { view : View
+    , previousView : View
     , positions : GcData (Dict String Position)
     , url : String
     , device : Device
