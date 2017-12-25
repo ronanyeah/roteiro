@@ -29,7 +29,7 @@ queryTask url token request =
         , withCredentials = False
         }
         request
-        |> convert request
+        |> convert (B.responseDataDecoder request)
 
 
 query : String -> String -> (GcData a -> msg) -> B.Request B.Query a -> Cmd msg
@@ -49,7 +49,7 @@ mutationTask url token request =
         , withCredentials = False
         }
         request
-        |> convert request
+        |> convert (B.responseDataDecoder request)
 
 
 mutation : String -> String -> (GcData a -> msg) -> B.Request B.Mutation a -> Cmd msg
@@ -59,8 +59,8 @@ mutation url token msg request =
         |> Cmd.map msg
 
 
-convert : B.Request x a -> Task Error (Http.Response String) -> Task GcError a
-convert request =
+convert : Decoder a -> Task Error (Http.Response String) -> Task GcError a
+convert resDecoder =
     Task.mapError
         (\e ->
             case e of
@@ -83,14 +83,14 @@ convert request =
                     decoder =
                         Decode.map2 (,)
                             (Decode.maybe <| Decode.field "errors" <| Decode.list decodeGcError)
-                            (Decode.maybe <| Decode.field "data" <| B.responseDataDecoder request)
+                            (Decode.maybe <| Decode.field "data" resDecoder)
                 in
                 case Decode.decodeString decoder response.body of
                     Err err ->
                         Task.fail <| HttpError <| Http.BadPayload err response
 
-                    Ok res ->
-                        case res of
+                    Ok result ->
+                        case result of
                             ( Just [], Just d ) ->
                                 Task.succeed d
 
