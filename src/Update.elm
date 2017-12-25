@@ -9,7 +9,7 @@ import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (emptyForm, listToDict, log, unwrap)
+import Utils exposing (emptyForm, listToDict, log, logError, unwrap)
 import Validate
 
 
@@ -28,62 +28,62 @@ update msg model =
                     )
 
                 Err err ->
-                    ( { model | view = ViewStart }, log err )
+                    ( { model | confirm = Nothing }, log err )
 
         CbPosition res ->
             ( { model
                 | view = ViewPosition res
               }
-            , Cmd.none
+            , logError res
             )
 
         CbPositions res ->
             ( { model
                 | positions = RemoteData.map listToDict res
               }
-            , Cmd.none
+            , logError res
             )
 
         CbSubmission res ->
             ( { model
                 | view = ViewSubmission res
               }
-            , Cmd.none
+            , logError res
             )
 
         CbSubmissions res ->
             ( { model
                 | view = ViewSubmissions res
               }
-            , Cmd.none
+            , logError res
             )
 
         CbTopic res ->
             ( { model
                 | view = ViewTopic res
               }
-            , Cmd.none
+            , logError res
             )
 
         CbTopics res ->
             ( { model
                 | view = ViewTopics res
               }
-            , Cmd.none
+            , logError res
             )
 
         CbTransition res ->
             ( { model
                 | view = ViewTransition res
               }
-            , Cmd.none
+            , logError res
             )
 
         CbTransitions res ->
             ( { model
                 | view = ViewTransitions res
               }
-            , Cmd.none
+            , logError res
             )
 
         Confirm maybeM ->

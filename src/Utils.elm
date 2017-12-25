@@ -135,6 +135,16 @@ unwrap default fn =
         >> Maybe.withDefault default
 
 
+logError : GcData a -> Cmd msg
+logError data =
+    case data of
+        RemoteData.Failure err ->
+            log err
+
+        _ ->
+            Cmd.none
+
+
 log : a -> Cmd msg
 log a =
     let
