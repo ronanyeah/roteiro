@@ -123,6 +123,8 @@ type GcError
     | GcError (List ApiError)
 
 
+{-| <https://www.graph.cool/docs/reference/graphql-api/error-handling-aecou7haj9>
+-}
 type ApiError
     = InsufficientPermissions
     | RelationIsRequired

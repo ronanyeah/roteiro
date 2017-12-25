@@ -23,6 +23,7 @@ update msg model =
             case res of
                 Ok _ ->
                     ( { model | confirm = Nothing }
+                      -- Forces reload of previous page so deleted data won't be visible.
                     , Navigation.back 1
                     )
 
