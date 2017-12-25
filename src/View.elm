@@ -13,7 +13,7 @@ import RemoteData exposing (RemoteData(..))
 import Router
 import Styling exposing (styling)
 import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Position, Styles(..), Variations(..), View(..))
-import Utils exposing (icon, matchDomain, matchLink, remoteUnwrap, sort)
+import Utils exposing (icon, isPicking, matchDomain, matchLink, remoteUnwrap, sort)
 
 
 view : Model -> Html Msg
@@ -127,8 +127,13 @@ view ({ form } as model) =
                     column None
                         [ center, spacing 20, width fill ]
                         [ nameEdit form
-                        , paragraph None
-                            [ verticalCenter, spacing 10 ]
+                        , (if isPicking form.startPosition || isPicking form.endPosition then
+                            column
+                           else
+                            paragraph
+                          )
+                            None
+                            [ verticalCenter, spacing 10, center ]
                             [ pickStartPosition model.positions form
                             , icon Arrow MattIcon []
                             , pickEndPosition model.positions form

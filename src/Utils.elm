@@ -9,6 +9,19 @@ import RemoteData
 import Types exposing (Device(Desktop), FaIcon(..), Form, GcData, Id(..), Model, Picker(..), View(..))
 
 
+isPicking : Picker a -> Bool
+isPicking p =
+    case p of
+        Picking _ ->
+            True
+
+        Picked _ ->
+            False
+
+        Pending ->
+            False
+
+
 icon : FaIcon -> s -> List (Attribute vs msg) -> Element s vs msg
 icon fa s attrs =
     let
