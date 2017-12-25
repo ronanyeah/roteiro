@@ -2,43 +2,55 @@ module Router exposing (..)
 
 import Data exposing (fetchPosition, fetchPositions, fetchSubmission, fetchSubmissions, fetchTopic, fetchTopics, fetchTransition, fetchTransitions, query)
 import Navigation exposing (Location)
+import Paths
 import RemoteData
 import Types exposing (..)
 import UrlParser exposing ((</>), Parser, map, oneOf, parseHash, s, string)
+import Utils exposing (appendCmd, log)
 
 
-position : Id -> String
-position (Id id) =
-    "/#/p/" ++ id
+stripHash : String -> String
+stripHash =
+    String.dropLeft 3
 
 
-submission : Id -> String
-submission (Id id) =
-    "/#/s/" ++ id
+positions : String
+positions =
+    stripHash Paths.positions
 
 
-topic : Id -> String
-topic (Id id) =
-    "/#/to/" ++ id
+submissions : String
+submissions =
+    stripHash Paths.submissions
 
 
-transition : Id -> String
-transition (Id id) =
-    "/#/t/" ++ id
+topics : String
+topics =
+    stripHash Paths.topics
+
+
+transitions : String
+transitions =
+    stripHash Paths.transitions
+
+
+start : String
+start =
+    stripHash Paths.start
 
 
 route : Parser (Route -> a) a
 route =
     oneOf
-        [ map Ps (s "ps")
-        , map Ts (s "ts")
-        , map Trs (s "trs")
-        , map Ss (s "ss")
-        , map (Id >> P) (s "p" </> string)
-        , map Start (s "start")
-        , map (Id >> T) (s "t" </> string)
-        , map (Id >> To) (s "to" </> string)
-        , map (Id >> S) (s "s" </> string)
+        [ map Ps (s positions)
+        , map Ss (s submissions)
+        , map Ts (s topics)
+        , map Trs (s transitions)
+        , map (Id >> P) (s positions </> string)
+        , map (Id >> S) (s submissions </> string)
+        , map (Id >> To) (s topics </> string)
+        , map (Id >> T) (s transitions </> string)
+        , map Start (s start)
         ]
 
 
@@ -46,7 +58,7 @@ router : Model -> Route -> ( Model, Cmd Msg )
 router model route =
     let
         default =
-            ( model, Navigation.newUrl "/#/start" )
+            ( model, Navigation.newUrl Paths.start )
     in
     case route of
         Ps ->

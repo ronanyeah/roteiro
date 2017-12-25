@@ -8,9 +8,9 @@ import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
 import List.Extra exposing (groupWhile)
+import Paths
 import Regex
 import RemoteData exposing (RemoteData(..))
-import Router
 import Styling exposing (styling)
 import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Position, Styles(..), Variations(..), View(..))
 import Utils exposing (icon, isPicking, matchDomain, matchLink, remoteUnwrap, sort)
@@ -39,13 +39,13 @@ view ({ form } as model) =
                         Desktop ->
                             column None
                                 [ center, spacing 40 ]
-                                [ link "/#/ps" <|
+                                [ link Paths.positions <|
                                     icon Flag ActionIcon []
-                                , link "/#/trs" <|
+                                , link Paths.transitions <|
                                     icon Arrow ActionIcon []
-                                , link "/#/ss" <|
+                                , link Paths.submissions <|
                                     icon Bolt ActionIcon []
-                                , link "/#/ts" <|
+                                , link Paths.topics <|
                                     icon Book ActionIcon []
                                 ]
 
@@ -157,11 +157,11 @@ view ({ form } as model) =
                                     , viewNotes notes
                                     , el Line [ width <| px 100, height <| px 2 ] empty
                                     , icon Arrow MattIcon []
-                                    , viewTechList Router.transition transitions
+                                    , viewTechList Paths.transition transitions
                                     , plus <| CreateTransition <| Just position
                                     , el Line [ width <| px 100, height <| px 2 ] empty
                                     , icon Bolt MattIcon []
-                                    , viewTechList Router.submission submissions
+                                    , viewTechList Paths.submission submissions
                                     , plus <| CreateSubmission <| Just position
                                     ]
                             )
@@ -179,7 +179,7 @@ view ({ form } as model) =
                                             |> sort
                                             |> List.map
                                                 (\p ->
-                                                    link (Router.position p.id) <|
+                                                    link (Paths.position p.id) <|
                                                         paragraph Choice
                                                             []
                                                             [ text p.name
@@ -200,7 +200,7 @@ view ({ form } as model) =
                                     , row None
                                         [ spacing 10 ]
                                         [ icon Flag MattIcon []
-                                        , link (Router.position sub.position.id) <|
+                                        , link (Paths.position sub.position.id) <|
                                             el Link [] <|
                                                 text sub.position.name
                                         ]
@@ -229,12 +229,12 @@ view ({ form } as model) =
                                                             |> Maybe.map .position
                                                             |> flip whenJust
                                                                 (\{ id, name } ->
-                                                                    link (Router.position id) <|
+                                                                    link (Paths.position id) <|
                                                                         paragraph Choice
                                                                             []
                                                                             [ text name ]
                                                                 )
-                                                        , viewTechList Router.submission g
+                                                        , viewTechList Paths.submission g
                                                         ]
                                                 )
                                         )
@@ -264,7 +264,7 @@ view ({ form } as model) =
                                         (topics
                                             |> List.map
                                                 (\t ->
-                                                    link (Router.topic t.id) <|
+                                                    link (Paths.topic t.id) <|
                                                         el Choice [] <|
                                                             text t.name
                                                 )
@@ -282,11 +282,11 @@ view ({ form } as model) =
                                     [ editRow t.name
                                     , paragraph None
                                         [ verticalCenter, spacing 10 ]
-                                        [ link (Router.position startPosition.id) <|
+                                        [ link (Paths.position startPosition.id) <|
                                             el Link [] <|
                                                 text startPosition.name
                                         , icon Arrow MattIcon []
-                                        , link (Router.position endPosition.id) <|
+                                        , link (Paths.position endPosition.id) <|
                                             el Link [] <|
                                                 text endPosition.name
                                         ]
@@ -315,12 +315,12 @@ view ({ form } as model) =
                                                             |> Maybe.map .startPosition
                                                             |> flip whenJust
                                                                 (\{ id, name } ->
-                                                                    link (Router.position id) <|
+                                                                    link (Paths.position id) <|
                                                                         paragraph Choice
                                                                             []
                                                                             [ text name ]
                                                                 )
-                                                        , viewTechList Router.transition g
+                                                        , viewTechList Paths.transition g
                                                         ]
                                                 )
                                         )
@@ -335,7 +335,7 @@ view ({ form } as model) =
             when (not (model.view == ViewStart && model.device == Mobile)) <|
                 row None
                     [ center, spacing 10, verticalCenter ]
-                    [ link "/#/" <|
+                    [ link Paths.start <|
                         el Header [ vary Small <| model.view /= ViewStart ] <|
                             text "ROTEIRO"
                     , when (model.view == ViewStart) <|
@@ -439,10 +439,10 @@ viewShortcuts size =
         el None [ alignBottom, width fill ] <|
             row None
                 [ spread, width fill, padding 10 ]
-                [ ball "/#/ps" Flag
-                , ball "/#/trs" Arrow
-                , ball "/#/ss" Bolt
-                , ball "/#/ts" Book
+                [ ball Paths.positions Flag
+                , ball Paths.transitions Arrow
+                , ball Paths.submissions Bolt
+                , ball Paths.topics Book
                 ]
 
 
