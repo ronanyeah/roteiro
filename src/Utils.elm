@@ -76,6 +76,18 @@ sort =
 notEditing : View -> Bool
 notEditing view =
     case view of
+        ViewCreatePosition ->
+            False
+
+        ViewCreateSubmission _ ->
+            False
+
+        ViewCreateTopic _ ->
+            False
+
+        ViewCreateTransition _ ->
+            False
+
         ViewEditPosition _ ->
             False
 
