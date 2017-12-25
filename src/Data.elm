@@ -12,11 +12,22 @@ import Types exposing (..)
 import Utils exposing (filterEmpty)
 
 
-decodeGcError : Decoder { code : Int, message : String }
+decodeGcError : Decoder ApiError
 decodeGcError =
-    Decode.map2 (\c m -> { code = c, message = m })
-        (Decode.field "code" Decode.int)
-        (Decode.field "message" Decode.string)
+    Decode.field "code" Decode.int
+        |> Decode.andThen
+            (\code ->
+                case code of
+                    3032 ->
+                        Decode.succeed RelationIsRequired
+
+                    3008 ->
+                        Decode.succeed InsufficientPermissions
+
+                    _ ->
+                        Decode.field "message" Decode.string
+                            |> Decode.map Other
+            )
 
 
 queryTask : String -> String -> B.Request B.Query a -> Task GcError a
@@ -69,12 +80,7 @@ convert resDecoder =
 
                 GraphQL.Client.Http.GraphQLError xs ->
                     xs
-                        |> List.map
-                            (\{ message } ->
-                                { code = 999
-                                , message = message
-                                }
-                            )
+                        |> List.map (.message >> Other)
                         |> GcError
         )
         >> Task.andThen
@@ -97,9 +103,7 @@ convert resDecoder =
                             ( Just errs, Just _ ) ->
                                 Task.fail
                                     (GcError
-                                        ({ code = 999
-                                         , message = "data returned with errors"
-                                         }
+                                        (Other "data returned with errors"
                                             :: errs
                                         )
                                     )

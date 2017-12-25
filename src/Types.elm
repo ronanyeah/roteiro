@@ -120,7 +120,13 @@ type alias GcData a =
 -}
 type GcError
     = HttpError Http.Error
-    | GcError (List { code : Int, message : String })
+    | GcError (List ApiError)
+
+
+type ApiError
+    = InsufficientPermissions
+    | RelationIsRequired
+    | Other String
 
 
 type alias Info =
