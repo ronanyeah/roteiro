@@ -100,6 +100,7 @@ router model route =
 
         NotFound ->
             default
+                |> appendCmd (log "route not found")
 
 
 parseLocation : Location -> Route

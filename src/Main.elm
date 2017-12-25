@@ -5,7 +5,7 @@ import Router exposing (parseLocation, router)
 import Task
 import Types exposing (..)
 import Update exposing (update)
-import Utils exposing (emptyModel)
+import Utils exposing (appendCmd, emptyModel)
 import View exposing (view)
 import Window
 
@@ -24,10 +24,4 @@ init : ( String, String ) -> Location -> ( Model, Cmd Msg )
 init ( url, token ) =
     parseLocation
         >> router { emptyModel | url = url, token = token }
-        >> Tuple.mapSecond
-            (\cmd ->
-                Cmd.batch
-                    [ Task.perform WindowSize Window.size
-                    , cmd
-                    ]
-            )
+        >> appendCmd (Task.perform WindowSize Window.size)

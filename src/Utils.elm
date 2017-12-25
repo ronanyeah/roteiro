@@ -10,6 +10,12 @@ import Types exposing (Device(Desktop), FaIcon(..), Form, GcData, Id(..), Model,
 import Window
 
 
+appendCmd : Cmd msg -> ( model, Cmd msg ) -> ( model, Cmd msg )
+appendCmd newCmd =
+    Tuple.mapSecond
+        (List.singleton >> (::) newCmd >> Cmd.batch)
+
+
 isPicking : Picker a -> Bool
 isPicking p =
     case p of
