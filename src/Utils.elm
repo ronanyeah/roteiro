@@ -209,6 +209,7 @@ emptyForm : Form
 emptyForm =
     { name = ""
     , id = Id ""
+    , errors = []
     , startPosition = Pending
     , endPosition = Pending
     , steps = Array.empty

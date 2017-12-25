@@ -199,6 +199,7 @@ type alias Submission =
 type alias Form =
     { name : String
     , id : Id
+    , errors : List String
     , startPosition : Picker Info
     , endPosition : Picker Info
     , notes : Array String

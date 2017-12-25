@@ -1,6 +1,24 @@
 module Validate exposing (..)
 
+import Array
 import Types exposing (Form, Id(..), Info, Picker(..), Position, Submission, Topic, Transition)
+import Utils exposing (filterEmpty)
+
+
+createPosition : Form -> Result (List String) ( String, List String )
+createPosition { name, notes } =
+    Ok ( name, notes |> Array.toList |> filterEmpty )
+
+
+updatePosition : Form -> Result (List String) Position
+updatePosition { id, name, notes } =
+    Ok
+        { id = id
+        , name = name
+        , notes = notes
+        , submissions = []
+        , transitions = []
+        }
 
 
 submission : Form -> Result (List String) Submission
@@ -42,15 +60,4 @@ topic { id, name, notes } =
         { id = id
         , name = name
         , notes = notes
-        }
-
-
-position : Form -> Result (List String) Position
-position { id, name, notes } =
-    Ok
-        { id = id
-        , name = name
-        , notes = notes
-        , submissions = []
-        , transitions = []
         }

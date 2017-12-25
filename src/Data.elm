@@ -200,12 +200,12 @@ fetchTransition (Id id) =
 -- CREATE
 
 
-createPosition : String -> Array String -> B.Request B.Mutation Position
+createPosition : String -> List String -> B.Request B.Mutation Position
 createPosition name notes =
     position
         |> B.field "createPosition"
             [ ( "name", Arg.string name )
-            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
+            , ( "notes", Arg.list <| List.map Arg.string <| notes )
             ]
         |> B.extract
         |> B.mutationDocument
