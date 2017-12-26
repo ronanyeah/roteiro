@@ -1,7 +1,6 @@
 module Types exposing (..)
 
 import Array exposing (Array)
-import Dict exposing (Dict)
 import Element.Input exposing (SelectMsg, SelectWith)
 import Http
 import RemoteData exposing (RemoteData)
@@ -12,7 +11,7 @@ type Msg
     = Cancel
     | CbDelete (Result GcError Id)
     | CbPosition (GcData Position)
-    | CbPositions (GcData (List Position))
+    | CbPositions (GcData (List Info))
     | CbSubmission (GcData Submission)
     | CbSubmissions (GcData (List Submission))
     | CbTopic (GcData Topic)
@@ -141,7 +140,7 @@ type alias Info =
 type alias Model =
     { view : View
     , previousView : View
-    , positions : GcData (Dict String Position)
+    , positions : GcData (List Info)
     , url : String
     , device : Device
     , size : Window.Size

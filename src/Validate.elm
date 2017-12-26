@@ -1,7 +1,7 @@
 module Validate exposing (..)
 
 import Array
-import Types exposing (Form, Id(..), Info, Picker(..), Submission, Topic, Transition)
+import Types exposing (Form, Id(..), Picker(..))
 import Utils exposing (filterEmpty)
 
 

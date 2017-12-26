@@ -1,6 +1,6 @@
 module Data exposing (..)
 
-import Array exposing (Array)
+import Array
 import GraphQL.Client.Http exposing (customSendMutationRaw, customSendQueryRaw)
 import GraphQL.Request.Builder as B
 import GraphQL.Request.Builder.Arg as Arg
@@ -9,7 +9,6 @@ import Json.Decode as Decode exposing (Decoder)
 import RemoteData
 import Task exposing (Task)
 import Types exposing (..)
-import Utils exposing (filterEmpty)
 
 
 decodeGcError : Decoder ApiError
@@ -137,13 +136,9 @@ fetchPosition (Id id) =
         |> B.request ()
 
 
-fetchPositions : B.Request B.Query (List Position)
+fetchPositions : B.Request B.Query (List Info)
 fetchPositions =
-    B.list position
-        |> B.field "allPositions" []
-        |> B.extract
-        |> B.queryDocument
-        |> B.request ()
+    fetchInfo "allPositions"
 
 
 fetchSubmission : Id -> B.Request B.Query Submission

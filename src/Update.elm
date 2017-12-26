@@ -9,7 +9,7 @@ import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (addErrors, clearErrors, emptyForm, listToDict, log, logError, unwrap)
+import Utils exposing (addErrors, clearErrors, emptyForm, log, logError, unwrap)
 import Validate
 
 
@@ -39,7 +39,7 @@ update msg model =
 
         CbPositions res ->
             ( { model
-                | positions = RemoteData.map listToDict res
+                | positions = res
               }
             , logError res
             )

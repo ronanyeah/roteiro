@@ -1,7 +1,6 @@
 module View exposing (..)
 
 import Array exposing (Array)
-import Dict exposing (Dict)
 import Element exposing (Element, circle, column, decorativeImage, el, empty, layout, link, modal, newTab, paragraph, row, screen, text, when, whenJust)
 import Element.Attributes exposing (alignBottom, alignLeft, attribute, center, fill, height, maxWidth, moveDown, padding, px, spacing, spread, vary, verticalCenter, width)
 import Element.Events exposing (onClick)
@@ -12,8 +11,8 @@ import Paths
 import Regex
 import RemoteData exposing (RemoteData(..))
 import Styling exposing (styling)
-import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Position, Styles(..), Variations(..), View(..))
-import Utils exposing (icon, isPicking, matchDomain, matchLink, remoteUnwrap, sort)
+import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Styles(..), Variations(..), View(..))
+import Utils exposing (icon, isPicking, matchDomain, matchLink, sort)
 import Window exposing (Size)
 
 
@@ -183,14 +182,13 @@ view ({ form } as model) =
                                     [ icon Flag MattIcon []
                                     , column None [] <|
                                         (positions
-                                            |> Dict.values
                                             |> sort
                                             |> List.map
-                                                (\p ->
-                                                    link (Paths.position p.id) <|
+                                                (\{ id, name } ->
+                                                    link (Paths.position id) <|
                                                         paragraph Choice
                                                             []
-                                                            [ text p.name
+                                                            [ text name
                                                             ]
                                                 )
                                         )
@@ -454,12 +452,12 @@ viewShortcuts size =
                 ]
 
 
-pickStartPosition : GcData (Dict String Position) -> Form -> Element Styles vs Msg
+pickStartPosition : GcData (List Info) -> Form -> Element Styles vs Msg
 pickStartPosition positions form =
     let
         ps =
             positions
-                |> remoteUnwrap [] (Dict.values >> List.map (\{ id, name } -> Info id name))
+                |> RemoteData.withDefault []
     in
     case form.startPosition of
         Pending ->
@@ -507,12 +505,12 @@ pickStartPosition positions form =
                 ]
 
 
-pickEndPosition : GcData (Dict String Position) -> Form -> Element Styles vs Msg
+pickEndPosition : GcData (List Info) -> Form -> Element Styles vs Msg
 pickEndPosition positions form =
     let
         ps =
             positions
-                |> remoteUnwrap [] (Dict.values >> List.map (\{ id, name } -> Info id name))
+                |> RemoteData.withDefault []
     in
     case form.endPosition of
         Pending ->
