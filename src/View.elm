@@ -781,7 +781,7 @@ viewErrors errs =
     when (errs |> List.isEmpty |> not) <|
         column None
             [ center, spacing 15 ]
-            [ icon Warning ActionIcon []
+            [ icon Warning MattIcon []
             , errs |> Array.fromList |> viewNotes
             ]
 
