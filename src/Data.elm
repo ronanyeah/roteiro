@@ -212,6 +212,20 @@ createPosition name notes =
         |> B.request ()
 
 
+createSubmission : String -> Id -> List String -> List String -> B.Request B.Mutation Submission
+createSubmission name (Id startId) steps notes =
+    submission
+        |> B.field "createSubmission"
+            [ ( "name", Arg.string name )
+            , ( "positionId", Arg.string startId )
+            , ( "notes", Arg.list <| List.map Arg.string notes )
+            , ( "steps", Arg.list <| List.map Arg.string steps )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
+
+
 createTopic : String -> Array String -> B.Request B.Mutation Topic
 createTopic name notes =
     topic
@@ -231,20 +245,6 @@ createTransition name steps notes (Id startId) (Id endId) =
             [ ( "name", Arg.string name )
             , ( "startPositionId", Arg.string startId )
             , ( "endPositionId", Arg.string endId )
-            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
-            , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList steps )
-            ]
-        |> B.extract
-        |> B.mutationDocument
-        |> B.request ()
-
-
-createSubmission : String -> Array String -> Array String -> Id -> B.Request B.Mutation Submission
-createSubmission name steps notes (Id startId) =
-    submission
-        |> B.field "createSubmission"
-            [ ( "name", Arg.string name )
-            , ( "positionId", Arg.string startId )
             , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
             , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList steps )
             ]
@@ -292,17 +292,13 @@ updateTransition t =
                 |> B.request ()
 
 
-updatePosition : Position -> B.Request B.Mutation Position
-updatePosition p =
-    let
-        (Id id) =
-            p.id
-    in
+updatePosition : Id -> String -> List String -> B.Request B.Mutation Position
+updatePosition (Id id) name notes =
     position
         |> B.field "updatePosition"
             [ ( "id", Arg.string id )
-            , ( "name", Arg.string p.name )
-            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList p.notes )
+            , ( "name", Arg.string name )
+            , ( "notes", Arg.list <| List.map Arg.string notes )
             ]
         |> B.extract
         |> B.mutationDocument

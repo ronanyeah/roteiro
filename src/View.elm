@@ -61,7 +61,8 @@ view ({ form } as model) =
                 ViewCreateSubmission ->
                     column None
                         [ center, spacing 20, width fill ]
-                        [ nameEdit form
+                        [ viewErrors form.errors
+                        , nameEdit form
                         , row None
                             [ spacing 10 ]
                             [ icon Flag MattIcon []

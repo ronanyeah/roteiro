@@ -1,27 +1,61 @@
 module Validate exposing (..)
 
 import Array
-import Types exposing (Form, Id(..), Info, Picker(..), Position, Submission, Topic, Transition)
+import Types exposing (Form, Id(..), Info, Picker(..), Submission, Topic, Transition)
 import Utils exposing (filterEmpty)
+
+
+emptyNameField : String
+emptyNameField =
+    "Name field is empty."
+
+
+startPositionMissing : String
+startPositionMissing =
+    "Start position missing."
 
 
 createPosition : Form -> Result (List String) ( String, List String )
 createPosition { name, notes } =
     if String.isEmpty name then
-        Err [ "Name field is empty." ]
+        Err [ emptyNameField ]
     else
         Ok ( name, notes |> Array.toList |> filterEmpty )
 
 
-updatePosition : Form -> Result (List String) Position
+updatePosition : Form -> Result (List String) ( Id, String, List String )
 updatePosition { id, name, notes } =
-    Ok
-        { id = id
-        , name = name
-        , notes = notes
-        , submissions = []
-        , transitions = []
-        }
+    if String.isEmpty name then
+        Err [ emptyNameField ]
+    else
+        Ok ( id, name, notes |> Array.toList |> filterEmpty )
+
+
+createSubmission : Form -> Result (List String) ( String, Id, List String, List String )
+createSubmission { name, startPosition, steps, notes } =
+    case ( name, startPosition ) of
+        ( "", Pending ) ->
+            Err [ emptyNameField, startPositionMissing ]
+
+        ( "", Picking _ ) ->
+            Err [ emptyNameField, startPositionMissing ]
+
+        ( "", Picked _ ) ->
+            Err [ emptyNameField ]
+
+        ( _, Pending ) ->
+            Err [ startPositionMissing ]
+
+        ( _, Picking _ ) ->
+            Err [ startPositionMissing ]
+
+        ( str, Picked { id } ) ->
+            Ok
+                ( str
+                , id
+                , steps |> Array.toList |> filterEmpty
+                , notes |> Array.toList |> filterEmpty
+                )
 
 
 submission : Form -> Result (List String) Submission

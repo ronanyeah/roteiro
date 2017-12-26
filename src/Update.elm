@@ -273,15 +273,17 @@ update msg model =
                             )
 
                 ViewCreateSubmission ->
-                    case model.form.startPosition of
-                        Picked { id } ->
+                    case Validate.createSubmission model.form of
+                        Ok ( name, startId, steps, notes ) ->
                             ( model
-                            , createSubmission model.form.name model.form.steps model.form.notes id
+                            , createSubmission name startId steps notes
                                 |> mutation model.url model.token CbSubmission
                             )
 
-                        _ ->
-                            ( model, log "missing position" )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
 
                 ViewCreateTopic ->
                     ( model
@@ -307,9 +309,9 @@ update msg model =
 
                 ViewEditPosition ->
                     case Validate.updatePosition model.form of
-                        Ok value ->
+                        Ok ( id, name, notes ) ->
                             ( model
-                            , updatePosition value
+                            , updatePosition id name notes
                                 |> mutation model.url model.token CbPosition
                             )
 
