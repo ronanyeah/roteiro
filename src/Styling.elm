@@ -43,6 +43,7 @@ styling =
         , style Dot [ Color.text e ]
         , style MattIcon
             [ Color.text e
+            , Font.size 35
             ]
         , style Field
             [ Color.text e
