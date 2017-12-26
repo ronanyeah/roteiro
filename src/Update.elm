@@ -275,7 +275,7 @@ update msg model =
                 ViewCreateSubmission ->
                     case Validate.createSubmission model.form of
                         Ok ( name, startId, steps, notes ) ->
-                            ( model
+                            ( { model | form = clearErrors model.form }
                             , createSubmission name startId steps notes
                                 |> mutation model.url model.token CbSubmission
                             )
@@ -286,70 +286,87 @@ update msg model =
                             )
 
                 ViewCreateTopic ->
-                    ( model
-                    , createTopic model.form.name model.form.notes
-                        |> mutation model.url model.token CbTopic
-                    )
+                    case Validate.createTopic model.form of
+                        Ok args ->
+                            ( { model | form = clearErrors model.form }
+                            , uncurry createTopic args
+                                |> mutation model.url model.token CbTopic
+                            )
+
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
 
                 ViewCreateTransition ->
-                    case ( model.form.startPosition, model.form.endPosition ) of
-                        ( Picked start, Picked end ) ->
-                            ( model
+                    case Validate.createTransition model.form of
+                        Ok ( name, startId, endId, steps, notes ) ->
+                            ( { model | form = clearErrors model.form }
                             , createTransition
-                                model.form.name
-                                model.form.steps
-                                model.form.notes
-                                start.id
-                                end.id
+                                name
+                                startId
+                                endId
+                                steps
+                                notes
                                 |> mutation model.url model.token CbTransition
                             )
 
-                        _ ->
-                            ( model, log "missing position" )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
 
                 ViewEditPosition ->
                     case Validate.updatePosition model.form of
                         Ok ( id, name, notes ) ->
-                            ( model
+                            ( { model | form = clearErrors model.form }
                             , updatePosition id name notes
                                 |> mutation model.url model.token CbPosition
                             )
 
-                        Err _ ->
-                            ( model, Cmd.none )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
 
                 ViewEditSubmission ->
-                    case Validate.submission model.form of
-                        Ok value ->
-                            ( model
-                            , updateSubmission value
+                    case Validate.updateSubmission model.form of
+                        Ok ( id, name, position, steps, notes ) ->
+                            ( { model | form = clearErrors model.form }
+                            , updateSubmission id name position steps notes
                                 |> mutation model.url model.token CbSubmission
                             )
 
-                        Err _ ->
-                            ( model, Cmd.none )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
 
                 ViewEditTopic ->
-                    case Validate.topic model.form of
-                        Ok value ->
-                            ( model
-                            , updateTopic value
+                    case Validate.updateTopic model.form of
+                        Ok ( id, name, notes ) ->
+                            ( { model | form = clearErrors model.form }
+                            , updateTopic id name notes
                                 |> mutation model.url model.token CbTopic
                             )
 
-                        Err _ ->
-                            ( model, Cmd.none )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
 
                 ViewEditTransition ->
-                    case Validate.transition model.form of
-                        Ok value ->
-                            ( model
-                            , updateTransition value
+                    case Validate.updateTransition model.form of
+                        Ok ( id, name, startId, endId, steps, notes ) ->
+                            ( { model | form = clearErrors model.form }
+                            , updateTransition id name startId endId steps notes
                                 |> mutation model.url model.token CbTransition
                             )
 
-                        Err _ ->
-                            ( model, Cmd.none )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
 
                 _ ->
                     ( model, Cmd.none )

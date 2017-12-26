@@ -119,19 +119,19 @@ convert resDecoder =
             )
 
 
-fetchPosition : Id -> B.Request B.Query Position
-fetchPosition (Id id) =
-    position
-        |> B.field "Position" [ ( "id", Arg.string id ) ]
+fetchInfo : String -> B.Request B.Query (List Info)
+fetchInfo field =
+    B.list info
+        |> B.field field []
         |> B.extract
         |> B.queryDocument
         |> B.request ()
 
 
-fetchInfo : String -> B.Request B.Query (List Info)
-fetchInfo field =
-    B.list info
-        |> B.field field []
+fetchPosition : Id -> B.Request B.Query Position
+fetchPosition (Id id) =
+    position
+        |> B.field "Position" [ ( "id", Arg.string id ) ]
         |> B.extract
         |> B.queryDocument
         |> B.request ()
@@ -146,33 +146,19 @@ fetchPositions =
         |> B.request ()
 
 
-fetchSubmissions : B.Request B.Query (List Submission)
-fetchSubmissions =
-    B.list submission
-        |> B.field "allSubmissions" []
-        |> B.extract
-        |> B.queryDocument
-        |> B.request ()
-
-
-fetchTopics : B.Request B.Query (List Info)
-fetchTopics =
-    fetchInfo "allTopics"
-
-
-fetchTransitions : B.Request B.Query (List Transition)
-fetchTransitions =
-    B.list transition
-        |> B.field "allTransitions" []
-        |> B.extract
-        |> B.queryDocument
-        |> B.request ()
-
-
 fetchSubmission : Id -> B.Request B.Query Submission
 fetchSubmission (Id id) =
     submission
         |> B.field "Submission" [ ( "id", Arg.string id ) ]
+        |> B.extract
+        |> B.queryDocument
+        |> B.request ()
+
+
+fetchSubmissions : B.Request B.Query (List Submission)
+fetchSubmissions =
+    B.list submission
+        |> B.field "allSubmissions" []
         |> B.extract
         |> B.queryDocument
         |> B.request ()
@@ -187,10 +173,24 @@ fetchTopic (Id id) =
         |> B.request ()
 
 
+fetchTopics : B.Request B.Query (List Info)
+fetchTopics =
+    fetchInfo "allTopics"
+
+
 fetchTransition : Id -> B.Request B.Query Transition
 fetchTransition (Id id) =
     transition
         |> B.field "Transition" [ ( "id", Arg.string id ) ]
+        |> B.extract
+        |> B.queryDocument
+        |> B.request ()
+
+
+fetchTransitions : B.Request B.Query (List Transition)
+fetchTransitions =
+    B.list transition
+        |> B.field "allTransitions" []
         |> B.extract
         |> B.queryDocument
         |> B.request ()
@@ -226,27 +226,27 @@ createSubmission name (Id startId) steps notes =
         |> B.request ()
 
 
-createTopic : String -> Array String -> B.Request B.Mutation Topic
+createTopic : String -> List String -> B.Request B.Mutation Topic
 createTopic name notes =
     topic
         |> B.field "createTopic"
             [ ( "name", Arg.string name )
-            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
+            , ( "notes", Arg.list <| List.map Arg.string notes )
             ]
         |> B.extract
         |> B.mutationDocument
         |> B.request ()
 
 
-createTransition : String -> Array String -> Array String -> Id -> Id -> B.Request B.Mutation Transition
-createTransition name steps notes (Id startId) (Id endId) =
+createTransition : String -> Id -> Id -> List String -> List String -> B.Request B.Mutation Transition
+createTransition name (Id startId) (Id endId) steps notes =
     transition
         |> B.field "createTransition"
             [ ( "name", Arg.string name )
             , ( "startPositionId", Arg.string startId )
             , ( "endPositionId", Arg.string endId )
-            , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
-            , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList steps )
+            , ( "steps", Arg.list <| List.map Arg.string steps )
+            , ( "notes", Arg.list <| List.map Arg.string notes )
             ]
         |> B.extract
         |> B.mutationDocument
@@ -255,41 +255,6 @@ createTransition name steps notes (Id startId) (Id endId) =
 
 
 -- UPDATE
-
-
-updateSubmission : Submission -> B.Request B.Mutation Submission
-updateSubmission s =
-    case ( s.id, s.position.id ) of
-        ( Id id, Id positionId ) ->
-            submission
-                |> B.field "updateSubmission"
-                    [ ( "id", Arg.string id )
-                    , ( "name", Arg.string s.name )
-                    , ( "positionId", Arg.string positionId )
-                    , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList s.notes )
-                    , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList s.steps )
-                    ]
-                |> B.extract
-                |> B.mutationDocument
-                |> B.request ()
-
-
-updateTransition : Transition -> B.Request B.Mutation Transition
-updateTransition t =
-    case ( t.id, t.startPosition.id, t.endPosition.id ) of
-        ( Id id, Id startId, Id endId ) ->
-            transition
-                |> B.field "updateTransition"
-                    [ ( "id", Arg.string id )
-                    , ( "name", Arg.string t.name )
-                    , ( "startPositionId", Arg.string startId )
-                    , ( "endPositionId", Arg.string endId )
-                    , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList t.notes )
-                    , ( "steps", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList t.steps )
-                    ]
-                |> B.extract
-                |> B.mutationDocument
-                |> B.request ()
 
 
 updatePosition : Id -> String -> List String -> B.Request B.Mutation Position
@@ -305,19 +270,48 @@ updatePosition (Id id) name notes =
         |> B.request ()
 
 
-updateTopic : Topic -> B.Request B.Mutation Topic
-updateTopic { id, name, notes } =
-    case id of
-        Id idStr ->
-            topic
-                |> B.field "updateTopic"
-                    [ ( "id", Arg.string idStr )
-                    , ( "name", Arg.string name )
-                    , ( "notes", Arg.list <| List.map Arg.string <| filterEmpty <| Array.toList notes )
-                    ]
-                |> B.extract
-                |> B.mutationDocument
-                |> B.request ()
+updateSubmission : Id -> String -> Id -> List String -> List String -> B.Request B.Mutation Submission
+updateSubmission (Id id) name (Id positionId) steps notes =
+    submission
+        |> B.field "updateSubmission"
+            [ ( "id", Arg.string id )
+            , ( "name", Arg.string name )
+            , ( "positionId", Arg.string positionId )
+            , ( "steps", Arg.list <| List.map Arg.string steps )
+            , ( "notes", Arg.list <| List.map Arg.string notes )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
+
+
+updateTopic : Id -> String -> List String -> B.Request B.Mutation Topic
+updateTopic (Id id) name notes =
+    topic
+        |> B.field "updateTopic"
+            [ ( "id", Arg.string id )
+            , ( "name", Arg.string name )
+            , ( "notes", Arg.list <| List.map Arg.string notes )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
+
+
+updateTransition : Id -> String -> Id -> Id -> List String -> List String -> B.Request B.Mutation Transition
+updateTransition (Id id) name (Id startId) (Id endId) steps notes =
+    transition
+        |> B.field "updateTransition"
+            [ ( "id", Arg.string id )
+            , ( "name", Arg.string name )
+            , ( "startPositionId", Arg.string startId )
+            , ( "endPositionId", Arg.string endId )
+            , ( "steps", Arg.list <| List.map Arg.string steps )
+            , ( "notes", Arg.list <| List.map Arg.string notes )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
 
 
 
@@ -391,14 +385,6 @@ info =
         |> B.with (B.field "name" [] B.string)
 
 
-topic : B.ValueSpec B.NonNull B.ObjectType Topic vars
-topic =
-    B.object Topic
-        |> B.with (B.field "id" [] (B.map Id B.id))
-        |> B.with (B.field "name" [] B.string)
-        |> B.with (B.field "notes" [] (B.list B.string |> B.map Array.fromList))
-
-
 position : B.ValueSpec B.NonNull B.ObjectType Position vars
 position =
     B.object Position
@@ -417,6 +403,14 @@ submission =
         |> B.with (B.field "steps" [] (B.list B.string |> B.map Array.fromList))
         |> B.with (B.field "notes" [] (B.list B.string |> B.map Array.fromList))
         |> B.with (B.field "position" [] info)
+
+
+topic : B.ValueSpec B.NonNull B.ObjectType Topic vars
+topic =
+    B.object Topic
+        |> B.with (B.field "id" [] (B.map Id B.id))
+        |> B.with (B.field "name" [] B.string)
+        |> B.with (B.field "notes" [] (B.list B.string |> B.map Array.fromList))
 
 
 transition : B.ValueSpec B.NonNull B.ObjectType Transition vars

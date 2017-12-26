@@ -10,6 +10,11 @@ emptyNameField =
     "Name field is empty."
 
 
+endPositionMissing : String
+endPositionMissing =
+    "End position missing."
+
+
 startPositionMissing : String
 startPositionMissing =
     "Start position missing."
@@ -58,43 +63,124 @@ createSubmission { name, startPosition, steps, notes } =
                 )
 
 
-submission : Form -> Result (List String) Submission
-submission { id, startPosition, steps, name, notes } =
-    case startPosition of
-        Picked p ->
+updateSubmission : Form -> Result (List String) ( Id, String, Id, List String, List String )
+updateSubmission { id, name, startPosition, steps, notes } =
+    case ( name, startPosition ) of
+        ( "", Pending ) ->
+            Err [ emptyNameField, startPositionMissing ]
+
+        ( "", Picking _ ) ->
+            Err [ emptyNameField, startPositionMissing ]
+
+        ( "", Picked _ ) ->
+            Err [ emptyNameField ]
+
+        ( _, Pending ) ->
+            Err [ startPositionMissing ]
+
+        ( _, Picking _ ) ->
+            Err [ startPositionMissing ]
+
+        ( str, Picked position ) ->
             Ok
-                { id = id
-                , position = Info p.id p.name
-                , steps = steps
-                , notes = notes
-                , name = name
-                }
+                ( id
+                , str
+                , position.id
+                , steps |> Array.toList |> filterEmpty
+                , notes |> Array.toList |> filterEmpty
+                )
+
+
+createTopic : Form -> Result (List String) ( String, List String )
+createTopic { name, notes } =
+    if String.isEmpty name then
+        Err [ emptyNameField ]
+    else
+        Ok ( name, notes |> Array.toList |> filterEmpty )
+
+
+updateTopic : Form -> Result (List String) ( Id, String, List String )
+updateTopic { id, name, notes } =
+    if String.isEmpty name then
+        Err [ emptyNameField ]
+    else
+        Ok ( id, name, notes |> Array.toList |> filterEmpty )
+
+
+createTransition : Form -> Result (List String) ( String, Id, Id, List String, List String )
+createTransition { name, startPosition, endPosition, steps, notes } =
+    [ if String.isEmpty name then
+        Just emptyNameField
+      else
+        Nothing
+    , case startPosition of
+        Picked _ ->
+            Nothing
 
         _ ->
-            Err []
-
-
-transition : Form -> Result (List String) Transition
-transition { id, startPosition, endPosition, steps, name, notes } =
-    case ( startPosition, endPosition ) of
-        ( Picked start, Picked end ) ->
-            Ok
-                { id = id
-                , startPosition = Info start.id start.name
-                , endPosition = Info end.id end.name
-                , steps = steps
-                , notes = notes
-                , name = name
-                }
+            Just startPositionMissing
+    , case endPosition of
+        Picked _ ->
+            Nothing
 
         _ ->
-            Err []
+            Just endPositionMissing
+    ]
+        |> List.filterMap identity
+        |> (\errs ->
+                if List.isEmpty errs then
+                    case ( startPosition, endPosition ) of
+                        ( Picked start, Picked end ) ->
+                            Ok
+                                ( name
+                                , start.id
+                                , end.id
+                                , steps |> Array.toList |> filterEmpty
+                                , notes |> Array.toList |> filterEmpty
+                                )
+
+                        _ ->
+                            Err [ "oops" ]
+                else
+                    Err errs
+           )
 
 
-topic : Form -> Result (List String) Topic
-topic { id, name, notes } =
-    Ok
-        { id = id
-        , name = name
-        , notes = notes
-        }
+updateTransition : Form -> Result (List String) ( Id, String, Id, Id, List String, List String )
+updateTransition { id, name, startPosition, endPosition, steps, notes } =
+    [ if String.isEmpty name then
+        Just emptyNameField
+      else
+        Nothing
+    , case startPosition of
+        Picked _ ->
+            Nothing
+
+        _ ->
+            Just startPositionMissing
+    , case endPosition of
+        Picked _ ->
+            Nothing
+
+        _ ->
+            Just endPositionMissing
+    ]
+        |> List.filterMap identity
+        |> (\errs ->
+                if List.isEmpty errs then
+                    case ( startPosition, endPosition ) of
+                        ( Picked start, Picked end ) ->
+                            Ok
+                                ( id
+                                , name
+                                , start.id
+                                , end.id
+                                , steps |> Array.toList |> filterEmpty
+                                , notes |> Array.toList |> filterEmpty
+                                )
+
+                        _ ->
+                            Err [ "oops" ]
+                else
+                    Err errs
+           )

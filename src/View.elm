@@ -76,7 +76,8 @@ view ({ form } as model) =
                 ViewCreateTopic ->
                     column None
                         [ center, spacing 20, width fill ]
-                        [ nameEdit form
+                        [ viewErrors form.errors
+                        , nameEdit form
                         , notesEditor form
                         , buttons Nothing
                         ]
@@ -84,7 +85,8 @@ view ({ form } as model) =
                 ViewCreateTransition ->
                     column None
                         [ center, spacing 20, width fill ]
-                        [ nameEdit form
+                        [ viewErrors form.errors
+                        , nameEdit form
                         , row None
                             [ verticalCenter, spacing 10 ]
                             [ pickStartPosition model.positions form
@@ -99,7 +101,8 @@ view ({ form } as model) =
                 ViewEditPosition ->
                     column None
                         [ center, spacing 20, width fill ]
-                        [ nameEdit form
+                        [ viewErrors form.errors
+                        , nameEdit form
                         , notesEditor form
                         , buttons <| Just <| DeletePosition form.id
                         ]
@@ -107,7 +110,8 @@ view ({ form } as model) =
                 ViewEditSubmission ->
                     column None
                         [ center, spacing 20, width fill ]
-                        [ nameEdit form
+                        [ viewErrors form.errors
+                        , nameEdit form
                         , row None
                             [ spacing 10 ]
                             [ icon Flag MattIcon []
@@ -121,7 +125,8 @@ view ({ form } as model) =
                 ViewEditTopic ->
                     column None
                         [ center, spacing 20, width fill ]
-                        [ nameEdit form
+                        [ viewErrors form.errors
+                        , nameEdit form
                         , notesEditor form
                         , buttons <| Just <| DeleteTopic form.id
                         ]
@@ -136,7 +141,8 @@ view ({ form } as model) =
                     in
                     column None
                         [ center, spacing 20, width fill ]
-                        [ nameEdit form
+                        [ viewErrors form.errors
+                        , nameEdit form
                         , pickersLayout
                             None
                             [ verticalCenter, spacing 10, center ]
