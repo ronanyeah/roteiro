@@ -134,7 +134,7 @@ view ({ form } as model) =
                             (\({ name, notes, submissions, transitions } as position) ->
                                 column None
                                     [ center, spacing 20, width fill ]
-                                    [ editRow name
+                                    [ editRow name <| EditPosition position
                                     , viewNotes <| Array.toList notes
                                     , el Line [ width <| px 100, height <| px 2 ] empty
                                     , icon Arrow MattIcon []
@@ -176,7 +176,7 @@ view ({ form } as model) =
                             (\sub ->
                                 column None
                                     [ center, spacing 20, width fill ]
-                                    [ editRow sub.name
+                                    [ editRow sub.name <| EditSubmission sub
                                     , row None
                                         [ spacing 10 ]
                                         [ icon Flag MattIcon []
@@ -228,7 +228,7 @@ view ({ form } as model) =
                             (\t ->
                                 column None
                                     [ center, spacing 20, width fill ]
-                                    [ editRow t.name
+                                    [ editRow t.name <| EditTopic t
                                     , viewNotes <| Array.toList t.notes
                                     ]
                             )
@@ -259,7 +259,7 @@ view ({ form } as model) =
                             (\({ steps, startPosition, endPosition, notes } as t) ->
                                 column None
                                     [ center, spacing 20, width fill ]
-                                    [ editRow t.name
+                                    [ editRow t.name <| EditTransition t
                                     , paragraph None
                                         [ verticalCenter, spacing 10 ]
                                         [ link (Paths.position startPosition.id) <|
@@ -564,16 +564,12 @@ pickEndPosition positions form =
                 ]
 
 
-editRow : String -> Element Styles vs Msg
-editRow name =
+editRow : String -> Msg -> Element Styles vs Msg
+editRow name editMsg =
     paragraph None
-        [ spacing 5, verticalCenter ]
+        [ spacing 20, padding 10, verticalCenter ]
         [ el Subtitle [] <| text name
-        , icon Write
-            ActionIcon
-            [ padding 10
-            , onClick Edit
-            ]
+        , icon Write ActionIcon [ onClick editMsg ]
         ]
 
 

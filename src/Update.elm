@@ -179,83 +179,78 @@ update msg model =
             in
             ( model, Task.attempt CbDelete request )
 
-        Edit ->
-            case model.view of
-                ViewPosition (Success p) ->
-                    let
-                        form =
-                            { emptyForm
-                                | name = p.name
-                                , notes = p.notes
-                                , id = p.id
-                            }
-                    in
-                    ( { model
-                        | view = ViewEditPosition
-                        , previousView = model.view
-                        , form = form
-                      }
-                    , Cmd.none
-                    )
+        EditPosition p ->
+            let
+                form =
+                    { emptyForm
+                        | name = p.name
+                        , notes = p.notes
+                        , id = p.id
+                    }
+            in
+            ( { model
+                | view = ViewEditPosition
+                , previousView = model.view
+                , form = form
+              }
+            , Cmd.none
+            )
 
-                ViewSubmission (Success s) ->
-                    let
-                        form =
-                            { emptyForm
-                                | name = s.name
-                                , steps = s.steps
-                                , notes = s.notes
-                                , startPosition = Picked s.position
-                                , id = s.id
-                            }
-                    in
-                    ( { model
-                        | view = ViewEditSubmission
-                        , previousView = model.view
-                        , form = form
-                      }
-                    , fetchPositions |> query model.url model.token CbPositions
-                    )
+        EditSubmission s ->
+            let
+                form =
+                    { emptyForm
+                        | name = s.name
+                        , steps = s.steps
+                        , notes = s.notes
+                        , startPosition = Picked s.position
+                        , id = s.id
+                    }
+            in
+            ( { model
+                | view = ViewEditSubmission
+                , previousView = model.view
+                , form = form
+              }
+            , fetchPositions |> query model.url model.token CbPositions
+            )
 
-                ViewTopic (Success t) ->
-                    let
-                        form =
-                            { emptyForm
-                                | name = t.name
-                                , notes = t.notes
-                                , id = t.id
-                            }
-                    in
-                    ( { model
-                        | view = ViewEditTopic
-                        , previousView = model.view
-                        , form = form
-                      }
-                    , Cmd.none
-                    )
+        EditTopic t ->
+            let
+                form =
+                    { emptyForm
+                        | name = t.name
+                        , notes = t.notes
+                        , id = t.id
+                    }
+            in
+            ( { model
+                | view = ViewEditTopic
+                , previousView = model.view
+                , form = form
+              }
+            , Cmd.none
+            )
 
-                ViewTransition (Success t) ->
-                    let
-                        form =
-                            { emptyForm
-                                | name = t.name
-                                , id = t.id
-                                , steps = t.steps
-                                , notes = t.notes
-                                , startPosition = Picked t.startPosition
-                                , endPosition = Picked t.endPosition
-                            }
-                    in
-                    ( { model
-                        | view = ViewEditTransition
-                        , previousView = model.view
-                        , form = form
-                      }
-                    , fetchPositions |> query model.url model.token CbPositions
-                    )
-
-                _ ->
-                    ( model, Cmd.none )
+        EditTransition t ->
+            let
+                form =
+                    { emptyForm
+                        | name = t.name
+                        , id = t.id
+                        , steps = t.steps
+                        , notes = t.notes
+                        , startPosition = Picked t.startPosition
+                        , endPosition = Picked t.endPosition
+                    }
+            in
+            ( { model
+                | view = ViewEditTransition
+                , previousView = model.view
+                , form = form
+              }
+            , fetchPositions |> query model.url model.token CbPositions
+            )
 
         Save ->
             case model.view of

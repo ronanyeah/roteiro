@@ -27,7 +27,10 @@ type Msg
     | DeleteSubmission Id
     | DeleteTopic Id
     | DeleteTransition Id
-    | Edit
+    | EditPosition Position
+    | EditSubmission Submission
+    | EditTopic Topic
+    | EditTransition Transition
     | Save
     | SetRoute Route
     | TokenEdit (Maybe String)
