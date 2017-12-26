@@ -115,7 +115,7 @@ update msg model =
                 , previousView = model.view
                 , form = form
               }
-            , Cmd.none
+            , fetchPositions |> query model.url model.token CbPositions
             )
 
         CreateTopic ->
@@ -144,7 +144,7 @@ update msg model =
                 , previousView = model.view
                 , form = form
               }
-            , Cmd.none
+            , fetchPositions |> query model.url model.token CbPositions
             )
 
         DeletePosition id ->
