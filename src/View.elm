@@ -62,11 +62,7 @@ view ({ form } as model) =
                         [ center, spacing 20, width fill ]
                         [ viewErrors form.errors
                         , nameEdit form
-                        , row None
-                            [ spacing 10 ]
-                            [ icon Flag MattIcon []
-                            , pickStartPosition model.positions form
-                            ]
+                        , viewSubmissionPicker model.positions form
                         , stepsEditor form
                         , notesEditor form
                         , buttons Nothing
@@ -86,12 +82,7 @@ view ({ form } as model) =
                         [ center, spacing 20, width fill ]
                         [ viewErrors form.errors
                         , nameEdit form
-                        , row None
-                            [ verticalCenter, spacing 10 ]
-                            [ pickStartPosition model.positions form
-                            , icon Arrow MattIcon []
-                            , pickEndPosition model.positions form
-                            ]
+                        , viewTransitionPickers model.positions form
                         , stepsEditor form
                         , notesEditor form
                         , buttons Nothing
@@ -111,11 +102,7 @@ view ({ form } as model) =
                         [ center, spacing 20, width fill ]
                         [ viewErrors form.errors
                         , nameEdit form
-                        , row None
-                            [ spacing 10 ]
-                            [ icon Flag MattIcon []
-                            , pickStartPosition model.positions form
-                            ]
+                        , viewSubmissionPicker model.positions form
                         , stepsEditor form
                         , notesEditor form
                         , buttons <| Just <| DeleteSubmission form.id
@@ -131,24 +118,11 @@ view ({ form } as model) =
                         ]
 
                 ViewEditTransition ->
-                    let
-                        pickersLayout =
-                            if isPicking form.startPosition || isPicking form.endPosition then
-                                column
-                            else
-                                paragraph
-                    in
                     column None
                         [ center, spacing 20, width fill ]
                         [ viewErrors form.errors
                         , nameEdit form
-                        , pickersLayout
-                            None
-                            [ verticalCenter, spacing 10, center ]
-                            [ pickStartPosition model.positions form
-                            , icon Arrow MattIcon []
-                            , pickEndPosition model.positions form
-                            ]
+                        , viewTransitionPickers model.positions form
                         , stepsEditor form
                         , notesEditor form
                         , buttons <| Just <| DeleteTransition form.id
@@ -161,7 +135,7 @@ view ({ form } as model) =
                                 column None
                                     [ center, spacing 20, width fill ]
                                     [ editRow name
-                                    , viewNotes notes
+                                    , viewNotes <| Array.toList notes
                                     , el Line [ width <| px 100, height <| px 2 ] empty
                                     , icon Arrow MattIcon []
                                     , viewTechList Paths.transition transitions
@@ -211,7 +185,7 @@ view ({ form } as model) =
                                                 text sub.position.name
                                         ]
                                     , viewSteps sub.steps
-                                    , viewNotes sub.notes
+                                    , viewNotes <| Array.toList sub.notes
                                     ]
                             )
 
@@ -255,7 +229,7 @@ view ({ form } as model) =
                                 column None
                                     [ center, spacing 20, width fill ]
                                     [ editRow t.name
-                                    , viewNotes t.notes
+                                    , viewNotes <| Array.toList t.notes
                                     ]
                             )
 
@@ -297,7 +271,7 @@ view ({ form } as model) =
                                                 text endPosition.name
                                         ]
                                     , viewSteps steps
-                                    , viewNotes notes
+                                    , viewNotes <| Array.toList notes
                                     ]
                             )
 
@@ -452,13 +426,50 @@ viewShortcuts size =
                 ]
 
 
-pickStartPosition : GcData (List Info) -> Form -> Element Styles vs Msg
-pickStartPosition positions form =
+viewSubmissionPicker : GcData (List Info) -> Form -> Element Styles Variations Msg
+viewSubmissionPicker positions form =
     let
+        pickerLayout =
+            if isPicking form.startPosition || isPicking form.endPosition then
+                column
+            else
+                paragraph
+
         ps =
             positions
                 |> RemoteData.withDefault []
     in
+    pickerLayout None
+        [ spacing 10 ]
+        [ icon Flag MattIcon []
+        , pickStartPosition ps form
+        ]
+
+
+viewTransitionPickers : GcData (List Info) -> Form -> Element Styles Variations Msg
+viewTransitionPickers positions form =
+    let
+        pickersLayout =
+            if isPicking form.startPosition || isPicking form.endPosition then
+                column
+            else
+                paragraph
+
+        ps =
+            positions
+                |> RemoteData.withDefault []
+    in
+    pickersLayout
+        None
+        [ verticalCenter, spacing 10, center ]
+        [ pickStartPosition ps form
+        , icon Arrow MattIcon []
+        , pickEndPosition ps form
+        ]
+
+
+pickStartPosition : List Info -> Form -> Element Styles vs Msg
+pickStartPosition positions form =
     case form.startPosition of
         Pending ->
             icon Question
@@ -483,7 +494,7 @@ pickStartPosition positions form =
                 , menu =
                     Input.menu None
                         []
-                        (ps
+                        (positions
                             |> List.map
                                 (\p ->
                                     Input.choice p <| text p.name
@@ -505,13 +516,8 @@ pickStartPosition positions form =
                 ]
 
 
-pickEndPosition : GcData (List Info) -> Form -> Element Styles vs Msg
+pickEndPosition : List Info -> Form -> Element Styles vs Msg
 pickEndPosition positions form =
-    let
-        ps =
-            positions
-                |> RemoteData.withDefault []
-    in
     case form.endPosition of
         Pending ->
             icon Question
@@ -536,7 +542,7 @@ pickEndPosition positions form =
                 , menu =
                     Input.menu None
                         []
-                        (ps
+                        (positions
                             |> List.map
                                 (\p ->
                                     Input.choice p <| text p.name
@@ -726,12 +732,11 @@ viewSteps steps =
         )
 
 
-viewNotes : Array String -> Element Styles vs msg
+viewNotes : List String -> Element Styles vs msg
 viewNotes notes =
     column None
         [ center, maxWidth <| px 500 ]
         (notes
-            |> Array.toList
             |> List.map
                 (\x ->
                     let
@@ -782,7 +787,7 @@ viewErrors errs =
         column None
             [ center, spacing 15 ]
             [ icon Warning MattIcon []
-            , errs |> Array.fromList |> viewNotes
+            , viewNotes errs
             ]
 
 
