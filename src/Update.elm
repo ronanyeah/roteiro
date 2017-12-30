@@ -4,12 +4,13 @@ import Data exposing (createPosition, createSubmission, createTopic, createTrans
 import Element
 import Element.Input as Input
 import Navigation
+import Paths
 import Ports
 import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (addErrors, clearErrors, emptyForm, log, logError, unwrap)
+import Utils exposing (addErrors, clearErrors, emptyForm, log, logError, redirect, unwrap)
 import Validate
 
 
@@ -34,7 +35,7 @@ update msg model =
             ( { model
                 | view = ViewPosition res
               }
-            , logError res
+            , redirect res Paths.position
             )
 
         CbPositions res ->
@@ -48,7 +49,7 @@ update msg model =
             ( { model
                 | view = ViewSubmission res
               }
-            , logError res
+            , redirect res Paths.submission
             )
 
         CbSubmissions res ->
@@ -62,7 +63,7 @@ update msg model =
             ( { model
                 | view = ViewTopic res
               }
-            , logError res
+            , redirect res Paths.topic
             )
 
         CbTopics res ->
@@ -76,7 +77,7 @@ update msg model =
             ( { model
                 | view = ViewTransition res
               }
-            , logError res
+            , redirect res Paths.transition
             )
 
         CbTransitions res ->

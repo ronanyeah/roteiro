@@ -4,10 +4,24 @@ import Array
 import Dict exposing (Dict)
 import Element exposing (Attribute, Element, el, empty)
 import Element.Attributes exposing (class)
+import Navigation
 import Regex exposing (Regex)
 import RemoteData
 import Types exposing (Device(Desktop), FaIcon(..), Form, GcData, Id(..), Model, Picker(..), View(..))
 import Window
+
+
+redirect : GcData { r | id : Id } -> (Id -> String) -> Cmd msg
+redirect data fn =
+    case data of
+        RemoteData.Success { id } ->
+            Navigation.newUrl <| fn id
+
+        RemoteData.Failure err ->
+            log err
+
+        _ ->
+            Cmd.none
 
 
 addErrors : List String -> Form -> Form

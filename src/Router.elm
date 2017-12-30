@@ -3,7 +3,7 @@ module Router exposing (..)
 import Data exposing (fetchPosition, fetchPositions, fetchSubmission, fetchSubmissions, fetchTopic, fetchTopics, fetchTransition, fetchTransitions, query)
 import Navigation exposing (Location)
 import Paths
-import RemoteData
+import RemoteData exposing (RemoteData(..))
 import Types exposing (..)
 import UrlParser exposing ((</>), Parser, map, oneOf, parseHash, s, string)
 import Utils exposing (appendCmd, log)
@@ -54,64 +54,98 @@ route =
         ]
 
 
+dataIsLoaded : View -> Id -> Bool
+dataIsLoaded view id =
+    case view of
+        ViewPosition (Success d) ->
+            id == d.id
+
+        ViewSubmission (Success d) ->
+            id == d.id
+
+        ViewTopic (Success d) ->
+            id == d.id
+
+        ViewTransition (Success d) ->
+            id == d.id
+
+        _ ->
+            False
+
+
 router : Model -> Route -> ( Model, Cmd Msg )
 router model route =
     let
-        default =
+        redirectToStart =
             ( model, Navigation.newUrl Paths.start )
+
+        doNothing =
+            ( model, Cmd.none )
     in
     case route of
         Ps ->
-            ( { model | view = ViewPositions, positions = RemoteData.Loading }
+            ( { model | view = ViewPositions, positions = Loading }
             , fetchPositions |> query model.url model.token CbPositions
             )
 
         P id ->
-            ( { model | view = ViewPosition RemoteData.Loading }
-            , fetchPosition id
-                |> query model.url model.token CbPosition
-            )
+            if dataIsLoaded model.view id then
+                doNothing
+            else
+                ( { model | view = ViewPosition Loading }
+                , fetchPosition id
+                    |> query model.url model.token CbPosition
+                )
 
         Ss ->
-            ( { model | view = ViewSubmissions RemoteData.Loading }
+            ( { model | view = ViewSubmissions Loading }
             , fetchSubmissions |> query model.url model.token CbSubmissions
             )
 
         Ts ->
-            ( { model | view = ViewTopics RemoteData.Loading }
+            ( { model | view = ViewTopics Loading }
             , fetchTopics |> query model.url model.token CbTopics
             )
 
         Trs ->
-            ( { model | view = ViewTransitions RemoteData.Loading }
+            ( { model | view = ViewTransitions Loading }
             , fetchTransitions |> query model.url model.token CbTransitions
             )
 
         To id ->
-            ( { model | view = ViewTopic RemoteData.Loading }
-            , fetchTopic id |> query model.url model.token CbTopic
-            )
+            if dataIsLoaded model.view id then
+                doNothing
+            else
+                ( { model | view = ViewTopic Loading }
+                , fetchTopic id |> query model.url model.token CbTopic
+                )
 
         T id ->
-            ( { model | view = ViewTransition RemoteData.Loading }
-            , fetchTransition id
-                |> query model.url model.token CbTransition
-            )
+            if dataIsLoaded model.view id then
+                doNothing
+            else
+                ( { model | view = ViewTransition Loading }
+                , fetchTransition id
+                    |> query model.url model.token CbTransition
+                )
 
         Top ->
-            default
+            redirectToStart
 
         S id ->
-            ( { model | view = ViewSubmission RemoteData.Loading }
-            , fetchSubmission id
-                |> query model.url model.token CbSubmission
-            )
+            if dataIsLoaded model.view id then
+                doNothing
+            else
+                ( { model | view = ViewSubmission Loading }
+                , fetchSubmission id
+                    |> query model.url model.token CbSubmission
+                )
 
         Start ->
             ( { model | view = ViewStart }, Cmd.none )
 
         NotFound ->
-            default
+            redirectToStart
                 |> appendCmd (log "route not found")
 
 
