@@ -1,6 +1,6 @@
 module Update exposing (..)
 
-import Data exposing (createPosition, createSubmission, createTopic, createTransition, fetchPositions, mutation, mutationTask, query, updatePosition, updateSubmission, updateTopic, updateTransition)
+import Data exposing (createPosition, createSubmission, createTopic, createTransition, fetchPositions, mutation, query, updatePosition, updateSubmission, updateTopic, updateTransition)
 import Element
 import Element.Input as Input
 import Navigation
@@ -10,7 +10,7 @@ import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (addErrors, clearErrors, emptyForm, log, logError, redirect, unwrap)
+import Utils exposing (addErrors, clearErrors, emptyForm, formatErrors, log, logError, redirect, taskToGcData, unwrap)
 import Validate
 
 
@@ -19,6 +19,86 @@ update msg model =
     case msg of
         Cancel ->
             ( { model | view = model.previousView, confirm = Nothing }, Cmd.none )
+
+        CbCreateOrUpdatePosition res ->
+            case res of
+                Ok a ->
+                    ( { model
+                        | view = ViewPosition <| Success a
+                        , confirm = Nothing
+                      }
+                    , Navigation.newUrl <| Paths.position a.id
+                    )
+
+                Err err ->
+                    ( { model
+                        | confirm = Nothing
+                        , form =
+                            model.form
+                                |> addErrors (formatErrors err)
+                      }
+                    , Cmd.none
+                    )
+
+        CbCreateOrUpdateSubmission res ->
+            case res of
+                Ok a ->
+                    ( { model
+                        | view = ViewSubmission <| Success a
+                        , confirm = Nothing
+                      }
+                    , Navigation.newUrl <| Paths.submission a.id
+                    )
+
+                Err err ->
+                    ( { model
+                        | confirm = Nothing
+                        , form =
+                            model.form
+                                |> addErrors (formatErrors err)
+                      }
+                    , Cmd.none
+                    )
+
+        CbCreateOrUpdateTopic res ->
+            case res of
+                Ok a ->
+                    ( { model
+                        | view = ViewTopic <| Success a
+                        , confirm = Nothing
+                      }
+                    , Navigation.newUrl <| Paths.topic a.id
+                    )
+
+                Err err ->
+                    ( { model
+                        | confirm = Nothing
+                        , form =
+                            model.form
+                                |> addErrors (formatErrors err)
+                      }
+                    , Cmd.none
+                    )
+
+        CbCreateOrUpdateTransition res ->
+            case res of
+                Ok a ->
+                    ( { model
+                        | view = ViewTransition <| Success a
+                        , confirm = Nothing
+                      }
+                    , Navigation.newUrl <| Paths.transition a.id
+                    )
+
+                Err err ->
+                    ( { model
+                        | confirm = Nothing
+                        , form =
+                            model.form
+                                |> addErrors (formatErrors err)
+                      }
+                    , Cmd.none
+                    )
 
         CbDelete res ->
             case res of
@@ -29,7 +109,14 @@ update msg model =
                     )
 
                 Err err ->
-                    ( { model | confirm = Nothing }, log err )
+                    ( { model
+                        | confirm = Nothing
+                        , form =
+                            model.form
+                                |> addErrors (formatErrors err)
+                      }
+                    , log err
+                    )
 
         CbPosition res ->
             ( { model
@@ -116,7 +203,9 @@ update msg model =
                 , previousView = model.view
                 , form = form
               }
-            , fetchPositions |> query model.url model.token CbPositions
+            , fetchPositions
+                |> query model.url model.token
+                |> taskToGcData CbPositions
             )
 
         CreateTopic ->
@@ -145,40 +234,38 @@ update msg model =
                 , previousView = model.view
                 , form = form
               }
-            , fetchPositions |> query model.url model.token CbPositions
+            , fetchPositions
+                |> query model.url model.token
+                |> taskToGcData CbPositions
             )
 
         DeletePosition id ->
-            let
-                request =
-                    Data.deletePosition id
-                        |> mutationTask model.url model.token
-            in
-            ( model, Task.attempt CbDelete request )
+            ( model
+            , Data.deletePosition id
+                |> mutation model.url model.token
+                |> Task.attempt CbDelete
+            )
 
         DeleteSubmission id ->
-            let
-                request =
-                    Data.deleteSubmission id
-                        |> mutationTask model.url model.token
-            in
-            ( model, Task.attempt CbDelete request )
+            ( model
+            , Data.deleteSubmission id
+                |> mutation model.url model.token
+                |> Task.attempt CbDelete
+            )
 
         DeleteTopic id ->
-            let
-                request =
-                    Data.deleteTopic id
-                        |> mutationTask model.url model.token
-            in
-            ( model, Task.attempt CbDelete request )
+            ( model
+            , Data.deleteTopic id
+                |> mutation model.url model.token
+                |> Task.attempt CbDelete
+            )
 
         DeleteTransition id ->
-            let
-                request =
-                    Data.deleteTransition id
-                        |> mutationTask model.url model.token
-            in
-            ( model, Task.attempt CbDelete request )
+            ( model
+            , Data.deleteTransition id
+                |> mutation model.url model.token
+                |> Task.attempt CbDelete
+            )
 
         EditPosition p ->
             let
@@ -213,7 +300,9 @@ update msg model =
                 , previousView = model.view
                 , form = form
               }
-            , fetchPositions |> query model.url model.token CbPositions
+            , fetchPositions
+                |> query model.url model.token
+                |> taskToGcData CbPositions
             )
 
         EditTopic t ->
@@ -250,7 +339,9 @@ update msg model =
                 , previousView = model.view
                 , form = form
               }
-            , fetchPositions |> query model.url model.token CbPositions
+            , fetchPositions
+                |> query model.url model.token
+                |> taskToGcData CbPositions
             )
 
         Save ->
@@ -260,7 +351,8 @@ update msg model =
                         Ok args ->
                             ( { model | form = clearErrors model.form }
                             , uncurry createPosition args
-                                |> mutation model.url model.token CbPosition
+                                |> mutation model.url model.token
+                                |> Task.attempt CbCreateOrUpdatePosition
                             )
 
                         Err errs ->
@@ -273,7 +365,8 @@ update msg model =
                         Ok ( name, startId, steps, notes ) ->
                             ( { model | form = clearErrors model.form }
                             , createSubmission name startId steps notes
-                                |> mutation model.url model.token CbSubmission
+                                |> mutation model.url model.token
+                                |> Task.attempt CbCreateOrUpdateSubmission
                             )
 
                         Err errs ->
@@ -286,7 +379,8 @@ update msg model =
                         Ok args ->
                             ( { model | form = clearErrors model.form }
                             , uncurry createTopic args
-                                |> mutation model.url model.token CbTopic
+                                |> mutation model.url model.token
+                                |> Task.attempt CbCreateOrUpdateTopic
                             )
 
                         Err errs ->
@@ -304,7 +398,8 @@ update msg model =
                                 endId
                                 steps
                                 notes
-                                |> mutation model.url model.token CbTransition
+                                |> mutation model.url model.token
+                                |> Task.attempt CbCreateOrUpdateTransition
                             )
 
                         Err errs ->
@@ -317,7 +412,8 @@ update msg model =
                         Ok ( id, name, notes ) ->
                             ( { model | form = clearErrors model.form }
                             , updatePosition id name notes
-                                |> mutation model.url model.token CbPosition
+                                |> mutation model.url model.token
+                                |> Task.attempt CbCreateOrUpdatePosition
                             )
 
                         Err errs ->
@@ -330,7 +426,8 @@ update msg model =
                         Ok ( id, name, position, steps, notes ) ->
                             ( { model | form = clearErrors model.form }
                             , updateSubmission id name position steps notes
-                                |> mutation model.url model.token CbSubmission
+                                |> mutation model.url model.token
+                                |> Task.attempt CbCreateOrUpdateSubmission
                             )
 
                         Err errs ->
@@ -343,7 +440,8 @@ update msg model =
                         Ok ( id, name, notes ) ->
                             ( { model | form = clearErrors model.form }
                             , updateTopic id name notes
-                                |> mutation model.url model.token CbTopic
+                                |> mutation model.url model.token
+                                |> Task.attempt CbCreateOrUpdateTopic
                             )
 
                         Err errs ->
@@ -356,7 +454,8 @@ update msg model =
                         Ok ( id, name, startId, endId, steps, notes ) ->
                             ( { model | form = clearErrors model.form }
                             , updateTransition id name startId endId steps notes
-                                |> mutation model.url model.token CbTransition
+                                |> mutation model.url model.token
+                                |> Task.attempt CbCreateOrUpdateTransition
                             )
 
                         Err errs ->

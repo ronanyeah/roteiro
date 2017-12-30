@@ -6,7 +6,7 @@ import Paths
 import RemoteData exposing (RemoteData(..))
 import Types exposing (..)
 import UrlParser exposing ((</>), Parser, map, oneOf, parseHash, s, string)
-import Utils exposing (appendCmd, log)
+import Utils exposing (appendCmd, log, taskToGcData)
 
 
 stripHash : String -> String
@@ -85,7 +85,9 @@ router model route =
     case route of
         Ps ->
             ( { model | view = ViewPositions, positions = Loading }
-            , fetchPositions |> query model.url model.token CbPositions
+            , fetchPositions
+                |> query model.url model.token
+                |> taskToGcData CbPositions
             )
 
         P id ->
@@ -94,22 +96,29 @@ router model route =
             else
                 ( { model | view = ViewPosition Loading }
                 , fetchPosition id
-                    |> query model.url model.token CbPosition
+                    |> query model.url model.token
+                    |> taskToGcData CbPosition
                 )
 
         Ss ->
             ( { model | view = ViewSubmissions Loading }
-            , fetchSubmissions |> query model.url model.token CbSubmissions
+            , fetchSubmissions
+                |> query model.url model.token
+                |> taskToGcData CbSubmissions
             )
 
         Ts ->
             ( { model | view = ViewTopics Loading }
-            , fetchTopics |> query model.url model.token CbTopics
+            , fetchTopics
+                |> query model.url model.token
+                |> taskToGcData CbTopics
             )
 
         Trs ->
             ( { model | view = ViewTransitions Loading }
-            , fetchTransitions |> query model.url model.token CbTransitions
+            , fetchTransitions
+                |> query model.url model.token
+                |> taskToGcData CbTransitions
             )
 
         To id ->
@@ -117,7 +126,9 @@ router model route =
                 doNothing
             else
                 ( { model | view = ViewTopic Loading }
-                , fetchTopic id |> query model.url model.token CbTopic
+                , fetchTopic id
+                    |> query model.url model.token
+                    |> taskToGcData CbTopic
                 )
 
         T id ->
@@ -126,7 +137,8 @@ router model route =
             else
                 ( { model | view = ViewTransition Loading }
                 , fetchTransition id
-                    |> query model.url model.token CbTransition
+                    |> query model.url model.token
+                    |> taskToGcData CbTransition
                 )
 
         Top ->
@@ -138,7 +150,8 @@ router model route =
             else
                 ( { model | view = ViewSubmission Loading }
                 , fetchSubmission id
-                    |> query model.url model.token CbSubmission
+                    |> query model.url model.token
+                    |> taskToGcData CbSubmission
                 )
 
         Start ->

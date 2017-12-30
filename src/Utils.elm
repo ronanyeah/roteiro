@@ -7,8 +7,37 @@ import Element.Attributes exposing (class)
 import Navigation
 import Regex exposing (Regex)
 import RemoteData
-import Types exposing (Device(Desktop), FaIcon(..), Form, GcData, Id(..), Model, Picker(..), View(..))
+import Task exposing (Task)
+import Types exposing (ApiError(..), Device(Desktop), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, Picker(..), View(..))
 import Window
+
+
+taskToGcData : (GcData a -> msg) -> Task GcError a -> Cmd msg
+taskToGcData msg =
+    RemoteData.asCmd
+        >> Cmd.map msg
+
+
+formatErrors : GcError -> List String
+formatErrors err =
+    case err of
+        HttpError _ ->
+            [ "Some HTTP bullshit." ]
+
+        GcError errs ->
+            errs
+                |> List.map
+                    (\e ->
+                        case e of
+                            InsufficientPermissions ->
+                                "Not authorised."
+
+                            RelationIsRequired ->
+                                "Can't delete, other data depends on this."
+
+                            Other str ->
+                                str
+                    )
 
 
 redirect : GcData { r | id : Id } -> (Id -> String) -> Cmd msg

@@ -9,6 +9,10 @@ import Window
 
 type Msg
     = Cancel
+    | CbCreateOrUpdatePosition (Result GcError Position)
+    | CbCreateOrUpdateSubmission (Result GcError Submission)
+    | CbCreateOrUpdateTopic (Result GcError Topic)
+    | CbCreateOrUpdateTransition (Result GcError Transition)
     | CbDelete (Result GcError Id)
     | CbPosition (GcData Position)
     | CbPositions (GcData (List Info))

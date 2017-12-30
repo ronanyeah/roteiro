@@ -6,7 +6,6 @@ import GraphQL.Request.Builder as B
 import GraphQL.Request.Builder.Arg as Arg
 import Http
 import Json.Decode as Decode exposing (Decoder)
-import RemoteData
 import Task exposing (Task)
 import Types exposing (..)
 
@@ -29,8 +28,8 @@ decodeGcError =
             )
 
 
-queryTask : String -> String -> B.Request B.Query a -> Task GcError a
-queryTask url token request =
+query : String -> String -> B.Request B.Query a -> Task GcError a
+query url token request =
     customSendQueryRaw
         { method = "POST"
         , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
@@ -42,15 +41,8 @@ queryTask url token request =
         |> convert (B.responseDataDecoder request)
 
 
-query : String -> String -> (GcData a -> msg) -> B.Request B.Query a -> Cmd msg
-query url token msg request =
-    queryTask url token request
-        |> RemoteData.asCmd
-        |> Cmd.map msg
-
-
-mutationTask : String -> String -> B.Request B.Mutation a -> Task GcError a
-mutationTask url token request =
+mutation : String -> String -> B.Request B.Mutation a -> Task GcError a
+mutation url token request =
     customSendMutationRaw
         { method = "POST"
         , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
@@ -60,13 +52,6 @@ mutationTask url token request =
         }
         request
         |> convert (B.responseDataDecoder request)
-
-
-mutation : String -> String -> (GcData a -> msg) -> B.Request B.Mutation a -> Cmd msg
-mutation url token msg request =
-    mutationTask url token request
-        |> RemoteData.asCmd
-        |> Cmd.map msg
 
 
 convert : Decoder a -> Task GraphQL.Client.Http.Error (Http.Response String) -> Task GcError a
