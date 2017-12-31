@@ -193,7 +193,8 @@ type alias Position =
     , name : String
     , notes : Array String
     , submissions : List Info
-    , transitions : List Info
+    , transitionsFrom : List Info
+    , transitionsTo : List Info
     }
 
 

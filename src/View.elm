@@ -11,7 +11,7 @@ import Paths
 import Regex
 import RemoteData exposing (RemoteData(..))
 import Styling exposing (styling)
-import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Styles(..), Variations(..), View(..))
+import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Styles(..), Transition, Variations(..), View(..))
 import Utils exposing (icon, isPicking, matchDomain, matchLink, sort)
 import Window exposing (Size)
 
@@ -131,14 +131,15 @@ view ({ form } as model) =
                 ViewPosition data ->
                     data
                         |> viewRemote
-                            (\({ name, notes, submissions, transitions } as position) ->
+                            (\({ name, notes, submissions, transitionsFrom, transitionsTo } as position) ->
                                 column None
                                     [ center, spacing 20, width fill ]
                                     [ editRow name <| EditPosition position
                                     , viewNotes <| Array.toList notes
                                     , el Line [ width <| px 100, height <| px 2 ] empty
+                                    , viewTechList Paths.transition transitionsFrom
                                     , icon Arrow MattIcon []
-                                    , viewTechList Paths.transition transitions
+                                    , viewTechList Paths.transition transitionsTo
                                     , plus <| CreateTransition <| Just position
                                     , el Line [ width <| px 100, height <| px 2 ] empty
                                     , icon Bolt MattIcon []
@@ -300,7 +301,7 @@ view ({ form } as model) =
                                                                             []
                                                                             [ text name ]
                                                                 )
-                                                        , viewTechList Paths.transition g
+                                                        , viewTransitions g
                                                         ]
                                                 )
                                         )
@@ -440,7 +441,7 @@ viewSubmissionPicker positions form =
                 |> RemoteData.withDefault []
     in
     pickerLayout None
-        [ spacing 10 ]
+        [ spacing 10, center ]
         [ icon Flag MattIcon []
         , pickStartPosition ps form
         ]
@@ -751,6 +752,37 @@ viewNotes notes =
                         [ spacing 5 ]
                         [ el Dot [] <| text "• "
                         , content
+                        ]
+                )
+        )
+
+
+viewTransitions : List Transition -> Element Styles vs Msg
+viewTransitions ts =
+    column None
+        []
+        (ts
+            |> List.map
+                (\{ id, endPosition, name } ->
+                    paragraph None
+                        []
+                        [ el Dot [] <| text "• "
+                        , link
+                            (Paths.transition id)
+                          <|
+                            el Link [] <|
+                                text name
+                        , text " "
+                        , paragraph None
+                            []
+                            [ text "("
+                            , link
+                                (Paths.position endPosition.id)
+                              <|
+                                el Link [] <|
+                                    text endPosition.name
+                            , text ")"
+                            ]
                         ]
                 )
         )

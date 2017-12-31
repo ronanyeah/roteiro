@@ -373,6 +373,7 @@ position =
         |> B.with (B.field "notes" [] (B.list B.string |> B.map Array.fromList))
         |> B.with (B.field "submissions" [] (B.list info))
         |> B.with (B.field "transitionsFrom" [] (B.list info))
+        |> B.with (B.field "transitionsTo" [] (B.list info))
 
 
 submission : B.ValueSpec B.NonNull B.ObjectType Submission vars
