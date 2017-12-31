@@ -10,7 +10,7 @@ import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (addErrors, clearErrors, emptyForm, formatErrors, log, logError, redirect, taskToGcData, unwrap)
+import Utils exposing (addErrors, clearErrors, emptyForm, formatErrors, log, logError, taskToGcData, unwrap)
 import Validate
 
 
@@ -100,7 +100,7 @@ update msg model =
                     , Cmd.none
                     )
 
-        CbDelete res ->
+        CbDeletePosition res ->
             case res of
                 Ok _ ->
                     ( { model | confirm = Nothing }
@@ -118,11 +118,62 @@ update msg model =
                     , log err
                     )
 
+        CbDeleteSubmission res ->
+            case res of
+                Ok _ ->
+                    ( { model | confirm = Nothing }
+                    , Navigation.newUrl <| Paths.submissions
+                    )
+
+                Err err ->
+                    ( { model
+                        | confirm = Nothing
+                        , form =
+                            model.form
+                                |> addErrors (formatErrors err)
+                      }
+                    , log err
+                    )
+
+        CbDeleteTopic res ->
+            case res of
+                Ok _ ->
+                    ( { model | confirm = Nothing }
+                    , Navigation.newUrl <| Paths.topics
+                    )
+
+                Err err ->
+                    ( { model
+                        | confirm = Nothing
+                        , form =
+                            model.form
+                                |> addErrors (formatErrors err)
+                      }
+                    , log err
+                    )
+
+        CbDeleteTransition res ->
+            case res of
+                Ok _ ->
+                    ( { model | confirm = Nothing }
+                    , Navigation.newUrl <| Paths.transitions
+                    )
+
+                Err err ->
+                    ( { model
+                        | confirm = Nothing
+                        , form =
+                            model.form
+                                |> addErrors (formatErrors err)
+                      }
+                    , log err
+                    )
+
         CbPosition res ->
             ( { model
                 | view = ViewPosition res
               }
-            , redirect res Paths.position
+            , logError res
             )
 
         CbPositions res ->
@@ -136,7 +187,7 @@ update msg model =
             ( { model
                 | view = ViewSubmission res
               }
-            , redirect res Paths.submission
+            , logError res
             )
 
         CbSubmissions res ->
@@ -150,7 +201,7 @@ update msg model =
             ( { model
                 | view = ViewTopic res
               }
-            , redirect res Paths.topic
+            , logError res
             )
 
         CbTopics res ->
@@ -164,7 +215,7 @@ update msg model =
             ( { model
                 | view = ViewTransition res
               }
-            , redirect res Paths.transition
+            , logError res
             )
 
         CbTransitions res ->
@@ -243,28 +294,28 @@ update msg model =
             ( model
             , Data.deletePosition id
                 |> mutation model.url model.token
-                |> Task.attempt CbDelete
+                |> Task.attempt CbDeletePosition
             )
 
         DeleteSubmission id ->
             ( model
             , Data.deleteSubmission id
                 |> mutation model.url model.token
-                |> Task.attempt CbDelete
+                |> Task.attempt CbDeleteSubmission
             )
 
         DeleteTopic id ->
             ( model
             , Data.deleteTopic id
                 |> mutation model.url model.token
-                |> Task.attempt CbDelete
+                |> Task.attempt CbDeleteTopic
             )
 
         DeleteTransition id ->
             ( model
             , Data.deleteTransition id
                 |> mutation model.url model.token
-                |> Task.attempt CbDelete
+                |> Task.attempt CbDeleteTransition
             )
 
         EditPosition p ->
