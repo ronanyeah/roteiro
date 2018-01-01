@@ -398,10 +398,11 @@ update msg model =
         Save ->
             case model.view of
                 ViewCreatePosition ->
-                    case Validate.createPosition model.form of
+                    case Validate.position model.form of
                         Ok args ->
                             ( { model | form = clearErrors model.form }
-                            , uncurry createPosition args
+                            , args
+                                |> uncurry createPosition
                                 |> mutation model.url model.token
                                 |> Task.attempt CbCreateOrUpdatePosition
                             )
@@ -412,7 +413,7 @@ update msg model =
                             )
 
                 ViewCreateSubmission ->
-                    case Validate.createSubmission model.form of
+                    case Validate.submission model.form of
                         Ok ( name, startId, steps, notes ) ->
                             ( { model | form = clearErrors model.form }
                             , createSubmission name startId steps notes
@@ -426,10 +427,11 @@ update msg model =
                             )
 
                 ViewCreateTopic ->
-                    case Validate.createTopic model.form of
+                    case Validate.topic model.form of
                         Ok args ->
                             ( { model | form = clearErrors model.form }
-                            , uncurry createTopic args
+                            , args
+                                |> uncurry createTopic
                                 |> mutation model.url model.token
                                 |> Task.attempt CbCreateOrUpdateTopic
                             )
@@ -440,7 +442,7 @@ update msg model =
                             )
 
                 ViewCreateTransition ->
-                    case Validate.createTransition model.form of
+                    case Validate.transition model.form of
                         Ok ( name, startId, endId, steps, notes ) ->
                             ( { model | form = clearErrors model.form }
                             , createTransition
@@ -459,10 +461,11 @@ update msg model =
                             )
 
                 ViewEditPosition ->
-                    case Validate.updatePosition model.form of
-                        Ok ( id, name, notes ) ->
+                    case Validate.position model.form of
+                        Ok args ->
                             ( { model | form = clearErrors model.form }
-                            , updatePosition id name notes
+                            , args
+                                |> uncurry (updatePosition model.form.id)
                                 |> mutation model.url model.token
                                 |> Task.attempt CbCreateOrUpdatePosition
                             )
@@ -473,10 +476,10 @@ update msg model =
                             )
 
                 ViewEditSubmission ->
-                    case Validate.updateSubmission model.form of
-                        Ok ( id, name, position, steps, notes ) ->
+                    case Validate.submission model.form of
+                        Ok ( name, position, steps, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , updateSubmission id name position steps notes
+                            , updateSubmission model.form.id name position steps notes
                                 |> mutation model.url model.token
                                 |> Task.attempt CbCreateOrUpdateSubmission
                             )
@@ -487,10 +490,11 @@ update msg model =
                             )
 
                 ViewEditTopic ->
-                    case Validate.updateTopic model.form of
-                        Ok ( id, name, notes ) ->
+                    case Validate.topic model.form of
+                        Ok args ->
                             ( { model | form = clearErrors model.form }
-                            , updateTopic id name notes
+                            , args
+                                |> uncurry (updateTopic model.form.id)
                                 |> mutation model.url model.token
                                 |> Task.attempt CbCreateOrUpdateTopic
                             )
@@ -501,10 +505,10 @@ update msg model =
                             )
 
                 ViewEditTransition ->
-                    case Validate.updateTransition model.form of
-                        Ok ( id, name, startId, endId, steps, notes ) ->
+                    case Validate.transition model.form of
+                        Ok ( name, startId, endId, steps, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , updateTransition id name startId endId steps notes
+                            , updateTransition model.form.id name startId endId steps notes
                                 |> mutation model.url model.token
                                 |> Task.attempt CbCreateOrUpdateTransition
                             )
