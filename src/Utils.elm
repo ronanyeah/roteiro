@@ -2,8 +2,9 @@ module Utils exposing (..)
 
 import Array
 import Dict exposing (Dict)
-import Element exposing (Attribute, Element, el, empty)
-import Element.Attributes exposing (class)
+import Element exposing (Attribute, Element, el, html)
+import Html
+import Html.Attributes
 import Regex exposing (Regex)
 import RemoteData
 import Task exposing (Task)
@@ -77,7 +78,7 @@ icon fa s attrs =
                     "fa-flag-checkered"
 
                 Arrow ->
-                    "fa-long-arrow-right"
+                    "fa-long-arrow-alt-right"
 
                 Bolt ->
                     "fa-bolt"
@@ -98,13 +99,13 @@ icon fa s attrs =
                     "fa-minus"
 
                 Notes ->
-                    "fa-sticky-note-o"
+                    "fa-sticky-note"
 
                 Cross ->
                     "fa-times"
 
                 Waiting ->
-                    "fa-refresh"
+                    "fa-spinner fa-pulse"
 
                 Warning ->
                     "fa-exclamation"
@@ -124,10 +125,10 @@ icon fa s attrs =
                 Cogs ->
                     "fa-cogs"
             )
-                |> (++) "fa "
-                |> class
+                |> (++) "fas "
+                |> Html.Attributes.class
     in
-    el s (faClass :: attrs) empty
+    el s attrs <| html <| Html.span [ faClass ] []
 
 
 sort : List { r | name : String } -> List { r | name : String }

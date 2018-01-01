@@ -1,3 +1,6 @@
+require("@fortawesome/fontawesome");
+require("@fortawesome/fontawesome-free-solid");
+
 if (window.navigator.serviceWorker) {
   window.navigator.serviceWorker
     .register("/sw.js")
@@ -16,7 +19,7 @@ var Elm = require("./Main.elm");
 
 var token = localStorage.getItem("ROTEIRO_TOKEN") || "";
 
-var app = Elm.Main.embed(document.getElementById("roteiro"), [
+var app = Elm.Main.embed(document.getElementById("app"), [
   GRAPHQL_ENDPOINT,
   token
 ]);

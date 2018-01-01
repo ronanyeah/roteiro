@@ -12,8 +12,6 @@ styling : StyleSheet Styles Variations
 styling =
     styleSheet
         [ importUrl "https://fonts.googleapis.com/css?family=Cuprum"
-        , importUrl "/font-awesome/css/font-awesome.min.css"
-        , importUrl "/style.css"
         , style None []
         , style BigIcon
             [ Color.text e
