@@ -3,6 +3,7 @@ module Types exposing (..)
 import Array exposing (Array)
 import Element.Input exposing (SelectMsg, SelectWith)
 import Http
+import Navigation exposing (Location)
 import RemoteData exposing (RemoteData)
 import Window
 
@@ -39,11 +40,11 @@ type Msg
     | EditTopic Topic
     | EditTransition Transition
     | Save
-    | SetRoute Route
     | TokenEdit (Maybe String)
     | UpdateEndPosition (SelectMsg Info)
     | UpdateForm Form
     | UpdateStartPosition (SelectMsg Info)
+    | UrlChange Location
     | WindowSize Window.Size
 
 

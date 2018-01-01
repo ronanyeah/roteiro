@@ -521,9 +521,6 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        SetRoute route ->
-            router model route
-
         TokenEdit maybeStr ->
             case maybeStr of
                 Nothing ->
@@ -585,6 +582,9 @@ update msg model =
 
                 _ ->
                     ( model, Cmd.none )
+
+        UrlChange location ->
+            router model location
 
         WindowSize size ->
             let

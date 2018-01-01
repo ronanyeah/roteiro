@@ -5,7 +5,7 @@ import Navigation exposing (Location)
 import Paths
 import RemoteData exposing (RemoteData(..))
 import Types exposing (..)
-import UrlParser exposing ((</>), Parser, map, oneOf, parseHash, s, string)
+import UrlParser exposing ((</>), map, oneOf, parseHash, s, string)
 import Utils exposing (appendCmd, log, taskToGcData)
 
 
@@ -39,21 +39,6 @@ start =
     stripHash Paths.start
 
 
-route : Parser (Route -> a) a
-route =
-    oneOf
-        [ map Ps (s positions)
-        , map Ss (s submissions)
-        , map Ts (s topics)
-        , map Trs (s transitions)
-        , map (Id >> P) (s positions </> string)
-        , map (Id >> S) (s submissions </> string)
-        , map (Id >> To) (s topics </> string)
-        , map (Id >> T) (s transitions </> string)
-        , map Start (s start)
-        ]
-
-
 dataIsLoaded : View -> Id -> Bool
 dataIsLoaded view id =
     case view of
@@ -73,8 +58,8 @@ dataIsLoaded view id =
             False
 
 
-router : Model -> Route -> ( Model, Cmd Msg )
-router model route =
+handleRoute : Model -> Route -> ( Model, Cmd Msg )
+handleRoute model route =
     let
         redirectToStart =
             ( model, Navigation.newUrl Paths.start )
@@ -162,7 +147,20 @@ router model route =
                 |> appendCmd (log "route not found")
 
 
-parseLocation : Location -> Route
-parseLocation =
-    parseHash route
+router : Model -> Location -> ( Model, Cmd Msg )
+router model =
+    parseHash
+        (oneOf
+            [ map Ps (s positions)
+            , map Ss (s submissions)
+            , map Ts (s topics)
+            , map Trs (s transitions)
+            , map (Id >> P) (s positions </> string)
+            , map (Id >> S) (s submissions </> string)
+            , map (Id >> To) (s topics </> string)
+            , map (Id >> T) (s transitions </> string)
+            , map Start (s start)
+            ]
+        )
         >> Maybe.withDefault NotFound
+        >> handleRoute model

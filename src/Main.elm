@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Navigation exposing (Location)
-import Router exposing (parseLocation, router)
+import Router exposing (router)
 import Task
 import Types exposing (..)
 import Update exposing (update)
@@ -12,7 +12,7 @@ import Window
 
 main : Program ( String, String ) Model Msg
 main =
-    Navigation.programWithFlags (parseLocation >> SetRoute)
+    Navigation.programWithFlags UrlChange
         { init = init
         , subscriptions = always Sub.none
         , update = update
@@ -22,6 +22,5 @@ main =
 
 init : ( String, String ) -> Location -> ( Model, Cmd Msg )
 init ( url, token ) =
-    parseLocation
-        >> router { emptyModel | url = url, token = token }
+    router { emptyModel | url = url, token = token }
         >> appendCmd (Task.perform WindowSize Window.size)
