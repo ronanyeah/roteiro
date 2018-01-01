@@ -21,7 +21,7 @@
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.0",
     "@fortawesome/fontawesome-free-solid": "^5.0.2",
-    "copy-webpack-plugin": "^4.3.0",
+    "copy-webpack-plugin": "^4.3.1",
     "elm-hot-loader": "^0.5.4",
     "elm-webpack-loader": "^4.4.0",
     "webpack": "^3.10.0",
