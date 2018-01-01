@@ -6,7 +6,7 @@ import Paths
 import RemoteData exposing (RemoteData(..))
 import Types exposing (..)
 import UrlParser exposing ((</>), map, oneOf, parseHash, s, string)
-import Utils exposing (appendCmd, log, taskToGcData)
+import Utils exposing (taskToGcData)
 
 
 stripHash : String -> String
@@ -61,21 +61,14 @@ dataIsLoaded view id =
 handleRoute : Model -> Route -> ( Model, Cmd Msg )
 handleRoute model route =
     let
-        redirectToStart =
-            ( model, Navigation.newUrl Paths.start )
-
         doNothing =
             ( model, Cmd.none )
     in
     case route of
-        Ps ->
-            ( { model | view = ViewPositions, positions = Loading }
-            , fetchPositions
-                |> query model.url model.token
-                |> taskToGcData CbPositions
-            )
+        NotFound ->
+            ( model, Navigation.newUrl Paths.start )
 
-        P id ->
+        PositionRoute id ->
             if dataIsLoaded model.view id then
                 doNothing
             else
@@ -85,51 +78,14 @@ handleRoute model route =
                     |> taskToGcData CbPosition
                 )
 
-        Ss ->
-            ( { model | view = ViewSubmissions Loading }
-            , fetchSubmissions
+        Positions ->
+            ( { model | view = ViewPositions, positions = Loading }
+            , fetchPositions
                 |> query model.url model.token
-                |> taskToGcData CbSubmissions
+                |> taskToGcData CbPositions
             )
 
-        Ts ->
-            ( { model | view = ViewTopics Loading }
-            , fetchTopics
-                |> query model.url model.token
-                |> taskToGcData CbTopics
-            )
-
-        Trs ->
-            ( { model | view = ViewTransitions Loading }
-            , fetchTransitions
-                |> query model.url model.token
-                |> taskToGcData CbTransitions
-            )
-
-        To id ->
-            if dataIsLoaded model.view id then
-                doNothing
-            else
-                ( { model | view = ViewTopic Loading }
-                , fetchTopic id
-                    |> query model.url model.token
-                    |> taskToGcData CbTopic
-                )
-
-        T id ->
-            if dataIsLoaded model.view id then
-                doNothing
-            else
-                ( { model | view = ViewTransition Loading }
-                , fetchTransition id
-                    |> query model.url model.token
-                    |> taskToGcData CbTransition
-                )
-
-        Top ->
-            redirectToStart
-
-        S id ->
+        SubmissionRoute id ->
             if dataIsLoaded model.view id then
                 doNothing
             else
@@ -139,26 +95,63 @@ handleRoute model route =
                     |> taskToGcData CbSubmission
                 )
 
+        Submissions ->
+            ( { model | view = ViewSubmissions Loading }
+            , fetchSubmissions
+                |> query model.url model.token
+                |> taskToGcData CbSubmissions
+            )
+
         Start ->
             ( { model | view = ViewStart }, Cmd.none )
 
-        NotFound ->
-            redirectToStart
-                |> appendCmd (log "route not found")
+        TopicRoute id ->
+            if dataIsLoaded model.view id then
+                doNothing
+            else
+                ( { model | view = ViewTopic Loading }
+                , fetchTopic id
+                    |> query model.url model.token
+                    |> taskToGcData CbTopic
+                )
+
+        Topics ->
+            ( { model | view = ViewTopics Loading }
+            , fetchTopics
+                |> query model.url model.token
+                |> taskToGcData CbTopics
+            )
+
+        TransitionRoute id ->
+            if dataIsLoaded model.view id then
+                doNothing
+            else
+                ( { model | view = ViewTransition Loading }
+                , fetchTransition id
+                    |> query model.url model.token
+                    |> taskToGcData CbTransition
+                )
+
+        Transitions ->
+            ( { model | view = ViewTransitions Loading }
+            , fetchTransitions
+                |> query model.url model.token
+                |> taskToGcData CbTransitions
+            )
 
 
 router : Model -> Location -> ( Model, Cmd Msg )
 router model =
     parseHash
         (oneOf
-            [ map Ps (s positions)
-            , map Ss (s submissions)
-            , map Ts (s topics)
-            , map Trs (s transitions)
-            , map (Id >> P) (s positions </> string)
-            , map (Id >> S) (s submissions </> string)
-            , map (Id >> To) (s topics </> string)
-            , map (Id >> T) (s transitions </> string)
+            [ map Positions (s positions)
+            , map Submissions (s submissions)
+            , map Topics (s topics)
+            , map Transitions (s transitions)
+            , map (Id >> PositionRoute) (s positions </> string)
+            , map (Id >> SubmissionRoute) (s submissions </> string)
+            , map (Id >> TopicRoute) (s topics </> string)
+            , map (Id >> TransitionRoute) (s transitions </> string)
             , map Start (s start)
             ]
         )

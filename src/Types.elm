@@ -169,17 +169,16 @@ type Device
 
 
 type Route
-    = Ps
-    | P Id
-    | Ts
-    | S Id
-    | Ss
+    = NotFound
+    | PositionRoute Id
+    | Positions
+    | SubmissionRoute Id
+    | Submissions
     | Start
-    | T Id
-    | To Id
-    | Top
-    | Trs
-    | NotFound
+    | TopicRoute Id
+    | Topics
+    | TransitionRoute Id
+    | Transitions
 
 
 type alias Topic =
