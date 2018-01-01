@@ -77,7 +77,9 @@ convert resDecoder =
                 in
                 case Decode.decodeString decoder response.body of
                     Err err ->
-                        Task.fail <| HttpError <| Http.BadPayload err response
+                        Task.fail <|
+                            HttpError <|
+                                Http.BadPayload err response
 
                     Ok result ->
                         case result of
@@ -85,21 +87,21 @@ convert resDecoder =
                                 Task.succeed d
 
                             ( Just errs, Just _ ) ->
-                                Task.fail
-                                    (GcError
-                                        (Other "data returned with errors"
+                                Task.fail <|
+                                    GcError <|
+                                        Other "Data returned with errors."
                                             :: errs
-                                        )
-                                    )
 
                             ( Nothing, Just d ) ->
                                 Task.succeed d
 
                             ( Just errs, Nothing ) ->
-                                Task.fail (GcError errs)
+                                Task.fail <| GcError errs
 
                             ( Nothing, Nothing ) ->
-                                Task.fail <| HttpError <| Http.BadPayload "f'kd payload" response
+                                Task.fail <|
+                                    GcError
+                                        [ Other "Data does not exist." ]
             )
 
 

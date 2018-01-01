@@ -12,7 +12,7 @@ import Regex
 import RemoteData exposing (RemoteData(..))
 import Styling exposing (styling)
 import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Styles(..), Transition, Variations(..), View(..))
-import Utils exposing (icon, isPicking, matchDomain, matchLink, sort)
+import Utils exposing (formatErrors, icon, isPicking, matchDomain, matchLink, sort)
 import Window exposing (Size)
 
 
@@ -398,7 +398,9 @@ viewRemote fn data =
             icon Waiting MattIcon []
 
         Failure err ->
-            paragraph None [ center ] [ text <| toString err ]
+            err
+                |> formatErrors
+                |> viewErrors
 
         Success a ->
             fn a
