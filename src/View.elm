@@ -734,7 +734,7 @@ viewSteps steps =
 viewNotes : List String -> Element Styles vs msg
 viewNotes notes =
     column None
-        [ center, maxWidth <| px 500 ]
+        [ center, maxWidth <| px 500, alignLeft ]
         (notes
             |> List.map
                 (\x ->
