@@ -39,7 +39,14 @@ type Msg
     | EditSubmission Submission
     | EditTopic Topic
     | EditTransition Transition
-    | Save
+    | SaveCreatePosition
+    | SaveCreateSubmission
+    | SaveCreateTopic
+    | SaveCreateTransition
+    | SaveEditPosition
+    | SaveEditSubmission
+    | SaveEditTopic
+    | SaveEditTransition
     | TokenEdit (Maybe String)
     | UpdateEndPosition (SelectMsg Info)
     | UpdateForm Form

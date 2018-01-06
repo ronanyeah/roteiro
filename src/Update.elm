@@ -395,131 +395,126 @@ update msg model =
                 |> taskToGcData CbPositions
             )
 
-        Save ->
-            case model.view of
-                ViewCreatePosition ->
-                    case Validate.position model.form of
-                        Ok args ->
-                            ( { model | form = clearErrors model.form }
-                            , args
-                                |> uncurry createPosition
-                                |> mutation model.url model.token
-                                |> Task.attempt CbCreateOrUpdatePosition
-                            )
+        SaveCreatePosition ->
+            case Validate.position model.form of
+                Ok args ->
+                    ( { model | form = clearErrors model.form }
+                    , args
+                        |> uncurry createPosition
+                        |> mutation model.url model.token
+                        |> Task.attempt CbCreateOrUpdatePosition
+                    )
 
-                        Err errs ->
-                            ( { model | form = addErrors errs model.form }
-                            , Cmd.none
-                            )
+                Err errs ->
+                    ( { model | form = addErrors errs model.form }
+                    , Cmd.none
+                    )
 
-                ViewCreateSubmission ->
-                    case Validate.submission model.form of
-                        Ok ( name, startId, steps, notes ) ->
-                            ( { model | form = clearErrors model.form }
-                            , createSubmission name startId steps notes
-                                |> mutation model.url model.token
-                                |> Task.attempt CbCreateOrUpdateSubmission
-                            )
+        SaveCreateSubmission ->
+            case Validate.submission model.form of
+                Ok ( name, startId, steps, notes ) ->
+                    ( { model | form = clearErrors model.form }
+                    , createSubmission name startId steps notes
+                        |> mutation model.url model.token
+                        |> Task.attempt CbCreateOrUpdateSubmission
+                    )
 
-                        Err errs ->
-                            ( { model | form = addErrors errs model.form }
-                            , Cmd.none
-                            )
+                Err errs ->
+                    ( { model | form = addErrors errs model.form }
+                    , Cmd.none
+                    )
 
-                ViewCreateTopic ->
-                    case Validate.topic model.form of
-                        Ok args ->
-                            ( { model | form = clearErrors model.form }
-                            , args
-                                |> uncurry createTopic
-                                |> mutation model.url model.token
-                                |> Task.attempt CbCreateOrUpdateTopic
-                            )
+        SaveCreateTopic ->
+            case Validate.topic model.form of
+                Ok args ->
+                    ( { model | form = clearErrors model.form }
+                    , args
+                        |> uncurry createTopic
+                        |> mutation model.url model.token
+                        |> Task.attempt CbCreateOrUpdateTopic
+                    )
 
-                        Err errs ->
-                            ( { model | form = addErrors errs model.form }
-                            , Cmd.none
-                            )
+                Err errs ->
+                    ( { model | form = addErrors errs model.form }
+                    , Cmd.none
+                    )
 
-                ViewCreateTransition ->
-                    case Validate.transition model.form of
-                        Ok ( name, startId, endId, steps, notes ) ->
-                            ( { model | form = clearErrors model.form }
-                            , createTransition
-                                name
-                                startId
-                                endId
-                                steps
-                                notes
-                                |> mutation model.url model.token
-                                |> Task.attempt CbCreateOrUpdateTransition
-                            )
+        SaveCreateTransition ->
+            case Validate.transition model.form of
+                Ok ( name, startId, endId, steps, notes ) ->
+                    ( { model | form = clearErrors model.form }
+                    , createTransition
+                        name
+                        startId
+                        endId
+                        steps
+                        notes
+                        |> mutation model.url model.token
+                        |> Task.attempt CbCreateOrUpdateTransition
+                    )
 
-                        Err errs ->
-                            ( { model | form = addErrors errs model.form }
-                            , Cmd.none
-                            )
+                Err errs ->
+                    ( { model | form = addErrors errs model.form }
+                    , Cmd.none
+                    )
 
-                ViewEditPosition ->
-                    case Validate.position model.form of
-                        Ok args ->
-                            ( { model | form = clearErrors model.form }
-                            , args
-                                |> uncurry (updatePosition model.form.id)
-                                |> mutation model.url model.token
-                                |> Task.attempt CbCreateOrUpdatePosition
-                            )
+        SaveEditPosition ->
+            case Validate.position model.form of
+                Ok args ->
+                    ( { model | form = clearErrors model.form }
+                    , args
+                        |> uncurry (updatePosition model.form.id)
+                        |> mutation model.url model.token
+                        |> Task.attempt CbCreateOrUpdatePosition
+                    )
 
-                        Err errs ->
-                            ( { model | form = addErrors errs model.form }
-                            , Cmd.none
-                            )
+                Err errs ->
+                    ( { model | form = addErrors errs model.form }
+                    , Cmd.none
+                    )
 
-                ViewEditSubmission ->
-                    case Validate.submission model.form of
-                        Ok ( name, position, steps, notes ) ->
-                            ( { model | form = clearErrors model.form }
-                            , updateSubmission model.form.id name position steps notes
-                                |> mutation model.url model.token
-                                |> Task.attempt CbCreateOrUpdateSubmission
-                            )
+        SaveEditSubmission ->
+            case Validate.submission model.form of
+                Ok ( name, position, steps, notes ) ->
+                    ( { model | form = clearErrors model.form }
+                    , updateSubmission model.form.id name position steps notes
+                        |> mutation model.url model.token
+                        |> Task.attempt CbCreateOrUpdateSubmission
+                    )
 
-                        Err errs ->
-                            ( { model | form = addErrors errs model.form }
-                            , Cmd.none
-                            )
+                Err errs ->
+                    ( { model | form = addErrors errs model.form }
+                    , Cmd.none
+                    )
 
-                ViewEditTopic ->
-                    case Validate.topic model.form of
-                        Ok args ->
-                            ( { model | form = clearErrors model.form }
-                            , args
-                                |> uncurry (updateTopic model.form.id)
-                                |> mutation model.url model.token
-                                |> Task.attempt CbCreateOrUpdateTopic
-                            )
+        SaveEditTopic ->
+            case Validate.topic model.form of
+                Ok args ->
+                    ( { model | form = clearErrors model.form }
+                    , args
+                        |> uncurry (updateTopic model.form.id)
+                        |> mutation model.url model.token
+                        |> Task.attempt CbCreateOrUpdateTopic
+                    )
 
-                        Err errs ->
-                            ( { model | form = addErrors errs model.form }
-                            , Cmd.none
-                            )
+                Err errs ->
+                    ( { model | form = addErrors errs model.form }
+                    , Cmd.none
+                    )
 
-                ViewEditTransition ->
-                    case Validate.transition model.form of
-                        Ok ( name, startId, endId, steps, notes ) ->
-                            ( { model | form = clearErrors model.form }
-                            , updateTransition model.form.id name startId endId steps notes
-                                |> mutation model.url model.token
-                                |> Task.attempt CbCreateOrUpdateTransition
-                            )
+        SaveEditTransition ->
+            case Validate.transition model.form of
+                Ok ( name, startId, endId, steps, notes ) ->
+                    ( { model | form = clearErrors model.form }
+                    , updateTransition model.form.id name startId endId steps notes
+                        |> mutation model.url model.token
+                        |> Task.attempt CbCreateOrUpdateTransition
+                    )
 
-                        Err errs ->
-                            ( { model | form = addErrors errs model.form }
-                            , Cmd.none
-                            )
-
-                _ ->
-                    ( model, Cmd.none )
+                Err errs ->
+                    ( { model | form = addErrors errs model.form }
+                    , Cmd.none
+                    )
 
         TokenEdit maybeStr ->
             case maybeStr of

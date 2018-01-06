@@ -54,7 +54,7 @@ view ({ form } as model) =
                         [ viewErrors form.errors
                         , nameEdit form
                         , notesEditor form
-                        , buttons Nothing
+                        , createButtons SaveCreatePosition
                         ]
 
                 ViewCreateSubmission ->
@@ -65,7 +65,7 @@ view ({ form } as model) =
                         , viewSubmissionPicker model.positions form
                         , stepsEditor form
                         , notesEditor form
-                        , buttons Nothing
+                        , createButtons SaveCreateSubmission
                         ]
 
                 ViewCreateTopic ->
@@ -74,7 +74,7 @@ view ({ form } as model) =
                         [ viewErrors form.errors
                         , nameEdit form
                         , notesEditor form
-                        , buttons Nothing
+                        , createButtons SaveCreateTopic
                         ]
 
                 ViewCreateTransition ->
@@ -85,7 +85,7 @@ view ({ form } as model) =
                         , viewTransitionPickers model.positions form
                         , stepsEditor form
                         , notesEditor form
-                        , buttons Nothing
+                        , createButtons SaveCreateTransition
                         ]
 
                 ViewEditPosition ->
@@ -94,7 +94,7 @@ view ({ form } as model) =
                         [ viewErrors form.errors
                         , nameEdit form
                         , notesEditor form
-                        , buttons <| Just <| DeletePosition form.id
+                        , editButtons SaveEditPosition <| DeletePosition form.id
                         ]
 
                 ViewEditSubmission ->
@@ -105,7 +105,7 @@ view ({ form } as model) =
                         , viewSubmissionPicker model.positions form
                         , stepsEditor form
                         , notesEditor form
-                        , buttons <| Just <| DeleteSubmission form.id
+                        , editButtons SaveEditSubmission <| DeleteSubmission form.id
                         ]
 
                 ViewEditTopic ->
@@ -114,7 +114,7 @@ view ({ form } as model) =
                         [ viewErrors form.errors
                         , nameEdit form
                         , notesEditor form
-                        , buttons <| Just <| DeleteTopic form.id
+                        , editButtons SaveEditTopic <| DeleteTopic form.id
                         ]
 
                 ViewEditTransition ->
@@ -125,7 +125,7 @@ view ({ form } as model) =
                         , viewTransitionPickers model.positions form
                         , stepsEditor form
                         , notesEditor form
-                        , buttons <| Just <| DeleteTransition form.id
+                        , editButtons SaveEditTransition <| DeleteTransition form.id
                         ]
 
                 ViewPosition data ->
@@ -606,28 +606,42 @@ minus msg =
         ]
 
 
-buttons : Maybe Msg -> Element Styles vs Msg
-buttons maybeDelete =
+editButtons : Msg -> Msg -> Element Styles vs Msg
+editButtons save delete =
     row ChooseBox
         [ spacing 20 ]
         [ icon Tick
             ActionIcon
             [ padding 10
-            , onClick Save
+            , onClick save
             ]
         , icon Cross
             ActionIcon
             [ padding 10
             , onClick Cancel
             ]
-        , whenJust maybeDelete
-            (\msg ->
-                icon Trash
-                    ActionIcon
-                    [ padding 10
-                    , onClick <| Confirm <| Just msg
-                    ]
-            )
+        , icon Trash
+            ActionIcon
+            [ padding 10
+            , onClick <| Confirm <| Just delete
+            ]
+        ]
+
+
+createButtons : Msg -> Element Styles vs Msg
+createButtons save =
+    row ChooseBox
+        [ spacing 20 ]
+        [ icon Tick
+            ActionIcon
+            [ padding 10
+            , onClick save
+            ]
+        , icon Cross
+            ActionIcon
+            [ padding 10
+            , onClick Cancel
+            ]
         ]
 
 
