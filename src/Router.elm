@@ -74,14 +74,14 @@ handleRoute model route =
             else
                 ( { model | view = ViewPosition Loading }
                 , fetchPosition id
-                    |> query model.url model.token
+                    |> query model.token
                     |> taskToGcData CbPosition
                 )
 
         Positions ->
             ( { model | view = ViewPositions, positions = Loading }
             , fetchPositions
-                |> query model.url model.token
+                |> query model.token
                 |> taskToGcData CbPositions
             )
 
@@ -91,14 +91,14 @@ handleRoute model route =
             else
                 ( { model | view = ViewSubmission Loading }
                 , fetchSubmission id
-                    |> query model.url model.token
+                    |> query model.token
                     |> taskToGcData CbSubmission
                 )
 
         Submissions ->
             ( { model | view = ViewSubmissions Loading }
             , fetchSubmissions
-                |> query model.url model.token
+                |> query model.token
                 |> taskToGcData CbSubmissions
             )
 
@@ -111,14 +111,14 @@ handleRoute model route =
             else
                 ( { model | view = ViewTopic Loading }
                 , fetchTopic id
-                    |> query model.url model.token
+                    |> query model.token
                     |> taskToGcData CbTopic
                 )
 
         Topics ->
             ( { model | view = ViewTopics Loading }
             , fetchTopics
-                |> query model.url model.token
+                |> query model.token
                 |> taskToGcData CbTopics
             )
 
@@ -128,14 +128,14 @@ handleRoute model route =
             else
                 ( { model | view = ViewTransition Loading }
                 , fetchTransition id
-                    |> query model.url model.token
+                    |> query model.token
                     |> taskToGcData CbTransition
                 )
 
         Transitions ->
             ( { model | view = ViewTransitions Loading }
             , fetchTransitions
-                |> query model.url model.token
+                |> query model.token
                 |> taskToGcData CbTransitions
             )
 

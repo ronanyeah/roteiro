@@ -1,10 +1,8 @@
-const copyWebpackPlugin = require("copy-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const { resolve } = require("path");
 const webpack = require("webpack");
 
 const { GRAPHQL_ENDPOINT, DEBUG, NODE_ENV } = process.env;
-
-if (!GRAPHQL_ENDPOINT) throw Error("Missing GraphQL endpoint!");
 
 const publicFolder = resolve("./public");
 
@@ -15,7 +13,13 @@ module.exports = {
     filename: "bundle.js"
   },
   devServer: {
-    contentBase: publicFolder
+    contentBase: publicFolder,
+    proxy: {
+      "/api": {
+        target: GRAPHQL_ENDPOINT,
+        pathRewrite: { "^/api": "" }
+      }
+    }
   },
   module: {
     rules: [
@@ -37,11 +41,8 @@ module.exports = {
     ]
   },
   plugins: [
-    new webpack.DefinePlugin({
-      GRAPHQL_ENDPOINT: `"${GRAPHQL_ENDPOINT}"`
-    }),
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
-    new copyWebpackPlugin(["static"])
+    new CopyWebpackPlugin(["static"])
   ]
 };

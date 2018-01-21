@@ -1,56 +1,51 @@
 module View exposing (..)
 
 import Array exposing (Array)
-import Element exposing (Element, circle, column, decorativeImage, el, empty, layout, link, modal, newTab, paragraph, row, screen, text, when, whenJust)
-import Element.Attributes exposing (alignBottom, alignLeft, attribute, center, fill, height, maxWidth, moveDown, padding, px, spacing, spread, vary, verticalCenter, width)
+import Element exposing (Element, alignLeft, alignRight, attribute, center, centerY, column, decorativeImage, el, empty, fill, height, inFront, layoutWith, link, newTabLink, noHover, padding, paragraph, px, row, scrollbars, spacing, text, width)
+import Element.Background as Background
+import Element.Border as Border
 import Element.Events exposing (onClick)
 import Element.Input as Input
 import Html exposing (Html)
+import Html.Attributes
 import List.Extra exposing (groupWhile)
 import Paths
 import Regex
 import RemoteData exposing (RemoteData(..))
-import Styling exposing (styling)
-import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Styles(..), Transition, Variations(..), View(..))
-import Utils exposing (formatErrors, icon, isPicking, matchDomain, matchLink, sort)
-import Window exposing (Size)
+import Styling
+import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Transition, View(..))
+import Utils exposing (formatErrors, icon, isPicking, matchDomain, matchLink, noLabel, sort, when, whenJust)
 
 
 view : Model -> Html Msg
 view ({ form } as model) =
     let
+        wrapper =
+            column
+                [ scrollbars
+                , height <| px model.size.height
+                , spacing 40
+                ]
+
         content =
             case model.view of
                 ViewStart ->
-                    case model.device of
-                        Mobile ->
-                            column None
-                                [ center, spacing 20, moveDown 200 ]
-                                [ decorativeImage None
-                                    [ onClick <| TokenEdit <| Just ""
-                                    , height <| px 100
+                    wrapper
+                        [ Input.button []
+                            { onPress =
+                                Just <| TokenEdit <| Just ""
+                            , label =
+                                decorativeImage
+                                    [ height <| px 100
                                     , width <| px 100
                                     ]
                                     { src = "/map.svg" }
-                                , el Home [] <| text "ROTEIRO"
-                                ]
-
-                        Desktop ->
-                            column None
-                                [ center, spacing 40 ]
-                                [ link Paths.positions <|
-                                    icon Flag ActionIcon []
-                                , link Paths.transitions <|
-                                    icon Arrow ActionIcon []
-                                , link Paths.submissions <|
-                                    icon Bolt ActionIcon []
-                                , link Paths.topics <|
-                                    icon Book ActionIcon []
-                                ]
+                            }
+                        , el Styling.home <| text "ROTEIRO"
+                        ]
 
                 ViewCreatePosition ->
-                    column None
-                        [ center, spacing 20, width fill ]
+                    wrapper
                         [ viewErrors form.errors
                         , nameEdit form
                         , notesEditor form
@@ -58,8 +53,7 @@ view ({ form } as model) =
                         ]
 
                 ViewCreateSubmission ->
-                    column None
-                        [ center, spacing 20, width fill ]
+                    wrapper
                         [ viewErrors form.errors
                         , nameEdit form
                         , viewSubmissionPicker model.positions form
@@ -69,8 +63,7 @@ view ({ form } as model) =
                         ]
 
                 ViewCreateTopic ->
-                    column None
-                        [ center, spacing 20, width fill ]
+                    wrapper
                         [ viewErrors form.errors
                         , nameEdit form
                         , notesEditor form
@@ -78,8 +71,7 @@ view ({ form } as model) =
                         ]
 
                 ViewCreateTransition ->
-                    column None
-                        [ center, spacing 20, width fill ]
+                    wrapper
                         [ viewErrors form.errors
                         , nameEdit form
                         , viewTransitionPickers model.positions form
@@ -89,8 +81,7 @@ view ({ form } as model) =
                         ]
 
                 ViewEditPosition ->
-                    column None
-                        [ center, spacing 20, width fill ]
+                    wrapper
                         [ viewErrors form.errors
                         , nameEdit form
                         , notesEditor form
@@ -98,8 +89,7 @@ view ({ form } as model) =
                         ]
 
                 ViewEditSubmission ->
-                    column None
-                        [ center, spacing 20, width fill ]
+                    wrapper
                         [ viewErrors form.errors
                         , nameEdit form
                         , viewSubmissionPicker model.positions form
@@ -109,8 +99,7 @@ view ({ form } as model) =
                         ]
 
                 ViewEditTopic ->
-                    column None
-                        [ center, spacing 20, width fill ]
+                    wrapper
                         [ viewErrors form.errors
                         , nameEdit form
                         , notesEditor form
@@ -118,8 +107,7 @@ view ({ form } as model) =
                         ]
 
                 ViewEditTransition ->
-                    column None
-                        [ center, spacing 20, width fill ]
+                    wrapper
                         [ viewErrors form.errors
                         , nameEdit form
                         , viewTransitionPickers model.positions form
@@ -132,17 +120,16 @@ view ({ form } as model) =
                     data
                         |> viewRemote
                             (\({ name, notes, submissions, transitionsFrom, transitionsTo } as position) ->
-                                column None
-                                    [ center, spacing 20, width fill ]
+                                wrapper
                                     [ editRow name <| EditPosition position
                                     , viewNotes <| Array.toList notes
-                                    , el Line [ width <| px 100, height <| px 2 ] empty
+                                    , el (Styling.line ++ [ width <| px 100, height <| px 2 ]) empty
                                     , viewTechList Paths.transition transitionsFrom
-                                    , icon Arrow MattIcon []
+                                    , icon Arrow Styling.mattIcon
                                     , viewTechList Paths.transition transitionsTo
                                     , plus <| CreateTransition <| Just position
-                                    , el Line [ width <| px 100, height <| px 2 ] empty
-                                    , icon Bolt MattIcon []
+                                    , el (Styling.line ++ [ width <| px 100, height <| px 2 ]) empty
+                                    , icon Bolt Styling.mattIcon
                                     , viewTechList Paths.submission submissions
                                     , plus <| CreateSubmission <| Just position
                                     ]
@@ -152,19 +139,20 @@ view ({ form } as model) =
                     model.positions
                         |> viewRemote
                             (\positions ->
-                                column None
-                                    [ alignLeft, center, spacing 20 ]
-                                    [ icon Flag MattIcon []
-                                    , column None [] <|
+                                wrapper
+                                    [ icon Flag Styling.mattIcon
+                                    , column [] <|
                                         (positions
                                             |> sort
                                             |> List.map
                                                 (\{ id, name } ->
-                                                    link (Paths.position id) <|
-                                                        paragraph Choice
-                                                            []
-                                                            [ text name
-                                                            ]
+                                                    link []
+                                                        { url = Paths.position id
+                                                        , label =
+                                                            paragraph Styling.choice
+                                                                [ text name
+                                                                ]
+                                                        }
                                                 )
                                         )
                                     , plus CreatePosition
@@ -175,15 +163,17 @@ view ({ form } as model) =
                     data
                         |> viewRemote
                             (\sub ->
-                                column None
-                                    [ center, spacing 20, width fill ]
+                                wrapper
                                     [ editRow sub.name <| EditSubmission sub
-                                    , row None
+                                    , row
                                         [ spacing 10 ]
-                                        [ icon Flag MattIcon []
-                                        , link (Paths.position sub.position.id) <|
-                                            el Link [] <|
-                                                text sub.position.name
+                                        [ icon Flag Styling.mattIcon
+                                        , link []
+                                            { url = Paths.position sub.position.id
+                                            , label =
+                                                el Styling.link <|
+                                                    text sub.position.name
+                                            }
                                         ]
                                     , viewSteps sub.steps
                                     , viewNotes <| Array.toList sub.notes
@@ -194,26 +184,27 @@ view ({ form } as model) =
                     data
                         |> viewRemote
                             (\submissions ->
-                                column None
-                                    [ alignLeft, center, spacing 20 ]
-                                    [ icon Bolt MattIcon []
-                                    , column None [ spacing 20 ] <|
+                                wrapper
+                                    [ icon Bolt Styling.mattIcon
+                                    , column [ spacing 20 ] <|
                                         (submissions
                                             |> List.sortBy (.position >> .id >> (\(Id id) -> id))
                                             |> groupWhile (\a b -> a.position.id == b.position.id)
                                             |> List.map
                                                 (\g ->
-                                                    column None
+                                                    column
                                                         [ center ]
                                                         [ g
                                                             |> List.head
                                                             |> Maybe.map .position
-                                                            |> flip whenJust
+                                                            |> whenJust
                                                                 (\{ id, name } ->
-                                                                    link (Paths.position id) <|
-                                                                        paragraph Choice
-                                                                            []
-                                                                            [ text name ]
+                                                                    link []
+                                                                        { url = Paths.position id
+                                                                        , label =
+                                                                            paragraph Styling.choice
+                                                                                [ text name ]
+                                                                        }
                                                                 )
                                                         , viewTechList Paths.submission g
                                                         ]
@@ -227,8 +218,7 @@ view ({ form } as model) =
                     data
                         |> viewRemote
                             (\t ->
-                                column None
-                                    [ center, spacing 20, width fill ]
+                                wrapper
                                     [ editRow t.name <| EditTopic t
                                     , viewNotes <| Array.toList t.notes
                                     ]
@@ -238,16 +228,18 @@ view ({ form } as model) =
                     data
                         |> viewRemote
                             (\topics ->
-                                column None
-                                    [ alignLeft, center, spacing 20 ]
-                                    [ icon Book MattIcon []
-                                    , column None [] <|
+                                wrapper
+                                    [ icon Book Styling.mattIcon
+                                    , column [] <|
                                         (topics
                                             |> List.map
                                                 (\t ->
-                                                    link (Paths.topic t.id) <|
-                                                        el Choice [] <|
-                                                            text t.name
+                                                    link []
+                                                        { url = Paths.topic t.id
+                                                        , label =
+                                                            el Styling.choice <|
+                                                                text t.name
+                                                        }
                                                 )
                                         )
                                     , plus CreateTopic
@@ -258,18 +250,23 @@ view ({ form } as model) =
                     data
                         |> viewRemote
                             (\({ steps, startPosition, endPosition, notes } as t) ->
-                                column None
-                                    [ center, spacing 20, width fill ]
+                                wrapper
                                     [ editRow t.name <| EditTransition t
-                                    , paragraph None
-                                        [ verticalCenter, spacing 10 ]
-                                        [ link (Paths.position startPosition.id) <|
-                                            el Link [] <|
-                                                text startPosition.name
-                                        , icon Arrow MattIcon []
-                                        , link (Paths.position endPosition.id) <|
-                                            el Link [] <|
-                                                text endPosition.name
+                                    , paragraph
+                                        [ centerY, spacing 10 ]
+                                        [ link []
+                                            { url = Paths.position startPosition.id
+                                            , label =
+                                                el Styling.link <|
+                                                    text startPosition.name
+                                            }
+                                        , icon Arrow Styling.mattIcon
+                                        , link []
+                                            { url = Paths.position endPosition.id
+                                            , label =
+                                                el Styling.link <|
+                                                    text endPosition.name
+                                            }
                                         ]
                                     , viewSteps steps
                                     , viewNotes <| Array.toList notes
@@ -280,26 +277,27 @@ view ({ form } as model) =
                     data
                         |> viewRemote
                             (\transitions ->
-                                column None
-                                    [ alignLeft, center, spacing 20 ]
-                                    [ icon Arrow MattIcon []
-                                    , column None [ spacing 20 ] <|
+                                wrapper
+                                    [ icon Arrow Styling.mattIcon
+                                    , column [ spacing 20 ] <|
                                         (transitions
                                             |> List.sortBy (.startPosition >> .id >> (\(Id id) -> id))
                                             |> groupWhile (\a b -> a.startPosition.id == b.startPosition.id)
                                             |> List.map
                                                 (\g ->
-                                                    column None
+                                                    column
                                                         [ center ]
                                                         [ g
                                                             |> List.head
                                                             |> Maybe.map .startPosition
-                                                            |> flip whenJust
+                                                            |> whenJust
                                                                 (\{ id, name } ->
-                                                                    link (Paths.position id) <|
-                                                                        paragraph Choice
-                                                                            []
-                                                                            [ text name ]
+                                                                    link []
+                                                                        { url = Paths.position id
+                                                                        , label =
+                                                                            paragraph Styling.choice
+                                                                                [ text name ]
+                                                                        }
                                                                 )
                                                         , viewTransitions g
                                                         ]
@@ -309,93 +307,294 @@ view ({ form } as model) =
                                     ]
                             )
 
-        shortcutsEnabled =
-            model.device == Mobile && Utils.notEditing model.view
-
-        roteiro =
-            when (not (model.view == ViewStart && model.device == Mobile)) <|
-                row None
-                    [ center, spacing 10, verticalCenter ]
-                    [ link Paths.start <|
-                        el Header [ vary Small <| model.view /= ViewStart ] <|
-                            text "ROTEIRO"
-                    , when (model.view == ViewStart) <|
-                        icon Lock
-                            ActionIcon
-                            [ padding 10
-                            , onClick <| TokenEdit <| Just ""
-                            ]
-                    ]
-
         enterToken =
-            whenJust model.tokenForm
-                (\str ->
-                    modal ChooseBox [ center, verticalCenter, padding 10 ] <|
-                        column None
-                            [ center ]
-                            [ Input.text
-                                Field
-                                [ maxWidth <| px 300 ]
-                                { onChange = Just >> TokenEdit
-                                , value = str
-                                , label =
-                                    Input.labelAbove <|
-                                        icon Lock BigIcon [ center ]
-                                , options = []
-                                }
-                            , icon Cross ActionIcon [ onClick <| TokenEdit Nothing ]
+            model.tokenForm
+                |> whenJust
+                    (\str ->
+                        el
+                            [ center
+                            , centerY
+                            , Background.color Styling.c
+                            , width fill
+                            , height fill
                             ]
-                )
+                        <|
+                            column
+                                [ center, spacing 20 ]
+                                [ Input.text
+                                    ([ centerY, width <| px <| model.size.width // 3 ] ++ Styling.field)
+                                    { onChange = Just (Just >> TokenEdit)
+                                    , text = str
+                                    , label =
+                                        Input.labelAbove [] <|
+                                            icon Lock (center :: Styling.bigIcon)
+                                    , placeholder = Nothing
+                                    , notice = Nothing
+                                    }
+                                , Input.button []
+                                    { onPress =
+                                        Just <| TokenEdit Nothing
+                                    , label =
+                                        icon Cross
+                                            Styling.actionIcon
+                                    }
+                                ]
+                    )
+                |> inFront True
 
         confirm =
-            whenJust model.confirm
-                (\msg ->
-                    modal ChooseBox [ center, verticalCenter, padding 10, spacing 20 ] <|
-                        column None
-                            [ center ]
-                            [ icon Question BigIcon [ center ]
-                            , row None
-                                [ spacing 40 ]
-                                [ icon Tick ActionIcon [ onClick msg ]
-                                , icon Cross ActionIcon [ onClick <| Confirm Nothing ]
+            model.confirm
+                |> whenJust
+                    (\msg ->
+                        el [ center, centerY, padding 10, spacing 20 ] <|
+                            column
+                                [ center ]
+                                [ icon Question (center :: Styling.bigIcon)
+                                , row
+                                    [ spacing 40 ]
+                                    [ Input.button []
+                                        { onPress =
+                                            Just msg
+                                        , label =
+                                            icon Tick
+                                                Styling.actionIcon
+                                        }
+                                    , Input.button []
+                                        { onPress =
+                                            Just <| Confirm Nothing
+                                        , label =
+                                            icon Cross
+                                                Styling.actionIcon
+                                        }
+                                    ]
                                 ]
-                            ]
-                )
+                    )
+                |> inFront True
 
-        ws =
-            case model.device of
-                Desktop ->
-                    30
+        links =
+            column
+                [ spacing 40
+                , height <| px model.size.height
+                ]
+                [ link []
+                    { url = Paths.start
+                    , label =
+                        icon Home
+                            (if model.view == ViewStart then
+                                Styling.ballIcon
+                             else
+                                Styling.actionIcon
+                            )
+                    }
+                , link []
+                    { url = Paths.positions
+                    , label =
+                        icon Flag
+                            (case model.view of
+                                ViewPositions ->
+                                    Styling.ballIcon
 
-                Mobile ->
-                    10
+                                ViewPosition _ ->
+                                    Styling.ballIcon
+
+                                _ ->
+                                    Styling.actionIcon
+                            )
+                    }
+                , link []
+                    { url = Paths.transitions
+                    , label =
+                        icon Arrow
+                            (case model.view of
+                                ViewTransitions _ ->
+                                    Styling.ballIcon
+
+                                ViewTransition _ ->
+                                    Styling.ballIcon
+
+                                _ ->
+                                    Styling.actionIcon
+                            )
+                    }
+                , link []
+                    { url = Paths.submissions
+                    , label =
+                        icon Bolt
+                            (case model.view of
+                                ViewSubmissions _ ->
+                                    Styling.ballIcon
+
+                                ViewSubmission _ ->
+                                    Styling.ballIcon
+
+                                _ ->
+                                    Styling.actionIcon
+                            )
+                    }
+                , link []
+                    { url = Paths.topics
+                    , label =
+                        icon Book
+                            (case model.view of
+                                ViewTopics _ ->
+                                    Styling.ballIcon
+
+                                ViewTopic _ ->
+                                    Styling.ballIcon
+
+                                _ ->
+                                    Styling.actionIcon
+                            )
+                    }
+                ]
+
+        sidebar =
+            column
+                [ spacing 40
+                , height <| px model.size.height
+                , alignRight
+                , width <| px <| model.size.width // 2
+                , Background.color Styling.c
+                , Border.solid
+                , Border.widthEach { bottom = 0, left = 5, right = 0, top = 0 }
+                , Border.color Styling.e
+                ]
+                [ Input.button
+                    []
+                    { onPress =
+                        Just <| SidebarNavigate Paths.start
+                    , label =
+                        icon Home
+                            (if model.view == ViewStart then
+                                Styling.ballIcon
+                             else
+                                Styling.actionIcon
+                            )
+                    }
+                , Input.button
+                    []
+                    { onPress =
+                        Just <| SidebarNavigate Paths.positions
+                    , label =
+                        icon Flag
+                            (case model.view of
+                                ViewPositions ->
+                                    Styling.ballIcon
+
+                                ViewPosition _ ->
+                                    Styling.ballIcon
+
+                                _ ->
+                                    Styling.actionIcon
+                            )
+                    }
+                , Input.button
+                    []
+                    { onPress =
+                        Just <| SidebarNavigate Paths.transitions
+                    , label =
+                        icon Arrow
+                            (case model.view of
+                                ViewTransitions _ ->
+                                    Styling.ballIcon
+
+                                ViewTransition _ ->
+                                    Styling.ballIcon
+
+                                _ ->
+                                    Styling.actionIcon
+                            )
+                    }
+                , Input.button
+                    []
+                    { onPress =
+                        Just <| SidebarNavigate Paths.submissions
+                    , label =
+                        icon Bolt
+                            (case model.view of
+                                ViewSubmissions _ ->
+                                    Styling.ballIcon
+
+                                ViewSubmission _ ->
+                                    Styling.ballIcon
+
+                                _ ->
+                                    Styling.actionIcon
+                            )
+                    }
+                , Input.button
+                    []
+                    { onPress =
+                        Just <| SidebarNavigate Paths.topics
+                    , label =
+                        icon Book
+                            (case model.view of
+                                ViewTopics _ ->
+                                    Styling.ballIcon
+
+                                ViewTopic _ ->
+                                    Styling.ballIcon
+
+                                _ ->
+                                    Styling.actionIcon
+                            )
+                    }
+                , Input.button
+                    []
+                    { onPress =
+                        Just <| ToggleSidebar
+                    , label =
+                        icon Cross Styling.actionIcon
+                    }
+                ]
     in
-    layout styling <|
-        column Body
-            [ height fill
-            , center
-            , width fill
-            , spacing 20
-            , padding ws
-            ]
-            [ enterToken
-            , when shortcutsEnabled <| viewShortcuts model.size
-            , confirm
-            , roteiro
-            , content
-            , when shortcutsEnabled <|
-                el None [ height <| px <| (toFloat model.size.width / 12) + 20 ] empty
-            ]
+    case model.device of
+        Desktop ->
+            row
+                [ width fill
+                , height fill
+                , enterToken
+                , confirm
+                ]
+                [ links
+                , el [ width <| px <| round <| toFloat model.size.width * 0.8 ]
+                    content
+                ]
+                |> layoutWith { options = [] }
+                    [ Background.color Styling.c
+                    , Styling.font
+                    ]
+
+        Mobile ->
+            content
+                |> layoutWith { options = [ noHover ] }
+                    [ Background.color Styling.c
+                    , Element.above (not model.sidebarOpen) <|
+                        Input.button
+                            [ alignRight
+                            , Element.moveDown 50
+                            , Element.moveLeft 20
+                            ]
+                            { onPress =
+                                Just <| ToggleSidebar
+                            , label =
+                                icon Bars Styling.actionIcon
+                            }
+                    , Styling.font
+                    , enterToken
+                    , confirm
+                    , inFront model.sidebarOpen sidebar
+                    ]
 
 
-viewRemote : (a -> Element Styles Variations Msg) -> GcData a -> Element Styles Variations Msg
+viewRemote : (a -> Element Msg) -> GcData a -> Element Msg
 viewRemote fn data =
     case data of
         NotAsked ->
-            el None [ center ] <| text "not asked"
+            el [ center ] <| text "not asked"
 
         Loading ->
-            icon Waiting MattIcon []
+            icon Waiting Styling.mattIcon
 
         Failure err ->
             err
@@ -406,30 +605,7 @@ viewRemote fn data =
             fn a
 
 
-viewShortcuts : Size -> Element Styles Variations Msg
-viewShortcuts size =
-    let
-        ball lnk fa =
-            link lnk <|
-                circle (toFloat size.width / 12) Ball [] <|
-                    icon fa
-                        BallIcon
-                        [ center
-                        , verticalCenter
-                        ]
-    in
-    screen <|
-        el None [ alignBottom, width fill ] <|
-            row None
-                [ spread, width fill, padding 10 ]
-                [ ball Paths.positions Flag
-                , ball Paths.transitions Arrow
-                , ball Paths.submissions Bolt
-                , ball Paths.topics Book
-                ]
-
-
-viewSubmissionPicker : GcData (List Info) -> Form -> Element Styles Variations Msg
+viewSubmissionPicker : GcData (List Info) -> Form -> Element Msg
 viewSubmissionPicker positions form =
     let
         pickerLayout =
@@ -442,14 +618,14 @@ viewSubmissionPicker positions form =
             positions
                 |> RemoteData.withDefault []
     in
-    pickerLayout None
+    pickerLayout
         [ spacing 10, center ]
-        [ icon Flag MattIcon []
+        [ icon Flag Styling.mattIcon
         , pickStartPosition ps form
         ]
 
 
-viewTransitionPickers : GcData (List Info) -> Form -> Element Styles Variations Msg
+viewTransitionPickers : GcData (List Info) -> Form -> Element Msg
 viewTransitionPickers positions form =
     let
         pickersLayout =
@@ -463,280 +639,304 @@ viewTransitionPickers positions form =
                 |> RemoteData.withDefault []
     in
     pickersLayout
-        None
-        [ verticalCenter, spacing 10, center ]
+        [ centerY, spacing 10, center ]
         [ pickStartPosition ps form
-        , icon Arrow MattIcon []
+        , icon Arrow Styling.mattIcon
         , pickEndPosition ps form
         ]
 
 
-pickStartPosition : List Info -> Form -> Element Styles vs Msg
+pickStartPosition : List Info -> Form -> Element Msg
 pickStartPosition positions form =
     case form.startPosition of
         Pending ->
-            icon Question
-                ActionIcon
-                [ center
-                , onClick <|
-                    UpdateForm
-                        { form
-                            | startPosition =
-                                Picking <|
-                                    Input.autocomplete Nothing UpdateStartPosition
-                        }
-                ]
+            Input.button [ center ]
+                { onPress =
+                    Just <|
+                        UpdateForm
+                            { form
+                                | startPosition =
+                                    Picking
+                            }
+                , label =
+                    icon Question
+                        Styling.actionIcon
+                }
 
-        Picking state ->
-            Input.select None
+        Picking ->
+            Input.select
                 []
-                { label = Input.hiddenLabel ""
-                , with = state
-                , max = 5
-                , options = []
+                { label = noLabel
+                , selected = Nothing
+                , notice = Nothing
+                , onChange = Just <| UpdateEndPosition
                 , menu =
-                    Input.menu None
+                    Input.menuBelow
                         []
                         (positions
                             |> List.map
                                 (\p ->
-                                    Input.choice p <| text p.name
+                                    Input.option p <| text p.name
                                 )
                         )
                 }
 
         Picked { name } ->
-            paragraph Link
-                [ onClick <|
-                    UpdateForm
-                        { form
-                            | startPosition =
-                                Picking <|
-                                    Input.autocomplete Nothing UpdateStartPosition
-                        }
-                ]
+            paragraph
+                (Styling.link
+                    ++ [ onClick <|
+                            UpdateForm
+                                { form
+                                    | startPosition =
+                                        Picking
+                                }
+                       ]
+                )
                 [ text name
                 ]
 
 
-pickEndPosition : List Info -> Form -> Element Styles vs Msg
+pickEndPosition : List Info -> Form -> Element Msg
 pickEndPosition positions form =
     case form.endPosition of
         Pending ->
-            icon Question
-                ActionIcon
-                [ center
-                , onClick <|
-                    UpdateForm
-                        { form
-                            | endPosition =
-                                Picking <|
-                                    Input.autocomplete Nothing UpdateEndPosition
-                        }
-                ]
+            Input.button [ center ]
+                { onPress =
+                    Just <|
+                        UpdateForm
+                            { form
+                                | endPosition =
+                                    Picking
+                            }
+                , label =
+                    icon Question
+                        Styling.actionIcon
+                }
 
-        Picking state ->
-            Input.select None
+        Picking ->
+            Input.select
                 []
-                { label = Input.hiddenLabel ""
-                , with = state
-                , max = 5
-                , options = []
+                { label = noLabel
+                , selected = Nothing
+                , notice = Nothing
+                , onChange = Just <| UpdateEndPosition
                 , menu =
-                    Input.menu None
+                    Input.menuBelow
                         []
                         (positions
                             |> List.map
                                 (\p ->
-                                    Input.choice p <| text p.name
+                                    Input.option p <| text p.name
                                 )
                         )
                 }
 
         Picked { name } ->
-            paragraph Link
-                [ onClick <|
-                    UpdateForm
-                        { form
-                            | endPosition =
-                                Picking <|
-                                    Input.autocomplete Nothing UpdateEndPosition
-                        }
-                ]
+            paragraph
+                (Styling.link
+                    ++ [ onClick <|
+                            UpdateForm
+                                { form
+                                    | endPosition =
+                                        Picking
+                                }
+                       ]
+                )
                 [ text name
                 ]
 
 
-editRow : String -> Msg -> Element Styles vs Msg
+editRow : String -> Msg -> Element Msg
 editRow name editMsg =
-    paragraph None
-        [ spacing 20, padding 10, verticalCenter ]
-        [ el Subtitle [] <| text name
-        , icon Write ActionIcon [ onClick editMsg ]
-        ]
+    el [] <|
+        row
+            [ spacing 20, centerY ]
+            [ paragraph Styling.subtitle [ text name ]
+            , Input.button []
+                { onPress = Just editMsg
+                , label = icon Write Styling.actionIcon
+                }
+            ]
 
 
-nameEdit : Form -> Element Styles vs Msg
+nameEdit : Form -> Element Msg
 nameEdit form =
     Input.text
-        Field
-        [ maxWidth <| px 300, center ]
-        { onChange = \str -> UpdateForm { form | name = str }
-        , value = form.name
-        , label = Input.hiddenLabel ""
-        , options = []
+        (center :: Styling.field)
+        { onChange = Just <| \str -> UpdateForm { form | name = str }
+        , text = form.name
+        , label = noLabel
+        , placeholder = Nothing
+        , notice = Nothing
         }
 
 
-plus : msg -> Element Styles vs msg
+plus : msg -> Element msg
 plus msg =
-    icon Plus
-        ActionIcon
-        [ padding 10
-        , onClick msg
-        ]
+    Input.button [ padding 10 ]
+        { onPress = Just msg
+        , label =
+            icon Plus
+                Styling.actionIcon
+        }
 
 
-minus : msg -> Element Styles vs msg
+minus : msg -> Element msg
 minus msg =
-    icon Minus
-        ActionIcon
-        [ padding 10
-        , onClick msg
-        ]
+    Input.button [ padding 10 ]
+        { onPress = Just msg
+        , label =
+            icon Minus
+                Styling.actionIcon
+        }
 
 
-editButtons : Msg -> Msg -> Element Styles vs Msg
+editButtons : Msg -> Msg -> Element Msg
 editButtons save delete =
-    row ChooseBox
-        [ spacing 20 ]
-        [ icon Tick
-            ActionIcon
-            [ padding 10
-            , onClick save
-            ]
-        , icon Cross
-            ActionIcon
-            [ padding 10
-            , onClick Cancel
-            ]
-        , icon Trash
-            ActionIcon
-            [ padding 10
-            , onClick <| Confirm <| Just delete
-            ]
+    row
+        (spacing 20 :: Styling.chooseBox)
+        [ Input.button [ padding 10 ]
+            { onPress = Just save
+            , label =
+                icon Tick
+                    Styling.actionIcon
+            }
+        , Input.button [ padding 10 ]
+            { onPress = Just Cancel
+            , label =
+                icon Cross
+                    Styling.actionIcon
+            }
+        , Input.button [ padding 10 ]
+            { onPress = Just <| Confirm <| Just delete
+            , label =
+                icon Trash
+                    Styling.actionIcon
+            }
         ]
 
 
-createButtons : Msg -> Element Styles vs Msg
+createButtons : Msg -> Element Msg
 createButtons save =
-    row ChooseBox
-        [ spacing 20 ]
-        [ icon Tick
-            ActionIcon
-            [ padding 10
-            , onClick save
-            ]
-        , icon Cross
-            ActionIcon
-            [ padding 10
-            , onClick Cancel
-            ]
+    row
+        (spacing 20 :: Styling.chooseBox)
+        [ Input.button [ padding 10 ]
+            { onPress = Just save
+            , label =
+                icon Tick
+                    Styling.actionIcon
+            }
+        , Input.button [ padding 10 ]
+            { onPress = Just Cancel
+            , label =
+                icon Cross
+                    Styling.actionIcon
+            }
         ]
 
 
-stepsEditor : Form -> Element Styles vs Msg
+stepsEditor : Form -> Element Msg
 stepsEditor form =
     let
         steps =
-            column None
+            column
                 [ spacing 10 ]
                 (form.steps
                     |> Array.indexedMap
                         (\i v ->
                             Input.multiline
-                                Field
-                                [ width fill, attribute "rows" "4" ]
+                                (Styling.field
+                                    ++ [ width fill, attribute <| Html.Attributes.rows 4 ]
+                                )
                                 { onChange =
-                                    \str ->
-                                        UpdateForm
-                                            { form | steps = Array.set i str form.steps }
-                                , value = v
-                                , label = Input.hiddenLabel ""
-                                , options = []
+                                    Just <|
+                                        \str ->
+                                            UpdateForm
+                                                { form | steps = Array.set i str form.steps }
+                                , text = v
+                                , label = noLabel
+                                , notice = Nothing
+                                , placeholder = Nothing
                                 }
                         )
                     |> Array.toList
                 )
 
         buttons =
-            row None
+            row
                 [ center ]
                 [ plus (UpdateForm { form | steps = Array.push "" form.steps })
                 , when (not <| Array.isEmpty form.steps) <|
                     minus (UpdateForm { form | steps = Array.slice 0 -1 form.steps })
                 ]
     in
-    column None
-        [ spacing 10, width fill, maxWidth <| px 500 ]
-        [ icon Cogs BigIcon [ center ]
+    column
+        [ spacing 10
+        , width fill
+        ]
+        [ icon Cogs (center :: Styling.bigIcon)
         , steps
         , buttons
         ]
 
 
-notesEditor : Form -> Element Styles vs Msg
+notesEditor : Form -> Element Msg
 notesEditor form =
     let
         notes =
-            column None
+            column
                 [ spacing 10 ]
                 (form.notes
                     |> Array.indexedMap
                         (\i v ->
                             Input.multiline
-                                Field
-                                [ width fill, attribute "rows" "4" ]
+                                (Styling.field
+                                    ++ [ width fill, attribute <| Html.Attributes.rows 4 ]
+                                )
                                 { onChange =
-                                    \str ->
-                                        UpdateForm
-                                            { form | notes = Array.set i str form.notes }
-                                , value = v
-                                , label = Input.hiddenLabel ""
-                                , options = []
+                                    Just <|
+                                        \str ->
+                                            UpdateForm
+                                                { form | notes = Array.set i str form.notes }
+                                , text = v
+                                , label = noLabel
+                                , notice = Nothing
+                                , placeholder = Nothing
                                 }
                         )
                     |> Array.toList
                 )
 
         buttons =
-            row None
+            row
                 [ center ]
                 [ plus (UpdateForm { form | notes = Array.push "" form.notes })
                 , when (not <| Array.isEmpty form.notes) <|
                     minus (UpdateForm { form | notes = Array.slice 0 -1 form.notes })
                 ]
     in
-    column None
-        [ spacing 10, width fill, maxWidth <| px 500 ]
-        [ icon Notes BigIcon [ center ]
+    column
+        [ spacing 10
+        , width fill
+        ]
+        [ icon Notes (center :: Styling.bigIcon)
         , notes
         , buttons
         ]
 
 
-viewSteps : Array String -> Element Styles vs Msg
+viewSteps : Array String -> Element Msg
 viewSteps steps =
-    column None
-        [ maxWidth <| px 700 ]
+    column
+        []
         (steps
             |> Array.toList
             |> List.indexedMap
                 (\i step ->
-                    row None
+                    row
                         [ spacing 10 ]
-                        [ el Dot [] <| text <| (toString (i + 1) ++ ".")
-                        , paragraph None
+                        [ el Styling.dot <| text <| (toString (i + 1) ++ ".")
+                        , paragraph
                             []
                             [ text step
                             ]
@@ -745,58 +945,62 @@ viewSteps steps =
         )
 
 
-viewNotes : List String -> Element Styles vs msg
+viewNotes : List String -> Element msg
 viewNotes notes =
-    column None
-        [ center, maxWidth <| px 500, alignLeft ]
+    column
+        [ center
+        , alignLeft
+        ]
         (notes
             |> List.map
                 (\x ->
                     let
                         content =
                             if Regex.contains matchLink x then
-                                newTab x <|
-                                    paragraph None
-                                        [ spacing 5 ]
-                                        [ icon Globe MattIcon []
-                                        , text <| domain x
-                                        ]
+                                newTabLink [ spacing 5 ]
+                                    { url = x
+                                    , label =
+                                        paragraph []
+                                            [ icon Globe Styling.mattIcon
+                                            , text <| domain x
+                                            ]
+                                    }
                             else
                                 text x
                     in
-                    paragraph None
+                    paragraph
                         [ spacing 5 ]
-                        [ el Dot [] <| text "• "
+                        [ el Styling.dot <| text "• "
                         , content
                         ]
                 )
         )
 
 
-viewTransitions : List Transition -> Element Styles vs Msg
+viewTransitions : List Transition -> Element Msg
 viewTransitions ts =
-    column None
+    column
         []
         (ts
             |> List.map
                 (\{ id, endPosition, name } ->
-                    paragraph None
+                    paragraph
                         []
-                        [ el Dot [] <| text "• "
-                        , link
-                            (Paths.transition id)
-                          <|
-                            el Link [] <|
-                                text name
+                        [ el Styling.dot <| text "• "
+                        , link Styling.link
+                            { url = Paths.transition id
+                            , label = text name
+                            }
                         , text " "
-                        , paragraph None
+                        , paragraph
                             []
                             [ text "("
-                            , link
-                                (Paths.position endPosition.id)
-                              <|
-                                el Link [] <|
+                            , link Styling.link
+                                { url =
+                                    Paths.position endPosition.id
+                                , label =
                                     text endPosition.name
+                                }
                             , text ")"
                             ]
                         ]
@@ -804,33 +1008,35 @@ viewTransitions ts =
         )
 
 
-viewTechList : (Id -> String) -> List { r | name : String, id : Id } -> Element Styles vs Msg
+viewTechList : (Id -> String) -> List { r | name : String, id : Id } -> Element Msg
 viewTechList fn xs =
     if List.isEmpty xs then
-        el None [] <| text "None!"
+        el [] <| text "None!"
     else
-        column None
+        column
             []
             (xs
                 |> List.map
                     (\t ->
-                        link (fn t.id) <|
-                            paragraph None
-                                []
-                                [ el Dot [] <| text "• "
-                                , el Link [] <|
-                                    text t.name
-                                ]
+                        link []
+                            { url = fn t.id
+                            , label =
+                                paragraph
+                                    []
+                                    [ el Styling.dot <| text "• "
+                                    , el Styling.link <| text t.name
+                                    ]
+                            }
                     )
             )
 
 
-viewErrors : List String -> Element Styles Variations Msg
+viewErrors : List String -> Element Msg
 viewErrors errs =
     when (errs |> List.isEmpty |> not) <|
-        column None
+        column
             [ center, spacing 15 ]
-            [ icon Warning MattIcon []
+            [ icon Warning Styling.mattIcon
             , viewNotes errs
             ]
 

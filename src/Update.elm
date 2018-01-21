@@ -1,8 +1,6 @@
 module Update exposing (..)
 
 import Data exposing (createPosition, createSubmission, createTopic, createTransition, fetchPositions, mutation, query, updatePosition, updateSubmission, updateTopic, updateTransition)
-import Element
-import Element.Input as Input
 import Navigation
 import Paths
 import Ports
@@ -255,7 +253,7 @@ update msg model =
                 , form = form
               }
             , fetchPositions
-                |> query model.url model.token
+                |> query model.token
                 |> taskToGcData CbPositions
             )
 
@@ -286,35 +284,35 @@ update msg model =
                 , form = form
               }
             , fetchPositions
-                |> query model.url model.token
+                |> query model.token
                 |> taskToGcData CbPositions
             )
 
         DeletePosition id ->
             ( model
             , Data.deletePosition id
-                |> mutation model.url model.token
+                |> mutation model.token
                 |> Task.attempt CbDeletePosition
             )
 
         DeleteSubmission id ->
             ( model
             , Data.deleteSubmission id
-                |> mutation model.url model.token
+                |> mutation model.token
                 |> Task.attempt CbDeleteSubmission
             )
 
         DeleteTopic id ->
             ( model
             , Data.deleteTopic id
-                |> mutation model.url model.token
+                |> mutation model.token
                 |> Task.attempt CbDeleteTopic
             )
 
         DeleteTransition id ->
             ( model
             , Data.deleteTransition id
-                |> mutation model.url model.token
+                |> mutation model.token
                 |> Task.attempt CbDeleteTransition
             )
 
@@ -352,7 +350,7 @@ update msg model =
                 , form = form
               }
             , fetchPositions
-                |> query model.url model.token
+                |> query model.token
                 |> taskToGcData CbPositions
             )
 
@@ -391,7 +389,7 @@ update msg model =
                 , form = form
               }
             , fetchPositions
-                |> query model.url model.token
+                |> query model.token
                 |> taskToGcData CbPositions
             )
 
@@ -401,7 +399,7 @@ update msg model =
                     ( { model | form = clearErrors model.form }
                     , args
                         |> uncurry createPosition
-                        |> mutation model.url model.token
+                        |> mutation model.token
                         |> Task.attempt CbCreateOrUpdatePosition
                     )
 
@@ -415,7 +413,7 @@ update msg model =
                 Ok ( name, startId, steps, notes ) ->
                     ( { model | form = clearErrors model.form }
                     , createSubmission name startId steps notes
-                        |> mutation model.url model.token
+                        |> mutation model.token
                         |> Task.attempt CbCreateOrUpdateSubmission
                     )
 
@@ -430,7 +428,7 @@ update msg model =
                     ( { model | form = clearErrors model.form }
                     , args
                         |> uncurry createTopic
-                        |> mutation model.url model.token
+                        |> mutation model.token
                         |> Task.attempt CbCreateOrUpdateTopic
                     )
 
@@ -449,7 +447,7 @@ update msg model =
                         endId
                         steps
                         notes
-                        |> mutation model.url model.token
+                        |> mutation model.token
                         |> Task.attempt CbCreateOrUpdateTransition
                     )
 
@@ -464,7 +462,7 @@ update msg model =
                     ( { model | form = clearErrors model.form }
                     , args
                         |> uncurry (updatePosition model.form.id)
-                        |> mutation model.url model.token
+                        |> mutation model.token
                         |> Task.attempt CbCreateOrUpdatePosition
                     )
 
@@ -478,7 +476,7 @@ update msg model =
                 Ok ( name, position, steps, notes ) ->
                     ( { model | form = clearErrors model.form }
                     , updateSubmission model.form.id name position steps notes
-                        |> mutation model.url model.token
+                        |> mutation model.token
                         |> Task.attempt CbCreateOrUpdateSubmission
                     )
 
@@ -493,7 +491,7 @@ update msg model =
                     ( { model | form = clearErrors model.form }
                     , args
                         |> uncurry (updateTopic model.form.id)
-                        |> mutation model.url model.token
+                        |> mutation model.token
                         |> Task.attempt CbCreateOrUpdateTopic
                     )
 
@@ -507,7 +505,7 @@ update msg model =
                 Ok ( name, startId, endId, steps, notes ) ->
                     ( { model | form = clearErrors model.form }
                     , updateTransition model.form.id name startId endId steps notes
-                        |> mutation model.url model.token
+                        |> mutation model.token
                         |> Task.attempt CbCreateOrUpdateTransition
                     )
 
@@ -515,6 +513,12 @@ update msg model =
                     ( { model | form = addErrors errs model.form }
                     , Cmd.none
                     )
+
+        SidebarNavigate url ->
+            ( { model | sidebarOpen = False }, Navigation.newUrl url )
+
+        ToggleSidebar ->
+            ( { model | sidebarOpen = not model.sidebarOpen }, Cmd.none )
 
         TokenEdit maybeStr ->
             case maybeStr of
@@ -532,61 +536,27 @@ update msg model =
         UpdateForm f ->
             ( { model | form = f }, Cmd.none )
 
-        UpdateEndPosition selectMsg ->
-            case model.form.endPosition of
-                Picking state ->
-                    let
-                        newState =
-                            Input.updateSelection selectMsg state
+        UpdateEndPosition selection ->
+            let
+                form =
+                    model.form |> (\f -> { f | endPosition = Picked selection })
+            in
+            ( { model | form = form }, Cmd.none )
 
-                        picker =
-                            case Input.selected newState of
-                                Just pos ->
-                                    Picked pos
-
-                                Nothing ->
-                                    Picking newState
-
-                        form =
-                            model.form |> (\f -> { f | endPosition = picker })
-                    in
-                    ( { model | form = form }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
-
-        UpdateStartPosition selectMsg ->
-            case model.form.startPosition of
-                Picking state ->
-                    let
-                        newState =
-                            Input.updateSelection selectMsg state
-
-                        picker =
-                            case Input.selected newState of
-                                Just pos ->
-                                    Picked pos
-
-                                Nothing ->
-                                    Picking newState
-
-                        form =
-                            model.form |> (\f -> { f | startPosition = picker })
-                    in
-                    ( { model | form = form }, Cmd.none )
-
-                _ ->
-                    ( model, Cmd.none )
+        UpdateStartPosition selection ->
+            let
+                form =
+                    model.form |> (\f -> { f | startPosition = Picked selection })
+            in
+            ( { model | form = form }, Cmd.none )
 
         UrlChange location ->
             router model location
 
         WindowSize size ->
-            let
-                device =
-                    if size |> Element.classifyDevice |> .phone then
-                        Mobile
-                    else
-                        Desktop
-            in
-            ( { model | device = device, size = size }, Cmd.none )
+            ( { model
+                | device = size |> Utils.classifyDevice
+                , size = size
+              }
+            , Cmd.none
+            )

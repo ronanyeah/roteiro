@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"100% coverage!\" && exit 0",
     "watch": "webpack-dev-server --hot",
-    "build": "webpack -p"
+    "build": "webpack -p && npm run build-redirects",
+    "build-redirects": "node build-redirects.js"
   },
   "repository": {
     "type": "git",
@@ -19,8 +20,6 @@
   },
   "homepage": "https://github.com/ronanyeah/tree#readme",
   "dependencies": {
-    "@fortawesome/fontawesome": "^1.1.0",
-    "@fortawesome/fontawesome-free-solid": "^5.0.2",
     "copy-webpack-plugin": "^4.3.1",
     "elm-hot-loader": "^0.5.4",
     "elm-webpack-loader": "^4.4.0",

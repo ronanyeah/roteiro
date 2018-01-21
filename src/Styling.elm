@@ -1,89 +1,143 @@
 module Styling exposing (..)
 
 import Color exposing (Color, rgb)
-import Style exposing (Property, StyleSheet, hover, importUrl, style, styleSheet, variation)
-import Style.Border as Border
-import Style.Color as Color
-import Style.Font as Font
-import Types exposing (Styles(..), Variations(..))
+import Element exposing (Attribute, height, pointer, px, width)
+import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
 
 
-styling : StyleSheet Styles Variations
-styling =
-    styleSheet
-        [ importUrl "https://fonts.googleapis.com/css?family=Cuprum"
-        , style None []
-        , style BigIcon
-            [ Color.text e
-            , Font.size 40
-            ]
-        , style Button
-            [ Border.rounded 15
-            , pointer
-            , Color.background b
-            ]
-        , style Body
-            [ font
-            , Font.size 25
-            ]
-        , style Choice
-            [ Font.size 30
-            , font
-            , pointer
-            , hover [ Color.text e ]
-            ]
-        , style ChooseBox
-            [ Border.rounded 15
-            , Border.all 3
-            , Color.border e
-            , Color.background c
-            ]
-        , style Dot [ Color.text e ]
-        , style MattIcon
-            [ Color.text e
-            , Font.size 35
-            ]
-        , style Field
-            [ Color.text e
-            , Color.background a
-            ]
-        , style Link [ Font.underline, pointer ]
-        , style Line [ Color.background e ]
-        , style Header
-            [ Font.size 55
-            , Color.text e
-            , pointer
-            , hover [ Color.text a ]
-            , variation Small [ Font.size 45 ]
-            ]
-        , style Picker
-            [ Color.background c
-            ]
-        , style Subtitle
-            [ Font.size 35
-            , Color.text e
-            ]
-        , style Home [ Font.size 55, Color.text e ]
-        , style ActionIcon
-            [ Color.text e
-            , Font.size 35
-            , pointer
-            , hover [ Color.text a ]
-            ]
-        , style BallIcon [ Font.size 35, Color.text c ]
-        , style Ball [ Color.background e, pointer ]
-        ]
+bigIcon : List (Attribute msg)
+bigIcon =
+    [ Font.color e
+    , Font.size 40
+    ]
 
 
-pointer : Property class variation
-pointer =
-    Style.cursor "pointer"
+button : List (Attribute msg)
+button =
+    [ Border.rounded 15
+    , pointer
+    , Background.color b
+    ]
 
 
-font : Property class variation
+choice : List (Attribute msg)
+choice =
+    [ Font.size 30
+    , font
+    , pointer
+    , Font.mouseOverColor e
+    ]
+
+
+chooseBox : List (Attribute msg)
+chooseBox =
+    [ Border.rounded 15
+    , Border.width 3
+    , Border.color e
+    , Background.color c
+    ]
+
+
+dot : List (Attribute msg)
+dot =
+    [ Font.color e ]
+
+
+mattIcon : List (Attribute msg)
+mattIcon =
+    [ Font.color e
+    , Font.size 35
+    ]
+
+
+field : List (Attribute msg)
+field =
+    [ Font.color e
+    , Background.color a
+    ]
+
+
+link : List (Attribute msg)
+link =
+    [ Font.underline, pointer ]
+
+
+line : List (Attribute msg)
+line =
+    [ Background.color e ]
+
+
+header : List (Attribute msg)
+header =
+    [ Font.size 55
+    , Font.color e
+    , pointer
+    , Font.mouseOverColor a
+    ]
+
+
+picker : List (Attribute msg)
+picker =
+    [ Background.color c
+    ]
+
+
+subtitle : List (Attribute msg)
+subtitle =
+    [ Font.size 35
+    , Font.color e
+    ]
+
+
+home : List (Attribute msg)
+home =
+    [ Font.size 45, Font.color e ]
+
+
+actionIcon : List (Attribute msg)
+actionIcon =
+    [ Font.color e
+    , Font.size 35
+    , pointer
+    , Font.mouseOverColor a
+    ]
+
+
+ballIcon : List (Attribute msg)
+ballIcon =
+    [ Font.color c
+    , Font.size 35
+    , pointer
+    , Background.color e
+    , Border.rounded 30
+    , width <| px 60
+    , height <| px 60
+    , Font.mouseOverColor a
+    ]
+
+
+
+--(Html.Attributes.style
+--[ ( "border-radius", toString radius ++ "px" ) ]
+--)
+--:: Width (Style.Px (2 * radius))
+--:: Height (Style.Px (2 * radius))
+
+
+ball : List (Attribute msg)
+ball =
+    [ Background.color e, pointer ]
+
+
+font : Attribute msg
 font =
-    Font.typeface
-        [ Font.font "Cuprum"
+    Font.family
+        [ Font.external
+            { name = "Cuprum"
+            , url = "https://fonts.googleapis.com/css?family=Cuprum"
+            }
         , Font.sansSerif
         ]
 

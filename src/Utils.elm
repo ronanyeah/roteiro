@@ -2,14 +2,41 @@ module Utils exposing (..)
 
 import Array
 import Dict exposing (Dict)
-import Element exposing (Attribute, Element, el, html)
+import Element exposing (Attribute, Element, el, empty, html)
+import Element.Input as Input exposing (Label)
 import Html
 import Html.Attributes
 import Regex exposing (Regex)
 import RemoteData
 import Task exposing (Task)
-import Types exposing (ApiError(..), Device(Desktop), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, Picker(..), View(..))
+import Types exposing (ApiError(..), Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, Picker(..), View(..))
 import Window
+
+
+noLabel : Label msg
+noLabel =
+    Input.labelAbove [] empty
+
+
+when : Bool -> Element msg -> Element msg
+when b elem =
+    if b then
+        elem
+    else
+        empty
+
+
+whenJust : (a -> Element msg) -> Maybe a -> Element msg
+whenJust =
+    unwrap empty
+
+
+classifyDevice : Window.Size -> Device
+classifyDevice { width } =
+    if width <= 600 then
+        Mobile
+    else
+        Desktop
 
 
 taskToGcData : (GcData a -> msg) -> Task GcError a -> Cmd msg
@@ -59,7 +86,7 @@ appendCmd newCmd =
 isPicking : Picker a -> Bool
 isPicking p =
     case p of
-        Picking _ ->
+        Picking ->
             True
 
         Picked _ ->
@@ -69,8 +96,8 @@ isPicking p =
             False
 
 
-icon : FaIcon -> s -> List (Attribute vs msg) -> Element s vs msg
-icon fa s attrs =
+icon : FaIcon -> List (Attribute msg) -> Element msg
+icon fa attrs =
     let
         faClass =
             (case fa of
@@ -94,6 +121,9 @@ icon fa s attrs =
 
                 Globe ->
                     "fa-globe"
+
+                Home ->
+                    "fa-home"
 
                 Minus ->
                     "fa-minus"
@@ -124,11 +154,14 @@ icon fa s attrs =
 
                 Cogs ->
                     "fa-cogs"
+
+                Bars ->
+                    "fa-bars"
             )
                 |> (++) "fas "
                 |> Html.Attributes.class
     in
-    el s attrs <| html <| Html.span [ faClass ] []
+    el attrs <| html <| Html.span [ faClass ] []
 
 
 sort : List { r | name : String } -> List { r | name : String }
@@ -238,13 +271,13 @@ emptyModel =
     { view = ViewStart
     , previousView = ViewStart
     , positions = RemoteData.NotAsked
-    , url = ""
     , token = ""
     , device = Desktop
     , size = Window.Size 0 0
     , tokenForm = Nothing
     , confirm = Nothing
     , form = emptyForm
+    , sidebarOpen = False
     }
 
 

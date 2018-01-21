@@ -1,7 +1,6 @@
 module Types exposing (..)
 
 import Array exposing (Array)
-import Element.Input exposing (SelectMsg, SelectWith)
 import Http
 import Navigation exposing (Location)
 import RemoteData exposing (RemoteData)
@@ -47,10 +46,12 @@ type Msg
     | SaveEditSubmission
     | SaveEditTopic
     | SaveEditTransition
+    | SidebarNavigate String
+    | ToggleSidebar
     | TokenEdit (Maybe String)
-    | UpdateEndPosition (SelectMsg Info)
+    | UpdateEndPosition Info
     | UpdateForm Form
-    | UpdateStartPosition (SelectMsg Info)
+    | UpdateStartPosition Info
     | UrlChange Location
     | WindowSize Window.Size
 
@@ -75,27 +76,6 @@ type View
     | ViewTransitions (GcData (List Transition))
 
 
-type Styles
-    = Ball
-    | BallIcon
-    | BigIcon
-    | Body
-    | Button
-    | Choice
-    | ChooseBox
-    | Dot
-    | Field
-    | Header
-    | Home
-    | Line
-    | Link
-    | MattIcon
-    | None
-    | Picker
-    | Subtitle
-    | ActionIcon
-
-
 type FaIcon
     = Flag
     | Arrow
@@ -106,6 +86,7 @@ type FaIcon
     | Bolt
     | Lock
     | Waiting
+    | Home
     | Book
     | Notes
     | Plus
@@ -113,11 +94,8 @@ type FaIcon
     | Question
     | Globe
     | Cogs
+    | Bars
     | Warning
-
-
-type Variations
-    = Small
 
 
 type Id
@@ -125,7 +103,7 @@ type Id
 
 
 type Picker a
-    = Picking (SelectWith a Msg)
+    = Picking
     | Picked a
     | Pending
 
@@ -159,14 +137,13 @@ type alias Model =
     { view : View
     , previousView : View
     , positions : GcData (List Info)
-    , url : String
     , device : Device
     , size : Window.Size
-    , url : String
     , token : String
     , tokenForm : Maybe String
     , confirm : Maybe Msg
     , form : Form
+    , sidebarOpen : Bool
     }
 
 

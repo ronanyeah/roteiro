@@ -28,12 +28,12 @@ decodeGcError =
             )
 
 
-query : String -> String -> B.Request B.Query a -> Task GcError a
-query url token request =
+query : String -> B.Request B.Query a -> Task GcError a
+query token request =
     customSendQueryRaw
         { method = "POST"
         , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
-        , url = url
+        , url = "/api"
         , timeout = Nothing
         , withCredentials = False
         }
@@ -41,12 +41,12 @@ query url token request =
         |> convert (B.responseDataDecoder request)
 
 
-mutation : String -> String -> B.Request B.Mutation a -> Task GcError a
-mutation url token request =
+mutation : String -> B.Request B.Mutation a -> Task GcError a
+mutation token request =
     customSendMutationRaw
         { method = "POST"
         , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
-        , url = url
+        , url = "/api"
         , timeout = Nothing
         , withCredentials = False
         }

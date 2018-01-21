@@ -34,7 +34,7 @@ submission { name, startPosition, steps, notes } =
         ( "", Pending ) ->
             Err [ emptyNameField, startPositionMissing ]
 
-        ( "", Picking _ ) ->
+        ( "", Picking ) ->
             Err [ emptyNameField, startPositionMissing ]
 
         ( "", Picked _ ) ->
@@ -43,7 +43,7 @@ submission { name, startPosition, steps, notes } =
         ( _, Pending ) ->
             Err [ startPositionMissing ]
 
-        ( _, Picking _ ) ->
+        ( _, Picking ) ->
             Err [ startPositionMissing ]
 
         ( str, Picked { id } ) ->
