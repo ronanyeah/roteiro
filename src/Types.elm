@@ -4,6 +4,7 @@ import Array exposing (Array)
 import Http
 import Navigation exposing (Location)
 import RemoteData exposing (RemoteData)
+import Swiper
 import Window
 
 
@@ -47,7 +48,10 @@ type Msg
     | SaveEditTopic
     | SaveEditTransition
     | SidebarNavigate String
+    | Swiped Swiper.SwipeEvent
+    | ToggleEndPosition
     | ToggleSidebar
+    | ToggleStartPosition
     | TokenEdit (Maybe String)
     | UpdateEndPosition Info
     | UpdateForm Form
@@ -102,12 +106,6 @@ type Id
     = Id String
 
 
-type Picker a
-    = Picking
-    | Picked a
-    | Pending
-
-
 type alias GcData a =
     RemoteData GcError a
 
@@ -144,6 +142,9 @@ type alias Model =
     , confirm : Maybe Msg
     , form : Form
     , sidebarOpen : Bool
+    , selectingEndPosition : Bool
+    , selectingStartPosition : Bool
+    , swipingState : Swiper.SwipingState
     }
 
 
@@ -195,8 +196,8 @@ type alias Form =
     { name : String
     , id : Id
     , errors : List String
-    , startPosition : Picker Info
-    , endPosition : Picker Info
+    , startPosition : Maybe Info
+    , endPosition : Maybe Info
     , notes : Array String
     , steps : Array String
     }

@@ -1,7 +1,7 @@
 module Styling exposing (..)
 
 import Color exposing (Color, rgb)
-import Element exposing (Attribute, height, pointer, px, width)
+import Element exposing (Attribute, height, padding, pointer, px, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -14,29 +14,25 @@ bigIcon =
     ]
 
 
-button : List (Attribute msg)
-button =
-    [ Border.rounded 15
+block : List (Attribute msg)
+block =
+    [ Font.size 40
+    , font
     , pointer
-    , Background.color b
+    , Background.color e
+    , Font.color c
+    , Font.mouseOverColor Color.darkGrey
+    , padding 10
     ]
 
 
 choice : List (Attribute msg)
 choice =
-    [ Font.size 30
+    [ Font.size 50
     , font
     , pointer
+    , Font.color Color.darkGrey
     , Font.mouseOverColor e
-    ]
-
-
-chooseBox : List (Attribute msg)
-chooseBox =
-    [ Border.rounded 15
-    , Border.width 3
-    , Border.color e
-    , Background.color c
     ]
 
 
@@ -116,14 +112,6 @@ ballIcon =
     , height <| px 60
     , Font.mouseOverColor a
     ]
-
-
-
---(Html.Attributes.style
---[ ( "border-radius", toString radius ++ "px" ) ]
---)
---:: Width (Style.Px (2 * radius))
---:: Height (Style.Px (2 * radius))
 
 
 ball : List (Attribute msg)

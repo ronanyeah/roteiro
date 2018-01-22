@@ -6,9 +6,10 @@ import Paths
 import Ports
 import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
+import Swiper
 import Task
 import Types exposing (..)
-import Utils exposing (addErrors, clearErrors, emptyForm, formatErrors, log, logError, taskToGcData, unwrap)
+import Utils exposing (addErrors, clearErrors, emptyForm, formatErrors, log, logError, taskToGcData)
 import Validate
 
 
@@ -240,11 +241,11 @@ update msg model =
                 form =
                     { emptyForm
                         | startPosition =
-                            unwrap Pending
-                                (\{ id, name } ->
-                                    Picked <| Info id name
-                                )
-                                p
+                            p
+                                |> Maybe.map
+                                    (\{ id, name } ->
+                                        Info id name
+                                    )
                     }
             in
             ( { model
@@ -271,11 +272,11 @@ update msg model =
                 form =
                     { emptyForm
                         | startPosition =
-                            unwrap Pending
-                                (\{ id, name } ->
-                                    Picked <| Info id name
-                                )
-                                p
+                            p
+                                |> Maybe.map
+                                    (\{ id, name } ->
+                                        Info id name
+                                    )
                     }
             in
             ( { model
@@ -340,7 +341,7 @@ update msg model =
                         | name = s.name
                         , steps = s.steps
                         , notes = s.notes
-                        , startPosition = Picked s.position
+                        , startPosition = Just s.position
                         , id = s.id
                     }
             in
@@ -379,8 +380,8 @@ update msg model =
                         , id = t.id
                         , steps = t.steps
                         , notes = t.notes
-                        , startPosition = Picked t.startPosition
-                        , endPosition = Picked t.endPosition
+                        , startPosition = Just t.startPosition
+                        , endPosition = Just t.endPosition
                     }
             in
             ( { model
@@ -514,6 +515,19 @@ update msg model =
                     , Cmd.none
                     )
 
+        Swiped evt ->
+            let
+                ( newState, swipedLeft ) =
+                    Swiper.hasSwipedLeft evt model.swipingState
+            in
+            ( { model | swipingState = newState, sidebarOpen = swipedLeft }, Cmd.none )
+
+        ToggleEndPosition ->
+            ( { model | selectingEndPosition = not model.selectingEndPosition }, Cmd.none )
+
+        ToggleStartPosition ->
+            ( { model | selectingStartPosition = not model.selectingStartPosition }, Cmd.none )
+
         SidebarNavigate url ->
             ( { model | sidebarOpen = False }, Navigation.newUrl url )
 
@@ -539,16 +553,16 @@ update msg model =
         UpdateEndPosition selection ->
             let
                 form =
-                    model.form |> (\f -> { f | endPosition = Picked selection })
+                    model.form |> (\f -> { f | endPosition = Just selection })
             in
-            ( { model | form = form }, Cmd.none )
+            ( { model | form = form, selectingEndPosition = False }, Cmd.none )
 
         UpdateStartPosition selection ->
             let
                 form =
-                    model.form |> (\f -> { f | startPosition = Picked selection })
+                    model.form |> (\f -> { f | startPosition = Just selection })
             in
-            ( { model | form = form }, Cmd.none )
+            ( { model | form = form, selectingStartPosition = False }, Cmd.none )
 
         UrlChange location ->
             router model location

@@ -1,10 +1,10 @@
 module View exposing (..)
 
 import Array exposing (Array)
-import Element exposing (Element, alignLeft, alignRight, attribute, center, centerY, column, decorativeImage, el, empty, fill, height, inFront, layoutWith, link, newTabLink, noHover, padding, paragraph, px, row, scrollbars, spacing, text, width)
+import Element exposing (Element, alignLeft, alignRight, attribute, center, centerY, column, decorativeImage, el, empty, fill, height, inFront, layoutWith, link, newTabLink, noHover, padding, paddingXY, paragraph, px, row, scrollbars, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Events exposing (onClick)
+import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
 import Html.Attributes
@@ -13,8 +13,9 @@ import Paths
 import Regex
 import RemoteData exposing (RemoteData(..))
 import Styling
-import Types exposing (Device(..), FaIcon(..), Form, GcData, Id(..), Info, Model, Msg(..), Picker(..), Transition, View(..))
-import Utils exposing (formatErrors, icon, isPicking, matchDomain, matchLink, noLabel, sort, when, whenJust)
+import Swiper
+import Types exposing (..)
+import Utils exposing (formatErrors, icon, matchDomain, matchLink, noLabel, sort, when, whenJust)
 
 
 view : Model -> Html Msg
@@ -56,7 +57,7 @@ view ({ form } as model) =
                     wrapper
                         [ viewErrors form.errors
                         , nameEdit form
-                        , viewSubmissionPicker model.positions form
+                        , viewSubmissionPicker form
                         , stepsEditor form
                         , notesEditor form
                         , createButtons SaveCreateSubmission
@@ -74,7 +75,7 @@ view ({ form } as model) =
                     wrapper
                         [ viewErrors form.errors
                         , nameEdit form
-                        , viewTransitionPickers model.positions form
+                        , viewTransitionPickers form
                         , stepsEditor form
                         , notesEditor form
                         , createButtons SaveCreateTransition
@@ -92,7 +93,7 @@ view ({ form } as model) =
                     wrapper
                         [ viewErrors form.errors
                         , nameEdit form
-                        , viewSubmissionPicker model.positions form
+                        , viewSubmissionPicker form
                         , stepsEditor form
                         , notesEditor form
                         , editButtons SaveEditSubmission <| DeleteSubmission form.id
@@ -110,7 +111,7 @@ view ({ form } as model) =
                     wrapper
                         [ viewErrors form.errors
                         , nameEdit form
-                        , viewTransitionPickers model.positions form
+                        , viewTransitionPickers form
                         , stepsEditor form
                         , notesEditor form
                         , editButtons SaveEditTransition <| DeleteTransition form.id
@@ -139,14 +140,18 @@ view ({ form } as model) =
                     model.positions
                         |> viewRemote
                             (\positions ->
-                                wrapper
-                                    [ icon Flag Styling.mattIcon
-                                    , column [] <|
+                                column
+                                    []
+                                    [ row [ spacing 20, padding 30 ]
+                                        [ icon Flag Styling.mattIcon
+                                        , plus CreatePosition
+                                        ]
+                                    , column [ paddingXY 40 0 ] <|
                                         (positions
                                             |> sort
                                             |> List.map
                                                 (\{ id, name } ->
-                                                    link []
+                                                    link [ alignLeft ]
                                                         { url = Paths.position id
                                                         , label =
                                                             paragraph Styling.choice
@@ -155,7 +160,6 @@ view ({ form } as model) =
                                                         }
                                                 )
                                         )
-                                    , plus CreatePosition
                                     ]
                             )
 
@@ -252,22 +256,23 @@ view ({ form } as model) =
                             (\({ steps, startPosition, endPosition, notes } as t) ->
                                 wrapper
                                     [ editRow t.name <| EditTransition t
-                                    , paragraph
-                                        [ centerY, spacing 10 ]
-                                        [ link []
-                                            { url = Paths.position startPosition.id
-                                            , label =
-                                                el Styling.link <|
-                                                    text startPosition.name
-                                            }
-                                        , icon Arrow Styling.mattIcon
-                                        , link []
-                                            { url = Paths.position endPosition.id
-                                            , label =
-                                                el Styling.link <|
-                                                    text endPosition.name
-                                            }
-                                        ]
+                                    , el [ center ] <|
+                                        paragraph
+                                            [ centerY, center ]
+                                            [ link []
+                                                { url = Paths.position startPosition.id
+                                                , label =
+                                                    el Styling.link <|
+                                                        text startPosition.name
+                                                }
+                                            , el [ padding 20 ] <| icon Arrow Styling.mattIcon
+                                            , link []
+                                                { url = Paths.position endPosition.id
+                                                , label =
+                                                    el Styling.link <|
+                                                        text endPosition.name
+                                                }
+                                            ]
                                     , viewSteps steps
                                     , viewNotes <| Array.toList notes
                                     ]
@@ -397,6 +402,12 @@ view ({ form } as model) =
                                 ViewPosition _ ->
                                     Styling.ballIcon
 
+                                ViewCreatePosition ->
+                                    Styling.ballIcon
+
+                                ViewEditPosition ->
+                                    Styling.ballIcon
+
                                 _ ->
                                     Styling.actionIcon
                             )
@@ -410,6 +421,12 @@ view ({ form } as model) =
                                     Styling.ballIcon
 
                                 ViewTransition _ ->
+                                    Styling.ballIcon
+
+                                ViewCreateTransition ->
+                                    Styling.ballIcon
+
+                                ViewEditTransition ->
                                     Styling.ballIcon
 
                                 _ ->
@@ -427,6 +444,12 @@ view ({ form } as model) =
                                 ViewSubmission _ ->
                                     Styling.ballIcon
 
+                                ViewCreateSubmission ->
+                                    Styling.ballIcon
+
+                                ViewEditSubmission ->
+                                    Styling.ballIcon
+
                                 _ ->
                                     Styling.actionIcon
                             )
@@ -440,6 +463,12 @@ view ({ form } as model) =
                                     Styling.ballIcon
 
                                 ViewTopic _ ->
+                                    Styling.ballIcon
+
+                                ViewCreateTopic ->
+                                    Styling.ballIcon
+
+                                ViewEditTopic ->
                                     Styling.ballIcon
 
                                 _ ->
@@ -484,6 +513,12 @@ view ({ form } as model) =
                                 ViewPosition _ ->
                                     Styling.ballIcon
 
+                                ViewCreatePosition ->
+                                    Styling.ballIcon
+
+                                ViewEditPosition ->
+                                    Styling.ballIcon
+
                                 _ ->
                                     Styling.actionIcon
                             )
@@ -499,6 +534,12 @@ view ({ form } as model) =
                                     Styling.ballIcon
 
                                 ViewTransition _ ->
+                                    Styling.ballIcon
+
+                                ViewCreateTransition ->
+                                    Styling.ballIcon
+
+                                ViewEditTransition ->
                                     Styling.ballIcon
 
                                 _ ->
@@ -518,6 +559,12 @@ view ({ form } as model) =
                                 ViewSubmission _ ->
                                     Styling.ballIcon
 
+                                ViewCreateSubmission ->
+                                    Styling.ballIcon
+
+                                ViewEditSubmission ->
+                                    Styling.ballIcon
+
                                 _ ->
                                     Styling.actionIcon
                             )
@@ -533,6 +580,12 @@ view ({ form } as model) =
                                     Styling.ballIcon
 
                                 ViewTopic _ ->
+                                    Styling.ballIcon
+
+                                ViewCreateTopic ->
+                                    Styling.ballIcon
+
+                                ViewEditTopic ->
                                     Styling.ballIcon
 
                                 _ ->
@@ -555,6 +608,10 @@ view ({ form } as model) =
                 , height fill
                 , enterToken
                 , confirm
+                , viewPickPosition UpdateStartPosition model.positions
+                    |> inFront model.selectingStartPosition
+                , viewPickPosition UpdateEndPosition model.positions
+                    |> inFront model.selectingEndPosition
                 ]
                 [ links
                 , el [ width <| px <| round <| toFloat model.size.width * 0.8 ]
@@ -568,23 +625,37 @@ view ({ form } as model) =
         Mobile ->
             content
                 |> layoutWith { options = [ noHover ] }
-                    [ Background.color Styling.c
-                    , Element.above (not model.sidebarOpen) <|
+                    ([ Background.color Styling.c
+                     , Styling.font
+                     , enterToken
+                     , confirm
+                     , inFront model.sidebarOpen sidebar
+                     , viewPickPosition UpdateStartPosition model.positions
+                        |> inFront model.selectingStartPosition
+                     , viewPickPosition UpdateEndPosition model.positions
+                        |> inFront model.selectingEndPosition
+                     ]
+                        ++ (Swiper.onSwipeEvents Swiped |> List.map attribute)
+                    )
+
+
+viewPickPosition : (Info -> Msg) -> GcData (List Info) -> Element Msg
+viewPickPosition msg ps =
+    el [ width fill, height fill, Background.color Styling.c ] <|
+        paragraph [ padding 20 ]
+            (ps
+                |> RemoteData.withDefault []
+                |> List.map
+                    (\p ->
                         Input.button
-                            [ alignRight
-                            , Element.moveDown 50
-                            , Element.moveLeft 20
-                            ]
+                            []
                             { onPress =
-                                Just <| ToggleSidebar
+                                Just <| msg p
                             , label =
-                                icon Bars Styling.actionIcon
+                                el [ padding 10 ] <| el Styling.block <| text p.name
                             }
-                    , Styling.font
-                    , enterToken
-                    , confirm
-                    , inFront model.sidebarOpen sidebar
-                    ]
+                    )
+            )
 
 
 viewRemote : (a -> Element Msg) -> GcData a -> Element Msg
@@ -594,7 +665,10 @@ viewRemote fn data =
             el [ center ] <| text "not asked"
 
         Loading ->
-            icon Waiting Styling.mattIcon
+            icon Waiting
+                [ Font.color Styling.e
+                , Font.size 60
+                ]
 
         Failure err ->
             err
@@ -605,145 +679,45 @@ viewRemote fn data =
             fn a
 
 
-viewSubmissionPicker : GcData (List Info) -> Form -> Element Msg
-viewSubmissionPicker positions form =
-    let
-        pickerLayout =
-            if isPicking form.startPosition || isPicking form.endPosition then
-                column
-            else
-                paragraph
-
-        ps =
-            positions
-                |> RemoteData.withDefault []
-    in
-    pickerLayout
+viewSubmissionPicker : Form -> Element Msg
+viewSubmissionPicker form =
+    paragraph
         [ spacing 10, center ]
         [ icon Flag Styling.mattIcon
-        , pickStartPosition ps form
+        , pickPosition ToggleStartPosition form.startPosition
         ]
 
 
-viewTransitionPickers : GcData (List Info) -> Form -> Element Msg
-viewTransitionPickers positions form =
-    let
-        pickersLayout =
-            if isPicking form.startPosition || isPicking form.endPosition then
-                column
-            else
-                paragraph
-
-        ps =
-            positions
-                |> RemoteData.withDefault []
-    in
-    pickersLayout
-        [ centerY, spacing 10, center ]
-        [ pickStartPosition ps form
-        , icon Arrow Styling.mattIcon
-        , pickEndPosition ps form
-        ]
+viewTransitionPickers : Form -> Element Msg
+viewTransitionPickers form =
+    el [ center ] <|
+        paragraph
+            [ centerY ]
+            [ pickPosition ToggleStartPosition form.startPosition
+            , el [ padding 20 ] <| icon Arrow Styling.mattIcon
+            , pickPosition ToggleEndPosition form.endPosition
+            ]
 
 
-pickStartPosition : List Info -> Form -> Element Msg
-pickStartPosition positions form =
-    case form.startPosition of
-        Pending ->
+pickPosition : Msg -> Maybe Info -> Element Msg
+pickPosition msg position =
+    case position of
+        Nothing ->
             Input.button [ center ]
                 { onPress =
-                    Just <|
-                        UpdateForm
-                            { form
-                                | startPosition =
-                                    Picking
-                            }
+                    Just msg
                 , label =
                     icon Question
                         Styling.actionIcon
                 }
 
-        Picking ->
-            Input.select
-                []
-                { label = noLabel
-                , selected = Nothing
-                , notice = Nothing
-                , onChange = Just <| UpdateEndPosition
-                , menu =
-                    Input.menuBelow
-                        []
-                        (positions
-                            |> List.map
-                                (\p ->
-                                    Input.option p <| text p.name
-                                )
-                        )
-                }
-
-        Picked { name } ->
-            paragraph
-                (Styling.link
-                    ++ [ onClick <|
-                            UpdateForm
-                                { form
-                                    | startPosition =
-                                        Picking
-                                }
-                       ]
-                )
-                [ text name
-                ]
-
-
-pickEndPosition : List Info -> Form -> Element Msg
-pickEndPosition positions form =
-    case form.endPosition of
-        Pending ->
+        Just { name } ->
             Input.button [ center ]
                 { onPress =
-                    Just <|
-                        UpdateForm
-                            { form
-                                | endPosition =
-                                    Picking
-                            }
+                    Just msg
                 , label =
-                    icon Question
-                        Styling.actionIcon
+                    el Styling.link <| text name
                 }
-
-        Picking ->
-            Input.select
-                []
-                { label = noLabel
-                , selected = Nothing
-                , notice = Nothing
-                , onChange = Just <| UpdateEndPosition
-                , menu =
-                    Input.menuBelow
-                        []
-                        (positions
-                            |> List.map
-                                (\p ->
-                                    Input.option p <| text p.name
-                                )
-                        )
-                }
-
-        Picked { name } ->
-            paragraph
-                (Styling.link
-                    ++ [ onClick <|
-                            UpdateForm
-                                { form
-                                    | endPosition =
-                                        Picking
-                                }
-                       ]
-                )
-                [ text name
-                ]
 
 
 editRow : String -> Msg -> Element Msg
@@ -794,7 +768,7 @@ minus msg =
 editButtons : Msg -> Msg -> Element Msg
 editButtons save delete =
     row
-        (spacing 20 :: Styling.chooseBox)
+        [ spacing 20 ]
         [ Input.button [ padding 10 ]
             { onPress = Just save
             , label =
@@ -819,7 +793,7 @@ editButtons save delete =
 createButtons : Msg -> Element Msg
 createButtons save =
     row
-        (spacing 20 :: Styling.chooseBox)
+        [ spacing 20 ]
         [ Input.button [ padding 10 ]
             { onPress = Just save
             , label =

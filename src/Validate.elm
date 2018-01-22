@@ -1,7 +1,7 @@
 module Validate exposing (..)
 
 import Array
-import Types exposing (Form, Id(..), Picker(..))
+import Types exposing (Form, Id(..))
 import Utils exposing (filterEmpty)
 
 
@@ -31,22 +31,16 @@ position { name, notes } =
 submission : Form -> Result (List String) ( String, Id, List String, List String )
 submission { name, startPosition, steps, notes } =
     case ( name, startPosition ) of
-        ( "", Pending ) ->
+        ( "", Nothing ) ->
             Err [ emptyNameField, startPositionMissing ]
 
-        ( "", Picking ) ->
-            Err [ emptyNameField, startPositionMissing ]
-
-        ( "", Picked _ ) ->
+        ( "", Just _ ) ->
             Err [ emptyNameField ]
 
-        ( _, Pending ) ->
+        ( _, Nothing ) ->
             Err [ startPositionMissing ]
 
-        ( _, Picking ) ->
-            Err [ startPositionMissing ]
-
-        ( str, Picked { id } ) ->
+        ( str, Just { id } ) ->
             Ok
                 ( str
                 , id
@@ -70,23 +64,23 @@ transition { name, startPosition, endPosition, steps, notes } =
       else
         Nothing
     , case startPosition of
-        Picked _ ->
+        Just _ ->
             Nothing
 
-        _ ->
+        Nothing ->
             Just startPositionMissing
     , case endPosition of
-        Picked _ ->
+        Just _ ->
             Nothing
 
-        _ ->
+        Nothing ->
             Just endPositionMissing
     ]
         |> List.filterMap identity
         |> (\errs ->
                 if List.isEmpty errs then
                     case ( startPosition, endPosition ) of
-                        ( Picked start, Picked end ) ->
+                        ( Just start, Just end ) ->
                             Ok
                                 ( name
                                 , start.id

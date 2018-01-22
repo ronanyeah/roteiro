@@ -8,8 +8,9 @@ import Html
 import Html.Attributes
 import Regex exposing (Regex)
 import RemoteData
+import Swiper
 import Task exposing (Task)
-import Types exposing (ApiError(..), Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, Picker(..), View(..))
+import Types exposing (ApiError(..), Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, View(..))
 import Window
 
 
@@ -81,19 +82,6 @@ appendCmd : Cmd msg -> ( model, Cmd msg ) -> ( model, Cmd msg )
 appendCmd newCmd =
     Tuple.mapSecond
         (List.singleton >> (::) newCmd >> Cmd.batch)
-
-
-isPicking : Picker a -> Bool
-isPicking p =
-    case p of
-        Picking ->
-            True
-
-        Picked _ ->
-            False
-
-        Pending ->
-            False
 
 
 icon : FaIcon -> List (Attribute msg) -> Element msg
@@ -278,6 +266,9 @@ emptyModel =
     , confirm = Nothing
     , form = emptyForm
     , sidebarOpen = False
+    , selectingStartPosition = False
+    , selectingEndPosition = False
+    , swipingState = Swiper.initialSwipingState
     }
 
 
@@ -286,8 +277,8 @@ emptyForm =
     { name = ""
     , id = Id ""
     , errors = []
-    , startPosition = Pending
-    , endPosition = Pending
+    , startPosition = Nothing
+    , endPosition = Nothing
     , steps = Array.empty
     , notes = Array.empty
     }
