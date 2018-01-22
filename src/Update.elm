@@ -517,10 +517,15 @@ update msg model =
 
         Swiped evt ->
             let
-                ( newState, swipedLeft ) =
-                    Swiper.hasSwipedLeft evt model.swipingState
+                ( newState, swipedRight ) =
+                    Swiper.hasSwipedRight evt model.swipingState
             in
-            ( { model | swipingState = newState, sidebarOpen = swipedLeft }, Cmd.none )
+            ( { model
+                | swipingState = newState
+                , sidebarOpen = model.sidebarOpen || swipedRight
+              }
+            , Cmd.none
+            )
 
         ToggleEndPosition ->
             ( { model | selectingEndPosition = not model.selectingEndPosition }, Cmd.none )
