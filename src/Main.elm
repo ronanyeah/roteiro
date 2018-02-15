@@ -3,7 +3,7 @@ module Main exposing (main)
 import Navigation exposing (Location)
 import Router exposing (router)
 import Task
-import Types exposing (..)
+import Types exposing (Model, Msg(UrlChange, WindowSize))
 import Update exposing (update)
 import Utils exposing (appendCmd, emptyModel)
 import View exposing (view)

@@ -6,7 +6,6 @@ import Paths
 import Ports
 import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
-import Swiper
 import Task
 import Types exposing (..)
 import Utils exposing (addErrors, clearErrors, emptyForm, formatErrors, log, logError, taskToGcData)
@@ -514,18 +513,6 @@ update msg model =
                     ( { model | form = addErrors errs model.form }
                     , Cmd.none
                     )
-
-        Swiped evt ->
-            let
-                ( newState, swipedRight ) =
-                    Swiper.hasSwipedRight evt model.swipingState
-            in
-            ( { model
-                | swipingState = newState
-                , sidebarOpen = model.sidebarOpen || swipedRight
-              }
-            , Cmd.none
-            )
 
         ToggleEndPosition ->
             ( { model | selectingEndPosition = not model.selectingEndPosition }, Cmd.none )

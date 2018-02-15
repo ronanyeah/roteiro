@@ -1,9 +1,8 @@
-module Styling exposing (..)
+module Style exposing (..)
 
 import Color exposing (Color, rgb)
-import Element exposing (Attribute, height, padding, pointer, px, width)
+import Element exposing (Attribute, padding, pointer)
 import Element.Background as Background
-import Element.Border as Border
 import Element.Font as Font
 
 
@@ -97,19 +96,6 @@ actionIcon =
     [ Font.color e
     , Font.size 35
     , pointer
-    , Font.mouseOverColor a
-    ]
-
-
-ballIcon : List (Attribute msg)
-ballIcon =
-    [ Font.color c
-    , Font.size 35
-    , pointer
-    , Background.color e
-    , Border.rounded 30
-    , width <| px 60
-    , height <| px 60
     , Font.mouseOverColor a
     ]
 

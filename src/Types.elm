@@ -4,7 +4,6 @@ import Array exposing (Array)
 import Http
 import Navigation exposing (Location)
 import RemoteData exposing (RemoteData)
-import Swiper
 import Window
 
 
@@ -48,7 +47,6 @@ type Msg
     | SaveEditTopic
     | SaveEditTransition
     | SidebarNavigate String
-    | Swiped Swiper.SwipeEvent
     | ToggleEndPosition
     | ToggleSidebar
     | ToggleStartPosition
@@ -144,7 +142,6 @@ type alias Model =
     , sidebarOpen : Bool
     , selectingEndPosition : Bool
     , selectingStartPosition : Bool
-    , swipingState : Swiper.SwipingState
     }
 
 

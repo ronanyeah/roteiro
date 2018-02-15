@@ -8,7 +8,6 @@ import Html
 import Html.Attributes
 import Regex exposing (Regex)
 import RemoteData
-import Swiper
 import Task exposing (Task)
 import Types exposing (ApiError(..), Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, View(..))
 import Window
@@ -268,7 +267,6 @@ emptyModel =
     , sidebarOpen = False
     , selectingStartPosition = False
     , selectingEndPosition = False
-    , swipingState = Swiper.initialSwipingState
     }
 
 
