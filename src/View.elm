@@ -1,7 +1,7 @@
 module View exposing (..)
 
 import Array exposing (Array)
-import Element exposing (Element, alignLeft, alignRight, attribute, center, centerY, column, decorativeImage, el, empty, fill, height, inFront, layout, layoutWith, link, newTabLink, noHover, padding, paragraph, pointer, px, row, scrollbars, spacing, text, width)
+import Element exposing (Element, alignRight, attribute, center, centerY, column, decorativeImage, el, empty, fill, height, inFront, layout, layoutWith, link, newTabLink, noHover, padding, paragraph, pointer, px, row, scrollbars, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -14,7 +14,7 @@ import Regex
 import RemoteData exposing (RemoteData(..))
 import Style
 import Types exposing (..)
-import Utils exposing (formatErrors, icon, matchDomain, matchLink, noLabel, when, whenJust)
+import Utils exposing (formatErrors, icon, isJust, matchDomain, matchLink, noLabel, unwrap, when, whenJust)
 
 
 view : Model -> Html Msg
@@ -34,7 +34,10 @@ view model =
                                     ]
                                     { src = "/map.svg" }
                             }
-                        , el Style.home <| text "ROTEIRO"
+                        , el
+                            [ Font.size 45, Font.color Style.e ]
+                          <|
+                            text "ROTEIRO"
                         ]
 
                 ViewCreatePosition ->
@@ -113,18 +116,32 @@ view model =
                     data
                         |> viewRemote
                             (\({ name, notes, submissions, transitionsFrom, transitionsTo } as position) ->
-                                column []
-                                    [ editRow name <| EditPosition position
-                                    , viewNotes <| Array.toList notes
-                                    , el (Style.line ++ [ width <| px 100, height <| px 2 ]) empty
-                                    , viewTechList Paths.transition transitionsFrom
-                                    , icon Arrow Style.mattIcon
-                                    , viewTechList Paths.transition transitionsTo
-                                    , plus <| CreateTransition <| Just position
-                                    , el (Style.line ++ [ width <| px 100, height <| px 2 ]) empty
-                                    , icon Bolt Style.mattIcon
-                                    , viewTechList Paths.submission submissions
-                                    , plus <| CreateSubmission <| Just position
+                                column [ height <| px model.size.height, scrollbars ]
+                                    [ editRow name Flag <| EditPosition position
+                                    , viewNotes notes
+                                    , column []
+                                        [ row [ spacing 20, padding 30 ]
+                                            [ icon Bolt Style.mattIcon
+                                            , plus <| CreateSubmission <| Just position
+                                            ]
+                                        , viewTechList Paths.submission submissions
+                                        ]
+                                    , column []
+                                        [ row [ spacing 20, padding 30 ]
+                                            [ icon Arrow Style.mattIcon
+                                            , plus <| CreateTransition <| Just position
+                                            ]
+                                        , column []
+                                            (transitionsFrom
+                                                |> List.map
+                                                    (transitionPositions { id = position.id, name = name })
+                                            )
+                                        , column []
+                                            (transitionsTo
+                                                |> List.map
+                                                    (flip transitionPositions { id = position.id, name = name })
+                                            )
+                                        ]
                                     ]
                             )
 
@@ -146,8 +163,8 @@ view model =
                     data
                         |> viewRemote
                             (\sub ->
-                                column []
-                                    [ editRow sub.name <| EditSubmission sub
+                                column [ height <| px model.size.height, scrollbars ]
+                                    [ editRow sub.name Bolt <| EditSubmission sub
                                     , row
                                         [ spacing 10 ]
                                         [ icon Flag Style.mattIcon
@@ -159,7 +176,7 @@ view model =
                                             }
                                         ]
                                     , viewSteps sub.steps
-                                    , viewNotes <| Array.toList sub.notes
+                                    , viewNotes sub.notes
                                     ]
                             )
 
@@ -206,8 +223,8 @@ view model =
                         |> viewRemote
                             (\t ->
                                 column []
-                                    [ editRow t.name <| EditTopic t
-                                    , viewNotes <| Array.toList t.notes
+                                    [ editRow t.name Book <| EditTopic t
+                                    , viewNotes t.notes
                                     ]
                             )
 
@@ -229,27 +246,12 @@ view model =
                     data
                         |> viewRemote
                             (\({ steps, startPosition, endPosition, notes } as t) ->
-                                column []
-                                    [ editRow t.name <| EditTransition t
-                                    , el [ center ] <|
-                                        paragraph
-                                            [ centerY, center ]
-                                            [ link []
-                                                { url = Paths.position startPosition.id
-                                                , label =
-                                                    el Style.link <|
-                                                        text startPosition.name
-                                                }
-                                            , el [ padding 20 ] <| icon Arrow Style.mattIcon
-                                            , link []
-                                                { url = Paths.position endPosition.id
-                                                , label =
-                                                    el Style.link <|
-                                                        text endPosition.name
-                                                }
-                                            ]
+                                column
+                                    [ height <| px model.size.height, scrollbars ]
+                                    [ editRow t.name Arrow <| EditTransition t
+                                    , transitionPositions startPosition endPosition
                                     , viewSteps steps
-                                    , viewNotes <| Array.toList notes
+                                    , viewNotes notes
                                     ]
                             )
 
@@ -342,7 +344,6 @@ view model =
                                 }
                             ]
                     )
-                |> inFront True
 
         confirm =
             model.confirm
@@ -371,7 +372,6 @@ view model =
                                     ]
                                 ]
                     )
-                |> inFront True
 
         links =
             column
@@ -598,28 +598,34 @@ view model =
                     }
                 ]
 
-        picker =
-            if model.selectingStartPosition then
-                [ viewPickPosition UpdateStartPosition model.positions
+        modal =
+            if isJust model.confirm then
+                confirm
                     |> inFront True
-                ]
+            else if isJust model.tokenForm then
+                enterToken
+                    |> inFront True
             else if model.selectingEndPosition then
-                [ viewPickPosition UpdateEndPosition model.positions
-                    |> inFront model.selectingEndPosition
-                ]
+                viewPickPosition UpdateEndPosition model.positions
+                    |> inFront True
+            else if model.selectingStartPosition then
+                viewPickPosition UpdateStartPosition model.positions
+                    |> inFront True
             else
-                []
+                empty
+                    |> inFront False
     in
     case model.device of
         Desktop ->
             row
-                ([ width fill
-                 , height fill
+                [ width fill
+                , height fill
 
-                 --, confirm
-                 ]
-                    ++ picker
-                )
+                --, viewPickPosition UpdateEndPosition model.positions
+                --|> inFront model.selectingEndPosition
+                --, viewPickPosition UpdateStartPosition model.positions
+                --|> inFront model.selectingStartPosition
+                ]
                 [ links
                 , el [ width <| px <| round <| toFloat model.size.width * 0.8 ]
                     content
@@ -627,7 +633,7 @@ view model =
                 |> layout
                     [ Background.color Style.c
                     , Style.font
-                    , enterToken
+                    , modal
                     ]
 
         Mobile ->
@@ -635,14 +641,33 @@ view model =
                 |> layoutWith { options = [ noHover ] }
                     [ Background.color Style.c
                     , Style.font
-                    , enterToken
-                    , confirm
-                    , inFront model.sidebarOpen sidebar
-                    , viewPickPosition UpdateStartPosition model.positions
-                        |> inFront model.selectingStartPosition
-                    , viewPickPosition UpdateEndPosition model.positions
-                        |> inFront model.selectingEndPosition
+                    , modal
+
+                    --, viewPickPosition UpdateStartPosition model.positions
+                    --|> inFront model.selectingStartPosition
+                    --, viewPickPosition UpdateEndPosition model.positions
+                    --|> inFront model.selectingEndPosition
                     ]
+
+
+transitionPositions : Info -> Info -> Element msg
+transitionPositions startPosition endPosition =
+    paragraph
+        [ centerY, center ]
+        [ link []
+            { url = Paths.position startPosition.id
+            , label =
+                el Style.link <|
+                    text startPosition.name
+            }
+        , el [ padding 20 ] <| icon Arrow Style.mattIcon
+        , link []
+            { url = Paths.position endPosition.id
+            , label =
+                el Style.link <|
+                    text endPosition.name
+            }
+        ]
 
 
 blocks : (Id -> String) -> List { r | id : Id, name : String } -> Element msg
@@ -741,12 +766,18 @@ pickPosition msg position =
                 }
 
 
-editRow : String -> Msg -> Element Msg
-editRow name editMsg =
+editRow : String -> FaIcon -> Msg -> Element Msg
+editRow name faIcon editMsg =
     el [] <|
         row
             [ spacing 20, centerY ]
-            [ paragraph Style.subtitle [ text name ]
+            [ icon faIcon Style.mattIcon
+            , paragraph
+                [ Font.size 35
+                , Font.color Style.e
+                , width fill
+                ]
+                [ text name ]
             , Input.button []
                 { onPress = Just editMsg
                 , label = icon Write Style.actionIcon
@@ -922,54 +953,55 @@ notesEditor form =
 
 viewSteps : Array String -> Element Msg
 viewSteps steps =
-    column
-        []
-        (steps
-            |> Array.toList
-            |> List.indexedMap
-                (\i step ->
-                    row
-                        [ spacing 10 ]
-                        [ el Style.dot <| text <| (toString (i + 1) ++ ".")
-                        , paragraph
-                            []
-                            [ text step
+    el [] <|
+        column
+            []
+            (steps
+                |> Array.toList
+                |> List.indexedMap
+                    (\i step ->
+                        row
+                            [ spacing 10 ]
+                            [ el Style.dot <| text <| (toString (i + 1) ++ ".")
+                            , paragraph
+                                [ width fill ]
+                                [ text step
+                                ]
                             ]
-                        ]
-                )
-        )
+                    )
+            )
 
 
-viewNotes : List String -> Element msg
+viewNotes : Array String -> Element msg
 viewNotes notes =
-    column
-        [ center
-        , alignLeft
-        ]
-        (notes
-            |> List.map
-                (\x ->
-                    let
-                        content =
-                            if Regex.contains matchLink x then
-                                newTabLink [ spacing 5 ]
-                                    { url = x
-                                    , label =
-                                        paragraph []
-                                            [ icon Globe Style.mattIcon
-                                            , text <| domain x
-                                            ]
-                                    }
-                            else
-                                text x
-                    in
-                    paragraph
-                        [ spacing 5 ]
-                        [ el Style.dot <| text "• "
-                        , content
-                        ]
-                )
-        )
+    el [] <|
+        column
+            []
+            (notes
+                |> Array.toList
+                |> List.map
+                    (\note ->
+                        let
+                            content =
+                                if Regex.contains matchLink note then
+                                    newTabLink [ spacing 5 ]
+                                        { url = note
+                                        , label =
+                                            paragraph []
+                                                [ icon Globe Style.mattIcon
+                                                , text <| domain note
+                                                ]
+                                        }
+                                else
+                                    text note
+                        in
+                        paragraph
+                            [ spacing 5 ]
+                            [ el Style.dot <| text "• "
+                            , content
+                            ]
+                    )
+            )
 
 
 viewTransitions : List Transition -> Element Msg
@@ -1032,7 +1064,7 @@ viewErrors errs =
         column
             [ center, spacing 15 ]
             [ icon Warning Style.mattIcon
-            , viewNotes errs
+            , viewNotes <| Array.fromList errs
             ]
 
 

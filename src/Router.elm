@@ -6,7 +6,7 @@ import Paths
 import RemoteData exposing (RemoteData(..))
 import Types exposing (..)
 import UrlParser exposing ((</>), map, oneOf, parseHash, s, string)
-import Utils exposing (taskToGcData)
+import Utils exposing (removeNull, taskToGcData)
 
 
 stripHash : String -> String
@@ -75,7 +75,7 @@ handleRoute model route =
                 ( { model | view = ViewPosition Loading }
                 , fetchPosition id
                     |> query model.token
-                    |> taskToGcData CbPosition
+                    |> taskToGcData (removeNull >> CbPosition)
                 )
 
         Positions ->
@@ -92,7 +92,7 @@ handleRoute model route =
                 ( { model | view = ViewSubmission Loading }
                 , fetchSubmission id
                     |> query model.token
-                    |> taskToGcData CbSubmission
+                    |> taskToGcData (removeNull >> CbSubmission)
                 )
 
         Submissions ->
@@ -112,7 +112,7 @@ handleRoute model route =
                 ( { model | view = ViewTopic Loading }
                 , fetchTopic id
                     |> query model.token
-                    |> taskToGcData CbTopic
+                    |> taskToGcData (removeNull >> CbTopic)
                 )
 
         Topics ->
@@ -129,7 +129,7 @@ handleRoute model route =
                 ( { model | view = ViewTransition Loading }
                 , fetchTransition id
                     |> query model.token
-                    |> taskToGcData CbTransition
+                    |> taskToGcData (removeNull >> CbTransition)
                 )
 
         Transitions ->

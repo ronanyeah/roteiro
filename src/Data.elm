@@ -12,20 +12,26 @@ import Types exposing (..)
 
 decodeGcError : Decoder ApiError
 decodeGcError =
-    Decode.field "code" Decode.int
-        |> Decode.andThen
-            (\code ->
-                case code of
-                    3032 ->
-                        Decode.succeed RelationIsRequired
+    Decode.oneOf
+        [ Decode.field "code" Decode.int
+            |> Decode.map
+                (\code ->
+                    case code of
+                        3032 ->
+                            RelationIsRequired
 
-                    3008 ->
-                        Decode.succeed InsufficientPermissions
+                        3008 ->
+                            InsufficientPermissions
 
-                    _ ->
-                        Decode.field "message" Decode.string
-                            |> Decode.map Other
-            )
+                        3016 ->
+                            Other "Missing project!"
+
+                        n ->
+                            Other <| "GraphCool Error Code: " ++ toString n
+                )
+        , Decode.field "message" Decode.string
+            |> Decode.map Other
+        ]
 
 
 query : String -> B.Request B.Query a -> Task GcError a
@@ -70,38 +76,19 @@ convert resDecoder =
         >> Task.andThen
             (\response ->
                 let
-                    decoder =
-                        Decode.map2 (,)
-                            (Decode.maybe <| Decode.field "errors" <| Decode.list decodeGcError)
-                            (Decode.maybe <| Decode.field "data" resDecoder)
+                    decoders =
+                        Decode.oneOf
+                            [ Decode.list decodeGcError
+                                |> Decode.field "errors"
+                                |> Decode.map (GcError >> Task.fail)
+                            , decodeGcError
+                                |> Decode.map (List.singleton >> GcError >> Task.fail)
+                            , Decode.field "data" resDecoder
+                                |> Decode.map Task.succeed
+                            ]
                 in
-                case Decode.decodeString decoder response.body of
-                    Err err ->
-                        Task.fail <|
-                            HttpError <|
-                                Http.BadPayload err response
-
-                    Ok result ->
-                        case result of
-                            ( Just [], Just d ) ->
-                                Task.succeed d
-
-                            ( Just errs, Just _ ) ->
-                                Task.fail <|
-                                    GcError <|
-                                        Other "Data returned with errors."
-                                            :: errs
-
-                            ( Nothing, Just d ) ->
-                                Task.succeed d
-
-                            ( Just errs, Nothing ) ->
-                                Task.fail <| GcError errs
-
-                            ( Nothing, Nothing ) ->
-                                Task.fail <|
-                                    GcError
-                                        [ Other "Data does not exist." ]
+                Decode.decodeString decoders response.body
+                    |> Result.withDefault (Task.fail <| GcError [ Other "very bad" ])
             )
 
 
@@ -114,9 +101,10 @@ fetchInfo field =
         |> B.request ()
 
 
-fetchPosition : Id -> B.Request B.Query Position
+fetchPosition : Id -> B.Request B.Query (Maybe Position)
 fetchPosition (Id id) =
     position
+        |> B.nullable
         |> B.field "Position" [ ( "id", Arg.string id ) ]
         |> B.extract
         |> B.queryDocument
@@ -128,9 +116,10 @@ fetchPositions =
     fetchInfo "allPositions"
 
 
-fetchSubmission : Id -> B.Request B.Query Submission
+fetchSubmission : Id -> B.Request B.Query (Maybe Submission)
 fetchSubmission (Id id) =
     submission
+        |> B.nullable
         |> B.field "Submission" [ ( "id", Arg.string id ) ]
         |> B.extract
         |> B.queryDocument
@@ -146,9 +135,10 @@ fetchSubmissions =
         |> B.request ()
 
 
-fetchTopic : Id -> B.Request B.Query Topic
+fetchTopic : Id -> B.Request B.Query (Maybe Topic)
 fetchTopic (Id id) =
     topic
+        |> B.nullable
         |> B.field "Topic" [ ( "id", Arg.string id ) ]
         |> B.extract
         |> B.queryDocument
@@ -160,9 +150,10 @@ fetchTopics =
     fetchInfo "allTopics"
 
 
-fetchTransition : Id -> B.Request B.Query Transition
+fetchTransition : Id -> B.Request B.Query (Maybe Transition)
 fetchTransition (Id id) =
     transition
+        |> B.nullable
         |> B.field "Transition" [ ( "id", Arg.string id ) ]
         |> B.extract
         |> B.queryDocument

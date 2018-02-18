@@ -13,6 +13,22 @@ import Types exposing (ApiError(..), Device(Desktop, Mobile), FaIcon(..), Form, 
 import Window
 
 
+isJust : Maybe a -> Bool
+isJust =
+    unwrap False <| always True
+
+
+removeNull : GcData (Maybe b) -> GcData b
+removeNull =
+    RemoteData.andThen
+        (Maybe.map RemoteData.Success
+            >> (Maybe.withDefault <|
+                    RemoteData.Failure <|
+                        GcError [ Other "Data does not exist" ]
+               )
+        )
+
+
 noLabel : Label msg
 noLabel =
     Input.labelAbove [] empty

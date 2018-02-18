@@ -59,11 +59,6 @@ link =
     [ Font.underline, pointer ]
 
 
-line : List (Attribute msg)
-line =
-    [ Background.color e ]
-
-
 header : List (Attribute msg)
 header =
     [ Font.size 55
@@ -71,24 +66,6 @@ header =
     , pointer
     , Font.mouseOverColor a
     ]
-
-
-picker : List (Attribute msg)
-picker =
-    [ Background.color c
-    ]
-
-
-subtitle : List (Attribute msg)
-subtitle =
-    [ Font.size 35
-    , Font.color e
-    ]
-
-
-home : List (Attribute msg)
-home =
-    [ Font.size 45, Font.color e ]
 
 
 actionIcon : List (Attribute msg)
@@ -100,11 +77,6 @@ actionIcon =
     ]
 
 
-ball : List (Attribute msg)
-ball =
-    [ Background.color e, pointer ]
-
-
 font : Attribute msg
 font =
     Font.family
@@ -112,7 +84,6 @@ font =
             { name = "Cuprum"
             , url = "https://fonts.googleapis.com/css?family=Cuprum"
             }
-        , Font.sansSerif
         ]
 
 
