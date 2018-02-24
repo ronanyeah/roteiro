@@ -1,7 +1,6 @@
 module Main exposing (main)
 
 import Navigation exposing (Location)
-import Router exposing (router)
 import Task
 import Types exposing (Model, Msg(UrlChange, WindowSize))
 import Update exposing (update)
@@ -22,5 +21,6 @@ main =
 
 init : String -> Location -> ( Model, Cmd Msg )
 init token =
-    router { emptyModel | token = token }
+    UrlChange
+        >> flip update { emptyModel | token = token }
         >> appendCmd (Task.perform WindowSize Window.size)

@@ -1,16 +1,35 @@
 module Utils exposing (..)
 
-import Array
+import Array exposing (Array)
 import Dict exposing (Dict)
-import Element exposing (Attribute, Element, el, empty, html)
+import Element exposing (Attribute, Element, centerX, centerY, el, empty, html)
 import Element.Input as Input exposing (Label)
 import Html
 import Html.Attributes
+import Navigation
 import Regex exposing (Regex)
 import RemoteData
 import Task exposing (Task)
 import Types exposing (ApiError(..), Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, View(..))
 import Window
+
+
+listRemove : Int -> List a -> List a
+listRemove i xs =
+    List.take i xs ++ List.drop (i + 1) xs
+
+
+arrayRemove : Int -> Array a -> Array a
+arrayRemove i =
+    Array.toList
+        >> listRemove i
+        >> Array.fromList
+
+
+goTo : String -> Cmd msg
+goTo =
+    (++) "/"
+        >> Navigation.newUrl
 
 
 isJust : Maybe a -> Bool
@@ -99,6 +118,101 @@ appendCmd newCmd =
         (List.singleton >> (::) newCmd >> Cmd.batch)
 
 
+isPositionView : View -> Bool
+isPositionView view =
+    case view of
+        ViewPositions ->
+            True
+
+        ViewPosition _ ->
+            True
+
+        ViewCreatePosition ->
+            True
+
+        ViewEditPosition ->
+            True
+
+        _ ->
+            False
+
+
+isSubmissionView : View -> Bool
+isSubmissionView view =
+    case view of
+        ViewSubmissions _ ->
+            True
+
+        ViewSubmission _ ->
+            True
+
+        ViewCreateSubmission ->
+            True
+
+        ViewEditSubmission ->
+            True
+
+        _ ->
+            False
+
+
+isTagView : View -> Bool
+isTagView view =
+    case view of
+        ViewTags ->
+            True
+
+        ViewTag _ ->
+            True
+
+        ViewCreateTag ->
+            True
+
+        ViewEditTag ->
+            True
+
+        _ ->
+            False
+
+
+isTopicView : View -> Bool
+isTopicView view =
+    case view of
+        ViewTopics _ ->
+            True
+
+        ViewTopic _ ->
+            True
+
+        ViewCreateTopic ->
+            True
+
+        ViewEditTopic ->
+            True
+
+        _ ->
+            False
+
+
+isTransitionView : View -> Bool
+isTransitionView view =
+    case view of
+        ViewTransitions _ ->
+            True
+
+        ViewTransition _ ->
+            True
+
+        ViewCreateTransition ->
+            True
+
+        ViewEditTransition ->
+            True
+
+        _ ->
+            False
+
+
 icon : FaIcon -> List (Attribute msg) -> Element msg
 icon fa attrs =
     let
@@ -143,6 +257,9 @@ icon fa attrs =
                 Warning ->
                     "fa-exclamation"
 
+                Tags ->
+                    "fa-tags"
+
                 Tick ->
                     "fa-check"
 
@@ -164,7 +281,7 @@ icon fa attrs =
                 |> (++) "fas "
                 |> Html.Attributes.class
     in
-    el attrs <| html <| Html.span [ faClass ] []
+    el attrs <| el [ centerX, centerY ] <| html <| Html.span [ faClass ] []
 
 
 sort : List { r | name : String } -> List { r | name : String }
@@ -274,6 +391,7 @@ emptyModel =
     { view = ViewStart
     , previousView = ViewStart
     , positions = RemoteData.NotAsked
+    , tags = RemoteData.NotAsked
     , token = ""
     , device = Desktop
     , size = Window.Size 0 0
@@ -295,6 +413,7 @@ emptyForm =
     , endPosition = Nothing
     , steps = Array.empty
     , notes = Array.empty
+    , tags = Array.empty
     }
 
 

@@ -19,7 +19,8 @@ module.exports = {
         target: GRAPHQL_ENDPOINT,
         pathRewrite: { "^/api": "" }
       }
-    }
+    },
+    historyApiFallback: true
   },
   module: {
     rules: [

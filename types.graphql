@@ -1,7 +1,7 @@
 type File @model {
-  contentType: String!
-  createdAt: DateTime!
   id: ID! @isUnique
+  createdAt: DateTime!
+  contentType: String!
   name: String!
   secret: String! @isUnique
   size: Int!
@@ -10,22 +10,22 @@ type File @model {
 }
 
 type User @model {
-  createdAt: DateTime!
   id: ID! @isUnique
+  createdAt: DateTime!
   updatedAt: DateTime!
 }
 
 type Topic @model {
-  createdAt: DateTime!
   id: ID! @isUnique
+  createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   notes: [String!]!
 }
 
 type Position @model {
-  createdAt: DateTime!
   id: ID! @isUnique
+  createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   notes: [String!]!
@@ -35,22 +35,33 @@ type Position @model {
 }
 
 type Submission @model {
-  createdAt: DateTime!
   id: ID! @isUnique
+  createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   steps: [String!]!
   notes: [String!]!
   position: Position! @relation(name: "PositionHasSubmissions")
+  tags: [Tag!]! @relation(name: "SubmissionHasTags")
 }
 
 type Transition @model {
-  createdAt: DateTime!
   id: ID! @isUnique
+  createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   steps: [String!]!
   notes: [String!]!
   startPosition: Position! @relation(name: "PositionHasTransitionsFrom")
   endPosition: Position! @relation(name: "PositionHasTransitionsTo")
+  tags: [Tag!]! @relation(name: "TransitionHasTags")
+}
+
+type Tag @model {
+  id: ID! @isUnique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  submissions: [Submission!]! @relation(name: "SubmissionHasTags")
+  transitions: [Transition!]! @relation(name: "TransitionHasTags")
 }

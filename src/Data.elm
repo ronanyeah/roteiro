@@ -135,6 +135,21 @@ fetchSubmissions =
         |> B.request ()
 
 
+fetchTag : Id -> B.Request B.Query (Maybe Tag)
+fetchTag (Id id) =
+    tag
+        |> B.nullable
+        |> B.field "Tag" [ ( "id", Arg.string id ) ]
+        |> B.extract
+        |> B.queryDocument
+        |> B.request ()
+
+
+fetchTags : B.Request B.Query (List Info)
+fetchTags =
+    fetchInfo "allTags"
+
+
 fetchTopic : Id -> B.Request B.Query (Maybe Topic)
 fetchTopic (Id id) =
     topic
@@ -199,6 +214,17 @@ createSubmission name (Id startId) steps notes =
         |> B.request ()
 
 
+createTag : String -> B.Request B.Mutation Tag
+createTag name =
+    tag
+        |> B.field "createTag"
+            [ ( "name", Arg.string name )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
+
+
 createTopic : String -> List String -> B.Request B.Mutation Topic
 createTopic name notes =
     topic
@@ -243,8 +269,8 @@ updatePosition (Id id) name notes =
         |> B.request ()
 
 
-updateSubmission : Id -> String -> Id -> List String -> List String -> B.Request B.Mutation Submission
-updateSubmission (Id id) name (Id positionId) steps notes =
+updateSubmission : Id -> String -> Id -> List String -> List String -> List Info -> B.Request B.Mutation Submission
+updateSubmission (Id id) name (Id positionId) steps notes tags =
     submission
         |> B.field "updateSubmission"
             [ ( "id", Arg.string id )
@@ -252,6 +278,29 @@ updateSubmission (Id id) name (Id positionId) steps notes =
             , ( "positionId", Arg.string positionId )
             , ( "steps", Arg.list <| List.map Arg.string steps )
             , ( "notes", Arg.list <| List.map Arg.string notes )
+            , ( "tagsIds"
+              , Arg.list <|
+                    List.map
+                        (.id
+                            >> (\(Id x) ->
+                                    x
+                               )
+                            >> Arg.string
+                        )
+                        tags
+              )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
+
+
+updateTag : Id -> String -> B.Request B.Mutation Tag
+updateTag (Id id) name =
+    tag
+        |> B.field "updateTag"
+            [ ( "id", Arg.string id )
+            , ( "name", Arg.string name )
             ]
         |> B.extract
         |> B.mutationDocument
@@ -319,6 +368,20 @@ deleteSubmission (Id id) =
         |> B.request ()
 
 
+deleteTag : Id -> B.Request B.Mutation Id
+deleteTag (Id id) =
+    B.id
+        |> B.map Id
+        |> B.field "id" []
+        |> B.extract
+        |> B.field "deleteTag"
+            [ ( "id", Arg.string id )
+            ]
+        |> B.extract
+        |> B.mutationDocument
+        |> B.request ()
+
+
 deleteTopic : Id -> B.Request B.Mutation Id
 deleteTopic (Id id) =
     B.id
@@ -365,8 +428,8 @@ position =
         |> B.with (B.field "name" [] B.string)
         |> B.with (B.field "notes" [] (B.list B.string |> B.map Array.fromList))
         |> B.with (B.field "submissions" [] (B.list info))
-        |> B.with (B.field "transitionsFrom" [] (B.list info))
-        |> B.with (B.field "transitionsTo" [] (B.list info))
+        |> B.with (B.field "transitionsFrom" [] (B.list transition))
+        |> B.with (B.field "transitionsTo" [] (B.list transition))
 
 
 submission : B.ValueSpec B.NonNull B.ObjectType Submission vars
@@ -377,6 +440,16 @@ submission =
         |> B.with (B.field "steps" [] (B.list B.string |> B.map Array.fromList))
         |> B.with (B.field "notes" [] (B.list B.string |> B.map Array.fromList))
         |> B.with (B.field "position" [] info)
+        |> B.with (B.field "tags" [] (B.list info))
+
+
+tag : B.ValueSpec B.NonNull B.ObjectType Tag vars
+tag =
+    B.object Tag
+        |> B.with (B.field "id" [] (B.map Id B.id))
+        |> B.with (B.field "name" [] B.string)
+        |> B.with (B.field "submissions" [] (B.list info))
+        |> B.with (B.field "transitions" [] (B.list info))
 
 
 topic : B.ValueSpec B.NonNull B.ObjectType Topic vars
@@ -396,3 +469,4 @@ transition =
         |> B.with (B.field "endPosition" [] info)
         |> B.with (B.field "notes" [] (B.list B.string |> B.map Array.fromList))
         |> B.with (B.field "steps" [] (B.list B.string |> B.map Array.fromList))
+        |> B.with (B.field "tags" [] (B.list info))

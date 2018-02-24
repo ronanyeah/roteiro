@@ -18,15 +18,19 @@ const makePair = (id, xs) => [
   faker.helpers.randomize(xs.filter(x => x !== id))
 ];
 
+const formatArray = xs => xs.map(JSON.stringify).join(", ");
+
+const pickN = (n, xs) => faker.helpers.shuffle(xs).slice(0, n);
+
 const times = (n, fn) =>
   Array(n)
     .fill(0)
     .map(fn);
 
 const lorem = () =>
-  times(5, () => faker.lorem.sentence() + " " + faker.lorem.sentence())
-    .map(JSON.stringify)
-    .join(", ");
+  formatArray(
+    times(5, () => faker.lorem.sentence() + " " + faker.lorem.sentence())
+  );
 
 const concatMap = (fn, xs) => xs.map(fn).reduce((acc, x) => acc.concat(x), []);
 
@@ -42,6 +46,20 @@ const getPositions = () =>
 const getSubmissions = () =>
   client.request(`{
   allSubmissions {
+    id
+  }
+}`);
+
+const getTags = () =>
+  client.request(`{
+  allTags {
+    id
+  }
+}`);
+
+const getTopics = () =>
+  client.request(`{
+  allTopics {
     id
   }
 }`);
@@ -67,20 +85,34 @@ const createPosition = () =>
   }
 `);
 
-const createSubmission = positionId =>
+const createSubmission = (positionId, tagIds) =>
   client.request(`
   mutation {
-    createSubmission(name: "${faker.name.jobArea()}", positionId: "${positionId}", notes: [${lorem()}], steps: [${lorem()}]) {
+    createSubmission(name: "${faker.name.jobArea()}", positionId: "${positionId}", notes: [${lorem()}], steps: [${lorem()}], tagsIds: [${formatArray(
+    pickN(2, tagIds)
+  )}]) {
       id
       name
     }
   }
 `);
 
-const createTransition = (start, end) =>
+const createTransition = (start, end, tagIds) =>
   client.request(`
   mutation {
-    createTransition(name: "${faker.name.jobArea()}", startPositionId: "${start}", endPositionId: "${end}", notes: [${lorem()}], steps: [${lorem()}]) {
+    createTransition(name: "${faker.name.jobArea()}", startPositionId: "${start}", endPositionId: "${end}", notes: [${lorem()}], steps: [${lorem()}], tagsIds: [${formatArray(
+    pickN(2, tagIds)
+  )}]) {
+      id
+      name
+    }
+  }
+`);
+
+const createTag = () =>
+  client.request(`
+  mutation {
+    createTag(name: "${faker.lorem.word()}") {
       id
       name
     }
@@ -101,6 +133,15 @@ const deleteSubmission = id =>
   client.request(`
   mutation {
     deleteSubmission(id: "${id}") {
+      id
+    }
+  }
+`);
+
+const deleteTag = id =>
+  client.request(`
+  mutation {
+    deleteTag(id: "${id}") {
       id
     }
   }
@@ -129,16 +170,22 @@ const fill = async () => {
     x => x.createPosition.id
   );
 
+  const tagIds = (await Promise.all(times(10, () => createTag()))).map(
+    x => x.createTag.id
+  );
+
   await Promise.all(
-    concatMap(id => times(3, () => createSubmission(id)), posIds)
+    concatMap(id => times(3, () => createSubmission(id, tagIds)), posIds)
   );
 
   await Promise.all(
     concatMap(
-      id => times(3, () => createTransition(...makePair(id, posIds))),
+      id => times(3, () => createTransition(...makePair(id, posIds), tagIds)),
       posIds
     )
   );
+
+  await Promise.all(times(10, () => createTopic()));
 
   return "OK";
 };
@@ -152,6 +199,12 @@ const clear = async () => {
 
   const posIds = (await getPositions()).allPositions.map(x => x.id);
   await Promise.all(posIds.map(deletePosition));
+
+  const tagIds = (await getTags()).allTags.map(x => x.id);
+  await Promise.all(tagIds.map(deleteTag));
+
+  const topicIds = (await getTopics()).allTopics.map(x => x.id);
+  await Promise.all(topicIds.map(deleteTag));
 
   return "OK";
 };

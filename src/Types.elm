@@ -8,19 +8,24 @@ import Window
 
 
 type Msg
-    = Cancel
+    = AddTag Info
+    | Cancel
     | CbCreateOrUpdatePosition (Result GcError Position)
     | CbCreateOrUpdateSubmission (Result GcError Submission)
+    | CbCreateOrUpdateTag (Result GcError Tag)
     | CbCreateOrUpdateTopic (Result GcError Topic)
     | CbCreateOrUpdateTransition (Result GcError Transition)
     | CbDeletePosition (Result GcError Id)
     | CbDeleteSubmission (Result GcError Id)
+    | CbDeleteTag (Result GcError Id)
     | CbDeleteTopic (Result GcError Id)
     | CbDeleteTransition (Result GcError Id)
     | CbPosition (GcData Position)
     | CbPositions (GcData (List Info))
     | CbSubmission (GcData Submission)
     | CbSubmissions (GcData (List Submission))
+    | CbTag (GcData Tag)
+    | CbTags (GcData (List Info))
     | CbTopic (GcData Topic)
     | CbTopics (GcData (List Info))
     | CbTransition (GcData Transition)
@@ -28,22 +33,29 @@ type Msg
     | Confirm (Maybe Msg)
     | CreatePosition
     | CreateSubmission (Maybe Position)
+    | CreateTag
     | CreateTopic
     | CreateTransition (Maybe Position)
     | DeletePosition Id
     | DeleteSubmission Id
+    | DeleteTag Id
     | DeleteTopic Id
     | DeleteTransition Id
     | EditPosition Position
     | EditSubmission Submission
+    | EditTag Tag
     | EditTopic Topic
     | EditTransition Transition
+    | NavigateTo String
+    | RemoveTag Int
     | SaveCreatePosition
     | SaveCreateSubmission
+    | SaveCreateTag
     | SaveCreateTopic
     | SaveCreateTransition
     | SaveEditPosition
     | SaveEditSubmission
+    | SaveEditTag
     | SaveEditTopic
     | SaveEditTransition
     | SidebarNavigate String
@@ -62,16 +74,20 @@ type View
     = ViewStart
     | ViewCreatePosition
     | ViewCreateSubmission
+    | ViewCreateTag
     | ViewCreateTopic
     | ViewCreateTransition
     | ViewEditPosition
     | ViewEditSubmission
+    | ViewEditTag
     | ViewEditTopic
     | ViewEditTransition
     | ViewPosition (GcData Position)
     | ViewPositions
     | ViewSubmission (GcData Submission)
     | ViewSubmissions (GcData (List Submission))
+    | ViewTag (GcData Tag)
+    | ViewTags
     | ViewTopic (GcData Topic)
     | ViewTopics (GcData (List Info))
     | ViewTransition (GcData Transition)
@@ -98,6 +114,7 @@ type FaIcon
     | Cogs
     | Bars
     | Warning
+    | Tags
 
 
 type Id
@@ -133,6 +150,7 @@ type alias Model =
     { view : View
     , previousView : View
     , positions : GcData (List Info)
+    , tags : GcData (List Info)
     , device : Device
     , size : Window.Size
     , token : String
@@ -157,10 +175,20 @@ type Route
     | SubmissionRoute Id
     | Submissions
     | Start
+    | TagRoute Id
+    | TagsRoute
     | TopicRoute Id
     | Topics
     | TransitionRoute Id
     | Transitions
+
+
+type alias Tag =
+    { id : Id
+    , name : String
+    , submissions : List Info
+    , transitions : List Info
+    }
 
 
 type alias Topic =
@@ -175,8 +203,8 @@ type alias Position =
     , name : String
     , notes : Array String
     , submissions : List Info
-    , transitionsFrom : List Info
-    , transitionsTo : List Info
+    , transitionsFrom : List Transition
+    , transitionsTo : List Transition
     }
 
 
@@ -186,6 +214,7 @@ type alias Submission =
     , steps : Array String
     , notes : Array String
     , position : Info
+    , tags : List Info
     }
 
 
@@ -197,6 +226,7 @@ type alias Form =
     , endPosition : Maybe Info
     , notes : Array String
     , steps : Array String
+    , tags : Array Info
     }
 
 
@@ -207,6 +237,7 @@ type alias Transition =
     , endPosition : Info
     , notes : Array String
     , steps : Array String
+    , tags : List Info
     }
 
 
