@@ -9,7 +9,9 @@ import Window
 
 type Msg
     = AddTag Info
+    | AppInit String Location (Result GcError User)
     | Cancel
+    | CbAuth (Result GcError Auth)
     | CbCreateOrUpdatePosition (Result GcError Position)
     | CbCreateOrUpdateSubmission (Result GcError Submission)
     | CbCreateOrUpdateTag (Result GcError Tag)
@@ -46,6 +48,8 @@ type Msg
     | EditTag Tag
     | EditTopic Topic
     | EditTransition Transition
+    | LoginSubmit
+    | Logout
     | NavigateTo String
     | RemoveTag Int
     | SaveCreatePosition
@@ -59,12 +63,14 @@ type Msg
     | SaveEditTopic
     | SaveEditTransition
     | SidebarNavigate String
+    | SignUpSubmit
     | ToggleEndPosition
     | ToggleSidebar
     | ToggleStartPosition
-    | TokenEdit (Maybe String)
+    | UpdateEmail String
     | UpdateEndPosition Info
     | UpdateForm Form
+    | UpdatePassword String
     | UpdateStartPosition Info
     | UrlChange Location
     | WindowSize Window.Size
@@ -82,8 +88,10 @@ type View
     | ViewEditTag
     | ViewEditTopic
     | ViewEditTransition
+    | ViewLogin
     | ViewPosition (GcData Position)
     | ViewPositions
+    | ViewSignUp
     | ViewSubmission (GcData Submission)
     | ViewSubmissions (GcData (List Submission))
     | ViewTag (GcData Tag)
@@ -92,6 +100,7 @@ type View
     | ViewTopics (GcData (List Info))
     | ViewTransition (GcData Transition)
     | ViewTransitions (GcData (List Transition))
+    | ViewWaiting
 
 
 type FaIcon
@@ -103,11 +112,15 @@ type FaIcon
     | Tick
     | Bolt
     | Lock
+    | Email
+    | SignIn
+    | SignOut
     | Waiting
     | Home
     | Book
     | Notes
     | Plus
+    | NewUser
     | Minus
     | Question
     | Globe
@@ -148,13 +161,12 @@ type alias Info =
 
 type alias Model =
     { view : View
+    , auth : Maybe Auth
     , previousView : View
     , positions : GcData (List Info)
     , tags : GcData (List Info)
     , device : Device
     , size : Window.Size
-    , token : String
-    , tokenForm : Maybe String
     , confirm : Maybe Msg
     , form : Form
     , sidebarOpen : Bool
@@ -174,6 +186,8 @@ type Route
     | Positions
     | SubmissionRoute Id
     | Submissions
+    | Login
+    | SignUp
     | Start
     | TagRoute Id
     | TagsRoute
@@ -181,6 +195,19 @@ type Route
     | Topics
     | TransitionRoute Id
     | Transitions
+
+
+type alias Auth =
+    { id : Id
+    , email : String
+    , token : String
+    }
+
+
+type alias User =
+    { id : Id
+    , email : String
+    }
 
 
 type alias Tag =
@@ -227,6 +254,8 @@ type alias Form =
     , notes : Array String
     , steps : Array String
     , tags : Array Info
+    , email : String
+    , password : String
     }
 
 

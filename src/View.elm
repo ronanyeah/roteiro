@@ -2,7 +2,7 @@ module View exposing (..)
 
 import Array exposing (Array)
 import Color
-import Element exposing (Attribute, Element, alignRight, centerX, centerY, column, decorativeImage, el, empty, fill, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, padding, paragraph, pointer, px, row, scrollbarY, shrink, spaceEvenly, spacing, text, width)
+import Element exposing (Attribute, Element, alignRight, centerX, centerY, column, decorativeImage, el, empty, fill, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, padding, paragraph, pointer, px, row, scrollbarY, shrink, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -25,25 +25,22 @@ view model =
         content =
             case model.view of
                 ViewStart ->
-                    column [ spacing 20 ]
-                        [ Input.button [ centerX ]
-                            { onPress =
-                                Just <| TokenEdit <| Just ""
-                            , label =
-                                decorativeImage
-                                    [ height <| px 100
-                                    , width <| px 100
-                                    ]
-                                    { src = "/map.svg" }
-                            }
-                        , el
-                            [ Font.size 45, Font.color Style.e, centerX ]
-                          <|
-                            text "ROTEIRO"
-                        ]
+                    el [ centerY ] <|
+                        column [ spacing 20 ]
+                            [ decorativeImage
+                                [ height <| px 100
+                                , width <| px 100
+                                , centerX
+                                ]
+                                { src = "/map.svg" }
+                            , el
+                                [ Font.size 45, Font.color Style.e, centerX ]
+                              <|
+                                text "ROTEIRO"
+                            ]
 
                 ViewCreatePosition ->
-                    column [ height <| px model.size.height, scrollbarY ]
+                    column []
                         [ viewErrors model.form.errors
                         , nameEdit model.form
                         , notesEditor model.form
@@ -51,7 +48,7 @@ view model =
                         ]
 
                 ViewCreateSubmission ->
-                    column [ height <| px model.size.height, scrollbarY ]
+                    column []
                         [ viewErrors model.form.errors
                         , nameEdit model.form
                         , viewSubmissionPicker model.form
@@ -61,14 +58,14 @@ view model =
                         ]
 
                 ViewCreateTag ->
-                    column [ height <| px model.size.height, scrollbarY ]
+                    column []
                         [ viewErrors model.form.errors
                         , nameEdit model.form
                         , createButtons SaveCreateTag
                         ]
 
                 ViewCreateTopic ->
-                    column [ height <| px model.size.height, scrollbarY ]
+                    column []
                         [ viewErrors model.form.errors
                         , nameEdit model.form
                         , notesEditor model.form
@@ -76,7 +73,7 @@ view model =
                         ]
 
                 ViewCreateTransition ->
-                    column [ height <| px model.size.height, scrollbarY ]
+                    column []
                         [ viewErrors model.form.errors
                         , nameEdit model.form
                         , viewTransitionPickers model.form
@@ -86,7 +83,7 @@ view model =
                         ]
 
                 ViewEditPosition ->
-                    column [ height <| px model.size.height, scrollbarY ]
+                    column []
                         [ viewErrors model.form.errors
                         , nameEdit model.form
                         , notesEditor model.form
@@ -94,7 +91,7 @@ view model =
                         ]
 
                 ViewEditSubmission ->
-                    column [ height <| px model.size.height, scrollbarY ]
+                    column []
                         [ viewErrors model.form.errors
                         , nameEdit model.form
                         , viewSubmissionPicker model.form
@@ -105,14 +102,14 @@ view model =
                         ]
 
                 ViewEditTag ->
-                    column [ height <| px model.size.height, scrollbarY ]
+                    column []
                         [ viewErrors model.form.errors
                         , nameEdit model.form
                         , editButtons SaveEditTag <| DeleteTag model.form.id
                         ]
 
                 ViewEditTopic ->
-                    column [ height <| px model.size.height, scrollbarY ]
+                    column []
                         [ viewErrors model.form.errors
                         , nameEdit model.form
                         , notesEditor model.form
@@ -120,7 +117,7 @@ view model =
                         ]
 
                 ViewEditTransition ->
-                    column [ height <| px model.size.height, scrollbarY ]
+                    column []
                         [ viewErrors model.form.errors
                         , nameEdit model.form
                         , viewTransitionPickers model.form
@@ -129,6 +126,114 @@ view model =
                         , editTags model.tags <| Array.toList model.form.tags
                         , editButtons SaveEditTransition <| DeleteTransition model.form.id
                         ]
+
+                ViewLogin ->
+                    el [ centerY ] <|
+                        column
+                            [ centerX
+                            , spacing 20
+                            , Background.color Style.c
+                            , width fill
+                            , height fill
+                            ]
+                            [ decorativeImage
+                                [ height <| px 100
+                                , width <| px 100
+                                , centerX
+                                ]
+                                { src = "/map.svg" }
+                            , el
+                                [ Font.size 45, Font.color Style.e, centerX ]
+                              <|
+                                text "ROTEIRO"
+                            , Input.button [ centerX ]
+                                { onPress =
+                                    Just <| NavigateTo Paths.signUp
+                                , label =
+                                    icon NewUser
+                                        Style.actionIcon
+                                }
+                            , Input.email
+                                ([ centerX, width <| px <| model.size.width // 3 ] ++ Style.field)
+                                { onChange = Just UpdateEmail
+                                , text = model.form.email
+                                , label =
+                                    Input.labelLeft [] <|
+                                        icon Email Style.bigIcon
+                                , placeholder = Nothing
+                                }
+                            , Input.currentPassword
+                                ([ centerX, width <| px <| model.size.width // 3 ] ++ Style.field)
+                                { onChange = Just UpdatePassword
+                                , text = model.form.password
+                                , label =
+                                    Input.labelLeft [] <|
+                                        icon Lock Style.bigIcon
+                                , placeholder = Nothing
+                                , show = False
+                                }
+                            , Input.button [ centerX ]
+                                { onPress =
+                                    Just <| LoginSubmit
+                                , label =
+                                    icon SignIn
+                                        Style.actionIcon
+                                }
+                            ]
+
+                ViewSignUp ->
+                    el [ centerY ] <|
+                        column
+                            [ centerX
+                            , spacing 20
+                            , Background.color Style.c
+                            , width fill
+                            , height fill
+                            ]
+                            [ decorativeImage
+                                [ height <| px 100
+                                , width <| px 100
+                                , centerX
+                                ]
+                                { src = "/map.svg" }
+                            , el
+                                [ Font.size 45, Font.color Style.e, centerX ]
+                              <|
+                                text "ROTEIRO"
+                            , Input.button [ centerX ]
+                                { onPress =
+                                    Just <| NavigateTo Paths.login
+                                , label =
+                                    icon SignIn
+                                        Style.actionIcon
+                                }
+                            , Input.email
+                                ([ centerX, width <| px <| model.size.width // 3 ] ++ Style.field)
+                                { onChange = Just UpdateEmail
+                                , text = model.form.email
+                                , label =
+                                    Input.labelLeft [] <|
+                                        icon Email Style.bigIcon
+                                , placeholder = Nothing
+                                }
+                            , Input.currentPassword
+                                ([ centerX, width <| px <| model.size.width // 3 ] ++ Style.field)
+                                { onChange = Just UpdatePassword
+                                , text = model.form.password
+                                , label =
+                                    Input.labelLeft [] <|
+                                        icon Lock Style.bigIcon
+                                , placeholder = Nothing
+                                , show = False
+                                }
+                            , Input.button [ centerX ]
+                                { onPress =
+                                    Just <| SignUpSubmit
+                                , label =
+                                    icon NewUser
+                                        Style.actionIcon
+                                }
+                            ]
 
                 ViewPosition data ->
                     data
@@ -202,7 +307,7 @@ view model =
                         |> viewRemote
                             (\positions ->
                                 column
-                                    [ height <| px model.size.height, scrollbarY ]
+                                    []
                                     [ addNewRow Flag CreatePosition
                                     , blocks Paths.position positions
                                     ]
@@ -212,7 +317,7 @@ view model =
                     data
                         |> viewRemote
                             (\sub ->
-                                column [ height <| px model.size.height, scrollbarY ]
+                                column []
                                     [ editRow sub.name Bolt <| EditSubmission sub
                                     , row
                                         [ spacing 10 ]
@@ -226,7 +331,7 @@ view model =
                                         ]
                                     , viewSteps sub.steps
                                     , viewNotes sub.notes
-                                    , viewTags model.tags sub.tags
+                                    , viewTags sub.tags
                                     ]
                             )
 
@@ -235,7 +340,7 @@ view model =
                         |> viewRemote
                             (\submissions ->
                                 column
-                                    [ height <| px model.size.height, scrollbarY ]
+                                    []
                                     [ addNewRow Bolt <| CreateSubmission Nothing
                                     , column [ spacing 20 ] <|
                                         (submissions
@@ -287,7 +392,7 @@ view model =
                         |> viewRemote
                             (\tags ->
                                 column
-                                    [ height <| px model.size.height, scrollbarY ]
+                                    []
                                     [ addNewRow Tags CreateTag
                                     , blocks Paths.tag tags
                                     ]
@@ -308,7 +413,7 @@ view model =
                         |> viewRemote
                             (\topics ->
                                 column
-                                    [ height <| px model.size.height, scrollbarY ]
+                                    []
                                     [ addNewRow Book CreateTopic
                                     , blocks Paths.topic topics
                                     ]
@@ -319,7 +424,7 @@ view model =
                         |> viewRemote
                             (\({ steps, startPosition, endPosition, notes, tags } as t) ->
                                 column
-                                    [ height <| px model.size.height, scrollbarY ]
+                                    []
                                     [ editRow t.name Arrow <| EditTransition t
                                     , paragraph
                                         [ centerY, centerX ]
@@ -339,7 +444,7 @@ view model =
                                         ]
                                     , viewSteps steps
                                     , viewNotes notes
-                                    , viewTags model.tags tags
+                                    , viewTags tags
                                     ]
                             )
 
@@ -348,7 +453,7 @@ view model =
                         |> viewRemote
                             (\transitions ->
                                 column
-                                    [ height <| px model.size.height, scrollbarY ]
+                                    []
                                     [ addNewRow Arrow <| CreateTransition Nothing
                                     , column [ spacing 20 ] <|
                                         (transitions
@@ -382,35 +487,8 @@ view model =
                                     ]
                             )
 
-        enterToken =
-            model.tokenForm
-                |> whenJust
-                    (\str ->
-                        column
-                            [ centerX
-                            , spacing 20
-                            , Background.color Style.c
-                            , width fill
-                            , height fill
-                            ]
-                            [ Input.text
-                                ([ centerY, width <| px <| model.size.width // 3 ] ++ Style.field)
-                                { onChange = Just (Just >> TokenEdit)
-                                , text = str
-                                , label =
-                                    Input.labelAbove [] <|
-                                        icon Lock (centerX :: Style.bigIcon)
-                                , placeholder = Nothing
-                                }
-                            , Input.button []
-                                { onPress =
-                                    Just <| TokenEdit Nothing
-                                , label =
-                                    icon Cross
-                                        Style.actionIcon
-                                }
-                            ]
-                    )
+                ViewWaiting ->
+                    el [ centerX, centerY ] <| icon Waiting Style.bigIcon
 
         confirm =
             model.confirm
@@ -444,9 +522,6 @@ view model =
             if isJust model.confirm then
                 confirm
                     |> inFront
-            else if isJust model.tokenForm then
-                enterToken
-                    |> inFront
             else if model.selectingEndPosition then
                 viewPickPosition UpdateEndPosition model.positions
                     |> inFront
@@ -473,14 +548,29 @@ view model =
                 , modal
                 ]
             <|
-                row
-                    [ width fill
-                    , height fill
-                    ]
-                    [ links model.view
-                    , el [ width <| px <| round <| toFloat model.size.width * 0.8 ]
+                case model.view of
+                    ViewLogin ->
                         content
-                    ]
+
+                    ViewSignUp ->
+                        content
+
+                    ViewWaiting ->
+                        content
+
+                    _ ->
+                        row
+                            [ width fill
+                            , height fill
+                            ]
+                            [ links model.view
+                            , el
+                                [ width <| px <| round <| toFloat model.size.width * 0.8
+                                , height <| px model.size.height
+                                , scrollbarY
+                                ]
+                                content
+                            ]
 
         Mobile ->
             layoutWith { options = [ noHover ] }
@@ -576,6 +666,11 @@ links view =
                          else
                             Style.actionIcon
                         )
+                }
+            , button []
+                { onPress = Just <| Logout
+                , label =
+                    icon SignOut Style.actionIcon
                 }
             ]
 
@@ -1104,8 +1199,8 @@ editTags tags xs =
                 |> remoteUnwrap (icon Waiting Style.mattIcon)
                     (List.filter
                         (flip List.member xs >> not)
-                        >> List.indexedMap
-                            (\i tag ->
+                        >> List.map
+                            (\tag ->
                                 block (tag.name ++ " +") <| AddTag tag
                             )
                         >> paragraph [ padding 20 ]
@@ -1119,17 +1214,17 @@ editTags tags xs =
             ]
 
 
-viewTags : GcData (List Info) -> List Info -> Element Msg
-viewTags tags xs =
+viewTags : List Info -> Element Msg
+viewTags tags =
     el [ centerX ] <|
         column [ spacing 20 ]
             [ icon Tags Style.mattIcon
-            , if List.isEmpty xs then
+            , if List.isEmpty tags then
                 el [] <| text "None!"
               else
                 column
                     []
-                    (xs
+                    (tags
                         |> List.map
                             (\t ->
                                 button []

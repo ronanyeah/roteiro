@@ -56,3 +56,13 @@ transitions =
 start : String
 start =
     "start"
+
+
+login : String
+login =
+    "login"
+
+
+signUp : String
+signUp =
+    "sign-up"

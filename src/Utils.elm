@@ -95,7 +95,7 @@ formatErrors err =
                                 "Not authorised."
 
                             RelationIsRequired ->
-                                "Can't delete, other data depends on this."
+                                "Relation is required!"
 
                             Other str ->
                                 str
@@ -239,6 +239,15 @@ icon fa attrs =
                 Globe ->
                     "fa-globe"
 
+                Email ->
+                    "fa-at"
+
+                SignIn ->
+                    "fa-sign-in-alt"
+
+                SignOut ->
+                    "fa-sign-out-alt"
+
                 Home ->
                     "fa-home"
 
@@ -247,6 +256,9 @@ icon fa attrs =
 
                 Notes ->
                     "fa-sticky-note"
+
+                NewUser ->
+                    "fa-user-plus"
 
                 Cross ->
                     "fa-times"
@@ -388,14 +400,13 @@ filterEmpty =
 
 emptyModel : Model
 emptyModel =
-    { view = ViewStart
+    { view = ViewWaiting
+    , auth = Nothing
     , previousView = ViewStart
     , positions = RemoteData.NotAsked
     , tags = RemoteData.NotAsked
-    , token = ""
     , device = Desktop
     , size = Window.Size 0 0
-    , tokenForm = Nothing
     , confirm = Nothing
     , form = emptyForm
     , sidebarOpen = False
@@ -414,6 +425,8 @@ emptyForm =
     , steps = Array.empty
     , notes = Array.empty
     , tags = Array.empty
+    , email = ""
+    , password = ""
     }
 
 

@@ -9,12 +9,21 @@ import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, logError, removeNull, taskToGcData)
+import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, logError, removeNull, taskToGcData, unwrap)
 import Validate
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    let
+        token =
+            model.auth
+                |> unwrap "" .token
+
+        userId =
+            model.auth
+                |> unwrap (Id "") .id
+    in
     case msg of
         AddTag tag ->
             ( { model
@@ -27,8 +36,50 @@ update msg model =
             , Cmd.none
             )
 
+        AppInit token location res ->
+            case res of
+                Ok { id, email } ->
+                    update (UrlChange location)
+                        { model
+                            | auth =
+                                Just
+                                    { id = id
+                                    , email = email
+                                    , token = token
+                                    }
+                        }
+
+                Err err ->
+                    ( model
+                    , Cmd.batch
+                        [ log err
+                        , goTo Paths.login
+                        , Ports.clearToken ()
+                        ]
+                    )
+
         Cancel ->
-            ( { model | view = model.previousView, confirm = Nothing }, Cmd.none )
+            ( { model
+                | view = model.previousView
+                , confirm = Nothing
+              }
+            , Cmd.none
+            )
+
+        CbAuth res ->
+            case res of
+                Ok auth ->
+                    ( { model | auth = Just auth }
+                    , Cmd.batch
+                        [ Ports.saveToken auth.token
+                        , goTo Paths.start
+                        ]
+                    )
+
+                Err err ->
+                    ( model
+                    , log err
+                    )
 
         CbCreateOrUpdatePosition res ->
             case res of
@@ -316,8 +367,8 @@ update msg model =
                 , form = form
               }
             , Cmd.batch
-                [ maybeFetchPositions model.token model.positions
-                , maybeFetchTags model.token model.tags
+                [ maybeFetchPositions token model.positions
+                , maybeFetchTags token model.tags
                 ]
             )
 
@@ -357,43 +408,43 @@ update msg model =
                 , form = form
               }
             , Cmd.batch
-                [ maybeFetchPositions model.token model.positions
-                , maybeFetchTags model.token model.tags
+                [ maybeFetchPositions token model.positions
+                , maybeFetchTags token model.tags
                 ]
             )
 
         DeletePosition id ->
             ( model
             , Data.deletePosition id
-                |> mutation model.token
+                |> mutation token
                 |> Task.attempt CbDeletePosition
             )
 
         DeleteSubmission id ->
             ( model
             , Data.deleteSubmission id
-                |> mutation model.token
+                |> mutation token
                 |> Task.attempt CbDeleteSubmission
             )
 
         DeleteTag id ->
             ( model
             , Data.deleteTag id
-                |> mutation model.token
+                |> mutation token
                 |> Task.attempt CbDeleteTag
             )
 
         DeleteTopic id ->
             ( model
             , Data.deleteTopic id
-                |> mutation model.token
+                |> mutation token
                 |> Task.attempt CbDeleteTopic
             )
 
         DeleteTransition id ->
             ( model
             , Data.deleteTransition id
-                |> mutation model.token
+                |> mutation token
                 |> Task.attempt CbDeleteTransition
             )
 
@@ -432,8 +483,8 @@ update msg model =
                 , form = form
               }
             , Cmd.batch
-                [ maybeFetchPositions model.token model.positions
-                , maybeFetchTags model.token model.tags
+                [ maybeFetchPositions token model.positions
+                , maybeFetchTags token model.tags
                 ]
             )
 
@@ -488,8 +539,23 @@ update msg model =
                 , form = form
               }
             , Cmd.batch
-                [ maybeFetchPositions model.token model.positions
-                , maybeFetchTags model.token model.tags
+                [ maybeFetchPositions token model.positions
+                , maybeFetchTags token model.tags
+                ]
+            )
+
+        LoginSubmit ->
+            ( model
+            , Data.login model.form.email model.form.password
+                |> mutation token
+                |> Task.attempt CbAuth
+            )
+
+        Logout ->
+            ( { model | auth = Nothing }
+            , Cmd.batch
+                [ Ports.clearToken ()
+                , goTo Paths.login
                 ]
             )
 
@@ -509,11 +575,10 @@ update msg model =
 
         SaveCreatePosition ->
             case Validate.position model.form of
-                Ok args ->
+                Ok ( name, notes ) ->
                     ( { model | form = clearErrors model.form }
-                    , args
-                        |> uncurry createPosition
-                        |> mutation model.token
+                    , createPosition userId name notes
+                        |> mutation token
                         |> Task.attempt CbCreateOrUpdatePosition
                     )
 
@@ -526,8 +591,8 @@ update msg model =
             case Validate.submission model.form of
                 Ok ( name, startId, steps, notes ) ->
                     ( { model | form = clearErrors model.form }
-                    , createSubmission name startId steps notes
-                        |> mutation model.token
+                    , createSubmission userId name startId steps notes
+                        |> mutation token
                         |> Task.attempt CbCreateOrUpdateSubmission
                     )
 
@@ -540,9 +605,8 @@ update msg model =
             case Validate.tag model.form of
                 Ok name ->
                     ( { model | form = clearErrors model.form }
-                    , name
-                        |> createTag
-                        |> mutation model.token
+                    , createTag userId name
+                        |> mutation token
                         |> Task.attempt CbCreateOrUpdateTag
                     )
 
@@ -553,11 +617,10 @@ update msg model =
 
         SaveCreateTopic ->
             case Validate.topic model.form of
-                Ok args ->
+                Ok ( name, notes ) ->
                     ( { model | form = clearErrors model.form }
-                    , args
-                        |> uncurry createTopic
-                        |> mutation model.token
+                    , createTopic userId name notes
+                        |> mutation token
                         |> Task.attempt CbCreateOrUpdateTopic
                     )
 
@@ -571,12 +634,13 @@ update msg model =
                 Ok ( name, startId, endId, steps, notes ) ->
                     ( { model | form = clearErrors model.form }
                     , createTransition
+                        userId
                         name
                         startId
                         endId
                         steps
                         notes
-                        |> mutation model.token
+                        |> mutation token
                         |> Task.attempt CbCreateOrUpdateTransition
                     )
 
@@ -591,7 +655,7 @@ update msg model =
                     ( { model | form = clearErrors model.form }
                     , args
                         |> uncurry (updatePosition model.form.id)
-                        |> mutation model.token
+                        |> mutation token
                         |> Task.attempt CbCreateOrUpdatePosition
                     )
 
@@ -604,8 +668,8 @@ update msg model =
             case Validate.submission model.form of
                 Ok ( name, position, steps, notes ) ->
                     ( { model | form = clearErrors model.form }
-                    , updateSubmission model.form.id name position steps notes (model.form.tags |> Array.toList)
-                        |> mutation model.token
+                    , updateSubmission model.form.id name position steps notes model.form.tags
+                        |> mutation token
                         |> Task.attempt CbCreateOrUpdateSubmission
                     )
 
@@ -620,7 +684,7 @@ update msg model =
                     ( { model | form = clearErrors model.form }
                     , name
                         |> updateTag model.form.id
-                        |> mutation model.token
+                        |> mutation token
                         |> Task.attempt CbCreateOrUpdateTag
                     )
 
@@ -635,7 +699,7 @@ update msg model =
                     ( { model | form = clearErrors model.form }
                     , args
                         |> uncurry (updateTopic model.form.id)
-                        |> mutation model.token
+                        |> mutation token
                         |> Task.attempt CbCreateOrUpdateTopic
                     )
 
@@ -648,8 +712,8 @@ update msg model =
             case Validate.transition model.form of
                 Ok ( name, startId, endId, steps, notes ) ->
                     ( { model | form = clearErrors model.form }
-                    , updateTransition model.form.id name startId endId steps notes
-                        |> mutation model.token
+                    , updateTransition model.form.id name startId endId steps notes model.form.tags
+                        |> mutation token
                         |> Task.attempt CbCreateOrUpdateTransition
                     )
 
@@ -661,6 +725,13 @@ update msg model =
         SidebarNavigate url ->
             ( { model | sidebarOpen = False }, goTo url )
 
+        SignUpSubmit ->
+            ( model
+            , Data.signUp model.form.email model.form.password
+                |> mutation token
+                |> Task.attempt CbAuth
+            )
+
         ToggleEndPosition ->
             ( { model | selectingEndPosition = not model.selectingEndPosition }, Cmd.none )
 
@@ -670,21 +741,19 @@ update msg model =
         ToggleStartPosition ->
             ( { model | selectingStartPosition = not model.selectingStartPosition }, Cmd.none )
 
-        TokenEdit maybeStr ->
-            case maybeStr of
-                Nothing ->
-                    ( { model | tokenForm = Nothing }, Cmd.none )
-
-                Just "" ->
-                    ( { model | tokenForm = Just "" }, Cmd.none )
-
-                Just token ->
-                    ( { model | tokenForm = Nothing, token = token }
-                    , Ports.saveToken token
-                    )
-
         UpdateForm f ->
             ( { model | form = f }, Cmd.none )
+
+        UpdateEmail str ->
+            ( { model
+                | form =
+                    model.form
+                        |> (\f ->
+                                { f | email = str }
+                           )
+              }
+            , Cmd.none
+            )
 
         UpdateEndPosition selection ->
             let
@@ -692,6 +761,17 @@ update msg model =
                     model.form |> (\f -> { f | endPosition = Just selection })
             in
             ( { model | form = form, selectingEndPosition = False }, Cmd.none )
+
+        UpdatePassword str ->
+            ( { model
+                | form =
+                    model.form
+                        |> (\f ->
+                                { f | password = str }
+                           )
+              }
+            , Cmd.none
+            )
 
         UpdateStartPosition selection ->
             let
@@ -706,6 +786,22 @@ update msg model =
                     ( model, Cmd.none )
             in
             case router location of
+                Login ->
+                    case model.auth of
+                        Just _ ->
+                            ( model, goTo Paths.start )
+
+                        Nothing ->
+                            ( { model | view = ViewLogin, form = emptyForm }, Cmd.none )
+
+                SignUp ->
+                    case model.auth of
+                        Just _ ->
+                            ( model, goTo Paths.start )
+
+                        Nothing ->
+                            ( { model | view = ViewSignUp, form = emptyForm }, Cmd.none )
+
                 NotFound ->
                     ( model, Cmd.batch [ log "redirecting...", goTo Paths.start ] )
 
@@ -715,14 +811,14 @@ update msg model =
                     else
                         ( { model | view = ViewPosition Loading }
                         , fetchPosition id
-                            |> query model.token
+                            |> query token
                             |> taskToGcData (removeNull >> CbPosition)
                         )
 
                 Positions ->
                     ( { model | view = ViewPositions, positions = Loading }
                     , fetchPositions
-                        |> query model.token
+                        |> query token
                         |> taskToGcData CbPositions
                     )
 
@@ -732,14 +828,14 @@ update msg model =
                     else
                         ( { model | view = ViewSubmission Loading }
                         , fetchSubmission id
-                            |> query model.token
+                            |> query token
                             |> taskToGcData (removeNull >> CbSubmission)
                         )
 
                 Submissions ->
                     ( { model | view = ViewSubmissions Loading }
                     , fetchSubmissions
-                        |> query model.token
+                        |> query token
                         |> taskToGcData CbSubmissions
                     )
 
@@ -749,14 +845,14 @@ update msg model =
                 TagRoute id ->
                     ( { model | view = ViewTag Loading }
                     , fetchTag id
-                        |> query model.token
+                        |> query token
                         |> taskToGcData (removeNull >> CbTag)
                     )
 
                 TagsRoute ->
                     ( { model | view = ViewTags, tags = Loading }
                     , fetchTags
-                        |> query model.token
+                        |> query token
                         |> taskToGcData CbTags
                     )
 
@@ -766,14 +862,14 @@ update msg model =
                     else
                         ( { model | view = ViewTopic Loading }
                         , fetchTopic id
-                            |> query model.token
+                            |> query token
                             |> taskToGcData (removeNull >> CbTopic)
                         )
 
                 Topics ->
                     ( { model | view = ViewTopics Loading }
                     , fetchTopics
-                        |> query model.token
+                        |> query token
                         |> taskToGcData CbTopics
                     )
 
@@ -783,14 +879,14 @@ update msg model =
                     else
                         ( { model | view = ViewTransition Loading }
                         , fetchTransition id
-                            |> query model.token
+                            |> query token
                             |> taskToGcData (removeNull >> CbTransition)
                         )
 
                 Transitions ->
                     ( { model | view = ViewTransitions Loading }
                     , fetchTransitions
-                        |> query model.token
+                        |> query token
                         |> taskToGcData CbTransitions
                     )
 

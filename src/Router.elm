@@ -20,6 +20,8 @@ routes =
     , map (Id >> TopicRoute) (s Paths.topics </> string)
     , map (Id >> TransitionRoute) (s Paths.transitions </> string)
     , map Start (s Paths.start)
+    , map Login (s Paths.login)
+    , map SignUp (s Paths.signUp)
     ]
 
 

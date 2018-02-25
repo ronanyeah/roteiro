@@ -3,7 +3,8 @@ const faker = require("faker");
 
 const { GRAPHQL_ENDPOINT, TOKEN } = process.env;
 
-if (!GRAPHQL_ENDPOINT || !TOKEN) throw Error("missing credentials");
+if (!GRAPHQL_ENDPOINT) throw Error("missing api endpoint");
+if (!TOKEN) throw Error("missing api token");
 
 const client = new GraphQLClient(GRAPHQL_ENDPOINT, {
   headers: {
@@ -35,6 +36,13 @@ const lorem = () =>
 const concatMap = (fn, xs) => xs.map(fn).reduce((acc, x) => acc.concat(x), []);
 
 // QUERIES
+
+const getUsers = () =>
+  client.request(`{
+  allUsers {
+    id
+  }
+}`);
 
 const getPositions = () =>
   client.request(`{
@@ -73,56 +81,65 @@ const getTransitions = () =>
 
 // MUTATIONS
 
-const createPosition = () =>
+const signUp = () =>
+  client.request(`
+  mutation {
+    signupUser(email: "ronan@yeah.com", password: "pw") {
+      id
+    }
+  }
+`);
+
+const createPosition = userId =>
   client.request(`
   mutation {
     createPosition(name: "${faker.commerce.productAdjective() +
       " " +
-      faker.name.lastName()}", notes: [${lorem()}]) {
+      faker.name.lastName()}", notes: [${lorem()}], userId: "${userId}") {
       id
       name
     }
   }
 `);
 
-const createSubmission = (positionId, tagIds) =>
+const createSubmission = (userId, positionId, tagIds) =>
   client.request(`
   mutation {
     createSubmission(name: "${faker.name.jobArea()}", positionId: "${positionId}", notes: [${lorem()}], steps: [${lorem()}], tagsIds: [${formatArray(
     pickN(2, tagIds)
-  )}]) {
+  )}], userId: "${userId}") {
       id
       name
     }
   }
 `);
 
-const createTransition = (start, end, tagIds) =>
+const createTransition = (userId, start, end, tagIds) =>
   client.request(`
   mutation {
     createTransition(name: "${faker.name.jobArea()}", startPositionId: "${start}", endPositionId: "${end}", notes: [${lorem()}], steps: [${lorem()}], tagsIds: [${formatArray(
     pickN(2, tagIds)
-  )}]) {
+  )}], userId: "${userId}") {
       id
       name
     }
   }
 `);
 
-const createTag = () =>
+const createTag = userId =>
   client.request(`
   mutation {
-    createTag(name: "${faker.lorem.word()}") {
+    createTag(name: "${faker.lorem.word()}", userId: "${userId}") {
       id
       name
     }
   }
 `);
 
-const createTopic = () =>
+const createTopic = userId =>
   client.request(`
   mutation {
-    createTopic(name: "${faker.random.word()}", notes: [${lorem()}]) {
+    createTopic(name: "${faker.random.word()}", notes: [${lorem()}], userId: "${userId}") {
       id
       name
     }
@@ -147,6 +164,15 @@ const deleteTag = id =>
   }
 `);
 
+const deleteTopic = id =>
+  client.request(`
+  mutation {
+    deleteTopic(id: "${id}") {
+      id
+    }
+  }
+`);
+
 const deleteTransition = id =>
   client.request(`
   mutation {
@@ -165,27 +191,44 @@ const deletePosition = id =>
   }
 `);
 
-const fill = async () => {
-  const posIds = (await Promise.all(times(10, () => createPosition()))).map(
-    x => x.createPosition.id
-  );
+const deleteUser = id =>
+  client.request(`
+  mutation {
+    deleteUser(id: "${id}") {
+      id
+    }
+  }
+`);
 
-  const tagIds = (await Promise.all(times(10, () => createTag()))).map(
+const fill = async () => {
+  const userId = (await signUp()).signupUser.id;
+
+  const posIds = (await Promise.all(
+    times(10, () => createPosition(userId))
+  )).map(x => x.createPosition.id);
+
+  const tagIds = (await Promise.all(times(10, () => createTag(userId)))).map(
     x => x.createTag.id
   );
 
   await Promise.all(
-    concatMap(id => times(3, () => createSubmission(id, tagIds)), posIds)
-  );
-
-  await Promise.all(
     concatMap(
-      id => times(3, () => createTransition(...makePair(id, posIds), tagIds)),
+      id => times(3, () => createSubmission(userId, id, tagIds)),
       posIds
     )
   );
 
-  await Promise.all(times(10, () => createTopic()));
+  await Promise.all(
+    concatMap(
+      id =>
+        times(3, () =>
+          createTransition(userId, ...makePair(id, posIds), tagIds)
+        ),
+      posIds
+    )
+  );
+
+  await Promise.all(times(10, () => createTopic(userId)));
 
   return "OK";
 };
@@ -204,7 +247,10 @@ const clear = async () => {
   await Promise.all(tagIds.map(deleteTag));
 
   const topicIds = (await getTopics()).allTopics.map(x => x.id);
-  await Promise.all(topicIds.map(deleteTag));
+  await Promise.all(topicIds.map(deleteTopic));
+
+  const userIds = (await getUsers()).allUsers.map(x => x.id);
+  await Promise.all(userIds.map(deleteUser));
 
   return "OK";
 };
