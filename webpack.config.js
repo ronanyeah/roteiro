@@ -4,6 +4,8 @@ const webpack = require("webpack");
 
 const { GRAPHQL_ENDPOINT, DEBUG, NODE_ENV } = process.env;
 
+if (!GRAPHQL_ENDPOINT) throw Error("missing api endpoint");
+
 const publicFolder = resolve("./public");
 
 module.exports = {
@@ -19,7 +21,8 @@ module.exports = {
         target: GRAPHQL_ENDPOINT,
         pathRewrite: { "^/api": "" }
       }
-    }
+    },
+    historyApiFallback: true
   },
   module: {
     rules: [
@@ -37,6 +40,15 @@ module.exports = {
             }
           }
         ]
+      },
+      {
+        test: /\.js$/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env"]
+          }
+        }
       }
     ]
   },

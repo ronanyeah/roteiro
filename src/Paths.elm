@@ -13,6 +13,11 @@ submission (Id id) =
     submissions ++ "/" ++ id
 
 
+tag : Id -> String
+tag (Id id) =
+    tags ++ "/" ++ id
+
+
 topic : Id -> String
 topic (Id id) =
     topics ++ "/" ++ id
@@ -25,24 +30,39 @@ transition (Id id) =
 
 positions : String
 positions =
-    "/#/positions"
+    "positions"
 
 
 submissions : String
 submissions =
-    "/#/submissions"
+    "submissions"
+
+
+tags : String
+tags =
+    "tags"
 
 
 topics : String
 topics =
-    "/#/topics"
+    "topics"
 
 
 transitions : String
 transitions =
-    "/#/transitions"
+    "transitions"
 
 
 start : String
 start =
-    "/#/start"
+    "start"
+
+
+login : String
+login =
+    "login"
+
+
+signUp : String
+signUp =
+    "sign-up"

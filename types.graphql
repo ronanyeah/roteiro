@@ -1,7 +1,7 @@
 type File @model {
-  contentType: String!
-  createdAt: DateTime!
   id: ID! @isUnique
+  createdAt: DateTime!
+  contentType: String!
   name: String!
   secret: String! @isUnique
   size: Int!
@@ -10,47 +10,70 @@ type File @model {
 }
 
 type User @model {
-  createdAt: DateTime!
   id: ID! @isUnique
-  updatedAt: DateTime!
-}
-
-type Topic @model {
   createdAt: DateTime!
-  id: ID! @isUnique
   updatedAt: DateTime!
-  name: String!
-  notes: [String!]!
+  email: String! @isUnique
+  password: String!
+  positions: [Position!]! @relation(name: "UserPositions")
+  submissions: [Submission!]! @relation(name: "UserSubmissions")
+  transitions: [Transition!]! @relation(name: "UserTransitions")
+  topics: [Topic!]! @relation(name: "UserTopics")
+  tags: [Tag!]! @relation(name: "UserTags")
 }
 
 type Position @model {
-  createdAt: DateTime!
   id: ID! @isUnique
+  createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   notes: [String!]!
   submissions: [Submission!]! @relation(name: "PositionHasSubmissions")
   transitionsFrom: [Transition!]! @relation(name: "PositionHasTransitionsFrom")
   transitionsTo: [Transition!]! @relation(name: "PositionHasTransitionsTo")
+  user: User! @relation(name: "UserPositions")
 }
 
 type Submission @model {
-  createdAt: DateTime!
   id: ID! @isUnique
+  createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   steps: [String!]!
   notes: [String!]!
   position: Position! @relation(name: "PositionHasSubmissions")
+  tags: [Tag!]! @relation(name: "SubmissionHasTags")
+  user: User! @relation(name: "UserSubmissions")
 }
 
 type Transition @model {
-  createdAt: DateTime!
   id: ID! @isUnique
+  createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   steps: [String!]!
   notes: [String!]!
   startPosition: Position! @relation(name: "PositionHasTransitionsFrom")
   endPosition: Position! @relation(name: "PositionHasTransitionsTo")
+  tags: [Tag!]! @relation(name: "TransitionHasTags")
+  user: User! @relation(name: "UserTransitions")
+}
+
+type Topic @model {
+  id: ID! @isUnique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  notes: [String!]!
+  user: User! @relation(name: "UserTopics")
+}
+
+type Tag @model {
+  id: ID! @isUnique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  submissions: [Submission!]! @relation(name: "SubmissionHasTags")
+  transitions: [Transition!]! @relation(name: "TransitionHasTags")
+  user: User! @relation(name: "UserTags")
 }

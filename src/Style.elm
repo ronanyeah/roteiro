@@ -1,7 +1,7 @@
 module Style exposing (..)
 
 import Color exposing (Color, rgb)
-import Element exposing (Attribute, padding, pointer)
+import Element exposing (Attribute, height, mouseOver, padding, pointer, px, width)
 import Element.Background as Background
 import Element.Font as Font
 
@@ -20,7 +20,9 @@ block =
     , pointer
     , Background.color e
     , Font.color c
-    , Font.mouseOverColor Color.darkGrey
+    , mouseOver
+        [ Font.color Color.darkGrey
+        ]
     , padding 10
     ]
 
@@ -31,13 +33,10 @@ choice =
     , font
     , pointer
     , Font.color Color.darkGrey
-    , Font.mouseOverColor e
+    , mouseOver
+        [ Font.color e
+        ]
     ]
-
-
-dot : List (Attribute msg)
-dot =
-    [ Font.color e ]
 
 
 mattIcon : List (Attribute msg)
@@ -64,7 +63,9 @@ header =
     [ Font.size 55
     , Font.color e
     , pointer
-    , Font.mouseOverColor a
+    , mouseOver
+        [ Font.color a
+        ]
     ]
 
 
@@ -73,7 +74,11 @@ actionIcon =
     [ Font.color e
     , Font.size 35
     , pointer
-    , Font.mouseOverColor a
+    , width <| px 60
+    , height <| px 60
+    , mouseOver
+        [ Font.color a
+        ]
     ]
 
 

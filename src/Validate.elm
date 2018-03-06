@@ -49,6 +49,14 @@ submission { name, startPosition, steps, notes } =
                 )
 
 
+tag : Form -> Result (List String) String
+tag { name } =
+    if String.isEmpty name then
+        Err [ emptyNameField ]
+    else
+        Ok name
+
+
 topic : Form -> Result (List String) ( String, List String )
 topic { name, notes } =
     if String.isEmpty name then

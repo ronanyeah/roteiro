@@ -1,8 +1,8 @@
 {
-  "name": "tree",
+  "name": "roteiro",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./src/index.js",
   "scripts": {
     "test": "echo \"100% coverage!\" && exit 0",
     "watch": "webpack-dev-server --hot",
@@ -11,20 +11,26 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ronanyeah/tree.git"
+    "url": "git+https://github.com/ronanyeah/roteiro.git"
   },
   "author": "ronanyeah",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/ronanyeah/tree/issues"
+    "url": "https://github.com/ronanyeah/roteiro/issues"
   },
-  "homepage": "https://github.com/ronanyeah/tree#readme",
+  "homepage": "https://github.com/ronanyeah/roteiro#readme",
   "dependencies": {
+    "@babel/core": "^7.0.0-beta.40",
+    "@babel/preset-env": "^7.0.0-beta.40",
+    "babel-loader": "^8.0.0-beta.0",
+    "bcryptjs": "^2.4.3",
     "copy-webpack-plugin": "^4.3.1",
     "elm-hot-loader": "^0.5.4",
     "elm-webpack-loader": "^4.4.0",
     "faker": "^4.1.0",
+    "graphcool-lib": "^0.1.4",
     "graphql-request": "^1.4.1",
+    "validator": "^9.4.1",
     "webpack": "^3.10.0",
     "webpack-dev-server": "^2.9.7"
   }

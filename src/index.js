@@ -13,12 +13,15 @@ if (
   console.log("App Launch!");
 }
 
-var Elm = require("./Main.elm");
+const Elm = require("./Main.elm");
 
-var token = localStorage.getItem("ROTEIRO_TOKEN") || "";
+const app = Elm.Main.embed(
+  document.body,
+  localStorage.getItem("ROTEIRO_TOKEN")
+);
 
-var app = Elm.Main.embed(document.body, token);
+app.ports.saveToken.subscribe(str =>
+  localStorage.setItem("ROTEIRO_TOKEN", str)
+);
 
-app.ports.saveToken.subscribe(function(str) {
-  return localStorage.setItem("ROTEIRO_TOKEN", str);
-});
+app.ports.clearToken.subscribe(() => localStorage.removeItem("ROTEIRO_TOKEN"));
