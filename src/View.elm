@@ -2,7 +2,7 @@ module View exposing (..)
 
 import Array exposing (Array)
 import Color
-import Element exposing (Attribute, Element, alignRight, centerX, centerY, column, decorativeImage, el, empty, fill, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, padding, paragraph, pointer, px, row, scrollbarY, shrink, spacing, text, width)
+import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, empty, fill, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, padding, paragraph, pointer, px, row, scrollbarY, shrink, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -128,7 +128,14 @@ view model =
                         ]
 
                 ViewLogin ->
-                    el [ centerY ] <|
+                    let
+                        inputWidth =
+                            if model.device == Desktop then
+                                px <| model.size.width // 3
+                            else
+                                fill
+                    in
+                    el [ centerY, width fill, padding 20 ] <|
                         column
                             [ centerX
                             , spacing 20
@@ -154,7 +161,11 @@ view model =
                                         Style.actionIcon
                                 }
                             , Input.email
-                                ([ centerX, width <| px <| model.size.width // 3 ] ++ Style.field)
+                                ([ centerX
+                                 , width inputWidth
+                                 ]
+                                    ++ Style.field
+                                )
                                 { onChange = Just UpdateEmail
                                 , text = model.form.email
                                 , label =
@@ -163,7 +174,11 @@ view model =
                                 , placeholder = Nothing
                                 }
                             , Input.currentPassword
-                                ([ centerX, width <| px <| model.size.width // 3 ] ++ Style.field)
+                                ([ centerX
+                                 , width inputWidth
+                                 ]
+                                    ++ Style.field
+                                )
                                 { onChange = Just UpdatePassword
                                 , text = model.form.password
                                 , label =
@@ -306,8 +321,7 @@ view model =
                     model.positions
                         |> viewRemote
                             (\positions ->
-                                column
-                                    []
+                                column [ height <| px model.size.height, scrollbarY ]
                                     [ addNewRow Flag CreatePosition
                                     , blocks Paths.position positions
                                     ]
@@ -317,7 +331,7 @@ view model =
                     data
                         |> viewRemote
                             (\sub ->
-                                column []
+                                column [ height <| px model.size.height, scrollbarY ]
                                     [ editRow sub.name Bolt <| EditSubmission sub
                                     , row
                                         [ spacing 10 ]
@@ -339,8 +353,7 @@ view model =
                     data
                         |> viewRemote
                             (\submissions ->
-                                column
-                                    []
+                                column [ height <| px model.size.height, scrollbarY ]
                                     [ addNewRow Bolt <| CreateSubmission Nothing
                                     , column [ spacing 20 ] <|
                                         (submissions
@@ -374,7 +387,7 @@ view model =
                     data
                         |> viewRemote
                             (\t ->
-                                column []
+                                column [ height <| px model.size.height, scrollbarY ]
                                     [ editRow t.name Tags <| EditTag t
                                     , column []
                                         [ icon Bolt Style.mattIcon
@@ -391,8 +404,7 @@ view model =
                     model.tags
                         |> viewRemote
                             (\tags ->
-                                column
-                                    []
+                                column [ height <| px model.size.height, scrollbarY ]
                                     [ addNewRow Tags CreateTag
                                     , blocks Paths.tag tags
                                     ]
@@ -402,7 +414,7 @@ view model =
                     data
                         |> viewRemote
                             (\t ->
-                                column []
+                                column [ height <| px model.size.height, scrollbarY ]
                                     [ editRow t.name Book <| EditTopic t
                                     , viewNotes t.notes
                                     ]
@@ -412,8 +424,7 @@ view model =
                     data
                         |> viewRemote
                             (\topics ->
-                                column
-                                    []
+                                column [ height <| px model.size.height, scrollbarY ]
                                     [ addNewRow Book CreateTopic
                                     , blocks Paths.topic topics
                                     ]
@@ -423,8 +434,7 @@ view model =
                     data
                         |> viewRemote
                             (\({ steps, startPosition, endPosition, notes, tags } as t) ->
-                                column
-                                    []
+                                column [ height <| px model.size.height, scrollbarY ]
                                     [ editRow t.name Arrow <| EditTransition t
                                     , paragraph
                                         [ centerY, centerX ]
@@ -452,8 +462,7 @@ view model =
                     data
                         |> viewRemote
                             (\transitions ->
-                                column
-                                    []
+                                column [ height <| px model.size.height, scrollbarY ]
                                     [ addNewRow Arrow <| CreateTransition Nothing
                                     , column [ spacing 20 ] <|
                                         (transitions
@@ -528,9 +537,25 @@ view model =
             else if model.selectingStartPosition then
                 viewPickPosition UpdateStartPosition model.positions
                     |> inFront
-            else
-                empty
+            else if model.device == Mobile then
+                (if model.sidebarOpen then
+                    sidebar model.size model.view
+                 else
+                    button []
+                        { onPress = Just ToggleSidebar
+                        , label =
+                            icon Bars
+                                [ height <| px 50
+                                , width <| px 50
+                                , alignRight
+                                , Font.color Style.e
+                                , Font.size 30
+                                ]
+                        }
+                )
                     |> inFront
+            else
+                behind empty
     in
     case model.device of
         Desktop ->
@@ -573,7 +598,16 @@ view model =
                             ]
 
         Mobile ->
-            layoutWith { options = [ noHover ] }
+            layoutWith
+                { options =
+                    [ noHover
+                    , Element.focusStyle
+                        { borderColor = Nothing
+                        , backgroundColor = Nothing
+                        , shadow = Nothing
+                        }
+                    ]
+                }
                 [ Background.color Style.c
                 , Style.font
                 , modal
@@ -677,83 +711,89 @@ links view =
 
 sidebar : Size -> View -> Element Msg
 sidebar size view =
-    column
-        [ spacing 40
-        , height <| px size.height
-        , alignRight
-        , width <| px <| size.width // 2
-        , Background.color Style.c
-        , Border.solid
-        , Border.widthEach { bottom = 0, left = 5, right = 0, top = 0 }
-        , Border.color Style.e
-        ]
-        [ Input.button
-            []
-            { onPress =
-                Just <| SidebarNavigate Paths.start
-            , label =
-                icon Home
-                    (if view == ViewStart then
-                        ballIcon
-                     else
-                        Style.actionIcon
-                    )
+    row [ width fill ]
+        [ button [ width fill, height fill ]
+            { onPress = Just ToggleSidebar
+            , label = empty
             }
-        , Input.button
-            []
-            { onPress =
-                Just <| SidebarNavigate Paths.positions
-            , label =
-                icon Flag
-                    (if isPositionView view then
-                        ballIcon
-                     else
-                        Style.actionIcon
-                    )
-            }
-        , Input.button
-            []
-            { onPress =
-                Just <| SidebarNavigate Paths.transitions
-            , label =
-                icon Arrow
-                    (if isTransitionView view then
-                        ballIcon
-                     else
-                        Style.actionIcon
-                    )
-            }
-        , Input.button
-            []
-            { onPress =
-                Just <| SidebarNavigate Paths.submissions
-            , label =
-                icon Bolt
-                    (if isSubmissionView view then
-                        ballIcon
-                     else
-                        Style.actionIcon
-                    )
-            }
-        , Input.button
-            []
-            { onPress =
-                Just <| SidebarNavigate Paths.topics
-            , label =
-                icon Book
-                    (if isTopicView view then
-                        ballIcon
-                     else
-                        Style.actionIcon
-                    )
-            }
-        , Input.button
-            []
-            { onPress =
-                Just <| ToggleSidebar
-            , label =
-                icon Cross Style.actionIcon
-            }
+        , column
+            [ spacing 40
+            , height <| px size.height
+            , alignRight
+            , width <| px <| size.width // 2
+            , Background.color Style.c
+            , Border.solid
+            , Border.widthEach { bottom = 0, left = 5, right = 0, top = 0 }
+            , Border.color Style.e
+            ]
+            [ Input.button
+                []
+                { onPress =
+                    Just <| SidebarNavigate Paths.start
+                , label =
+                    icon Home
+                        (if view == ViewStart then
+                            ballIcon
+                         else
+                            Style.actionIcon
+                        )
+                }
+            , Input.button
+                []
+                { onPress =
+                    Just <| SidebarNavigate Paths.positions
+                , label =
+                    icon Flag
+                        (if isPositionView view then
+                            ballIcon
+                         else
+                            Style.actionIcon
+                        )
+                }
+            , Input.button
+                []
+                { onPress =
+                    Just <| SidebarNavigate Paths.transitions
+                , label =
+                    icon Arrow
+                        (if isTransitionView view then
+                            ballIcon
+                         else
+                            Style.actionIcon
+                        )
+                }
+            , Input.button
+                []
+                { onPress =
+                    Just <| SidebarNavigate Paths.submissions
+                , label =
+                    icon Bolt
+                        (if isSubmissionView view then
+                            ballIcon
+                         else
+                            Style.actionIcon
+                        )
+                }
+            , Input.button
+                []
+                { onPress =
+                    Just <| SidebarNavigate Paths.topics
+                , label =
+                    icon Book
+                        (if isTopicView view then
+                            ballIcon
+                         else
+                            Style.actionIcon
+                        )
+                }
+            , Input.button
+                []
+                { onPress =
+                    Just <| ToggleSidebar
+                , label =
+                    icon Cross Style.actionIcon
+                }
+            ]
         ]
 
 
