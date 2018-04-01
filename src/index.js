@@ -25,3 +25,5 @@ app.ports.saveToken.subscribe(str =>
 );
 
 app.ports.clearToken.subscribe(() => localStorage.removeItem("ROTEIRO_TOKEN"));
+
+app.ports.log.subscribe(console.log);

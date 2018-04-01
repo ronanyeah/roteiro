@@ -5,3 +5,6 @@ port saveToken : String -> Cmd msg
 
 
 port clearToken : () -> Cmd msg
+
+
+port log : String -> Cmd msg

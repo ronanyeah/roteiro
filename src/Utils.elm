@@ -7,6 +7,7 @@ import Element.Input as Input exposing (Label)
 import Html
 import Html.Attributes
 import Navigation
+import Ports
 import Regex exposing (Regex)
 import RemoteData
 import Task exposing (Task)
@@ -416,12 +417,8 @@ logError data =
 
 
 log : a -> Cmd msg
-log a =
-    let
-        _ =
-            Debug.log "Log" a
-    in
-    Cmd.none
+log =
+    toString >> Ports.log
 
 
 listToDict : List { r | id : Id } -> Dict String { r | id : Id }
