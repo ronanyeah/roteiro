@@ -5,7 +5,7 @@ import GraphQL.Client.Http exposing (customSendMutationRaw, customSendQueryRaw)
 import GraphQL.Request.Builder as B
 import GraphQL.Request.Builder.Arg as Arg
 import Http
-import Json.Decode as Decode exposing (Decoder)
+import Json.Decode as Decode exposing (Decoder, succeed)
 import Task exposing (Task)
 import Types exposing (..)
 
@@ -22,20 +22,32 @@ decodeGcError : Decoder ApiError
 decodeGcError =
     Decode.oneOf
         [ Decode.field "code" Decode.int
-            |> Decode.map
+            |> Decode.andThen
                 (\code ->
                     case code of
                         3032 ->
-                            RelationIsRequired
+                            succeed RelationIsRequired
 
                         3008 ->
-                            InsufficientPermissions
+                            succeed InsufficientPermissions
 
                         3016 ->
-                            Other "Missing project!"
+                            succeed <| Other "Missing project!"
 
-                        n ->
-                            Other <| "GraphCool Error Code: " ++ toString n
+                        _ ->
+                            if code >= 5000 then
+                                Decode.field "message" Decode.string
+                                    |> Decode.map
+                                        ((\str ->
+                                            if String.startsWith "function execution error: " str then
+                                                String.dropLeft 26 str
+                                            else
+                                                str
+                                         )
+                                            >> FunctionExecutionError code
+                                        )
+                            else
+                                succeed <| ErrorCode code
                 )
         , Decode.field "message" Decode.string
             |> Decode.map Other

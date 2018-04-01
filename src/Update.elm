@@ -76,7 +76,11 @@ update msg model =
                     )
 
                 Err err ->
-                    ( model
+                    ( { model
+                        | form =
+                            model.form
+                                |> addErrors (formatErrors err)
+                      }
                     , log err
                     )
 

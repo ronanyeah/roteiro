@@ -412,6 +412,7 @@ view model =
                                     icon NewUser
                                         Style.actionIcon
                                 }
+                            , viewErrors model.form.errors
                             , Input.email
                                 ([ centerX
                                  , width inputWidth
@@ -481,6 +482,7 @@ view model =
                                     icon SignIn
                                         Style.actionIcon
                                 }
+                            , viewErrors model.form.errors
                             , Input.email
                                 ([ centerX, width inputWidth ] ++ Style.field)
                                 { onChange = Just UpdateEmail
@@ -1316,8 +1318,8 @@ viewErrors : List String -> Element Msg
 viewErrors errs =
     when (errs |> List.isEmpty |> not) <|
         column
-            [ centerX, spacing 15 ]
-            [ icon Warning Style.mattIcon
+            [ spacing 15 ]
+            [ el [ centerX ] <| icon Warning Style.mattIcon
             , viewNotes <| Array.fromList errs
             ]
 

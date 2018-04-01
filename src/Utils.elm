@@ -140,6 +140,12 @@ formatErrors err =
                             RelationIsRequired ->
                                 "Relation is required!"
 
+                            FunctionExecutionError code txt ->
+                                "Code: " ++ toString code ++ ", Message: " ++ txt
+
+                            ErrorCode code ->
+                                toString code
+
                             Other str ->
                                 str
                     )

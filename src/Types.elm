@@ -155,6 +155,8 @@ type GcError
 type ApiError
     = InsufficientPermissions
     | RelationIsRequired
+    | FunctionExecutionError Int String
+    | ErrorCode Int
     | Other String
 
 
