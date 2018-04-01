@@ -22,22 +22,19 @@ const getGraphcoolUser = (api, email) =>
 module.exports = event =>
   (async () => {
     if (!event.context.graphcool.pat) {
-      console.log("Please provide a valid root token!");
-      return { error: "Email Authentication not configured correctly." };
+      return Promise.reject(Error("Root token not provided"));
     }
 
-    // Retrieve payload from event
     const email = event.data.email;
     const password = event.data.password;
 
-    // Create Graphcool API (based on https://github.com/graphcool/graphql-request)
     const graphcool = fromEvent(event);
     const api = graphcool.api("simple/v1");
 
     const user = await getGraphcoolUser(api, email);
 
     if (!user) {
-      return Promise.reject("Invalid Credentials");
+      return Promise.reject(Error("Invalid Credentials"));
     }
 
     return (await bcryptjs.compare(password, user.password))
@@ -48,7 +45,7 @@ module.exports = event =>
             token: await graphcool.generateAuthToken(user.id, "User")
           }
         }
-      : Promise.reject("Invalid Credentials");
+      : Promise.reject(Error("Invalid Credentials"));
   })().catch(err => ({
-    error: JSON.stringify(err)
+    error: err.message
   }));

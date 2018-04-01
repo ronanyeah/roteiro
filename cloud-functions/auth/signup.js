@@ -40,28 +40,23 @@ const createGraphcoolUser = (api, email, passwordHash) =>
 module.exports = event =>
   (async () => {
     if (!event.context.graphcool.pat) {
-      console.log("Please provide a valid root token!");
-      return Promise.reject("Email Signup not configured correctly.");
+      return Promise.reject(Error("Root token not provided"));
     }
 
-    // Retrieve payload from event
     const email = event.data.email;
     const password = event.data.password;
 
-    // Create Graphcool API (based on https://github.com/graphcool/graphql-request)
     const graphcool = fromEvent(event);
     const api = graphcool.api("simple/v1");
 
     const salt = bcryptjs.genSaltSync(SALT_ROUNDS);
 
     if (!validator.isEmail(email)) {
-      return Promise.reject("Not a valid email");
+      return Promise.reject(Error("Not a valid email"));
     }
 
-    const user = await getGraphcoolUser(api, email);
-
-    if (user) {
-      return Promise.reject("Email already in use");
+    if (await getGraphcoolUser(api, email)) {
+      return Promise.reject(Error("Email already in use"));
     }
 
     const hash = await bcryptjs.hash(password, salt);
@@ -70,5 +65,5 @@ module.exports = event =>
 
     return { data: { id, email, token } };
   })().catch(err => ({
-    error: JSON.stringify(err)
+    error: err.message
   }));
