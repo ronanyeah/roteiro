@@ -11,3 +11,5 @@ dev.env
 prod.env
 
 .graphcoolrc
+
+elm-analyse.json
