@@ -63,6 +63,7 @@ type Msg
     | SaveEditTopic
     | SaveEditTransition
     | SidebarNavigate Route
+    | SidebarSignOut
     | SignUpSubmit
     | ToggleEndPosition
     | ToggleSidebar
@@ -77,8 +78,14 @@ type Msg
 
 
 type View
-    = ViewStart
-    | ViewCreatePosition
+    = ViewApp AppView
+    | ViewLogin
+    | ViewSignUp
+    | ViewWaiting
+
+
+type AppView
+    = ViewCreatePosition
     | ViewCreateSubmission
     | ViewCreateTag
     | ViewCreateTopic
@@ -88,10 +95,9 @@ type View
     | ViewEditTag
     | ViewEditTopic
     | ViewEditTransition
-    | ViewLogin
     | ViewPosition (GcData Position)
     | ViewPositions
-    | ViewSignUp
+    | ViewStart
     | ViewSubmission (GcData Submission)
     | ViewSubmissions (GcData (List Submission))
     | ViewTag (GcData Tag)
@@ -100,7 +106,6 @@ type View
     | ViewTopics (GcData (List Info))
     | ViewTransition (GcData Transition)
     | ViewTransitions (GcData (List Transition))
-    | ViewWaiting
 
 
 type FaIcon

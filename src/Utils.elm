@@ -10,7 +10,7 @@ import Navigation
 import Regex exposing (Regex)
 import RemoteData
 import Task exposing (Task)
-import Types exposing (ApiError(..), Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, Route(..), View(..))
+import Types exposing (ApiError(..), AppView(..), Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, Route(..), View(..))
 import Window
 
 
@@ -160,7 +160,7 @@ appendCmd newCmd =
         (List.singleton >> (::) newCmd >> Cmd.batch)
 
 
-isPositionView : View -> Bool
+isPositionView : AppView -> Bool
 isPositionView view =
     case view of
         ViewPositions ->
@@ -179,7 +179,7 @@ isPositionView view =
             False
 
 
-isSubmissionView : View -> Bool
+isSubmissionView : AppView -> Bool
 isSubmissionView view =
     case view of
         ViewSubmissions _ ->
@@ -198,7 +198,7 @@ isSubmissionView view =
             False
 
 
-isTagView : View -> Bool
+isTagView : AppView -> Bool
 isTagView view =
     case view of
         ViewTags ->
@@ -217,7 +217,7 @@ isTagView view =
             False
 
 
-isTopicView : View -> Bool
+isTopicView : AppView -> Bool
 isTopicView view =
     case view of
         ViewTopics _ ->
@@ -236,7 +236,7 @@ isTopicView view =
             False
 
 
-isTransitionView : View -> Bool
+isTransitionView : AppView -> Bool
 isTransitionView view =
     case view of
         ViewTransitions _ ->
@@ -343,7 +343,7 @@ sort =
     List.sortBy (.name >> String.toLower)
 
 
-notEditing : View -> Bool
+notEditing : AppView -> Bool
 notEditing view =
     case view of
         ViewCreatePosition ->
@@ -444,7 +444,7 @@ emptyModel : Model
 emptyModel =
     { view = ViewWaiting
     , auth = Nothing
-    , previousView = ViewStart
+    , previousView = ViewWaiting
     , positions = RemoteData.NotAsked
     , tags = RemoteData.NotAsked
     , device = Desktop

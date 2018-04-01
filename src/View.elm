@@ -23,108 +23,361 @@ view model =
     let
         content =
             case model.view of
-                ViewStart ->
-                    el [ centerY, centerX ] <|
-                        column [ spacing 20 ]
-                            [ decorativeImage
-                                [ height <| px 100
-                                , width <| px 100
-                                , centerX
+                ViewApp appView ->
+                    case appView of
+                        ViewStart ->
+                            el [ centerY, centerX ] <|
+                                column [ spacing 20 ]
+                                    [ decorativeImage
+                                        [ height <| px 100
+                                        , width <| px 100
+                                        , centerX
+                                        ]
+                                        { src = "/map.svg" }
+                                    , el
+                                        [ Font.size 45, Font.color Style.e, centerX ]
+                                      <|
+                                        text "ROTEIRO"
+                                    ]
+
+                        ViewCreatePosition ->
+                            column []
+                                [ viewErrors model.form.errors
+                                , nameEdit model.form
+                                , notesEditor model.form
+                                , createButtons SaveCreatePosition
                                 ]
-                                { src = "/map.svg" }
-                            , el
-                                [ Font.size 45, Font.color Style.e, centerX ]
-                              <|
-                                text "ROTEIRO"
-                            ]
 
-                ViewCreatePosition ->
-                    column []
-                        [ viewErrors model.form.errors
-                        , nameEdit model.form
-                        , notesEditor model.form
-                        , createButtons SaveCreatePosition
-                        ]
+                        ViewCreateSubmission ->
+                            column []
+                                [ viewErrors model.form.errors
+                                , nameEdit model.form
+                                , viewSubmissionPicker model.form
+                                , stepsEditor model.form
+                                , notesEditor model.form
+                                , createButtons SaveCreateSubmission
+                                ]
 
-                ViewCreateSubmission ->
-                    column []
-                        [ viewErrors model.form.errors
-                        , nameEdit model.form
-                        , viewSubmissionPicker model.form
-                        , stepsEditor model.form
-                        , notesEditor model.form
-                        , createButtons SaveCreateSubmission
-                        ]
+                        ViewCreateTag ->
+                            column []
+                                [ viewErrors model.form.errors
+                                , nameEdit model.form
+                                , createButtons SaveCreateTag
+                                ]
 
-                ViewCreateTag ->
-                    column []
-                        [ viewErrors model.form.errors
-                        , nameEdit model.form
-                        , createButtons SaveCreateTag
-                        ]
+                        ViewCreateTopic ->
+                            column []
+                                [ viewErrors model.form.errors
+                                , nameEdit model.form
+                                , notesEditor model.form
+                                , createButtons SaveCreateTopic
+                                ]
 
-                ViewCreateTopic ->
-                    column []
-                        [ viewErrors model.form.errors
-                        , nameEdit model.form
-                        , notesEditor model.form
-                        , createButtons SaveCreateTopic
-                        ]
+                        ViewCreateTransition ->
+                            column []
+                                [ viewErrors model.form.errors
+                                , nameEdit model.form
+                                , viewTransitionPickers model.form
+                                , stepsEditor model.form
+                                , notesEditor model.form
+                                , createButtons SaveCreateTransition
+                                ]
 
-                ViewCreateTransition ->
-                    column []
-                        [ viewErrors model.form.errors
-                        , nameEdit model.form
-                        , viewTransitionPickers model.form
-                        , stepsEditor model.form
-                        , notesEditor model.form
-                        , createButtons SaveCreateTransition
-                        ]
+                        ViewEditPosition ->
+                            column [ height <| px model.size.height, scrollbarY ]
+                                [ editHeader Flag
+                                , viewErrors model.form.errors
+                                , nameEdit model.form
+                                , notesEditor model.form
+                                , editButtons SaveEditPosition <| DeletePosition model.form.id
+                                ]
 
-                ViewEditPosition ->
-                    column []
-                        [ viewErrors model.form.errors
-                        , nameEdit model.form
-                        , notesEditor model.form
-                        , editButtons SaveEditPosition <| DeletePosition model.form.id
-                        ]
+                        ViewEditSubmission ->
+                            column [ height <| px model.size.height, scrollbarY ]
+                                [ editHeader Bolt
+                                , viewErrors model.form.errors
+                                , nameEdit model.form
+                                , viewSubmissionPicker model.form
+                                , stepsEditor model.form
+                                , notesEditor model.form
+                                , editTags model.tags <| Array.toList model.form.tags
+                                , editButtons SaveEditSubmission <| DeleteSubmission model.form.id
+                                ]
 
-                ViewEditSubmission ->
-                    column []
-                        [ viewErrors model.form.errors
-                        , nameEdit model.form
-                        , viewSubmissionPicker model.form
-                        , stepsEditor model.form
-                        , notesEditor model.form
-                        , editTags model.tags <| Array.toList model.form.tags
-                        , editButtons SaveEditSubmission <| DeleteSubmission model.form.id
-                        ]
+                        ViewEditTag ->
+                            column [ height <| px model.size.height, scrollbarY ]
+                                [ editHeader Tags
+                                , viewErrors model.form.errors
+                                , nameEdit model.form
+                                , editButtons SaveEditTag <| DeleteTag model.form.id
+                                ]
 
-                ViewEditTag ->
-                    column []
-                        [ viewErrors model.form.errors
-                        , nameEdit model.form
-                        , editButtons SaveEditTag <| DeleteTag model.form.id
-                        ]
+                        ViewEditTopic ->
+                            column [ height <| px model.size.height, scrollbarY ]
+                                [ editHeader Book
+                                , viewErrors model.form.errors
+                                , nameEdit model.form
+                                , notesEditor model.form
+                                , editButtons SaveEditTopic <| DeleteTopic model.form.id
+                                ]
 
-                ViewEditTopic ->
-                    column []
-                        [ viewErrors model.form.errors
-                        , nameEdit model.form
-                        , notesEditor model.form
-                        , editButtons SaveEditTopic <| DeleteTopic model.form.id
-                        ]
+                        ViewEditTransition ->
+                            column [ height <| px model.size.height, scrollbarY ]
+                                [ editHeader Arrow
+                                , viewErrors model.form.errors
+                                , nameEdit model.form
+                                , viewTransitionPickers model.form
+                                , stepsEditor model.form
+                                , notesEditor model.form
+                                , editTags model.tags <| Array.toList model.form.tags
+                                , editButtons SaveEditTransition <| DeleteTransition model.form.id
+                                ]
 
-                ViewEditTransition ->
-                    column []
-                        [ viewErrors model.form.errors
-                        , nameEdit model.form
-                        , viewTransitionPickers model.form
-                        , stepsEditor model.form
-                        , notesEditor model.form
-                        , editTags model.tags <| Array.toList model.form.tags
-                        , editButtons SaveEditTransition <| DeleteTransition model.form.id
-                        ]
+                        ViewPosition data ->
+                            data
+                                |> viewRemote
+                                    (\({ name, notes, submissions, transitionsFrom, transitionsTo } as position) ->
+                                        column [ height <| px model.size.height, scrollbarY ]
+                                            [ editRow name Flag <| EditPosition position
+                                            , viewNotes notes
+                                            , column []
+                                                [ addNewRow Bolt <| CreateSubmission <| Just position
+                                                , viewTechList SubmissionRoute submissions
+                                                ]
+                                            , column []
+                                                [ addNewRow Arrow <| CreateTransition <| Just position
+                                                , column []
+                                                    (transitionsFrom
+                                                        |> List.map
+                                                            (\transition ->
+                                                                paragraph
+                                                                    [ centerY, centerX ]
+                                                                    [ button []
+                                                                        { onPress = Just <| NavigateTo <| TransitionRoute transition.id
+                                                                        , label =
+                                                                            el Style.link <|
+                                                                                text transition.name
+                                                                        }
+                                                                    , text " ("
+                                                                    , el [] <| text name
+                                                                    , el [ padding 20 ] <| icon Arrow Style.mattIcon
+                                                                    , button []
+                                                                        { onPress = Just <| NavigateTo <| PositionRoute transition.endPosition.id
+                                                                        , label =
+                                                                            el Style.link <|
+                                                                                text transition.endPosition.name
+                                                                        }
+                                                                    , text ")"
+                                                                    ]
+                                                            )
+                                                    )
+                                                , column []
+                                                    (transitionsTo
+                                                        |> List.map
+                                                            (\transition ->
+                                                                paragraph
+                                                                    [ centerY, centerX ]
+                                                                    [ button []
+                                                                        { onPress = Just <| NavigateTo <| TransitionRoute transition.id
+                                                                        , label =
+                                                                            el Style.link <|
+                                                                                text transition.name
+                                                                        }
+                                                                    , text " ("
+                                                                    , button []
+                                                                        { onPress = Just <| NavigateTo <| PositionRoute transition.startPosition.id
+                                                                        , label =
+                                                                            el Style.link <|
+                                                                                text transition.startPosition.name
+                                                                        }
+                                                                    , el [ padding 20 ] <| icon Arrow Style.mattIcon
+                                                                    , el [] <| text name
+                                                                    , text ")"
+                                                                    ]
+                                                            )
+                                                    )
+                                                ]
+                                            ]
+                                    )
+
+                        ViewPositions ->
+                            model.positions
+                                |> viewRemote
+                                    (\positions ->
+                                        column [ height <| px model.size.height, scrollbarY ]
+                                            [ addNewRow Flag CreatePosition
+                                            , blocks PositionRoute positions
+                                            ]
+                                    )
+
+                        ViewSubmission data ->
+                            data
+                                |> viewRemote
+                                    (\sub ->
+                                        column [ height <| px model.size.height, scrollbarY ]
+                                            [ editRow sub.name Bolt <| EditSubmission sub
+                                            , row
+                                                [ spacing 10 ]
+                                                [ icon Flag Style.mattIcon
+                                                , button []
+                                                    { onPress = Just <| NavigateTo <| PositionRoute sub.position.id
+                                                    , label =
+                                                        el Style.link <|
+                                                            text sub.position.name
+                                                    }
+                                                ]
+                                            , viewSteps sub.steps
+                                            , viewNotes sub.notes
+                                            , viewTags sub.tags
+                                            ]
+                                    )
+
+                        ViewSubmissions data ->
+                            data
+                                |> viewRemote
+                                    (\submissions ->
+                                        column [ height <| px model.size.height, scrollbarY ]
+                                            [ addNewRow Bolt <| CreateSubmission Nothing
+                                            , column [ spacing 20 ] <|
+                                                (submissions
+                                                    |> List.sortBy (.position >> .id >> (\(Id id) -> id))
+                                                    |> groupWhile (\a b -> a.position.id == b.position.id)
+                                                    |> List.map
+                                                        (\g ->
+                                                            el [ centerX ] <|
+                                                                column
+                                                                    []
+                                                                    [ g
+                                                                        |> List.head
+                                                                        |> Maybe.map .position
+                                                                        |> whenJust
+                                                                            (\{ id, name } ->
+                                                                                button [ centerX ]
+                                                                                    { onPress = Just <| NavigateTo <| PositionRoute id
+                                                                                    , label =
+                                                                                        paragraph Style.choice
+                                                                                            [ text name ]
+                                                                                    }
+                                                                            )
+                                                                    , blocks SubmissionRoute g
+                                                                    ]
+                                                        )
+                                                )
+                                            ]
+                                    )
+
+                        ViewTag data ->
+                            data
+                                |> viewRemote
+                                    (\t ->
+                                        column [ height <| px model.size.height, scrollbarY ]
+                                            [ editRow t.name Tags <| EditTag t
+                                            , column []
+                                                [ icon Bolt Style.mattIcon
+                                                , viewTechList SubmissionRoute t.submissions
+                                                ]
+                                            , column []
+                                                [ icon Arrow Style.mattIcon
+                                                , viewTechList TransitionRoute t.transitions
+                                                ]
+                                            ]
+                                    )
+
+                        ViewTags ->
+                            model.tags
+                                |> viewRemote
+                                    (\tags ->
+                                        column [ height <| px model.size.height, scrollbarY ]
+                                            [ addNewRow Tags CreateTag
+                                            , blocks TagRoute tags
+                                            ]
+                                    )
+
+                        ViewTopic data ->
+                            data
+                                |> viewRemote
+                                    (\t ->
+                                        column [ height <| px model.size.height, scrollbarY ]
+                                            [ editRow t.name Book <| EditTopic t
+                                            , viewNotes t.notes
+                                            ]
+                                    )
+
+                        ViewTopics data ->
+                            data
+                                |> viewRemote
+                                    (\topics ->
+                                        column [ height <| px model.size.height, scrollbarY ]
+                                            [ addNewRow Book CreateTopic
+                                            , blocks TopicRoute topics
+                                            ]
+                                    )
+
+                        ViewTransition data ->
+                            data
+                                |> viewRemote
+                                    (\({ steps, startPosition, endPosition, notes, tags } as t) ->
+                                        column [ height <| px model.size.height, scrollbarY ]
+                                            [ editRow t.name Arrow <| EditTransition t
+                                            , paragraph
+                                                [ centerY, centerX ]
+                                                [ button []
+                                                    { onPress = Just <| NavigateTo <| PositionRoute startPosition.id
+                                                    , label =
+                                                        el Style.link <|
+                                                            text startPosition.name
+                                                    }
+                                                , el [ padding 20 ] <| icon Arrow Style.mattIcon
+                                                , button []
+                                                    { onPress = Just <| NavigateTo <| PositionRoute endPosition.id
+                                                    , label =
+                                                        el Style.link <|
+                                                            text endPosition.name
+                                                    }
+                                                ]
+                                            , viewSteps steps
+                                            , viewNotes notes
+                                            , viewTags tags
+                                            ]
+                                    )
+
+                        ViewTransitions data ->
+                            data
+                                |> viewRemote
+                                    (\transitions ->
+                                        column [ height <| px model.size.height, scrollbarY ]
+                                            [ addNewRow Arrow <| CreateTransition Nothing
+                                            , column [ spacing 20 ] <|
+                                                (transitions
+                                                    |> List.sortBy
+                                                        (.startPosition >> .id >> (\(Id id) -> id))
+                                                    |> groupWhile
+                                                        (\a b ->
+                                                            a.startPosition.id == b.startPosition.id
+                                                        )
+                                                    |> List.map
+                                                        (\g ->
+                                                            el [ centerX ] <|
+                                                                column
+                                                                    []
+                                                                    [ g
+                                                                        |> List.head
+                                                                        |> Maybe.map .startPosition
+                                                                        |> whenJust
+                                                                            (\{ id, name } ->
+                                                                                button [ centerX ]
+                                                                                    { onPress = Just <| NavigateTo <| PositionRoute id
+                                                                                    , label =
+                                                                                        paragraph Style.choice
+                                                                                            [ text name ]
+                                                                                    }
+                                                                            )
+                                                                    , blocks TransitionRoute g
+                                                                    ]
+                                                        )
+                                                )
+                                            ]
+                                    )
 
                 ViewLogin ->
                     let
@@ -196,7 +449,14 @@ view model =
                             ]
 
                 ViewSignUp ->
-                    el [ centerY ] <|
+                    let
+                        inputWidth =
+                            if model.device == Desktop then
+                                px <| model.size.width // 3
+                            else
+                                fill
+                    in
+                    el [ centerY, width fill, padding 20 ] <|
                         column
                             [ centerX
                             , spacing 20
@@ -222,7 +482,7 @@ view model =
                                         Style.actionIcon
                                 }
                             , Input.email
-                                ([ centerX, width <| px <| model.size.width // 3 ] ++ Style.field)
+                                ([ centerX, width inputWidth ] ++ Style.field)
                                 { onChange = Just UpdateEmail
                                 , text = model.form.email
                                 , label =
@@ -231,7 +491,7 @@ view model =
                                 , placeholder = Nothing
                                 }
                             , Input.currentPassword
-                                ([ centerX, width <| px <| model.size.width // 3 ] ++ Style.field)
+                                ([ centerX, width inputWidth ] ++ Style.field)
                                 { onChange = Just UpdatePassword
                                 , text = model.form.password
                                 , label =
@@ -248,252 +508,6 @@ view model =
                                         Style.actionIcon
                                 }
                             ]
-
-                ViewPosition data ->
-                    data
-                        |> viewRemote
-                            (\({ name, notes, submissions, transitionsFrom, transitionsTo } as position) ->
-                                column [ height <| px model.size.height, scrollbarY ]
-                                    [ editRow name Flag <| EditPosition position
-                                    , viewNotes notes
-                                    , column []
-                                        [ addNewRow Bolt <| CreateSubmission <| Just position
-                                        , viewTechList SubmissionRoute submissions
-                                        ]
-                                    , column []
-                                        [ addNewRow Arrow <| CreateTransition <| Just position
-                                        , column []
-                                            (transitionsFrom
-                                                |> List.map
-                                                    (\transition ->
-                                                        paragraph
-                                                            [ centerY, centerX ]
-                                                            [ button []
-                                                                { onPress = Just <| NavigateTo <| TransitionRoute transition.id
-                                                                , label =
-                                                                    el Style.link <|
-                                                                        text transition.name
-                                                                }
-                                                            , text " ("
-                                                            , el [] <| text name
-                                                            , el [ padding 20 ] <| icon Arrow Style.mattIcon
-                                                            , button []
-                                                                { onPress = Just <| NavigateTo <| PositionRoute transition.endPosition.id
-                                                                , label =
-                                                                    el Style.link <|
-                                                                        text transition.endPosition.name
-                                                                }
-                                                            , text ")"
-                                                            ]
-                                                    )
-                                            )
-                                        , column []
-                                            (transitionsTo
-                                                |> List.map
-                                                    (\transition ->
-                                                        paragraph
-                                                            [ centerY, centerX ]
-                                                            [ button []
-                                                                { onPress = Just <| NavigateTo <| TransitionRoute transition.id
-                                                                , label =
-                                                                    el Style.link <|
-                                                                        text transition.name
-                                                                }
-                                                            , text " ("
-                                                            , button []
-                                                                { onPress = Just <| NavigateTo <| PositionRoute transition.startPosition.id
-                                                                , label =
-                                                                    el Style.link <|
-                                                                        text transition.startPosition.name
-                                                                }
-                                                            , el [ padding 20 ] <| icon Arrow Style.mattIcon
-                                                            , el [] <| text name
-                                                            , text ")"
-                                                            ]
-                                                    )
-                                            )
-                                        ]
-                                    ]
-                            )
-
-                ViewPositions ->
-                    model.positions
-                        |> viewRemote
-                            (\positions ->
-                                column [ height <| px model.size.height, scrollbarY ]
-                                    [ addNewRow Flag CreatePosition
-                                    , blocks PositionRoute positions
-                                    ]
-                            )
-
-                ViewSubmission data ->
-                    data
-                        |> viewRemote
-                            (\sub ->
-                                column [ height <| px model.size.height, scrollbarY ]
-                                    [ editRow sub.name Bolt <| EditSubmission sub
-                                    , row
-                                        [ spacing 10 ]
-                                        [ icon Flag Style.mattIcon
-                                        , button []
-                                            { onPress = Just <| NavigateTo <| PositionRoute sub.position.id
-                                            , label =
-                                                el Style.link <|
-                                                    text sub.position.name
-                                            }
-                                        ]
-                                    , viewSteps sub.steps
-                                    , viewNotes sub.notes
-                                    , viewTags sub.tags
-                                    ]
-                            )
-
-                ViewSubmissions data ->
-                    data
-                        |> viewRemote
-                            (\submissions ->
-                                column [ height <| px model.size.height, scrollbarY ]
-                                    [ addNewRow Bolt <| CreateSubmission Nothing
-                                    , column [ spacing 20 ] <|
-                                        (submissions
-                                            |> List.sortBy (.position >> .id >> (\(Id id) -> id))
-                                            |> groupWhile (\a b -> a.position.id == b.position.id)
-                                            |> List.map
-                                                (\g ->
-                                                    el [ centerX ] <|
-                                                        column
-                                                            []
-                                                            [ g
-                                                                |> List.head
-                                                                |> Maybe.map .position
-                                                                |> whenJust
-                                                                    (\{ id, name } ->
-                                                                        button [ centerX ]
-                                                                            { onPress = Just <| NavigateTo <| PositionRoute id
-                                                                            , label =
-                                                                                paragraph Style.choice
-                                                                                    [ text name ]
-                                                                            }
-                                                                    )
-                                                            , blocks SubmissionRoute g
-                                                            ]
-                                                )
-                                        )
-                                    ]
-                            )
-
-                ViewTag data ->
-                    data
-                        |> viewRemote
-                            (\t ->
-                                column [ height <| px model.size.height, scrollbarY ]
-                                    [ editRow t.name Tags <| EditTag t
-                                    , column []
-                                        [ icon Bolt Style.mattIcon
-                                        , viewTechList SubmissionRoute t.submissions
-                                        ]
-                                    , column []
-                                        [ icon Arrow Style.mattIcon
-                                        , viewTechList TransitionRoute t.transitions
-                                        ]
-                                    ]
-                            )
-
-                ViewTags ->
-                    model.tags
-                        |> viewRemote
-                            (\tags ->
-                                column [ height <| px model.size.height, scrollbarY ]
-                                    [ addNewRow Tags CreateTag
-                                    , blocks TagRoute tags
-                                    ]
-                            )
-
-                ViewTopic data ->
-                    data
-                        |> viewRemote
-                            (\t ->
-                                column [ height <| px model.size.height, scrollbarY ]
-                                    [ editRow t.name Book <| EditTopic t
-                                    , viewNotes t.notes
-                                    ]
-                            )
-
-                ViewTopics data ->
-                    data
-                        |> viewRemote
-                            (\topics ->
-                                column [ height <| px model.size.height, scrollbarY ]
-                                    [ addNewRow Book CreateTopic
-                                    , blocks TopicRoute topics
-                                    ]
-                            )
-
-                ViewTransition data ->
-                    data
-                        |> viewRemote
-                            (\({ steps, startPosition, endPosition, notes, tags } as t) ->
-                                column [ height <| px model.size.height, scrollbarY ]
-                                    [ editRow t.name Arrow <| EditTransition t
-                                    , paragraph
-                                        [ centerY, centerX ]
-                                        [ button []
-                                            { onPress = Just <| NavigateTo <| PositionRoute startPosition.id
-                                            , label =
-                                                el Style.link <|
-                                                    text startPosition.name
-                                            }
-                                        , el [ padding 20 ] <| icon Arrow Style.mattIcon
-                                        , button []
-                                            { onPress = Just <| NavigateTo <| PositionRoute endPosition.id
-                                            , label =
-                                                el Style.link <|
-                                                    text endPosition.name
-                                            }
-                                        ]
-                                    , viewSteps steps
-                                    , viewNotes notes
-                                    , viewTags tags
-                                    ]
-                            )
-
-                ViewTransitions data ->
-                    data
-                        |> viewRemote
-                            (\transitions ->
-                                column [ height <| px model.size.height, scrollbarY ]
-                                    [ addNewRow Arrow <| CreateTransition Nothing
-                                    , column [ spacing 20 ] <|
-                                        (transitions
-                                            |> List.sortBy
-                                                (.startPosition >> .id >> (\(Id id) -> id))
-                                            |> groupWhile
-                                                (\a b ->
-                                                    a.startPosition.id == b.startPosition.id
-                                                )
-                                            |> List.map
-                                                (\g ->
-                                                    el [ centerX ] <|
-                                                        column
-                                                            []
-                                                            [ g
-                                                                |> List.head
-                                                                |> Maybe.map .startPosition
-                                                                |> whenJust
-                                                                    (\{ id, name } ->
-                                                                        button [ centerX ]
-                                                                            { onPress = Just <| NavigateTo <| PositionRoute id
-                                                                            , label =
-                                                                                paragraph Style.choice
-                                                                                    [ text name ]
-                                                                            }
-                                                                    )
-                                                            , blocks TransitionRoute g
-                                                            ]
-                                                )
-                                        )
-                                    ]
-                            )
 
                 ViewWaiting ->
                     el [ centerX, centerY ] <| icon Waiting Style.bigIcon
@@ -537,21 +551,12 @@ view model =
                 viewPickPosition UpdateStartPosition model.positions
                     |> inFront
             else if model.device == Mobile then
-                (if model.sidebarOpen then
-                    sidebar model.size model.view
-                 else
-                    button [ alignRight ]
-                        { onPress = Just ToggleSidebar
-                        , label =
-                            icon Bars
-                                [ height <| px 50
-                                , width <| px 50
-                                , Font.color Style.e
-                                , Font.size 30
-                                ]
-                        }
-                )
-                    |> inFront
+                case model.view of
+                    ViewApp appView ->
+                        sidebar model.sidebarOpen model.size appView
+
+                    _ ->
+                        behind empty
             else
                 behind empty
     in
@@ -581,12 +586,12 @@ view model =
                     ViewWaiting ->
                         content
 
-                    _ ->
+                    ViewApp appView ->
                         row
                             [ width fill
                             , height fill
                             ]
-                            [ links model.view
+                            [ links appView
                             , el
                                 [ width <| px <| round <| toFloat model.size.width * 0.8
                                 , height <| px model.size.height
@@ -613,6 +618,15 @@ view model =
                 content
 
 
+editHeader : FaIcon -> Element msg
+editHeader faIcon =
+    el [ centerX ] <|
+        row [ spacing 20, padding 20 ]
+            [ icon faIcon Style.mattIcon
+            , icon Write Style.mattIcon
+            ]
+
+
 ballIcon : List (Attribute msg)
 ballIcon =
     [ Font.color Style.c
@@ -631,7 +645,7 @@ ballIcon =
     ]
 
 
-links : View -> Element Msg
+links : AppView -> Element Msg
 links view =
     el [ centerX, centerY ] <|
         column
@@ -707,92 +721,113 @@ links view =
             ]
 
 
-sidebar : Size -> View -> Element Msg
-sidebar size view =
-    row [ width fill ]
-        [ button [ width fill, height fill ]
+sidebar : Bool -> Size -> AppView -> Attribute Msg
+sidebar isOpen size view =
+    if isOpen then
+        row [ width fill ]
+            [ button [ width fill, height fill ]
+                { onPress = Just ToggleSidebar
+                , label = empty
+                }
+            , column
+                [ spacing 5
+                , height <| px size.height
+                , alignRight
+                , width <| px <| size.width // 2
+                , Background.color Style.c
+                , Border.solid
+                , Border.widthEach { bottom = 0, left = 5, right = 0, top = 0 }
+                , Border.color Style.e
+                ]
+                [ Input.button
+                    [ centerX ]
+                    { onPress =
+                        Just <| SidebarNavigate Start
+                    , label =
+                        icon Home
+                            (if view == ViewStart then
+                                ballIcon
+                             else
+                                Style.actionIcon
+                            )
+                    }
+                , Input.button
+                    [ centerX ]
+                    { onPress =
+                        Just <| SidebarNavigate Positions
+                    , label =
+                        icon Flag
+                            (if isPositionView view then
+                                ballIcon
+                             else
+                                Style.actionIcon
+                            )
+                    }
+                , Input.button
+                    [ centerX ]
+                    { onPress =
+                        Just <| SidebarNavigate Transitions
+                    , label =
+                        icon Arrow
+                            (if isTransitionView view then
+                                ballIcon
+                             else
+                                Style.actionIcon
+                            )
+                    }
+                , Input.button
+                    [ centerX ]
+                    { onPress =
+                        Just <| SidebarNavigate Submissions
+                    , label =
+                        icon Bolt
+                            (if isSubmissionView view then
+                                ballIcon
+                             else
+                                Style.actionIcon
+                            )
+                    }
+                , Input.button
+                    [ centerX ]
+                    { onPress =
+                        Just <| SidebarNavigate Topics
+                    , label =
+                        icon Book
+                            (if isTopicView view then
+                                ballIcon
+                             else
+                                Style.actionIcon
+                            )
+                    }
+                , Input.button
+                    [ centerX ]
+                    { onPress =
+                        Just <| SidebarSignOut
+                    , label =
+                        icon SignOut Style.actionIcon
+                    }
+                , Input.button
+                    [ centerX ]
+                    { onPress =
+                        Just <| ToggleSidebar
+                    , label =
+                        icon Cross Style.actionIcon
+                    }
+                ]
+            ]
+            |> inFront
+    else
+        button [ alignRight ]
             { onPress = Just ToggleSidebar
-            , label = empty
+            , label =
+                icon Bars
+                    [ height <| px 50
+                    , width <| px 50
+                    , Font.color Style.e
+                    , Font.size 30
+                    ]
             }
-        , column
-            [ spacing 40
-            , height <| px size.height
-            , alignRight
-            , width <| px <| size.width // 2
-            , Background.color Style.c
-            , Border.solid
-            , Border.widthEach { bottom = 0, left = 5, right = 0, top = 0 }
-            , Border.color Style.e
-            ]
-            [ Input.button
-                [ centerX ]
-                { onPress =
-                    Just <| SidebarNavigate Start
-                , label =
-                    icon Home
-                        (if view == ViewStart then
-                            ballIcon
-                         else
-                            Style.actionIcon
-                        )
-                }
-            , Input.button
-                [ centerX ]
-                { onPress =
-                    Just <| SidebarNavigate Positions
-                , label =
-                    icon Flag
-                        (if isPositionView view then
-                            ballIcon
-                         else
-                            Style.actionIcon
-                        )
-                }
-            , Input.button
-                [ centerX ]
-                { onPress =
-                    Just <| SidebarNavigate Transitions
-                , label =
-                    icon Arrow
-                        (if isTransitionView view then
-                            ballIcon
-                         else
-                            Style.actionIcon
-                        )
-                }
-            , Input.button
-                [ centerX ]
-                { onPress =
-                    Just <| SidebarNavigate Submissions
-                , label =
-                    icon Bolt
-                        (if isSubmissionView view then
-                            ballIcon
-                         else
-                            Style.actionIcon
-                        )
-                }
-            , Input.button
-                [ centerX ]
-                { onPress =
-                    Just <| SidebarNavigate Topics
-                , label =
-                    icon Book
-                        (if isTopicView view then
-                            ballIcon
-                         else
-                            Style.actionIcon
-                        )
-                }
-            , Input.button
-                [ centerX ]
-                { onPress =
-                    Just <| ToggleSidebar
-                , label =
-                    icon Cross Style.actionIcon
-                }
-            ]
-        ]
+            |> inFront
 
 
 transitionPositions : Info -> Info -> Element Msg
@@ -1030,8 +1065,7 @@ stepsEditor form =
                         (\i v ->
                             Input.multiline
                                 (Style.field
-                                    ++ [ width Element.shrink
-                                       , htmlAttribute <| Html.Attributes.rows 4
+                                    ++ [ htmlAttribute <| Html.Attributes.rows 4
                                        , htmlAttribute <| Html.Attributes.cols 40
                                        , htmlAttribute <| Html.Attributes.wrap "hard"
                                        , htmlAttribute <| Html.Attributes.style [ ( "white-space", "normal" ) ]
@@ -1081,8 +1115,7 @@ notesEditor form =
                         (\i v ->
                             Input.multiline
                                 (Style.field
-                                    ++ [ width Element.shrink
-                                       , htmlAttribute <| Html.Attributes.rows 4
+                                    ++ [ htmlAttribute <| Html.Attributes.rows 4
                                        , htmlAttribute <| Html.Attributes.cols 40
                                        , htmlAttribute <| Html.Attributes.wrap "hard"
                                        , htmlAttribute <| Html.Attributes.style [ ( "white-space", "normal" ) ]

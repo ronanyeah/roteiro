@@ -84,7 +84,7 @@ update msg model =
             case res of
                 Ok a ->
                     ( { model
-                        | view = ViewPosition <| Success a
+                        | view = ViewApp <| ViewPosition <| Success a
                         , confirm = Nothing
                       }
                     , goTo <| PositionRoute a.id
@@ -104,7 +104,7 @@ update msg model =
             case res of
                 Ok a ->
                     ( { model
-                        | view = ViewSubmission <| Success a
+                        | view = ViewApp <| ViewSubmission <| Success a
                         , confirm = Nothing
                       }
                     , goTo <| SubmissionRoute a.id
@@ -124,7 +124,7 @@ update msg model =
             case res of
                 Ok a ->
                     ( { model
-                        | view = ViewTag <| Success a
+                        | view = ViewApp <| ViewTag <| Success a
                         , confirm = Nothing
                       }
                     , goTo <| TagRoute a.id
@@ -144,7 +144,7 @@ update msg model =
             case res of
                 Ok a ->
                     ( { model
-                        | view = ViewTopic <| Success a
+                        | view = ViewApp <| ViewTopic <| Success a
                         , confirm = Nothing
                       }
                     , goTo <| TopicRoute a.id
@@ -164,7 +164,7 @@ update msg model =
             case res of
                 Ok a ->
                     ( { model
-                        | view = ViewTransition <| Success a
+                        | view = ViewApp <| ViewTransition <| Success a
                         , confirm = Nothing
                       }
                     , goTo <| TransitionRoute a.id
@@ -268,7 +268,7 @@ update msg model =
 
         CbPosition res ->
             ( { model
-                | view = ViewPosition res
+                | view = ViewApp <| ViewPosition res
               }
             , logError res
             )
@@ -282,21 +282,21 @@ update msg model =
 
         CbSubmission res ->
             ( { model
-                | view = ViewSubmission res
+                | view = ViewApp <| ViewSubmission res
               }
             , logError res
             )
 
         CbSubmissions res ->
             ( { model
-                | view = ViewSubmissions res
+                | view = ViewApp <| ViewSubmissions res
               }
             , logError res
             )
 
         CbTag res ->
             ( { model
-                | view = ViewTag res
+                | view = ViewApp <| ViewTag res
               }
             , logError res
             )
@@ -310,28 +310,28 @@ update msg model =
 
         CbTopic res ->
             ( { model
-                | view = ViewTopic res
+                | view = ViewApp <| ViewTopic res
               }
             , logError res
             )
 
         CbTopics res ->
             ( { model
-                | view = ViewTopics res
+                | view = ViewApp <| ViewTopics res
               }
             , logError res
             )
 
         CbTransition res ->
             ( { model
-                | view = ViewTransition res
+                | view = ViewApp <| ViewTransition res
               }
             , logError res
             )
 
         CbTransitions res ->
             ( { model
-                | view = ViewTransitions res
+                | view = ViewApp <| ViewTransitions res
               }
             , logError res
             )
@@ -341,7 +341,7 @@ update msg model =
 
         CreatePosition ->
             ( { model
-                | view = ViewCreatePosition
+                | view = ViewApp ViewCreatePosition
                 , form = emptyForm
                 , previousView = model.view
               }
@@ -361,7 +361,7 @@ update msg model =
                     }
             in
             ( { model
-                | view = ViewCreateSubmission
+                | view = ViewApp ViewCreateSubmission
                 , previousView = model.view
                 , form = form
               }
@@ -373,7 +373,7 @@ update msg model =
 
         CreateTag ->
             ( { model
-                | view = ViewCreateTag
+                | view = ViewApp ViewCreateTag
                 , previousView = model.view
                 , form = emptyForm
               }
@@ -382,7 +382,7 @@ update msg model =
 
         CreateTopic ->
             ( { model
-                | view = ViewCreateTopic
+                | view = ViewApp ViewCreateTopic
                 , previousView = model.view
                 , form = emptyForm
               }
@@ -402,7 +402,7 @@ update msg model =
                     }
             in
             ( { model
-                | view = ViewCreateTransition
+                | view = ViewApp ViewCreateTransition
                 , previousView = model.view
                 , form = form
               }
@@ -457,7 +457,7 @@ update msg model =
                     }
             in
             ( { model
-                | view = ViewEditPosition
+                | view = ViewApp ViewEditPosition
                 , previousView = model.view
                 , form = form
               }
@@ -477,7 +477,7 @@ update msg model =
                     }
             in
             ( { model
-                | view = ViewEditSubmission
+                | view = ViewApp ViewEditSubmission
                 , previousView = model.view
                 , form = form
               }
@@ -496,7 +496,7 @@ update msg model =
                     }
             in
             ( { model
-                | view = ViewEditTag
+                | view = ViewApp ViewEditTag
                 , previousView = model.view
                 , form = form
               }
@@ -513,7 +513,7 @@ update msg model =
                     }
             in
             ( { model
-                | view = ViewEditTopic
+                | view = ViewApp ViewEditTopic
                 , previousView = model.view
                 , form = form
               }
@@ -533,7 +533,7 @@ update msg model =
                     }
             in
             ( { model
-                | view = ViewEditTransition
+                | view = ViewApp ViewEditTransition
                 , previousView = model.view
                 , form = form
               }
@@ -721,8 +721,11 @@ update msg model =
                     , Cmd.none
                     )
 
+        SidebarSignOut ->
+            update Logout { model | sidebarOpen = False }
+
         SidebarNavigate route ->
-            ( { model | sidebarOpen = False }, goTo route )
+            update (NavigateTo route) { model | sidebarOpen = False }
 
         SignUpSubmit ->
             ( model
@@ -783,6 +786,14 @@ update msg model =
             let
                 doNothing =
                     ( model, Cmd.none )
+
+                protect =
+                    case model.auth of
+                        Just _ ->
+                            identity
+
+                        Nothing ->
+                            always ( model, goTo Login )
             in
             case router location of
                 Login ->
@@ -802,92 +813,109 @@ update msg model =
                             ( { model | view = ViewSignUp, form = emptyForm }, Cmd.none )
 
                 NotFound ->
-                    ( model, Cmd.batch [ log "redirecting...", goTo Start ] )
+                    ( model
+                    , Cmd.batch
+                        [ log "redirecting..."
+                        , goTo
+                            (model.auth |> unwrap Login (always Start))
+                        ]
+                    )
 
                 PositionRoute id ->
                     if dataIsLoaded model.view id then
                         doNothing
                     else
-                        ( { model | view = ViewPosition Loading }
+                        ( { model | view = ViewApp <| ViewPosition Loading }
                         , fetchPosition id
                             |> query token
                             |> taskToGcData (removeNull >> CbPosition)
                         )
+                            |> protect
 
                 Positions ->
-                    ( { model | view = ViewPositions, positions = Loading }
+                    ( { model | view = ViewApp ViewPositions, positions = Loading }
                     , fetchPositions
                         |> query token
                         |> taskToGcData CbPositions
                     )
+                        |> protect
 
                 SubmissionRoute id ->
                     if dataIsLoaded model.view id then
                         doNothing
                     else
-                        ( { model | view = ViewSubmission Loading }
+                        ( { model | view = ViewApp <| ViewSubmission Loading }
                         , fetchSubmission id
                             |> query token
                             |> taskToGcData (removeNull >> CbSubmission)
                         )
+                            |> protect
 
                 Submissions ->
-                    ( { model | view = ViewSubmissions Loading }
+                    ( { model | view = ViewApp <| ViewSubmissions Loading }
                     , fetchSubmissions
                         |> query token
                         |> taskToGcData CbSubmissions
                     )
+                        |> protect
 
                 Start ->
-                    ( { model | view = ViewStart }, Cmd.none )
+                    ( { model | view = ViewApp ViewStart }, Cmd.none )
+                        |> protect
 
                 TagRoute id ->
-                    ( { model | view = ViewTag Loading }
+                    ( { model | view = ViewApp <| ViewTag Loading }
                     , fetchTag id
                         |> query token
                         |> taskToGcData (removeNull >> CbTag)
                     )
+                        |> protect
 
                 TagsRoute ->
-                    ( { model | view = ViewTags, tags = Loading }
+                    ( { model | view = ViewApp ViewTags, tags = Loading }
                     , fetchTags
                         |> query token
                         |> taskToGcData CbTags
                     )
+                        |> protect
 
                 TopicRoute id ->
                     if dataIsLoaded model.view id then
                         doNothing
                     else
-                        ( { model | view = ViewTopic Loading }
+                        ( { model | view = ViewApp <| ViewTopic Loading }
                         , fetchTopic id
                             |> query token
                             |> taskToGcData (removeNull >> CbTopic)
                         )
+                            |> protect
 
                 Topics ->
-                    ( { model | view = ViewTopics Loading }
+                    ( { model | view = ViewApp <| ViewTopics Loading }
                     , fetchTopics
                         |> query token
                         |> taskToGcData CbTopics
                     )
+                        |> protect
 
                 TransitionRoute id ->
                     if dataIsLoaded model.view id then
                         doNothing
                     else
-                        ( { model | view = ViewTransition Loading }
+                        ( { model | view = ViewApp <| ViewTransition Loading }
                         , fetchTransition id
                             |> query token
                             |> taskToGcData (removeNull >> CbTransition)
                         )
+                            |> protect
 
                 Transitions ->
-                    ( { model | view = ViewTransitions Loading }
+                    ( { model | view = ViewApp <| ViewTransitions Loading }
                     , fetchTransitions
                         |> query token
                         |> taskToGcData CbTransitions
                     )
+                        |> protect
 
         WindowSize size ->
             ( { model
@@ -947,16 +975,16 @@ maybeFetchPositions token data =
 dataIsLoaded : View -> Id -> Bool
 dataIsLoaded view id =
     case view of
-        ViewPosition (Success d) ->
+        ViewApp (ViewPosition (Success d)) ->
             id == d.id
 
-        ViewSubmission (Success d) ->
+        ViewApp (ViewSubmission (Success d)) ->
             id == d.id
 
-        ViewTopic (Success d) ->
+        ViewApp (ViewTopic (Success d)) ->
             id == d.id
 
-        ViewTransition (Success d) ->
+        ViewApp (ViewTransition (Success d)) ->
             id == d.id
 
         _ ->
