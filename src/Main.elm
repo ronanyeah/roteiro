@@ -2,7 +2,6 @@ module Main exposing (main)
 
 import Data exposing (query)
 import Navigation exposing (Location)
-import Paths
 import Task
 import Types exposing (Model, Msg(..))
 import Update exposing (update)
@@ -38,6 +37,6 @@ init maybeToken location =
             ( emptyModel
             , Cmd.batch
                 [ Task.perform WindowSize Window.size
-                , goTo Paths.login
+                , goTo Types.Login
                 ]
             )

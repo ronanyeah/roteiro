@@ -50,7 +50,7 @@ type Msg
     | EditTransition Transition
     | LoginSubmit
     | Logout
-    | NavigateTo String
+    | NavigateTo Route
     | RemoveTag Int
     | SaveCreatePosition
     | SaveCreateSubmission
@@ -62,7 +62,7 @@ type Msg
     | SaveEditTag
     | SaveEditTopic
     | SaveEditTransition
-    | SidebarNavigate String
+    | SidebarNavigate Route
     | SignUpSubmit
     | ToggleEndPosition
     | ToggleSidebar

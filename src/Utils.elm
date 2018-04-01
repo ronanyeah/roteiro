@@ -10,7 +10,7 @@ import Navigation
 import Regex exposing (Regex)
 import RemoteData
 import Task exposing (Task)
-import Types exposing (ApiError(..), Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, View(..))
+import Types exposing (ApiError(..), Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, Route(..), View(..))
 import Window
 
 
@@ -26,10 +26,52 @@ arrayRemove i =
         >> Array.fromList
 
 
-goTo : String -> Cmd msg
-goTo =
-    (++) "/"
-        >> Navigation.newUrl
+goTo : Route -> Cmd msg
+goTo route =
+    (case route of
+        NotFound ->
+            "/start"
+
+        PositionRoute (Id id) ->
+            "/positions/" ++ id
+
+        Positions ->
+            "/positions"
+
+        SubmissionRoute (Id id) ->
+            "/submissions/" ++ id
+
+        Submissions ->
+            "/submissions"
+
+        Login ->
+            "/login"
+
+        SignUp ->
+            "/sign-up"
+
+        Start ->
+            "/start"
+
+        TagRoute (Id id) ->
+            "/tags/" ++ id
+
+        TagsRoute ->
+            "/tags"
+
+        TopicRoute (Id id) ->
+            "/topics/" ++ id
+
+        Topics ->
+            "/topics"
+
+        TransitionRoute (Id id) ->
+            "/transitions/" ++ id
+
+        Transitions ->
+            "/transitions"
+    )
+        |> Navigation.newUrl
 
 
 isJust : Maybe a -> Bool

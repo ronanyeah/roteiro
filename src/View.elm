@@ -10,7 +10,6 @@ import Element.Input as Input exposing (button)
 import Html exposing (Html)
 import Html.Attributes
 import List.Extra exposing (groupWhile)
-import Paths
 import Regex
 import RemoteData exposing (RemoteData(..))
 import Style
@@ -25,7 +24,7 @@ view model =
         content =
             case model.view of
                 ViewStart ->
-                    el [ centerY ] <|
+                    el [ centerY, centerX ] <|
                         column [ spacing 20 ]
                             [ decorativeImage
                                 [ height <| px 100
@@ -155,7 +154,7 @@ view model =
                                 text "ROTEIRO"
                             , Input.button [ centerX ]
                                 { onPress =
-                                    Just <| NavigateTo Paths.signUp
+                                    Just <| NavigateTo SignUp
                                 , label =
                                     icon NewUser
                                         Style.actionIcon
@@ -217,7 +216,7 @@ view model =
                                 text "ROTEIRO"
                             , Input.button [ centerX ]
                                 { onPress =
-                                    Just <| NavigateTo Paths.login
+                                    Just <| NavigateTo Login
                                 , label =
                                     icon SignIn
                                         Style.actionIcon
@@ -259,7 +258,7 @@ view model =
                                     , viewNotes notes
                                     , column []
                                         [ addNewRow Bolt <| CreateSubmission <| Just position
-                                        , viewTechList Paths.submission submissions
+                                        , viewTechList SubmissionRoute submissions
                                         ]
                                     , column []
                                         [ addNewRow Arrow <| CreateTransition <| Just position
@@ -270,7 +269,7 @@ view model =
                                                         paragraph
                                                             [ centerY, centerX ]
                                                             [ button []
-                                                                { onPress = Just <| NavigateTo <| Paths.transition transition.id
+                                                                { onPress = Just <| NavigateTo <| TransitionRoute transition.id
                                                                 , label =
                                                                     el Style.link <|
                                                                         text transition.name
@@ -279,7 +278,7 @@ view model =
                                                             , el [] <| text name
                                                             , el [ padding 20 ] <| icon Arrow Style.mattIcon
                                                             , button []
-                                                                { onPress = Just <| NavigateTo <| Paths.position transition.endPosition.id
+                                                                { onPress = Just <| NavigateTo <| PositionRoute transition.endPosition.id
                                                                 , label =
                                                                     el Style.link <|
                                                                         text transition.endPosition.name
@@ -295,14 +294,14 @@ view model =
                                                         paragraph
                                                             [ centerY, centerX ]
                                                             [ button []
-                                                                { onPress = Just <| NavigateTo <| Paths.transition transition.id
+                                                                { onPress = Just <| NavigateTo <| TransitionRoute transition.id
                                                                 , label =
                                                                     el Style.link <|
                                                                         text transition.name
                                                                 }
                                                             , text " ("
                                                             , button []
-                                                                { onPress = Just <| NavigateTo <| Paths.position transition.startPosition.id
+                                                                { onPress = Just <| NavigateTo <| PositionRoute transition.startPosition.id
                                                                 , label =
                                                                     el Style.link <|
                                                                         text transition.startPosition.name
@@ -323,7 +322,7 @@ view model =
                             (\positions ->
                                 column [ height <| px model.size.height, scrollbarY ]
                                     [ addNewRow Flag CreatePosition
-                                    , blocks Paths.position positions
+                                    , blocks PositionRoute positions
                                     ]
                             )
 
@@ -337,7 +336,7 @@ view model =
                                         [ spacing 10 ]
                                         [ icon Flag Style.mattIcon
                                         , button []
-                                            { onPress = Just <| NavigateTo <| Paths.position sub.position.id
+                                            { onPress = Just <| NavigateTo <| PositionRoute sub.position.id
                                             , label =
                                                 el Style.link <|
                                                     text sub.position.name
@@ -370,13 +369,13 @@ view model =
                                                                 |> whenJust
                                                                     (\{ id, name } ->
                                                                         button [ centerX ]
-                                                                            { onPress = Just <| NavigateTo <| Paths.position id
+                                                                            { onPress = Just <| NavigateTo <| PositionRoute id
                                                                             , label =
                                                                                 paragraph Style.choice
                                                                                     [ text name ]
                                                                             }
                                                                     )
-                                                            , blocks Paths.submission g
+                                                            , blocks SubmissionRoute g
                                                             ]
                                                 )
                                         )
@@ -391,11 +390,11 @@ view model =
                                     [ editRow t.name Tags <| EditTag t
                                     , column []
                                         [ icon Bolt Style.mattIcon
-                                        , viewTechList Paths.submission t.submissions
+                                        , viewTechList SubmissionRoute t.submissions
                                         ]
                                     , column []
                                         [ icon Arrow Style.mattIcon
-                                        , viewTechList Paths.transition t.transitions
+                                        , viewTechList TransitionRoute t.transitions
                                         ]
                                     ]
                             )
@@ -406,7 +405,7 @@ view model =
                             (\tags ->
                                 column [ height <| px model.size.height, scrollbarY ]
                                     [ addNewRow Tags CreateTag
-                                    , blocks Paths.tag tags
+                                    , blocks TagRoute tags
                                     ]
                             )
 
@@ -426,7 +425,7 @@ view model =
                             (\topics ->
                                 column [ height <| px model.size.height, scrollbarY ]
                                     [ addNewRow Book CreateTopic
-                                    , blocks Paths.topic topics
+                                    , blocks TopicRoute topics
                                     ]
                             )
 
@@ -439,14 +438,14 @@ view model =
                                     , paragraph
                                         [ centerY, centerX ]
                                         [ button []
-                                            { onPress = Just <| NavigateTo <| Paths.position startPosition.id
+                                            { onPress = Just <| NavigateTo <| PositionRoute startPosition.id
                                             , label =
                                                 el Style.link <|
                                                     text startPosition.name
                                             }
                                         , el [ padding 20 ] <| icon Arrow Style.mattIcon
                                         , button []
-                                            { onPress = Just <| NavigateTo <| Paths.position endPosition.id
+                                            { onPress = Just <| NavigateTo <| PositionRoute endPosition.id
                                             , label =
                                                 el Style.link <|
                                                     text endPosition.name
@@ -483,13 +482,13 @@ view model =
                                                                 |> whenJust
                                                                     (\{ id, name } ->
                                                                         button [ centerX ]
-                                                                            { onPress = Just <| NavigateTo <| Paths.position id
+                                                                            { onPress = Just <| NavigateTo <| PositionRoute id
                                                                             , label =
                                                                                 paragraph Style.choice
                                                                                     [ text name ]
                                                                             }
                                                                     )
-                                                            , blocks Paths.transition g
+                                                            , blocks TransitionRoute g
                                                             ]
                                                 )
                                         )
@@ -541,13 +540,12 @@ view model =
                 (if model.sidebarOpen then
                     sidebar model.size model.view
                  else
-                    button []
+                    button [ alignRight ]
                         { onPress = Just ToggleSidebar
                         , label =
                             icon Bars
                                 [ height <| px 50
                                 , width <| px 50
-                                , alignRight
                                 , Font.color Style.e
                                 , Font.size 30
                                 ]
@@ -641,7 +639,7 @@ links view =
             , spacing 20
             ]
             [ button []
-                { onPress = Just <| NavigateTo <| Paths.start
+                { onPress = Just <| NavigateTo Start
                 , label =
                     icon Home
                         (if view == ViewStart then
@@ -651,7 +649,7 @@ links view =
                         )
                 }
             , button []
-                { onPress = Just <| NavigateTo <| Paths.positions
+                { onPress = Just <| NavigateTo Positions
                 , label =
                     icon Flag
                         (if isPositionView view then
@@ -661,7 +659,7 @@ links view =
                         )
                 }
             , button []
-                { onPress = Just <| NavigateTo <| Paths.transitions
+                { onPress = Just <| NavigateTo Transitions
                 , label =
                     icon Arrow
                         (if isTransitionView view then
@@ -671,7 +669,7 @@ links view =
                         )
                 }
             , button []
-                { onPress = Just <| NavigateTo <| Paths.submissions
+                { onPress = Just <| NavigateTo Submissions
                 , label =
                     icon Bolt
                         (if isSubmissionView view then
@@ -682,7 +680,7 @@ links view =
                 }
             , button []
                 { onPress =
-                    Just <| NavigateTo Paths.tags
+                    Just <| NavigateTo TagsRoute
                 , label =
                     icon Tags
                         (if isTagView view then
@@ -692,7 +690,7 @@ links view =
                         )
                 }
             , button []
-                { onPress = Just <| NavigateTo <| Paths.topics
+                { onPress = Just <| NavigateTo Topics
                 , label =
                     icon Book
                         (if isTopicView view then
@@ -727,9 +725,9 @@ sidebar size view =
             , Border.color Style.e
             ]
             [ Input.button
-                []
+                [ centerX ]
                 { onPress =
-                    Just <| SidebarNavigate Paths.start
+                    Just <| SidebarNavigate Start
                 , label =
                     icon Home
                         (if view == ViewStart then
@@ -739,9 +737,9 @@ sidebar size view =
                         )
                 }
             , Input.button
-                []
+                [ centerX ]
                 { onPress =
-                    Just <| SidebarNavigate Paths.positions
+                    Just <| SidebarNavigate Positions
                 , label =
                     icon Flag
                         (if isPositionView view then
@@ -751,9 +749,9 @@ sidebar size view =
                         )
                 }
             , Input.button
-                []
+                [ centerX ]
                 { onPress =
-                    Just <| SidebarNavigate Paths.transitions
+                    Just <| SidebarNavigate Transitions
                 , label =
                     icon Arrow
                         (if isTransitionView view then
@@ -763,9 +761,9 @@ sidebar size view =
                         )
                 }
             , Input.button
-                []
+                [ centerX ]
                 { onPress =
-                    Just <| SidebarNavigate Paths.submissions
+                    Just <| SidebarNavigate Submissions
                 , label =
                     icon Bolt
                         (if isSubmissionView view then
@@ -775,9 +773,9 @@ sidebar size view =
                         )
                 }
             , Input.button
-                []
+                [ centerX ]
                 { onPress =
-                    Just <| SidebarNavigate Paths.topics
+                    Just <| SidebarNavigate Topics
                 , label =
                     icon Book
                         (if isTopicView view then
@@ -787,7 +785,7 @@ sidebar size view =
                         )
                 }
             , Input.button
-                []
+                [ centerX ]
                 { onPress =
                     Just <| ToggleSidebar
                 , label =
@@ -802,14 +800,14 @@ transitionPositions startPosition endPosition =
     paragraph
         [ centerY, centerX ]
         [ button []
-            { onPress = Just <| NavigateTo <| Paths.position startPosition.id
+            { onPress = Just <| NavigateTo <| PositionRoute startPosition.id
             , label =
                 el Style.link <|
                     text startPosition.name
             }
         , el [ padding 20 ] <| icon Arrow Style.mattIcon
         , button []
-            { onPress = Just <| NavigateTo <| Paths.position endPosition.id
+            { onPress = Just <| NavigateTo <| PositionRoute endPosition.id
             , label =
                 el Style.link <|
                     text endPosition.name
@@ -817,11 +815,11 @@ transitionPositions startPosition endPosition =
         ]
 
 
-blocks : (Id -> String) -> List { r | id : Id, name : String } -> Element Msg
-blocks url =
+blocks : (Id -> Route) -> List { r | id : Id, name : String } -> Element Msg
+blocks route =
     List.map
         (\{ id, name } ->
-            block name <| NavigateTo <| url id
+            block name <| NavigateTo <| route id
         )
         >> paragraph []
 
@@ -1187,7 +1185,7 @@ viewTransitions ts =
                         []
                         [ el [ Font.color Style.e ] <| text "• "
                         , button Style.link
-                            { onPress = Just <| NavigateTo <| Paths.transition id
+                            { onPress = Just <| NavigateTo <| TransitionRoute id
                             , label = text name
                             }
                         , text " "
@@ -1196,7 +1194,7 @@ viewTransitions ts =
                             [ text "("
                             , button Style.link
                                 { onPress =
-                                    Just <| NavigateTo <| Paths.position endPosition.id
+                                    Just <| NavigateTo <| PositionRoute endPosition.id
                                 , label =
                                     text endPosition.name
                                 }
@@ -1207,8 +1205,8 @@ viewTransitions ts =
         )
 
 
-viewTechList : (Id -> String) -> List { r | name : String, id : Id } -> Element Msg
-viewTechList fn xs =
+viewTechList : (Id -> Route) -> List { r | name : String, id : Id } -> Element Msg
+viewTechList route xs =
     if List.isEmpty xs then
         el [] <| text "None!"
     else
@@ -1218,7 +1216,7 @@ viewTechList fn xs =
                 |> List.map
                     (\t ->
                         button []
-                            { onPress = Just <| NavigateTo <| fn t.id
+                            { onPress = Just <| NavigateTo <| route t.id
                             , label =
                                 paragraph
                                     []
@@ -1268,7 +1266,7 @@ viewTags tags =
                         |> List.map
                             (\t ->
                                 button []
-                                    { onPress = Just <| NavigateTo <| Paths.tag t.id
+                                    { onPress = Just <| NavigateTo <| TagRoute t.id
                                     , label =
                                         paragraph
                                             []

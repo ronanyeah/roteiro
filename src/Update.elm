@@ -3,7 +3,6 @@ module Update exposing (..)
 import Array
 import Data exposing (createPosition, createSubmission, createTag, createTopic, createTransition, fetchPosition, fetchPositions, fetchSubmission, fetchSubmissions, fetchTag, fetchTags, fetchTopic, fetchTopics, fetchTransition, fetchTransitions, mutation, query, updatePosition, updateSubmission, updateTag, updateTopic, updateTransition)
 import Navigation
-import Paths
 import Ports
 import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
@@ -53,7 +52,7 @@ update msg model =
                     ( model
                     , Cmd.batch
                         [ log err
-                        , goTo Paths.login
+                        , goTo Login
                         , Ports.clearToken ()
                         ]
                     )
@@ -72,7 +71,7 @@ update msg model =
                     ( { model | auth = Just auth }
                     , Cmd.batch
                         [ Ports.saveToken auth.token
-                        , goTo Paths.start
+                        , goTo Start
                         ]
                     )
 
@@ -88,7 +87,7 @@ update msg model =
                         | view = ViewPosition <| Success a
                         , confirm = Nothing
                       }
-                    , goTo <| Paths.position a.id
+                    , goTo <| PositionRoute a.id
                     )
 
                 Err err ->
@@ -108,7 +107,7 @@ update msg model =
                         | view = ViewSubmission <| Success a
                         , confirm = Nothing
                       }
-                    , goTo <| Paths.submission a.id
+                    , goTo <| SubmissionRoute a.id
                     )
 
                 Err err ->
@@ -128,7 +127,7 @@ update msg model =
                         | view = ViewTag <| Success a
                         , confirm = Nothing
                       }
-                    , goTo <| Paths.tag a.id
+                    , goTo <| TagRoute a.id
                     )
 
                 Err err ->
@@ -148,7 +147,7 @@ update msg model =
                         | view = ViewTopic <| Success a
                         , confirm = Nothing
                       }
-                    , goTo <| Paths.topic a.id
+                    , goTo <| TopicRoute a.id
                     )
 
                 Err err ->
@@ -168,7 +167,7 @@ update msg model =
                         | view = ViewTransition <| Success a
                         , confirm = Nothing
                       }
-                    , goTo <| Paths.transition a.id
+                    , goTo <| TransitionRoute a.id
                     )
 
                 Err err ->
@@ -203,7 +202,7 @@ update msg model =
             case res of
                 Ok _ ->
                     ( { model | confirm = Nothing }
-                    , goTo <| Paths.submissions
+                    , goTo Submissions
                     )
 
                 Err err ->
@@ -220,7 +219,7 @@ update msg model =
             case res of
                 Ok _ ->
                     ( { model | confirm = Nothing }
-                    , goTo <| Paths.tags
+                    , goTo TagsRoute
                     )
 
                 Err err ->
@@ -237,7 +236,7 @@ update msg model =
             case res of
                 Ok _ ->
                     ( { model | confirm = Nothing }
-                    , goTo <| Paths.topics
+                    , goTo Topics
                     )
 
                 Err err ->
@@ -254,7 +253,7 @@ update msg model =
             case res of
                 Ok _ ->
                     ( { model | confirm = Nothing }
-                    , goTo <| Paths.transitions
+                    , goTo Transitions
                     )
 
                 Err err ->
@@ -555,12 +554,12 @@ update msg model =
             ( { model | auth = Nothing }
             , Cmd.batch
                 [ Ports.clearToken ()
-                , goTo Paths.login
+                , goTo Login
                 ]
             )
 
-        NavigateTo path ->
-            ( model, goTo path )
+        NavigateTo route ->
+            ( model, goTo route )
 
         RemoveTag i ->
             ( { model
@@ -722,8 +721,8 @@ update msg model =
                     , Cmd.none
                     )
 
-        SidebarNavigate url ->
-            ( { model | sidebarOpen = False }, goTo url )
+        SidebarNavigate route ->
+            ( { model | sidebarOpen = False }, goTo route )
 
         SignUpSubmit ->
             ( model
@@ -789,7 +788,7 @@ update msg model =
                 Login ->
                     case model.auth of
                         Just _ ->
-                            ( model, goTo Paths.start )
+                            ( model, goTo Start )
 
                         Nothing ->
                             ( { model | view = ViewLogin, form = emptyForm }, Cmd.none )
@@ -797,13 +796,13 @@ update msg model =
                 SignUp ->
                     case model.auth of
                         Just _ ->
-                            ( model, goTo Paths.start )
+                            ( model, goTo Start )
 
                         Nothing ->
                             ( { model | view = ViewSignUp, form = emptyForm }, Cmd.none )
 
                 NotFound ->
-                    ( model, Cmd.batch [ log "redirecting...", goTo Paths.start ] )
+                    ( model, Cmd.batch [ log "redirecting...", goTo Start ] )
 
                 PositionRoute id ->
                     if dataIsLoaded model.view id then
