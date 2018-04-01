@@ -9,6 +9,7 @@ if (!GRAPHQL_ENDPOINT) throw Error("missing api endpoint");
 const publicFolder = resolve("./public");
 
 module.exports = {
+  mode: NODE_ENV === "production" ? "production" : "development",
   entry: "./src/index.js",
   output: {
     path: publicFolder,

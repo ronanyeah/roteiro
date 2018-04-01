@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"100% coverage!\" && exit 0",
     "watch": "webpack-dev-server --hot",
-    "build": "webpack -p && npm run build-redirects",
+    "build": "webpack && npm run build-redirects",
     "build-redirects": "node build-redirects.js"
   },
   "repository": {
@@ -20,18 +20,19 @@
   },
   "homepage": "https://github.com/ronanyeah/roteiro#readme",
   "dependencies": {
-    "@babel/core": "^7.0.0-beta.40",
-    "@babel/preset-env": "^7.0.0-beta.40",
-    "babel-loader": "^8.0.0-beta.0",
+    "@babel/core": "^7.0.0-beta.42",
+    "@babel/preset-env": "^7.0.0-beta.42",
+    "babel-loader": "^8.0.0-beta.2",
     "bcryptjs": "^2.4.3",
-    "copy-webpack-plugin": "^4.3.1",
+    "copy-webpack-plugin": "^4.5.1",
     "elm-hot-loader": "^0.5.4",
-    "elm-webpack-loader": "^4.4.0",
+    "elm-webpack-loader": "^4.5.0",
     "faker": "^4.1.0",
     "graphcool-lib": "^0.1.4",
-    "graphql-request": "^1.4.1",
+    "graphql-request": "^1.5.1",
     "validator": "^9.4.1",
-    "webpack": "^3.10.0",
-    "webpack-dev-server": "^2.9.7"
+    "webpack": "^4.4.1",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
   }
 }
