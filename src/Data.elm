@@ -5,7 +5,7 @@ import GraphQL.Client.Http exposing (customSendMutationRaw, customSendQueryRaw)
 import GraphQL.Request.Builder as B
 import GraphQL.Request.Builder.Arg as Arg
 import Http
-import Json.Decode as Decode exposing (Decoder, succeed)
+import Json.Decode as Decode exposing (Decoder)
 import Task exposing (Task)
 import Types exposing (..)
 
@@ -21,34 +21,22 @@ currentUser =
 decodeGcError : Decoder ApiError
 decodeGcError =
     Decode.oneOf
-        [ Decode.field "code" Decode.int
-            |> Decode.andThen
-                (\code ->
-                    case code of
-                        3032 ->
-                            succeed RelationIsRequired
+        [ Decode.field "functionError" Decode.string
+            |> Decode.map FunctionExecutionError
+        , Decode.map2
+            (\code message ->
+                case code of
+                    3032 ->
+                        RelationIsRequired
 
-                        3008 ->
-                            succeed InsufficientPermissions
+                    3008 ->
+                        InsufficientPermissions
 
-                        3016 ->
-                            succeed <| Other "Missing project!"
-
-                        _ ->
-                            if code >= 5000 then
-                                Decode.field "message" Decode.string
-                                    |> Decode.map
-                                        ((\str ->
-                                            if String.startsWith "function execution error: " str then
-                                                String.dropLeft 26 str
-                                            else
-                                                str
-                                         )
-                                            >> FunctionExecutionError code
-                                        )
-                            else
-                                succeed <| ErrorCode code
-                )
+                    _ ->
+                        ApiError code message
+            )
+            (Decode.field "code" Decode.int)
+            (Decode.field "message" Decode.string)
         , Decode.field "message" Decode.string
             |> Decode.map Other
         ]

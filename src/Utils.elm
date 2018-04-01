@@ -137,14 +137,14 @@ formatErrors err =
                             InsufficientPermissions ->
                                 "Not authorised."
 
+                            FunctionExecutionError txt ->
+                                txt
+
                             RelationIsRequired ->
                                 "Relation is required!"
 
-                            FunctionExecutionError code txt ->
+                            ApiError code txt ->
                                 "Code: " ++ toString code ++ ", Message: " ++ txt
-
-                            ErrorCode code ->
-                                toString code
 
                             Other str ->
                                 str
