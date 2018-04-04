@@ -6,13 +6,29 @@ import Element exposing (Attribute, Element, centerX, centerY, el, empty, html)
 import Element.Input as Input exposing (Label)
 import Html
 import Html.Attributes
+import Json.Decode as Decode exposing (Decoder)
 import Navigation
 import Ports
 import Regex exposing (Regex)
 import RemoteData
 import Task exposing (Task)
-import Types exposing (ApiError(..), AppView(..), Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, Route(..), View(..))
+import Types exposing (ApiError(..), AppView(..), Auth, Device(Desktop, Mobile), FaIcon(..), Flags, Form, GcData, GcError(..), Id(..), Model, Route(..), View(..))
 import Window
+
+
+flagsDecoder : Decoder Flags
+flagsDecoder =
+    Decode.map2 Flags
+        (Decode.field "auth" (Decode.nullable authDecoder))
+        (Decode.field "isOnline" Decode.bool)
+
+
+authDecoder : Decoder Auth
+authDecoder =
+    Decode.map3 Auth
+        (Decode.field "id" (Decode.map Id Decode.string))
+        (Decode.field "email" Decode.string)
+        (Decode.field "token" Decode.string)
 
 
 listRemove : Int -> List a -> List a

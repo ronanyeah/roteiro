@@ -2,7 +2,7 @@ module View exposing (..)
 
 import Array exposing (Array)
 import Color
-import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, empty, fill, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, padding, paragraph, pointer, px, row, scrollbarY, shrink, spacing, text, width)
+import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, empty, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, padding, paragraph, pointer, px, row, scrollbarY, shrink, spaceEvenly, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -726,20 +726,20 @@ links view =
 sidebar : Bool -> Size -> AppView -> Attribute Msg
 sidebar isOpen size view =
     if isOpen then
-        row [ width fill ]
-            [ button [ width fill, height fill ]
+        row []
+            [ button [ width <| fillPortion 1, height fill ]
                 { onPress = Just ToggleSidebar
                 , label = empty
                 }
             , column
-                [ spacing 5
-                , height <| px size.height
+                [ height <| px size.height
                 , alignRight
-                , width <| px <| size.width // 2
+                , width <| fillPortion 1
                 , Background.color Style.c
                 , Border.solid
                 , Border.widthEach { bottom = 0, left = 5, right = 0, top = 0 }
                 , Border.color Style.e
+                , spaceEvenly
                 ]
                 [ Input.button
                     [ centerX ]

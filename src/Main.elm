@@ -1,16 +1,17 @@
 module Main exposing (main)
 
 import Data exposing (query)
+import Json.Decode exposing (Value)
 import Navigation exposing (Location)
 import Task
 import Types exposing (Model, Msg(..))
 import Update exposing (update)
-import Utils exposing (emptyModel, goTo)
+import Utils exposing (appendCmd, emptyModel, flagsDecoder, goTo, log)
 import View exposing (view)
 import Window
 
 
-main : Program (Maybe String) Model Msg
+main : Program Value Model Msg
 main =
     Navigation.programWithFlags UrlChange
         { init = init
@@ -20,23 +21,41 @@ main =
         }
 
 
-init : Maybe String -> Location -> ( Model, Cmd Msg )
-init maybeToken location =
-    case maybeToken of
-        Just token ->
-            ( emptyModel
-            , Cmd.batch
-                [ Data.currentUser
-                    |> query token
-                    |> Task.attempt (AppInit token location)
-                , Task.perform WindowSize Window.size
-                ]
-            )
+init : Value -> Location -> ( Model, Cmd Msg )
+init flags location =
+    case
+        flags
+            |> Json.Decode.decodeValue flagsDecoder
+    of
+        Ok { auth, isOnline } ->
+            case ( auth, isOnline ) of
+                ( Just auth, True ) ->
+                    ( emptyModel
+                    , Cmd.batch
+                        [ Data.currentUser
+                            |> query auth.token
+                            |> Task.attempt (AppInit auth.token location)
+                        , Task.perform WindowSize Window.size
+                        ]
+                    )
 
-        Nothing ->
+                ( Just auth, False ) ->
+                    update (UrlChange location) { emptyModel | auth = Just auth }
+                        |> appendCmd (Task.perform WindowSize Window.size)
+
+                ( Nothing, _ ) ->
+                    ( emptyModel
+                    , Cmd.batch
+                        [ Task.perform WindowSize Window.size
+                        , goTo Types.Login
+                        ]
+                    )
+
+        Err err ->
             ( emptyModel
             , Cmd.batch
                 [ Task.perform WindowSize Window.size
                 , goTo Types.Login
+                , log err
                 ]
             )

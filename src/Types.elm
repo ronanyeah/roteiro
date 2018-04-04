@@ -204,6 +204,12 @@ type Route
     | Transitions
 
 
+type alias Flags =
+    { auth : Maybe Auth
+    , isOnline : Bool
+    }
+
+
 type alias Auth =
     { id : Id
     , email : String

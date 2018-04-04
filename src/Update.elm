@@ -2,13 +2,14 @@ module Update exposing (..)
 
 import Array
 import Data exposing (createPosition, createSubmission, createTag, createTopic, createTransition, fetchPosition, fetchPositions, fetchSubmission, fetchSubmissions, fetchTag, fetchTags, fetchTopic, fetchTopics, fetchTransition, fetchTransitions, mutation, query, updatePosition, updateSubmission, updateTag, updateTopic, updateTransition)
+import Json.Encode as Encode
 import Navigation
 import Ports
 import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, logError, removeNull, taskToGcData, unwrap)
+import Utils exposing (addErrors, appendCmd, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, logError, removeNull, taskToGcData, unwrap)
 import Validate
 
 
@@ -47,13 +48,20 @@ update msg model =
                                     , token = token
                                     }
                         }
+                        |> appendCmd
+                            (saveAuth
+                                { email = email
+                                , token = token
+                                , id = id
+                                }
+                            )
 
                 Err err ->
                     ( model
                     , Cmd.batch
                         [ log err
                         , goTo Login
-                        , Ports.clearToken ()
+                        , Ports.clearAuth ()
                         ]
                     )
 
@@ -70,7 +78,7 @@ update msg model =
                 Ok auth ->
                     ( { model | auth = Just auth }
                     , Cmd.batch
-                        [ Ports.saveToken auth.token
+                        [ saveAuth auth
                         , goTo Start
                         ]
                     )
@@ -557,7 +565,7 @@ update msg model =
         Logout ->
             ( { model | auth = Nothing }
             , Cmd.batch
-                [ Ports.clearToken ()
+                [ Ports.clearAuth ()
                 , goTo Login
                 ]
             )
@@ -928,6 +936,16 @@ update msg model =
               }
             , Cmd.none
             )
+
+
+saveAuth : Auth -> Cmd msg
+saveAuth auth =
+    [ ( "id", Encode.string (auth.id |> (\(Id id) -> id)) )
+    , ( "token", Encode.string auth.token )
+    , ( "email", Encode.string auth.email )
+    ]
+        |> Encode.object
+        |> Ports.saveAuth
 
 
 maybeFetchTags : String -> GcData a -> Cmd Msg
