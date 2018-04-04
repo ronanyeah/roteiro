@@ -72,6 +72,7 @@ goTo route =
         Transitions ->
             "/transitions"
     )
+        |> (++) "/app"
         |> Navigation.newUrl
 
 
