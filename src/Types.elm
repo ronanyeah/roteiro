@@ -9,7 +9,6 @@ import Window
 
 type Msg
     = AddTag Info
-    | AppInit String Location (Result GcError User)
     | Cancel
     | CbAuth (Result GcError Auth)
     | CbCreateOrUpdatePosition (Result GcError Position)
@@ -202,12 +201,6 @@ type Route
     | Topics
     | TransitionRoute Id
     | Transitions
-
-
-type alias Flags =
-    { auth : Maybe Auth
-    , isOnline : Bool
-    }
 
 
 type alias Auth =

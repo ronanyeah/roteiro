@@ -52,11 +52,21 @@ module.exports = event =>
     const salt = bcryptjs.genSaltSync(SALT_ROUNDS);
 
     if (!validator.isEmail(email)) {
-      return Promise.reject(Error("Not a valid email"));
+      return Promise.reject(Error("Not a valid email address!"));
     }
 
-    if (await getGraphcoolUser(api, email)) {
-      return Promise.reject(Error("Email already in use"));
+    const user = await getGraphcoolUser(api, email);
+
+    if (user) {
+      return (await bcryptjs.compare(password, user.password))
+        ? {
+            data: {
+              id: user.id,
+              email,
+              token: await graphcool.generateAuthToken(user.id, "User")
+            }
+          }
+        : Promise.reject(Error("Account exists, incorrect password!"));
     }
 
     const hash = await bcryptjs.hash(password, salt);

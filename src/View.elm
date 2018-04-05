@@ -15,7 +15,6 @@ import RemoteData exposing (RemoteData(..))
 import Style
 import Types exposing (..)
 import Utils exposing (formatErrors, icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, remoteUnwrap, when, whenJust)
-import Window exposing (Size)
 
 
 view : Model -> Html Msg
@@ -555,7 +554,7 @@ view model =
             else if model.device == Mobile then
                 case model.view of
                     ViewApp appView ->
-                        sidebar model.sidebarOpen model.size appView
+                        sidebar model.sidebarOpen appView
 
                     _ ->
                         behind empty
@@ -654,85 +653,20 @@ links view =
             [ padding 20
             , spacing 20
             ]
-            [ button []
-                { onPress = Just <| NavigateTo Start
-                , label =
-                    icon Home
-                        (if view == ViewStart then
-                            ballIcon
-                         else
-                            Style.actionIcon
-                        )
-                }
-            , button []
-                { onPress = Just <| NavigateTo Positions
-                , label =
-                    icon Flag
-                        (if isPositionView view then
-                            ballIcon
-                         else
-                            Style.actionIcon
-                        )
-                }
-            , button []
-                { onPress = Just <| NavigateTo Transitions
-                , label =
-                    icon Arrow
-                        (if isTransitionView view then
-                            ballIcon
-                         else
-                            Style.actionIcon
-                        )
-                }
-            , button []
-                { onPress = Just <| NavigateTo Submissions
-                , label =
-                    icon Bolt
-                        (if isSubmissionView view then
-                            ballIcon
-                         else
-                            Style.actionIcon
-                        )
-                }
-            , button []
-                { onPress =
-                    Just <| NavigateTo TagsRoute
-                , label =
-                    icon Tags
-                        (if isTagView view then
-                            ballIcon
-                         else
-                            Style.actionIcon
-                        )
-                }
-            , button []
-                { onPress = Just <| NavigateTo Topics
-                , label =
-                    icon Book
-                        (if isTopicView view then
-                            ballIcon
-                         else
-                            Style.actionIcon
-                        )
-                }
-            , button []
-                { onPress = Just <| Logout
-                , label =
-                    icon SignOut Style.actionIcon
-                }
-            ]
+        <|
+            icons False view
 
 
-sidebar : Bool -> Size -> AppView -> Attribute Msg
-sidebar isOpen size view =
+sidebar : Bool -> AppView -> Attribute Msg
+sidebar isOpen view =
     if isOpen then
-        row []
+        row [ height fill ]
             [ button [ width <| fillPortion 1, height fill ]
                 { onPress = Just ToggleSidebar
                 , label = empty
                 }
             , column
-                [ height <| px size.height
+                [ height fill
                 , alignRight
                 , width <| fillPortion 1
                 , Background.color Style.c
@@ -741,81 +675,8 @@ sidebar isOpen size view =
                 , Border.color Style.e
                 , spaceEvenly
                 ]
-                [ Input.button
-                    [ centerX ]
-                    { onPress =
-                        Just <| SidebarNavigate Start
-                    , label =
-                        icon Home
-                            (if view == ViewStart then
-                                ballIcon
-                             else
-                                Style.actionIcon
-                            )
-                    }
-                , Input.button
-                    [ centerX ]
-                    { onPress =
-                        Just <| SidebarNavigate Positions
-                    , label =
-                        icon Flag
-                            (if isPositionView view then
-                                ballIcon
-                             else
-                                Style.actionIcon
-                            )
-                    }
-                , Input.button
-                    [ centerX ]
-                    { onPress =
-                        Just <| SidebarNavigate Transitions
-                    , label =
-                        icon Arrow
-                            (if isTransitionView view then
-                                ballIcon
-                             else
-                                Style.actionIcon
-                            )
-                    }
-                , Input.button
-                    [ centerX ]
-                    { onPress =
-                        Just <| SidebarNavigate Submissions
-                    , label =
-                        icon Bolt
-                            (if isSubmissionView view then
-                                ballIcon
-                             else
-                                Style.actionIcon
-                            )
-                    }
-                , Input.button
-                    [ centerX ]
-                    { onPress =
-                        Just <| SidebarNavigate Topics
-                    , label =
-                        icon Book
-                            (if isTopicView view then
-                                ballIcon
-                             else
-                                Style.actionIcon
-                            )
-                    }
-                , Input.button
-                    [ centerX ]
-                    { onPress =
-                        Just <| SidebarSignOut
-                    , label =
-                        icon SignOut Style.actionIcon
-                    }
-                , Input.button
-                    [ centerX ]
-                    { onPress =
-                        Just <| ToggleSidebar
-                    , label =
-                        icon Cross Style.actionIcon
-                    }
-                ]
+              <|
+                icons True view
             ]
             |> inFront
     else
@@ -830,6 +691,96 @@ sidebar isOpen size view =
                     ]
             }
             |> inFront
+
+
+icons : Bool -> AppView -> List (Element Msg)
+icons isSidebar view =
+    let
+        nav =
+            if isSidebar then
+                SidebarNavigate
+            else
+                NavigateTo
+    in
+    [ button [ centerX ]
+        { onPress = Just <| nav Start
+        , label =
+            icon Home
+                (if view == ViewStart then
+                    ballIcon
+                 else
+                    Style.actionIcon
+                )
+        }
+    , button [ centerX ]
+        { onPress = Just <| nav Positions
+        , label =
+            icon Flag
+                (if isPositionView view then
+                    ballIcon
+                 else
+                    Style.actionIcon
+                )
+        }
+    , button [ centerX ]
+        { onPress = Just <| nav Transitions
+        , label =
+            icon Arrow
+                (if isTransitionView view then
+                    ballIcon
+                 else
+                    Style.actionIcon
+                )
+        }
+    , button [ centerX ]
+        { onPress = Just <| nav Submissions
+        , label =
+            icon Bolt
+                (if isSubmissionView view then
+                    ballIcon
+                 else
+                    Style.actionIcon
+                )
+        }
+    , button [ centerX ]
+        { onPress =
+            Just <| nav TagsRoute
+        , label =
+            icon Tags
+                (if isTagView view then
+                    ballIcon
+                 else
+                    Style.actionIcon
+                )
+        }
+    , button [ centerX ]
+        { onPress = Just <| nav Topics
+        , label =
+            icon Book
+                (if isTopicView view then
+                    ballIcon
+                 else
+                    Style.actionIcon
+                )
+        }
+    , button [ centerX ]
+        { onPress = Just <| Logout
+        , label =
+            icon SignOut Style.actionIcon
+        }
+    ]
+        ++ (if isSidebar then
+                [ Input.button
+                    [ centerX ]
+                    { onPress =
+                        Just <| ToggleSidebar
+                    , label =
+                        icon Cross Style.actionIcon
+                    }
+                ]
+            else
+                []
+           )
 
 
 transitionPositions : Info -> Info -> Element Msg

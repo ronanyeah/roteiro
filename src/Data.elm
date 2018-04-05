@@ -205,28 +205,52 @@ fetchTransitions =
         |> B.request ()
 
 
-login : String -> String -> B.Request B.Mutation Auth
+login : String -> String -> Task GcError Auth
 login email password =
-    B.request () <|
-        B.mutationDocument <|
-            B.extract <|
-                B.field "authenticateUser"
-                    [ ( "email", Arg.string email )
-                    , ( "password", Arg.string password )
-                    ]
-                    auth
+    let
+        request =
+            B.request () <|
+                B.mutationDocument <|
+                    B.extract <|
+                        B.field "authenticateUser"
+                            [ ( "email", Arg.string email )
+                            , ( "password", Arg.string password )
+                            ]
+                            auth
+    in
+    customSendMutationRaw
+        { method = "POST"
+        , headers = []
+        , url = "/api"
+        , timeout = Nothing
+        , withCredentials = False
+        }
+        request
+        |> convert (B.responseDataDecoder request)
 
 
-signUp : String -> String -> B.Request B.Mutation Auth
+signUp : String -> String -> Task GcError Auth
 signUp email password =
-    B.request () <|
-        B.mutationDocument <|
-            B.extract <|
-                B.field "signupUser"
-                    [ ( "email", Arg.string email )
-                    , ( "password", Arg.string password )
-                    ]
-                    auth
+    let
+        request =
+            B.request () <|
+                B.mutationDocument <|
+                    B.extract <|
+                        B.field "signupUser"
+                            [ ( "email", Arg.string email )
+                            , ( "password", Arg.string password )
+                            ]
+                            auth
+    in
+    customSendMutationRaw
+        { method = "POST"
+        , headers = []
+        , url = "/api"
+        , timeout = Nothing
+        , withCredentials = False
+        }
+        request
+        |> convert (B.responseDataDecoder request)
 
 
 

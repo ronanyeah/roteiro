@@ -9,20 +9,27 @@ import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (addErrors, appendCmd, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, logError, removeNull, taskToGcData, unwrap)
+import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, logError, removeNull, taskToGcData, unwrap)
 import Validate
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
-        token =
-            model.auth
-                |> unwrap "" .token
+        doNothing =
+            ( model, Cmd.none )
 
-        userId =
-            model.auth
-                |> unwrap (Id "") .id
+        protect =
+            flip
+                (unwrap
+                    ( model
+                    , Cmd.batch
+                        [ goTo Login
+                        , log <| "Message interrupted: " ++ toString msg
+                        ]
+                    )
+                )
+                model.auth
     in
     case msg of
         AddTag tag ->
@@ -35,35 +42,6 @@ update msg model =
               }
             , Cmd.none
             )
-
-        AppInit token location res ->
-            case res of
-                Ok { id, email } ->
-                    update (UrlChange location)
-                        { model
-                            | auth =
-                                Just
-                                    { id = id
-                                    , email = email
-                                    , token = token
-                                    }
-                        }
-                        |> appendCmd
-                            (saveAuth
-                                { email = email
-                                , token = token
-                                , id = id
-                                }
-                            )
-
-                Err err ->
-                    ( model
-                    , Cmd.batch
-                        [ log err
-                        , goTo Login
-                        , Ports.clearAuth ()
-                        ]
-                    )
 
         Cancel ->
             ( { model
@@ -361,27 +339,30 @@ update msg model =
             )
 
         CreateSubmission p ->
-            let
-                form =
-                    { emptyForm
-                        | startPosition =
-                            p
-                                |> Maybe.map
-                                    (\{ id, name } ->
-                                        Info id name
-                                    )
-                    }
-            in
-            ( { model
-                | view = ViewApp ViewCreateSubmission
-                , previousView = model.view
-                , form = form
-              }
-            , Cmd.batch
-                [ maybeFetchPositions token model.positions
-                , maybeFetchTags token model.tags
-                ]
-            )
+            protect
+                (\auth ->
+                    let
+                        form =
+                            { emptyForm
+                                | startPosition =
+                                    p
+                                        |> Maybe.map
+                                            (\{ id, name } ->
+                                                Info id name
+                                            )
+                            }
+                    in
+                    ( { model
+                        | view = ViewApp ViewCreateSubmission
+                        , previousView = model.view
+                        , form = form
+                      }
+                    , Cmd.batch
+                        [ maybeFetchPositions auth.token model.positions
+                        , maybeFetchTags auth.token model.tags
+                        ]
+                    )
+                )
 
         CreateTag ->
             ( { model
@@ -402,62 +383,80 @@ update msg model =
             )
 
         CreateTransition p ->
-            let
-                form =
-                    { emptyForm
-                        | startPosition =
-                            p
-                                |> Maybe.map
-                                    (\{ id, name } ->
-                                        Info id name
-                                    )
-                    }
-            in
-            ( { model
-                | view = ViewApp ViewCreateTransition
-                , previousView = model.view
-                , form = form
-              }
-            , Cmd.batch
-                [ maybeFetchPositions token model.positions
-                , maybeFetchTags token model.tags
-                ]
-            )
+            protect
+                (\auth ->
+                    let
+                        form =
+                            { emptyForm
+                                | startPosition =
+                                    p
+                                        |> Maybe.map
+                                            (\{ id, name } ->
+                                                Info id name
+                                            )
+                            }
+                    in
+                    ( { model
+                        | view = ViewApp ViewCreateTransition
+                        , previousView = model.view
+                        , form = form
+                      }
+                    , Cmd.batch
+                        [ maybeFetchPositions auth.token model.positions
+                        , maybeFetchTags auth.token model.tags
+                        ]
+                    )
+                )
 
         DeletePosition id ->
-            ( model
-            , Data.deletePosition id
-                |> mutation token
-                |> Task.attempt CbDeletePosition
-            )
+            protect
+                (\auth ->
+                    ( model
+                    , Data.deletePosition id
+                        |> mutation auth.token
+                        |> Task.attempt CbDeletePosition
+                    )
+                )
 
         DeleteSubmission id ->
-            ( model
-            , Data.deleteSubmission id
-                |> mutation token
-                |> Task.attempt CbDeleteSubmission
-            )
+            protect
+                (\auth ->
+                    ( model
+                    , Data.deleteSubmission id
+                        |> mutation auth.token
+                        |> Task.attempt CbDeleteSubmission
+                    )
+                )
 
         DeleteTag id ->
-            ( model
-            , Data.deleteTag id
-                |> mutation token
-                |> Task.attempt CbDeleteTag
-            )
+            protect
+                (\auth ->
+                    ( model
+                    , Data.deleteTag id
+                        |> mutation auth.token
+                        |> Task.attempt CbDeleteTag
+                    )
+                )
 
         DeleteTopic id ->
-            ( model
-            , Data.deleteTopic id
-                |> mutation token
-                |> Task.attempt CbDeleteTopic
-            )
+            protect
+                (\auth ->
+                    ( model
+                    , Data.deleteTopic id
+                        |> mutation auth.token
+                        |> Task.attempt CbDeleteTopic
+                    )
+                )
 
         DeleteTransition id ->
-            ( model
-            , Data.deleteTransition id
-                |> mutation token
-                |> Task.attempt CbDeleteTransition
-            )
+            protect
+                (\auth ->
+                    ( model
+                    , Data.deleteTransition id
+                        |> mutation auth.token
+                        |> Task.attempt CbDeleteTransition
+                    )
+                )
 
         EditPosition p ->
             let
@@ -477,27 +476,30 @@ update msg model =
             )
 
         EditSubmission s ->
-            let
-                form =
-                    { emptyForm
-                        | name = s.name
-                        , steps = s.steps
-                        , notes = s.notes
-                        , startPosition = Just s.position
-                        , id = s.id
-                        , tags = s.tags |> Array.fromList
-                    }
-            in
-            ( { model
-                | view = ViewApp ViewEditSubmission
-                , previousView = model.view
-                , form = form
-              }
-            , Cmd.batch
-                [ maybeFetchPositions token model.positions
-                , maybeFetchTags token model.tags
-                ]
-            )
+            protect
+                (\auth ->
+                    let
+                        form =
+                            { emptyForm
+                                | name = s.name
+                                , steps = s.steps
+                                , notes = s.notes
+                                , startPosition = Just s.position
+                                , id = s.id
+                                , tags = s.tags |> Array.fromList
+                            }
+                    in
+                    ( { model
+                        | view = ViewApp ViewEditSubmission
+                        , previousView = model.view
+                        , form = form
+                      }
+                    , Cmd.batch
+                        [ maybeFetchPositions auth.token model.positions
+                        , maybeFetchTags auth.token model.tags
+                        ]
+                    )
+                )
 
         EditTag t ->
             let
@@ -533,32 +535,34 @@ update msg model =
             )
 
         EditTransition t ->
-            let
-                form =
-                    { emptyForm
-                        | name = t.name
-                        , id = t.id
-                        , steps = t.steps
-                        , notes = t.notes
-                        , startPosition = Just t.startPosition
-                        , endPosition = Just t.endPosition
-                    }
-            in
-            ( { model
-                | view = ViewApp ViewEditTransition
-                , previousView = model.view
-                , form = form
-              }
-            , Cmd.batch
-                [ maybeFetchPositions token model.positions
-                , maybeFetchTags token model.tags
-                ]
-            )
+            protect
+                (\auth ->
+                    let
+                        form =
+                            { emptyForm
+                                | name = t.name
+                                , id = t.id
+                                , steps = t.steps
+                                , notes = t.notes
+                                , startPosition = Just t.startPosition
+                                , endPosition = Just t.endPosition
+                            }
+                    in
+                    ( { model
+                        | view = ViewApp ViewEditTransition
+                        , previousView = model.view
+                        , form = form
+                      }
+                    , Cmd.batch
+                        [ maybeFetchPositions auth.token model.positions
+                        , maybeFetchTags auth.token model.tags
+                        ]
+                    )
+                )
 
         LoginSubmit ->
             ( model
             , Data.login model.form.email model.form.password
-                |> mutation token
                 |> Task.attempt CbAuth
             )
 
@@ -585,153 +589,183 @@ update msg model =
             )
 
         SaveCreatePosition ->
-            case Validate.position model.form of
-                Ok ( name, notes ) ->
-                    ( { model | form = clearErrors model.form }
-                    , createPosition userId name notes
-                        |> mutation token
-                        |> Task.attempt CbCreateOrUpdatePosition
-                    )
+            protect
+                (\auth ->
+                    case Validate.position model.form of
+                        Ok ( name, notes ) ->
+                            ( { model | form = clearErrors model.form }
+                            , createPosition auth.id name notes
+                                |> mutation auth.token
+                                |> Task.attempt CbCreateOrUpdatePosition
+                            )
 
-                Err errs ->
-                    ( { model | form = addErrors errs model.form }
-                    , Cmd.none
-                    )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
+                )
 
         SaveCreateSubmission ->
-            case Validate.submission model.form of
-                Ok ( name, startId, steps, notes ) ->
-                    ( { model | form = clearErrors model.form }
-                    , createSubmission userId name startId steps notes
-                        |> mutation token
-                        |> Task.attempt CbCreateOrUpdateSubmission
-                    )
+            protect
+                (\auth ->
+                    case Validate.submission model.form of
+                        Ok ( name, startId, steps, notes ) ->
+                            ( { model | form = clearErrors model.form }
+                            , createSubmission auth.id name startId steps notes
+                                |> mutation auth.token
+                                |> Task.attempt CbCreateOrUpdateSubmission
+                            )
 
-                Err errs ->
-                    ( { model | form = addErrors errs model.form }
-                    , Cmd.none
-                    )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
+                )
 
         SaveCreateTag ->
-            case Validate.tag model.form of
-                Ok name ->
-                    ( { model | form = clearErrors model.form }
-                    , createTag userId name
-                        |> mutation token
-                        |> Task.attempt CbCreateOrUpdateTag
-                    )
+            protect
+                (\auth ->
+                    case Validate.tag model.form of
+                        Ok name ->
+                            ( { model | form = clearErrors model.form }
+                            , createTag auth.id name
+                                |> mutation auth.token
+                                |> Task.attempt CbCreateOrUpdateTag
+                            )
 
-                Err errs ->
-                    ( { model | form = addErrors errs model.form }
-                    , Cmd.none
-                    )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
+                )
 
         SaveCreateTopic ->
-            case Validate.topic model.form of
-                Ok ( name, notes ) ->
-                    ( { model | form = clearErrors model.form }
-                    , createTopic userId name notes
-                        |> mutation token
-                        |> Task.attempt CbCreateOrUpdateTopic
-                    )
+            protect
+                (\auth ->
+                    case Validate.topic model.form of
+                        Ok ( name, notes ) ->
+                            ( { model | form = clearErrors model.form }
+                            , createTopic auth.id name notes
+                                |> mutation auth.token
+                                |> Task.attempt CbCreateOrUpdateTopic
+                            )
 
-                Err errs ->
-                    ( { model | form = addErrors errs model.form }
-                    , Cmd.none
-                    )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
+                )
 
         SaveCreateTransition ->
-            case Validate.transition model.form of
-                Ok ( name, startId, endId, steps, notes ) ->
-                    ( { model | form = clearErrors model.form }
-                    , createTransition
-                        userId
-                        name
-                        startId
-                        endId
-                        steps
-                        notes
-                        |> mutation token
-                        |> Task.attempt CbCreateOrUpdateTransition
-                    )
+            protect
+                (\auth ->
+                    case Validate.transition model.form of
+                        Ok ( name, startId, endId, steps, notes ) ->
+                            ( { model | form = clearErrors model.form }
+                            , createTransition
+                                auth.id
+                                name
+                                startId
+                                endId
+                                steps
+                                notes
+                                |> mutation auth.token
+                                |> Task.attempt CbCreateOrUpdateTransition
+                            )
 
-                Err errs ->
-                    ( { model | form = addErrors errs model.form }
-                    , Cmd.none
-                    )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
+                )
 
         SaveEditPosition ->
-            case Validate.position model.form of
-                Ok args ->
-                    ( { model | form = clearErrors model.form }
-                    , args
-                        |> uncurry (updatePosition model.form.id)
-                        |> mutation token
-                        |> Task.attempt CbCreateOrUpdatePosition
-                    )
+            protect
+                (\auth ->
+                    case Validate.position model.form of
+                        Ok args ->
+                            ( { model | form = clearErrors model.form }
+                            , args
+                                |> uncurry (updatePosition model.form.id)
+                                |> mutation auth.token
+                                |> Task.attempt CbCreateOrUpdatePosition
+                            )
 
-                Err errs ->
-                    ( { model | form = addErrors errs model.form }
-                    , Cmd.none
-                    )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
+                )
 
         SaveEditSubmission ->
-            case Validate.submission model.form of
-                Ok ( name, position, steps, notes ) ->
-                    ( { model | form = clearErrors model.form }
-                    , updateSubmission model.form.id name position steps notes model.form.tags
-                        |> mutation token
-                        |> Task.attempt CbCreateOrUpdateSubmission
-                    )
+            protect
+                (\auth ->
+                    case Validate.submission model.form of
+                        Ok ( name, position, steps, notes ) ->
+                            ( { model | form = clearErrors model.form }
+                            , updateSubmission model.form.id name position steps notes model.form.tags
+                                |> mutation auth.token
+                                |> Task.attempt CbCreateOrUpdateSubmission
+                            )
 
-                Err errs ->
-                    ( { model | form = addErrors errs model.form }
-                    , Cmd.none
-                    )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
+                )
 
         SaveEditTag ->
-            case Validate.tag model.form of
-                Ok name ->
-                    ( { model | form = clearErrors model.form }
-                    , name
-                        |> updateTag model.form.id
-                        |> mutation token
-                        |> Task.attempt CbCreateOrUpdateTag
-                    )
+            protect
+                (\auth ->
+                    case Validate.tag model.form of
+                        Ok name ->
+                            ( { model | form = clearErrors model.form }
+                            , name
+                                |> updateTag model.form.id
+                                |> mutation auth.token
+                                |> Task.attempt CbCreateOrUpdateTag
+                            )
 
-                Err errs ->
-                    ( { model | form = addErrors errs model.form }
-                    , Cmd.none
-                    )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
+                )
 
         SaveEditTopic ->
-            case Validate.topic model.form of
-                Ok args ->
-                    ( { model | form = clearErrors model.form }
-                    , args
-                        |> uncurry (updateTopic model.form.id)
-                        |> mutation token
-                        |> Task.attempt CbCreateOrUpdateTopic
-                    )
+            protect
+                (\auth ->
+                    case Validate.topic model.form of
+                        Ok args ->
+                            ( { model | form = clearErrors model.form }
+                            , args
+                                |> uncurry (updateTopic model.form.id)
+                                |> mutation auth.token
+                                |> Task.attempt CbCreateOrUpdateTopic
+                            )
 
-                Err errs ->
-                    ( { model | form = addErrors errs model.form }
-                    , Cmd.none
-                    )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
+                )
 
         SaveEditTransition ->
-            case Validate.transition model.form of
-                Ok ( name, startId, endId, steps, notes ) ->
-                    ( { model | form = clearErrors model.form }
-                    , updateTransition model.form.id name startId endId steps notes model.form.tags
-                        |> mutation token
-                        |> Task.attempt CbCreateOrUpdateTransition
-                    )
+            protect
+                (\auth ->
+                    case Validate.transition model.form of
+                        Ok ( name, startId, endId, steps, notes ) ->
+                            ( { model | form = clearErrors model.form }
+                            , updateTransition model.form.id name startId endId steps notes model.form.tags
+                                |> mutation auth.token
+                                |> Task.attempt CbCreateOrUpdateTransition
+                            )
 
-                Err errs ->
-                    ( { model | form = addErrors errs model.form }
-                    , Cmd.none
-                    )
+                        Err errs ->
+                            ( { model | form = addErrors errs model.form }
+                            , Cmd.none
+                            )
+                )
 
         SidebarSignOut ->
             update Logout { model | sidebarOpen = False }
@@ -742,7 +776,6 @@ update msg model =
         SignUpSubmit ->
             ( model
             , Data.signUp model.form.email model.form.password
-                |> mutation token
                 |> Task.attempt CbAuth
             )
 
@@ -795,18 +828,6 @@ update msg model =
             ( { model | form = form, selectingStartPosition = False }, Cmd.none )
 
         UrlChange location ->
-            let
-                doNothing =
-                    ( model, Cmd.none )
-
-                protect =
-                    case model.auth of
-                        Just _ ->
-                            identity
-
-                        Nothing ->
-                            always ( model, goTo Login )
-            in
             case router location of
                 Login ->
                     case model.auth of
@@ -837,97 +858,116 @@ update msg model =
                     if dataIsLoaded model.view id then
                         doNothing
                     else
-                        ( { model | view = ViewApp <| ViewPosition Loading }
-                        , fetchPosition id
-                            |> query token
-                            |> taskToGcData (removeNull >> CbPosition)
-                        )
-                            |> protect
+                        protect
+                            (\auth ->
+                                ( { model | view = ViewApp <| ViewPosition Loading }
+                                , fetchPosition id
+                                    |> query auth.token
+                                    |> taskToGcData (removeNull >> CbPosition)
+                                )
+                            )
 
                 Positions ->
-                    ( { model | view = ViewApp ViewPositions, positions = Loading }
-                    , fetchPositions
-                        |> query token
-                        |> taskToGcData CbPositions
-                    )
-                        |> protect
+                    protect
+                        (\auth ->
+                            ( { model | view = ViewApp ViewPositions, positions = Loading }
+                            , fetchPositions
+                                |> query auth.token
+                                |> taskToGcData CbPositions
+                            )
+                        )
 
                 SubmissionRoute id ->
                     if dataIsLoaded model.view id then
                         doNothing
                     else
-                        ( { model | view = ViewApp <| ViewSubmission Loading }
-                        , fetchSubmission id
-                            |> query token
-                            |> taskToGcData (removeNull >> CbSubmission)
-                        )
-                            |> protect
+                        protect
+                            (\auth ->
+                                ( { model | view = ViewApp <| ViewSubmission Loading }
+                                , fetchSubmission id
+                                    |> query auth.token
+                                    |> taskToGcData (removeNull >> CbSubmission)
+                                )
+                            )
 
                 Submissions ->
-                    ( { model | view = ViewApp <| ViewSubmissions Loading }
-                    , fetchSubmissions
-                        |> query token
-                        |> taskToGcData CbSubmissions
-                    )
-                        |> protect
+                    protect
+                        (\auth ->
+                            ( { model | view = ViewApp <| ViewSubmissions Loading }
+                            , fetchSubmissions
+                                |> query auth.token
+                                |> taskToGcData CbSubmissions
+                            )
+                        )
 
                 Start ->
                     ( { model | view = ViewApp ViewStart }, Cmd.none )
-                        |> protect
 
                 TagRoute id ->
-                    ( { model | view = ViewApp <| ViewTag Loading }
-                    , fetchTag id
-                        |> query token
-                        |> taskToGcData (removeNull >> CbTag)
-                    )
-                        |> protect
+                    protect
+                        (\auth ->
+                            ( { model | view = ViewApp <| ViewTag Loading }
+                            , fetchTag id
+                                |> query auth.token
+                                |> taskToGcData (removeNull >> CbTag)
+                            )
+                        )
 
                 TagsRoute ->
-                    ( { model | view = ViewApp ViewTags, tags = Loading }
-                    , fetchTags
-                        |> query token
-                        |> taskToGcData CbTags
-                    )
-                        |> protect
+                    protect
+                        (\auth ->
+                            ( { model | view = ViewApp ViewTags, tags = Loading }
+                            , fetchTags
+                                |> query auth.token
+                                |> taskToGcData CbTags
+                            )
+                        )
 
                 TopicRoute id ->
                     if dataIsLoaded model.view id then
                         doNothing
                     else
-                        ( { model | view = ViewApp <| ViewTopic Loading }
-                        , fetchTopic id
-                            |> query token
-                            |> taskToGcData (removeNull >> CbTopic)
-                        )
-                            |> protect
+                        protect
+                            (\auth ->
+                                ( { model | view = ViewApp <| ViewTopic Loading }
+                                , fetchTopic id
+                                    |> query auth.token
+                                    |> taskToGcData (removeNull >> CbTopic)
+                                )
+                            )
 
                 Topics ->
-                    ( { model | view = ViewApp <| ViewTopics Loading }
-                    , fetchTopics
-                        |> query token
-                        |> taskToGcData CbTopics
-                    )
-                        |> protect
+                    protect
+                        (\auth ->
+                            ( { model | view = ViewApp <| ViewTopics Loading }
+                            , fetchTopics
+                                |> query auth.token
+                                |> taskToGcData CbTopics
+                            )
+                        )
 
                 TransitionRoute id ->
                     if dataIsLoaded model.view id then
                         doNothing
                     else
-                        ( { model | view = ViewApp <| ViewTransition Loading }
-                        , fetchTransition id
-                            |> query token
-                            |> taskToGcData (removeNull >> CbTransition)
-                        )
-                            |> protect
+                        protect
+                            (\auth ->
+                                ( { model | view = ViewApp <| ViewTransition Loading }
+                                , fetchTransition id
+                                    |> query auth.token
+                                    |> taskToGcData (removeNull >> CbTransition)
+                                )
+                            )
 
                 Transitions ->
-                    ( { model | view = ViewApp <| ViewTransitions Loading }
-                    , fetchTransitions
-                        |> query token
-                        |> taskToGcData CbTransitions
-                    )
-                        |> protect
+                    protect
+                        (\auth ->
+                            ( { model | view = ViewApp <| ViewTransitions Loading }
+                            , fetchTransitions
+                                |> query auth.token
+                                |> taskToGcData CbTransitions
+                            )
+                        )
 
         WindowSize size ->
             ( { model

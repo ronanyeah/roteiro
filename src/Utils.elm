@@ -12,15 +12,8 @@ import Ports
 import Regex exposing (Regex)
 import RemoteData
 import Task exposing (Task)
-import Types exposing (ApiError(..), AppView(..), Auth, Device(Desktop, Mobile), FaIcon(..), Flags, Form, GcData, GcError(..), Id(..), Model, Route(..), View(..))
+import Types exposing (ApiError(..), AppView(..), Auth, Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, Route(..), View(..))
 import Window
-
-
-flagsDecoder : Decoder Flags
-flagsDecoder =
-    Decode.map2 Flags
-        (Decode.field "auth" (Decode.nullable authDecoder))
-        (Decode.field "isOnline" Decode.bool)
 
 
 authDecoder : Decoder Auth

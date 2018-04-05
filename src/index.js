@@ -28,8 +28,7 @@ const getStoredData = () => {
 };
 
 const app = Elm.Main.embed(document.body, {
-  auth: getStoredData(),
-  isOnline: window.navigator.onLine
+  auth: getStoredData()
 });
 
 app.ports.saveAuth.subscribe(auth =>
