@@ -5,6 +5,8 @@ if (window.navigator.serviceWorker) {
     .catch(console.error);
 }
 
+require("./index.scss");
+
 if (
   window.URLSearchParams &&
   new window.URLSearchParams(document.location.search).get("applaunch") ===

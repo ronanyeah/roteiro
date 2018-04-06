@@ -1,6 +1,3 @@
-const isGoogleFontResponse = (url, response) =>
-  url.startsWith("https://fonts.googleapis.com") && response.type === "opaque";
-
 const isIndex = url => {
   const { origin, pathname } = new URL(url);
   return (
@@ -11,7 +8,6 @@ const isIndex = url => {
 
 const isAsset = url =>
   url.startsWith(self.location.origin) ||
-  url.startsWith("https://use.fontawesome.com") ||
   url.startsWith("https://fonts.gstatic.com");
 
 const cacheResponse = (key, response) =>
@@ -25,12 +21,12 @@ self.addEventListener(
       : e.respondWith(
           fetch(e.request)
             .then(res => {
-              if (isGoogleFontResponse(e.request.url, res)) {
-                cacheResponse(e.request, res);
-              } else if (res.ok && isIndex(e.request.url)) {
-                cacheResponse("/index.html", res);
-              } else if (res.ok && isAsset(e.request.url)) {
-                cacheResponse(e.request, res);
+              if (res.ok) {
+                if (isIndex(e.request.url)) {
+                  cacheResponse("/index.html", res);
+                } else if (isAsset(e.request.url)) {
+                  cacheResponse(e.request, res);
+                }
               }
               return res.clone();
             })

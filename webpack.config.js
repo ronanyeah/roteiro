@@ -28,6 +28,20 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.scss$/,
+        use: [
+          {
+            loader: "style-loader"
+          },
+          {
+            loader: "css-loader"
+          },
+          {
+            loader: "sass-loader"
+          }
+        ]
+      },
+      {
         test: /\.elm$/,
         exclude: [/elm-stuff/, /node_modules/],
         use: [
@@ -57,6 +71,12 @@ module.exports = {
   plugins: [
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
-    new CopyWebpackPlugin(["static"])
+    new CopyWebpackPlugin([
+      "static",
+      {
+        from: "./node_modules/@fortawesome/fontawesome-free-webfonts/webfonts",
+        to: "webfonts"
+      }
+    ])
   ]
 };

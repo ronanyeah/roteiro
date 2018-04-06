@@ -85,10 +85,7 @@ actionIcon =
 font : Attribute msg
 font =
     Font.family
-        [ Font.external
-            { name = "Cuprum"
-            , url = "https://fonts.googleapis.com/css?family=Cuprum"
-            }
+        [ Font.typeface "Cuprum"
         ]
 
 
