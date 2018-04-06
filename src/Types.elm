@@ -32,11 +32,6 @@ type Msg
     | CbTransition (GcData Transition)
     | CbTransitions (GcData (List Transition))
     | Confirm (Maybe Msg)
-    | CreatePosition
-    | CreateSubmission (Maybe Position)
-    | CreateTag
-    | CreateTopic
-    | CreateTransition (Maybe Position)
     | DeletePosition Id
     | DeleteSubmission Id
     | DeleteTag Id
@@ -188,6 +183,11 @@ type Device
 
 type Route
     = NotFound
+    | CreatePositionRoute
+    | CreateSubmissionRoute (Maybe String)
+    | CreateTagRoute
+    | CreateTopicRoute
+    | CreateTransitionRoute (Maybe String) (Maybe String)
     | PositionRoute Id
     | Positions
     | SubmissionRoute Id

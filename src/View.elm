@@ -135,16 +135,20 @@ view model =
                         ViewPosition data ->
                             data
                                 |> viewRemote
-                                    (\({ name, notes, submissions, transitionsFrom, transitionsTo } as position) ->
+                                    (\({ name, notes, submissions, transitionsFrom, transitionsTo, id } as position) ->
+                                        let
+                                            (Id startId) =
+                                                id
+                                        in
                                         column [ height <| px model.size.height, scrollbarY ]
                                             [ editRow name Flag <| EditPosition position
                                             , viewNotes notes
                                             , column []
-                                                [ addNewRow Bolt <| CreateSubmission <| Just position
+                                                [ addNewRow Bolt <| (NavigateTo <| CreateSubmissionRoute <| Just startId)
                                                 , viewTechList SubmissionRoute submissions
                                                 ]
                                             , column []
-                                                [ addNewRow Arrow <| CreateTransition <| Just position
+                                                [ addNewRow Arrow <| (NavigateTo <| CreateTransitionRoute (Just startId) Nothing)
                                                 , column []
                                                     (transitionsFrom
                                                         |> List.map
@@ -204,7 +208,7 @@ view model =
                                 |> viewRemote
                                     (\positions ->
                                         column [ height <| px model.size.height, scrollbarY ]
-                                            [ addNewRow Flag CreatePosition
+                                            [ addNewRow Flag <| NavigateTo CreatePositionRoute
                                             , blocks PositionRoute positions
                                             ]
                                     )
@@ -236,7 +240,9 @@ view model =
                                 |> viewRemote
                                     (\submissions ->
                                         column [ height <| px model.size.height, scrollbarY ]
-                                            [ addNewRow Bolt <| CreateSubmission Nothing
+                                            [ addNewRow Bolt <|
+                                                NavigateTo
+                                                    (CreateSubmissionRoute Nothing)
                                             , column [ spacing 20 ] <|
                                                 (submissions
                                                     |> List.sortBy (.position >> .id >> (\(Id id) -> id))
@@ -287,7 +293,7 @@ view model =
                                 |> viewRemote
                                     (\tags ->
                                         column [ height <| px model.size.height, scrollbarY ]
-                                            [ addNewRow Tags CreateTag
+                                            [ addNewRow Tags <| NavigateTo CreateTagRoute
                                             , blocks TagRoute tags
                                             ]
                                     )
@@ -307,7 +313,7 @@ view model =
                                 |> viewRemote
                                     (\topics ->
                                         column [ height <| px model.size.height, scrollbarY ]
-                                            [ addNewRow Book CreateTopic
+                                            [ addNewRow Book <| NavigateTo CreateTopicRoute
                                             , blocks TopicRoute topics
                                             ]
                                     )
@@ -345,7 +351,9 @@ view model =
                                 |> viewRemote
                                     (\transitions ->
                                         column [ height <| px model.size.height, scrollbarY ]
-                                            [ addNewRow Arrow <| CreateTransition Nothing
+                                            [ addNewRow Arrow <|
+                                                NavigateTo
+                                                    (CreateTransitionRoute Nothing Nothing)
                                             , column [ spacing 20 ] <|
                                                 (transitions
                                                     |> List.sortBy

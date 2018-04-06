@@ -16,6 +16,19 @@ import Types exposing (ApiError(..), AppView(..), Auth, Device(Desktop, Mobile),
 import Window
 
 
+find : (a -> Bool) -> List a -> Maybe a
+find predicate xs =
+    case xs of
+        x :: tail ->
+            if predicate x then
+                Just x
+            else
+                find predicate tail
+
+        [] ->
+            Nothing
+
+
 authDecoder : Decoder Auth
 authDecoder =
     Decode.map3 Auth
@@ -39,6 +52,36 @@ arrayRemove i =
 goTo : Route -> Cmd msg
 goTo route =
     (case route of
+        CreatePositionRoute ->
+            "/positions/new"
+
+        CreateSubmissionRoute maybeStartPosition ->
+            "/submissions/new" ++ (maybeStartPosition |> unwrap "" ((++) "?start="))
+
+        CreateTagRoute ->
+            "/tags/new"
+
+        CreateTopicRoute ->
+            "/topics/new"
+
+        CreateTransitionRoute maybeStartPosition maybeEndPosition ->
+            let
+                suffix =
+                    case ( maybeStartPosition, maybeEndPosition ) of
+                        ( Nothing, Nothing ) ->
+                            ""
+
+                        ( Just p, Nothing ) ->
+                            "?start=" ++ p
+
+                        ( Nothing, Just p ) ->
+                            "?start=" ++ p
+
+                        ( Just p1, Just p2 ) ->
+                            "?start=" ++ p1 ++ "&end=" ++ p2
+            in
+            "/transitions/new" ++ suffix
+
         NotFound ->
             "/start"
 

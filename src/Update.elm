@@ -9,7 +9,7 @@ import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Task
 import Types exposing (..)
-import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, logError, removeNull, taskToGcData, unwrap)
+import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, find, formatErrors, goTo, log, logError, removeNull, taskToGcData, unwrap)
 import Validate
 
 
@@ -328,85 +328,6 @@ update msg model =
 
         Confirm maybeM ->
             ( { model | confirm = maybeM }, Cmd.none )
-
-        CreatePosition ->
-            ( { model
-                | view = ViewApp ViewCreatePosition
-                , form = emptyForm
-                , previousView = model.view
-              }
-            , Cmd.none
-            )
-
-        CreateSubmission p ->
-            protect
-                (\auth ->
-                    let
-                        form =
-                            { emptyForm
-                                | startPosition =
-                                    p
-                                        |> Maybe.map
-                                            (\{ id, name } ->
-                                                Info id name
-                                            )
-                            }
-                    in
-                    ( { model
-                        | view = ViewApp ViewCreateSubmission
-                        , previousView = model.view
-                        , form = form
-                      }
-                    , Cmd.batch
-                        [ maybeFetchPositions auth.token model.positions
-                        , maybeFetchTags auth.token model.tags
-                        ]
-                    )
-                )
-
-        CreateTag ->
-            ( { model
-                | view = ViewApp ViewCreateTag
-                , previousView = model.view
-                , form = emptyForm
-              }
-            , Cmd.none
-            )
-
-        CreateTopic ->
-            ( { model
-                | view = ViewApp ViewCreateTopic
-                , previousView = model.view
-                , form = emptyForm
-              }
-            , Cmd.none
-            )
-
-        CreateTransition p ->
-            protect
-                (\auth ->
-                    let
-                        form =
-                            { emptyForm
-                                | startPosition =
-                                    p
-                                        |> Maybe.map
-                                            (\{ id, name } ->
-                                                Info id name
-                                            )
-                            }
-                    in
-                    ( { model
-                        | view = ViewApp ViewCreateTransition
-                        , previousView = model.view
-                        , form = form
-                      }
-                    , Cmd.batch
-                        [ maybeFetchPositions auth.token model.positions
-                        , maybeFetchTags auth.token model.tags
-                        ]
-                    )
-                )
 
         DeletePosition id ->
             protect
@@ -844,6 +765,103 @@ update msg model =
 
                         Nothing ->
                             ( { model | view = ViewSignUp, form = emptyForm }, Cmd.none )
+
+                CreatePositionRoute ->
+                    ( { model
+                        | view = ViewApp ViewCreatePosition
+                        , form = emptyForm
+                        , previousView = model.view
+                      }
+                    , Cmd.none
+                    )
+
+                CreateSubmissionRoute maybeStart ->
+                    protect
+                        (\auth ->
+                            let
+                                start =
+                                    model.positions
+                                        |> RemoteData.toMaybe
+                                        |> Maybe.map2 (,) maybeStart
+                                        |> Maybe.andThen
+                                            (\( p, positions ) ->
+                                                positions
+                                                    |> find (.id >> (==) (Id p))
+                                            )
+                                        |> Maybe.map
+                                            (\{ id, name } ->
+                                                Info id name
+                                            )
+
+                                form =
+                                    { emptyForm
+                                        | startPosition = start
+                                    }
+                            in
+                            ( { model
+                                | view = ViewApp ViewCreateSubmission
+                                , previousView = model.view
+                                , form = form
+                              }
+                            , Cmd.batch
+                                [ maybeFetchPositions auth.token model.positions
+                                , maybeFetchTags auth.token model.tags
+                                ]
+                            )
+                        )
+
+                CreateTagRoute ->
+                    ( { model
+                        | view = ViewApp ViewCreateTag
+                        , previousView = model.view
+                        , form = emptyForm
+                      }
+                    , Cmd.none
+                    )
+
+                CreateTopicRoute ->
+                    ( { model
+                        | view = ViewApp ViewCreateTopic
+                        , previousView = model.view
+                        , form = emptyForm
+                      }
+                    , Cmd.none
+                    )
+
+                CreateTransitionRoute maybeStart _ ->
+                    protect
+                        (\auth ->
+                            let
+                                start =
+                                    model.positions
+                                        |> RemoteData.toMaybe
+                                        |> Maybe.map2 (,) maybeStart
+                                        |> Maybe.andThen
+                                            (\( p, positions ) ->
+                                                positions
+                                                    |> find (.id >> (==) (Id p))
+                                            )
+                                        |> Maybe.map
+                                            (\{ id, name } ->
+                                                Info id name
+                                            )
+
+                                form =
+                                    { emptyForm
+                                        | startPosition = start
+                                    }
+                            in
+                            ( { model
+                                | view = ViewApp ViewCreateTransition
+                                , previousView = model.view
+                                , form = form
+                              }
+                            , Cmd.batch
+                                [ maybeFetchPositions auth.token model.positions
+                                , maybeFetchTags auth.token model.tags
+                                ]
+                            )
+                        )
 
                 NotFound ->
                     ( model
