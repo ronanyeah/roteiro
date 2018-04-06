@@ -852,6 +852,8 @@ viewRemote fn data =
             icon Waiting
                 [ Font.color Style.e
                 , Font.size 60
+                , centerX
+                , centerY
                 ]
 
         Failure err ->
