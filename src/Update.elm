@@ -44,12 +44,62 @@ update msg model =
             )
 
         Cancel ->
-            ( { model
-                | view = model.previousView
-                , confirm = Nothing
-              }
-            , Cmd.none
-            )
+            case model.view of
+                ViewApp ViewCreatePosition ->
+                    ( model, goTo Positions )
+
+                ViewApp ViewCreateSubmission ->
+                    ( model
+                    , model.previousRoute
+                        |> Maybe.withDefault Submissions
+                        |> goTo
+                    )
+
+                ViewApp ViewCreateTag ->
+                    ( model, goTo TagsRoute )
+
+                ViewApp ViewCreateTopic ->
+                    ( model, goTo Topics )
+
+                ViewApp ViewCreateTransition ->
+                    ( { model | previousRoute = Nothing }
+                    , model.previousRoute
+                        |> Maybe.withDefault Transitions
+                        |> goTo
+                    )
+
+                ViewApp (ViewEditPosition _) ->
+                    ( { model | confirm = Nothing }
+                    , goTo
+                        Positions
+                    )
+
+                ViewApp ViewEditSubmission ->
+                    ( { model | confirm = Nothing }
+                    , goTo
+                        Submissions
+                    )
+
+                ViewApp ViewEditTag ->
+                    ( { model | confirm = Nothing }
+                    , goTo
+                        TagsRoute
+                    )
+
+                ViewApp ViewEditTopic ->
+                    ( { model | confirm = Nothing }
+                    , goTo
+                        Topics
+                    )
+
+                ViewApp ViewEditTransition ->
+                    ( { model | confirm = Nothing }
+                    , goTo
+                        Transitions
+                    )
+
+                _ ->
+                    ( model, goTo Start )
 
         CbAuth res ->
             case res of
@@ -389,8 +439,7 @@ update msg model =
                     }
             in
             ( { model
-                | view = ViewApp ViewEditPosition
-                , previousView = model.view
+                | view = ViewApp (ViewEditPosition p)
                 , form = form
               }
             , Cmd.none
@@ -412,7 +461,6 @@ update msg model =
                     in
                     ( { model
                         | view = ViewApp ViewEditSubmission
-                        , previousView = model.view
                         , form = form
                       }
                     , Cmd.batch
@@ -432,7 +480,6 @@ update msg model =
             in
             ( { model
                 | view = ViewApp ViewEditTag
-                , previousView = model.view
                 , form = form
               }
             , Cmd.none
@@ -449,7 +496,6 @@ update msg model =
             in
             ( { model
                 | view = ViewApp ViewEditTopic
-                , previousView = model.view
                 , form = form
               }
             , Cmd.none
@@ -471,7 +517,6 @@ update msg model =
                     in
                     ( { model
                         | view = ViewApp ViewEditTransition
-                        , previousView = model.view
                         , form = form
                       }
                     , Cmd.batch
@@ -688,6 +733,9 @@ update msg model =
                             )
                 )
 
+        SetRouteThenNavigate route nextRoute ->
+            ( { model | previousRoute = Just route }, goTo nextRoute )
+
         SidebarSignOut ->
             update Logout { model | sidebarOpen = False }
 
@@ -770,7 +818,6 @@ update msg model =
                     ( { model
                         | view = ViewApp ViewCreatePosition
                         , form = emptyForm
-                        , previousView = model.view
                       }
                     , Cmd.none
                     )
@@ -800,7 +847,6 @@ update msg model =
                             in
                             ( { model
                                 | view = ViewApp ViewCreateSubmission
-                                , previousView = model.view
                                 , form = form
                               }
                             , Cmd.batch
@@ -813,7 +859,6 @@ update msg model =
                 CreateTagRoute ->
                     ( { model
                         | view = ViewApp ViewCreateTag
-                        , previousView = model.view
                         , form = emptyForm
                       }
                     , Cmd.none
@@ -822,7 +867,6 @@ update msg model =
                 CreateTopicRoute ->
                     ( { model
                         | view = ViewApp ViewCreateTopic
-                        , previousView = model.view
                         , form = emptyForm
                       }
                     , Cmd.none
@@ -853,7 +897,6 @@ update msg model =
                             in
                             ( { model
                                 | view = ViewApp ViewCreateTransition
-                                , previousView = model.view
                                 , form = form
                               }
                             , Cmd.batch

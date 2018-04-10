@@ -2,7 +2,7 @@ module View exposing (..)
 
 import Array exposing (Array)
 import Color
-import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, empty, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, padding, paragraph, pointer, px, row, scrollbarY, shrink, spaceEvenly, spacing, text, width)
+import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, empty, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, padding, paragraph, pointer, px, row, scrollbarY, spaceEvenly, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -41,7 +41,8 @@ view model =
 
                         ViewCreatePosition ->
                             column []
-                                [ viewErrors model.form.errors
+                                [ createHeader Flag
+                                , viewErrors model.form.errors
                                 , nameEdit model.form
                                 , notesEditor model.form
                                 , createButtons SaveCreatePosition
@@ -49,7 +50,8 @@ view model =
 
                         ViewCreateSubmission ->
                             column []
-                                [ viewErrors model.form.errors
+                                [ createHeader Bolt
+                                , viewErrors model.form.errors
                                 , nameEdit model.form
                                 , viewSubmissionPicker model.form
                                 , stepsEditor model.form
@@ -59,14 +61,16 @@ view model =
 
                         ViewCreateTag ->
                             column []
-                                [ viewErrors model.form.errors
+                                [ createHeader Tags
+                                , viewErrors model.form.errors
                                 , nameEdit model.form
                                 , createButtons SaveCreateTag
                                 ]
 
                         ViewCreateTopic ->
                             column []
-                                [ viewErrors model.form.errors
+                                [ createHeader Book
+                                , viewErrors model.form.errors
                                 , nameEdit model.form
                                 , notesEditor model.form
                                 , createButtons SaveCreateTopic
@@ -74,7 +78,8 @@ view model =
 
                         ViewCreateTransition ->
                             column []
-                                [ viewErrors model.form.errors
+                                [ createHeader Arrow
+                                , viewErrors model.form.errors
                                 , nameEdit model.form
                                 , viewTransitionPickers model.form
                                 , stepsEditor model.form
@@ -82,7 +87,7 @@ view model =
                                 , createButtons SaveCreateTransition
                                 ]
 
-                        ViewEditPosition ->
+                        ViewEditPosition _ ->
                             column [ height <| px model.size.height, scrollbarY ]
                                 [ editHeader Flag
                                 , viewErrors model.form.errors
@@ -137,18 +142,29 @@ view model =
                                 |> viewRemote
                                     (\({ name, notes, submissions, transitionsFrom, transitionsTo, id } as position) ->
                                         let
-                                            (Id startId) =
+                                            (Id idStr) =
                                                 id
                                         in
                                         column [ height <| px model.size.height, scrollbarY ]
                                             [ editRow name Flag <| EditPosition position
                                             , viewNotes notes
                                             , column []
-                                                [ addNewRow Bolt <| (NavigateTo <| CreateSubmissionRoute <| Just startId)
+                                                [ addNewRow Bolt
+                                                    (SetRouteThenNavigate
+                                                        (PositionRoute id)
+                                                        (CreateSubmissionRoute <| Just idStr)
+                                                    )
                                                 , viewTechList SubmissionRoute submissions
                                                 ]
                                             , column []
-                                                [ addNewRow Arrow <| (NavigateTo <| CreateTransitionRoute (Just startId) Nothing)
+                                                [ addNewRow Arrow
+                                                    (SetRouteThenNavigate
+                                                        (PositionRoute id)
+                                                        (CreateTransitionRoute
+                                                            (Just idStr)
+                                                            Nothing
+                                                        )
+                                                    )
                                                 , column []
                                                     (transitionsFrom
                                                         |> List.map
@@ -627,6 +643,15 @@ view model =
                 content
 
 
+createHeader : FaIcon -> Element msg
+createHeader faIcon =
+    el [ centerX ] <|
+        row [ spacing 20, padding 20 ]
+            [ icon faIcon Style.mattIcon
+            , icon Plus Style.mattIcon
+            ]
+
+
 editHeader : FaIcon -> Element msg
 editHeader faIcon =
     el [ centerX ] <|
@@ -916,21 +941,19 @@ pickPosition msg position =
 
 editRow : String -> FaIcon -> Msg -> Element Msg
 editRow name faIcon editMsg =
-    el [ centerX ] <|
-        row
-            [ spacing 20, centerY ]
-            [ icon faIcon Style.mattIcon
-            , paragraph
-                [ Font.size 35
-                , Font.color Style.e
-                , width shrink
-                ]
-                [ text name ]
-            , Input.button []
-                { onPress = Just editMsg
-                , label = icon Write Style.actionIcon
-                }
+    row
+        [ spacing 20 ]
+        [ icon faIcon Style.mattIcon
+        , paragraph
+            [ Font.size 35
+            , Font.color Style.e
             ]
+            [ text name ]
+        , Input.button []
+            { onPress = Just editMsg
+            , label = icon Write Style.actionIcon
+            }
+        ]
 
 
 addNewRow : FaIcon -> Msg -> Element Msg
@@ -975,46 +998,48 @@ minus msg =
 
 editButtons : Msg -> Msg -> Element Msg
 editButtons save delete =
-    row
-        [ spacing 20 ]
-        [ Input.button [ padding 10 ]
-            { onPress = Just save
-            , label =
-                icon Tick
-                    Style.actionIcon
-            }
-        , Input.button [ padding 10 ]
-            { onPress = Just Cancel
-            , label =
-                icon Cross
-                    Style.actionIcon
-            }
-        , Input.button [ padding 10 ]
-            { onPress = Just <| Confirm <| Just delete
-            , label =
-                icon Trash
-                    Style.actionIcon
-            }
-        ]
+    el [ centerX ] <|
+        row
+            [ spacing 20 ]
+            [ Input.button [ padding 10 ]
+                { onPress = Just save
+                , label =
+                    icon Tick
+                        Style.actionIcon
+                }
+            , Input.button [ padding 10 ]
+                { onPress = Just Cancel
+                , label =
+                    icon Cross
+                        Style.actionIcon
+                }
+            , Input.button [ padding 10 ]
+                { onPress = Just <| Confirm <| Just delete
+                , label =
+                    icon Trash
+                        Style.actionIcon
+                }
+            ]
 
 
 createButtons : Msg -> Element Msg
 createButtons save =
-    row
-        [ spacing 20 ]
-        [ Input.button [ padding 10 ]
-            { onPress = Just save
-            , label =
-                icon Tick
-                    Style.actionIcon
-            }
-        , Input.button [ padding 10 ]
-            { onPress = Just Cancel
-            , label =
-                icon Cross
-                    Style.actionIcon
-            }
-        ]
+    el [ centerX ] <|
+        row
+            [ spacing 20 ]
+            [ Input.button [ padding 10 ]
+                { onPress = Just save
+                , label =
+                    icon Tick
+                        Style.actionIcon
+                }
+            , Input.button [ padding 10 ]
+                { onPress = Just Cancel
+                , label =
+                    icon Cross
+                        Style.actionIcon
+                }
+            ]
 
 
 stepsEditor : Form -> Element Msg
@@ -1050,16 +1075,18 @@ stepsEditor form =
                 )
 
         buttons =
-            row
-                [ centerX ]
-                [ plus (UpdateForm { form | steps = Array.push "" form.steps })
-                , when (not <| Array.isEmpty form.steps) <|
-                    minus (UpdateForm { form | steps = Array.slice 0 -1 form.steps })
-                ]
+            el [ centerX ] <|
+                row
+                    []
+                    [ plus (UpdateForm { form | steps = Array.push "" form.steps })
+                    , when (not <| Array.isEmpty form.steps) <|
+                        minus (UpdateForm { form | steps = Array.slice 0 -1 form.steps })
+                    ]
     in
     column
         [ spacing 10
         , width fill
+        , height Element.shrink
         ]
         [ icon Cogs (centerX :: Style.bigIcon)
         , steps
@@ -1100,16 +1127,18 @@ notesEditor form =
                 )
 
         buttons =
-            row
-                [ centerX ]
-                [ plus (UpdateForm { form | notes = Array.push "" form.notes })
-                , when (not <| Array.isEmpty form.notes) <|
-                    minus (UpdateForm { form | notes = Array.slice 0 -1 form.notes })
-                ]
+            el [ centerX ] <|
+                row
+                    []
+                    [ plus (UpdateForm { form | notes = Array.push "" form.notes })
+                    , when (not <| Array.isEmpty form.notes) <|
+                        minus (UpdateForm { form | notes = Array.slice 0 -1 form.notes })
+                    ]
     in
     column
         [ spacing 10
         , width fill
+        , height Element.shrink
         ]
         [ icon Notes (centerX :: Style.bigIcon)
         , notes

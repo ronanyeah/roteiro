@@ -56,6 +56,7 @@ type Msg
     | SaveEditTag
     | SaveEditTopic
     | SaveEditTransition
+    | SetRouteThenNavigate Route Route
     | SidebarNavigate Route
     | SidebarSignOut
     | SignUpSubmit
@@ -84,7 +85,7 @@ type AppView
     | ViewCreateTag
     | ViewCreateTopic
     | ViewCreateTransition
-    | ViewEditPosition
+    | ViewEditPosition Position
     | ViewEditSubmission
     | ViewEditTag
     | ViewEditTopic
@@ -163,7 +164,7 @@ type alias Info =
 type alias Model =
     { view : View
     , auth : Maybe Auth
-    , previousView : View
+    , previousRoute : Maybe Route
     , positions : GcData (List Info)
     , tags : GcData (List Info)
     , device : Device

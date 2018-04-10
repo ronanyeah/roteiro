@@ -232,7 +232,7 @@ isPositionView view =
         ViewCreatePosition ->
             True
 
-        ViewEditPosition ->
+        ViewEditPosition _ ->
             True
 
         _ ->
@@ -418,7 +418,7 @@ notEditing view =
         ViewCreateTransition ->
             False
 
-        ViewEditPosition ->
+        ViewEditPosition _ ->
             False
 
         ViewEditSubmission ->
@@ -500,7 +500,7 @@ emptyModel : Model
 emptyModel =
     { view = ViewWaiting
     , auth = Nothing
-    , previousView = ViewWaiting
+    , previousRoute = Nothing
     , positions = RemoteData.NotAsked
     , tags = RemoteData.NotAsked
     , device = Desktop
