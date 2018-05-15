@@ -2,7 +2,7 @@ module Utils exposing (..)
 
 import Array exposing (Array)
 import Dict exposing (Dict)
-import Element exposing (Attribute, Element, centerX, centerY, el, empty, html)
+import Element exposing (Attribute, Element, centerX, centerY, el, html, none)
 import Element.Input as Input exposing (Label)
 import Html
 import Html.Attributes
@@ -146,7 +146,7 @@ removeNull =
 
 noLabel : Label msg
 noLabel =
-    Input.labelAbove [] empty
+    Input.labelAbove [] none
 
 
 when : Bool -> Element msg -> Element msg
@@ -154,12 +154,12 @@ when b elem =
     if b then
         elem
     else
-        empty
+        none
 
 
 whenJust : (a -> Element msg) -> Maybe a -> Element msg
 whenJust =
-    unwrap empty
+    unwrap none
 
 
 classifyDevice : Window.Size -> Device

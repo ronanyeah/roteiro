@@ -2,7 +2,7 @@ module View exposing (..)
 
 import Array exposing (Array)
 import Color
-import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, empty, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, padding, paragraph, pointer, px, row, scrollbarY, spaceEvenly, spacing, text, width)
+import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, none, padding, paragraph, pointer, px, row, scrollbarY, spaceEvenly, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -581,9 +581,9 @@ view model =
                         sidebar model.sidebarOpen appView
 
                     _ ->
-                        behind empty
+                        behind none
             else
-                behind empty
+                behind none
     in
     case model.device of
         Desktop ->
@@ -696,7 +696,7 @@ sidebar isOpen view =
         row [ height fill ]
             [ button [ width <| fillPortion 1, height fill ]
                 { onPress = Just ToggleSidebar
-                , label = empty
+                , label = none
                 }
             , column
                 [ height fill
