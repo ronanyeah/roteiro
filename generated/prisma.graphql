@@ -1,0 +1,2920 @@
+# source: http://localhost:4466
+# timestamp: Thu May 17 2018 15:50:06 GMT+0100 (IST)
+
+type AggregateFile {
+  count: Int!
+}
+
+type AggregatePosition {
+  count: Int!
+}
+
+type AggregateSubmission {
+  count: Int!
+}
+
+type AggregateTag {
+  count: Int!
+}
+
+type AggregateTopic {
+  count: Int!
+}
+
+type AggregateTransition {
+  count: Int!
+}
+
+type AggregateUser {
+  count: Int!
+}
+
+type BatchPayload {
+  """The number of nodes that have been affected by the Batch operation."""
+  count: Long!
+}
+
+scalar DateTime
+
+type File implements Node {
+  id: ID!
+  createdAt: DateTime!
+  contentType: String!
+  name: String!
+  secret: String!
+  size: Int!
+  updatedAt: DateTime!
+  url: String!
+}
+
+"""A connection to a list of items."""
+type FileConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [FileEdge]!
+  aggregate: AggregateFile!
+}
+
+input FileCreateInput {
+  contentType: String!
+  name: String!
+  secret: String!
+  size: Int!
+  url: String!
+}
+
+"""An edge in a connection."""
+type FileEdge {
+  """The item at the end of the edge."""
+  node: File!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum FileOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  contentType_ASC
+  contentType_DESC
+  name_ASC
+  name_DESC
+  secret_ASC
+  secret_DESC
+  size_ASC
+  size_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  url_ASC
+  url_DESC
+}
+
+type FilePreviousValues {
+  id: ID!
+  createdAt: DateTime!
+  contentType: String!
+  name: String!
+  secret: String!
+  size: Int!
+  updatedAt: DateTime!
+  url: String!
+}
+
+type FileSubscriptionPayload {
+  mutation: MutationType!
+  node: File
+  updatedFields: [String!]
+  previousValues: FilePreviousValues
+}
+
+input FileSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [FileSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [FileSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [FileSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: FileWhereInput
+}
+
+input FileUpdateInput {
+  contentType: String
+  name: String
+  secret: String
+  size: Int
+  url: String
+}
+
+input FileWhereInput {
+  """Logical AND on all given filters."""
+  AND: [FileWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [FileWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [FileWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  contentType: String
+
+  """All values that are not equal to given value."""
+  contentType_not: String
+
+  """All values that are contained in given list."""
+  contentType_in: [String!]
+
+  """All values that are not contained in given list."""
+  contentType_not_in: [String!]
+
+  """All values less than the given value."""
+  contentType_lt: String
+
+  """All values less than or equal the given value."""
+  contentType_lte: String
+
+  """All values greater than the given value."""
+  contentType_gt: String
+
+  """All values greater than or equal the given value."""
+  contentType_gte: String
+
+  """All values containing the given string."""
+  contentType_contains: String
+
+  """All values not containing the given string."""
+  contentType_not_contains: String
+
+  """All values starting with the given string."""
+  contentType_starts_with: String
+
+  """All values not starting with the given string."""
+  contentType_not_starts_with: String
+
+  """All values ending with the given string."""
+  contentType_ends_with: String
+
+  """All values not ending with the given string."""
+  contentType_not_ends_with: String
+  name: String
+
+  """All values that are not equal to given value."""
+  name_not: String
+
+  """All values that are contained in given list."""
+  name_in: [String!]
+
+  """All values that are not contained in given list."""
+  name_not_in: [String!]
+
+  """All values less than the given value."""
+  name_lt: String
+
+  """All values less than or equal the given value."""
+  name_lte: String
+
+  """All values greater than the given value."""
+  name_gt: String
+
+  """All values greater than or equal the given value."""
+  name_gte: String
+
+  """All values containing the given string."""
+  name_contains: String
+
+  """All values not containing the given string."""
+  name_not_contains: String
+
+  """All values starting with the given string."""
+  name_starts_with: String
+
+  """All values not starting with the given string."""
+  name_not_starts_with: String
+
+  """All values ending with the given string."""
+  name_ends_with: String
+
+  """All values not ending with the given string."""
+  name_not_ends_with: String
+  secret: String
+
+  """All values that are not equal to given value."""
+  secret_not: String
+
+  """All values that are contained in given list."""
+  secret_in: [String!]
+
+  """All values that are not contained in given list."""
+  secret_not_in: [String!]
+
+  """All values less than the given value."""
+  secret_lt: String
+
+  """All values less than or equal the given value."""
+  secret_lte: String
+
+  """All values greater than the given value."""
+  secret_gt: String
+
+  """All values greater than or equal the given value."""
+  secret_gte: String
+
+  """All values containing the given string."""
+  secret_contains: String
+
+  """All values not containing the given string."""
+  secret_not_contains: String
+
+  """All values starting with the given string."""
+  secret_starts_with: String
+
+  """All values not starting with the given string."""
+  secret_not_starts_with: String
+
+  """All values ending with the given string."""
+  secret_ends_with: String
+
+  """All values not ending with the given string."""
+  secret_not_ends_with: String
+  size: Int
+
+  """All values that are not equal to given value."""
+  size_not: Int
+
+  """All values that are contained in given list."""
+  size_in: [Int!]
+
+  """All values that are not contained in given list."""
+  size_not_in: [Int!]
+
+  """All values less than the given value."""
+  size_lt: Int
+
+  """All values less than or equal the given value."""
+  size_lte: Int
+
+  """All values greater than the given value."""
+  size_gt: Int
+
+  """All values greater than or equal the given value."""
+  size_gte: Int
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  url: String
+
+  """All values that are not equal to given value."""
+  url_not: String
+
+  """All values that are contained in given list."""
+  url_in: [String!]
+
+  """All values that are not contained in given list."""
+  url_not_in: [String!]
+
+  """All values less than the given value."""
+  url_lt: String
+
+  """All values less than or equal the given value."""
+  url_lte: String
+
+  """All values greater than the given value."""
+  url_gt: String
+
+  """All values greater than or equal the given value."""
+  url_gte: String
+
+  """All values containing the given string."""
+  url_contains: String
+
+  """All values not containing the given string."""
+  url_not_contains: String
+
+  """All values starting with the given string."""
+  url_starts_with: String
+
+  """All values not starting with the given string."""
+  url_not_starts_with: String
+
+  """All values ending with the given string."""
+  url_ends_with: String
+
+  """All values not ending with the given string."""
+  url_not_ends_with: String
+}
+
+input FileWhereUniqueInput {
+  id: ID
+  secret: String
+  url: String
+}
+
+"""
+The `Long` scalar type represents non-fractional signed whole numeric values.
+Long can represent values between -(2^63) and 2^63 - 1.
+"""
+scalar Long
+
+type Mutation {
+  createFile(data: FileCreateInput!): File!
+  createUser(data: UserCreateInput!): User!
+  createPosition(data: PositionCreateInput!): Position!
+  createSubmission(data: SubmissionCreateInput!): Submission!
+  createTransition(data: TransitionCreateInput!): Transition!
+  createTopic(data: TopicCreateInput!): Topic!
+  createTag(data: TagCreateInput!): Tag!
+  updateFile(data: FileUpdateInput!, where: FileWhereUniqueInput!): File
+  updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
+  updatePosition(data: PositionUpdateInput!, where: PositionWhereUniqueInput!): Position
+  updateSubmission(data: SubmissionUpdateInput!, where: SubmissionWhereUniqueInput!): Submission
+  updateTransition(data: TransitionUpdateInput!, where: TransitionWhereUniqueInput!): Transition
+  updateTopic(data: TopicUpdateInput!, where: TopicWhereUniqueInput!): Topic
+  updateTag(data: TagUpdateInput!, where: TagWhereUniqueInput!): Tag
+  deleteFile(where: FileWhereUniqueInput!): File
+  deleteUser(where: UserWhereUniqueInput!): User
+  deletePosition(where: PositionWhereUniqueInput!): Position
+  deleteSubmission(where: SubmissionWhereUniqueInput!): Submission
+  deleteTransition(where: TransitionWhereUniqueInput!): Transition
+  deleteTopic(where: TopicWhereUniqueInput!): Topic
+  deleteTag(where: TagWhereUniqueInput!): Tag
+  upsertFile(where: FileWhereUniqueInput!, create: FileCreateInput!, update: FileUpdateInput!): File!
+  upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
+  upsertPosition(where: PositionWhereUniqueInput!, create: PositionCreateInput!, update: PositionUpdateInput!): Position!
+  upsertSubmission(where: SubmissionWhereUniqueInput!, create: SubmissionCreateInput!, update: SubmissionUpdateInput!): Submission!
+  upsertTransition(where: TransitionWhereUniqueInput!, create: TransitionCreateInput!, update: TransitionUpdateInput!): Transition!
+  upsertTopic(where: TopicWhereUniqueInput!, create: TopicCreateInput!, update: TopicUpdateInput!): Topic!
+  upsertTag(where: TagWhereUniqueInput!, create: TagCreateInput!, update: TagUpdateInput!): Tag!
+  updateManyFiles(data: FileUpdateInput!, where: FileWhereInput): BatchPayload!
+  updateManyUsers(data: UserUpdateInput!, where: UserWhereInput): BatchPayload!
+  updateManyPositions(data: PositionUpdateInput!, where: PositionWhereInput): BatchPayload!
+  updateManySubmissions(data: SubmissionUpdateInput!, where: SubmissionWhereInput): BatchPayload!
+  updateManyTransitions(data: TransitionUpdateInput!, where: TransitionWhereInput): BatchPayload!
+  updateManyTopics(data: TopicUpdateInput!, where: TopicWhereInput): BatchPayload!
+  updateManyTags(data: TagUpdateInput!, where: TagWhereInput): BatchPayload!
+  deleteManyFiles(where: FileWhereInput): BatchPayload!
+  deleteManyUsers(where: UserWhereInput): BatchPayload!
+  deleteManyPositions(where: PositionWhereInput): BatchPayload!
+  deleteManySubmissions(where: SubmissionWhereInput): BatchPayload!
+  deleteManyTransitions(where: TransitionWhereInput): BatchPayload!
+  deleteManyTopics(where: TopicWhereInput): BatchPayload!
+  deleteManyTags(where: TagWhereInput): BatchPayload!
+}
+
+enum MutationType {
+  CREATED
+  UPDATED
+  DELETED
+}
+
+"""An object with an ID"""
+interface Node {
+  """The id of the object."""
+  id: ID!
+}
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+type Position implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  notes: [String!]
+  submissions(where: SubmissionWhereInput, orderBy: SubmissionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Submission!]
+  transitionsFrom(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Transition!]
+  transitionsTo(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Transition!]
+  user(where: UserWhereInput): User!
+}
+
+"""A connection to a list of items."""
+type PositionConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [PositionEdge]!
+  aggregate: AggregatePosition!
+}
+
+input PositionCreateInput {
+  name: String!
+  notes: PositionCreatenotesInput
+  submissions: SubmissionCreateManyWithoutPositionInput
+  transitionsFrom: TransitionCreateManyWithoutStartPositionInput
+  transitionsTo: TransitionCreateManyWithoutEndPositionInput
+  user: UserCreateOneWithoutPositionsInput!
+}
+
+input PositionCreateManyWithoutUserInput {
+  create: [PositionCreateWithoutUserInput!]
+  connect: [PositionWhereUniqueInput!]
+}
+
+input PositionCreatenotesInput {
+  set: [String!]
+}
+
+input PositionCreateOneWithoutSubmissionsInput {
+  create: PositionCreateWithoutSubmissionsInput
+  connect: PositionWhereUniqueInput
+}
+
+input PositionCreateOneWithoutTransitionsFromInput {
+  create: PositionCreateWithoutTransitionsFromInput
+  connect: PositionWhereUniqueInput
+}
+
+input PositionCreateOneWithoutTransitionsToInput {
+  create: PositionCreateWithoutTransitionsToInput
+  connect: PositionWhereUniqueInput
+}
+
+input PositionCreateWithoutSubmissionsInput {
+  name: String!
+  notes: PositionCreatenotesInput
+  transitionsFrom: TransitionCreateManyWithoutStartPositionInput
+  transitionsTo: TransitionCreateManyWithoutEndPositionInput
+  user: UserCreateOneWithoutPositionsInput!
+}
+
+input PositionCreateWithoutTransitionsFromInput {
+  name: String!
+  notes: PositionCreatenotesInput
+  submissions: SubmissionCreateManyWithoutPositionInput
+  transitionsTo: TransitionCreateManyWithoutEndPositionInput
+  user: UserCreateOneWithoutPositionsInput!
+}
+
+input PositionCreateWithoutTransitionsToInput {
+  name: String!
+  notes: PositionCreatenotesInput
+  submissions: SubmissionCreateManyWithoutPositionInput
+  transitionsFrom: TransitionCreateManyWithoutStartPositionInput
+  user: UserCreateOneWithoutPositionsInput!
+}
+
+input PositionCreateWithoutUserInput {
+  name: String!
+  notes: PositionCreatenotesInput
+  submissions: SubmissionCreateManyWithoutPositionInput
+  transitionsFrom: TransitionCreateManyWithoutStartPositionInput
+  transitionsTo: TransitionCreateManyWithoutEndPositionInput
+}
+
+"""An edge in a connection."""
+type PositionEdge {
+  """The item at the end of the edge."""
+  node: Position!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum PositionOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  name_ASC
+  name_DESC
+}
+
+type PositionPreviousValues {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  notes: [String!]
+}
+
+type PositionSubscriptionPayload {
+  mutation: MutationType!
+  node: Position
+  updatedFields: [String!]
+  previousValues: PositionPreviousValues
+}
+
+input PositionSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [PositionSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [PositionSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [PositionSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: PositionWhereInput
+}
+
+input PositionUpdateInput {
+  name: String
+  notes: PositionUpdatenotesInput
+  submissions: SubmissionUpdateManyWithoutPositionInput
+  transitionsFrom: TransitionUpdateManyWithoutStartPositionInput
+  transitionsTo: TransitionUpdateManyWithoutEndPositionInput
+  user: UserUpdateOneWithoutPositionsInput
+}
+
+input PositionUpdateManyWithoutUserInput {
+  create: [PositionCreateWithoutUserInput!]
+  connect: [PositionWhereUniqueInput!]
+  disconnect: [PositionWhereUniqueInput!]
+  delete: [PositionWhereUniqueInput!]
+  update: [PositionUpdateWithWhereUniqueWithoutUserInput!]
+  upsert: [PositionUpsertWithWhereUniqueWithoutUserInput!]
+}
+
+input PositionUpdatenotesInput {
+  set: [String!]
+}
+
+input PositionUpdateOneWithoutSubmissionsInput {
+  create: PositionCreateWithoutSubmissionsInput
+  connect: PositionWhereUniqueInput
+  delete: Boolean
+  update: PositionUpdateWithoutSubmissionsDataInput
+  upsert: PositionUpsertWithoutSubmissionsInput
+}
+
+input PositionUpdateOneWithoutTransitionsFromInput {
+  create: PositionCreateWithoutTransitionsFromInput
+  connect: PositionWhereUniqueInput
+  delete: Boolean
+  update: PositionUpdateWithoutTransitionsFromDataInput
+  upsert: PositionUpsertWithoutTransitionsFromInput
+}
+
+input PositionUpdateOneWithoutTransitionsToInput {
+  create: PositionCreateWithoutTransitionsToInput
+  connect: PositionWhereUniqueInput
+  delete: Boolean
+  update: PositionUpdateWithoutTransitionsToDataInput
+  upsert: PositionUpsertWithoutTransitionsToInput
+}
+
+input PositionUpdateWithoutSubmissionsDataInput {
+  name: String
+  notes: PositionUpdatenotesInput
+  transitionsFrom: TransitionUpdateManyWithoutStartPositionInput
+  transitionsTo: TransitionUpdateManyWithoutEndPositionInput
+  user: UserUpdateOneWithoutPositionsInput
+}
+
+input PositionUpdateWithoutTransitionsFromDataInput {
+  name: String
+  notes: PositionUpdatenotesInput
+  submissions: SubmissionUpdateManyWithoutPositionInput
+  transitionsTo: TransitionUpdateManyWithoutEndPositionInput
+  user: UserUpdateOneWithoutPositionsInput
+}
+
+input PositionUpdateWithoutTransitionsToDataInput {
+  name: String
+  notes: PositionUpdatenotesInput
+  submissions: SubmissionUpdateManyWithoutPositionInput
+  transitionsFrom: TransitionUpdateManyWithoutStartPositionInput
+  user: UserUpdateOneWithoutPositionsInput
+}
+
+input PositionUpdateWithoutUserDataInput {
+  name: String
+  notes: PositionUpdatenotesInput
+  submissions: SubmissionUpdateManyWithoutPositionInput
+  transitionsFrom: TransitionUpdateManyWithoutStartPositionInput
+  transitionsTo: TransitionUpdateManyWithoutEndPositionInput
+}
+
+input PositionUpdateWithWhereUniqueWithoutUserInput {
+  where: PositionWhereUniqueInput!
+  data: PositionUpdateWithoutUserDataInput!
+}
+
+input PositionUpsertWithoutSubmissionsInput {
+  update: PositionUpdateWithoutSubmissionsDataInput!
+  create: PositionCreateWithoutSubmissionsInput!
+}
+
+input PositionUpsertWithoutTransitionsFromInput {
+  update: PositionUpdateWithoutTransitionsFromDataInput!
+  create: PositionCreateWithoutTransitionsFromInput!
+}
+
+input PositionUpsertWithoutTransitionsToInput {
+  update: PositionUpdateWithoutTransitionsToDataInput!
+  create: PositionCreateWithoutTransitionsToInput!
+}
+
+input PositionUpsertWithWhereUniqueWithoutUserInput {
+  where: PositionWhereUniqueInput!
+  update: PositionUpdateWithoutUserDataInput!
+  create: PositionCreateWithoutUserInput!
+}
+
+input PositionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [PositionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [PositionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [PositionWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  name: String
+
+  """All values that are not equal to given value."""
+  name_not: String
+
+  """All values that are contained in given list."""
+  name_in: [String!]
+
+  """All values that are not contained in given list."""
+  name_not_in: [String!]
+
+  """All values less than the given value."""
+  name_lt: String
+
+  """All values less than or equal the given value."""
+  name_lte: String
+
+  """All values greater than the given value."""
+  name_gt: String
+
+  """All values greater than or equal the given value."""
+  name_gte: String
+
+  """All values containing the given string."""
+  name_contains: String
+
+  """All values not containing the given string."""
+  name_not_contains: String
+
+  """All values starting with the given string."""
+  name_starts_with: String
+
+  """All values not starting with the given string."""
+  name_not_starts_with: String
+
+  """All values ending with the given string."""
+  name_ends_with: String
+
+  """All values not ending with the given string."""
+  name_not_ends_with: String
+  submissions_every: SubmissionWhereInput
+  submissions_some: SubmissionWhereInput
+  submissions_none: SubmissionWhereInput
+  transitionsFrom_every: TransitionWhereInput
+  transitionsFrom_some: TransitionWhereInput
+  transitionsFrom_none: TransitionWhereInput
+  transitionsTo_every: TransitionWhereInput
+  transitionsTo_some: TransitionWhereInput
+  transitionsTo_none: TransitionWhereInput
+  user: UserWhereInput
+}
+
+input PositionWhereUniqueInput {
+  id: ID
+}
+
+type Query {
+  files(where: FileWhereInput, orderBy: FileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [File]!
+  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
+  positions(where: PositionWhereInput, orderBy: PositionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Position]!
+  submissions(where: SubmissionWhereInput, orderBy: SubmissionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Submission]!
+  transitions(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Transition]!
+  topics(where: TopicWhereInput, orderBy: TopicOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Topic]!
+  tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag]!
+  file(where: FileWhereUniqueInput!): File
+  user(where: UserWhereUniqueInput!): User
+  position(where: PositionWhereUniqueInput!): Position
+  submission(where: SubmissionWhereUniqueInput!): Submission
+  transition(where: TransitionWhereUniqueInput!): Transition
+  topic(where: TopicWhereUniqueInput!): Topic
+  tag(where: TagWhereUniqueInput!): Tag
+  filesConnection(where: FileWhereInput, orderBy: FileOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): FileConnection!
+  usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
+  positionsConnection(where: PositionWhereInput, orderBy: PositionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PositionConnection!
+  submissionsConnection(where: SubmissionWhereInput, orderBy: SubmissionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): SubmissionConnection!
+  transitionsConnection(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TransitionConnection!
+  topicsConnection(where: TopicWhereInput, orderBy: TopicOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TopicConnection!
+  tagsConnection(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TagConnection!
+
+  """Fetches an object given its ID"""
+  node(
+    """The ID of an object"""
+    id: ID!
+  ): Node
+}
+
+type Submission implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  steps: [String!]
+  notes: [String!]
+  position(where: PositionWhereInput): Position!
+  tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag!]
+  user(where: UserWhereInput): User!
+}
+
+"""A connection to a list of items."""
+type SubmissionConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [SubmissionEdge]!
+  aggregate: AggregateSubmission!
+}
+
+input SubmissionCreateInput {
+  name: String!
+  steps: SubmissionCreatestepsInput
+  notes: SubmissionCreatenotesInput
+  position: PositionCreateOneWithoutSubmissionsInput!
+  tags: TagCreateManyWithoutSubmissionsInput
+  user: UserCreateOneWithoutSubmissionsInput!
+}
+
+input SubmissionCreateManyWithoutPositionInput {
+  create: [SubmissionCreateWithoutPositionInput!]
+  connect: [SubmissionWhereUniqueInput!]
+}
+
+input SubmissionCreateManyWithoutTagsInput {
+  create: [SubmissionCreateWithoutTagsInput!]
+  connect: [SubmissionWhereUniqueInput!]
+}
+
+input SubmissionCreateManyWithoutUserInput {
+  create: [SubmissionCreateWithoutUserInput!]
+  connect: [SubmissionWhereUniqueInput!]
+}
+
+input SubmissionCreatenotesInput {
+  set: [String!]
+}
+
+input SubmissionCreatestepsInput {
+  set: [String!]
+}
+
+input SubmissionCreateWithoutPositionInput {
+  name: String!
+  steps: SubmissionCreatestepsInput
+  notes: SubmissionCreatenotesInput
+  tags: TagCreateManyWithoutSubmissionsInput
+  user: UserCreateOneWithoutSubmissionsInput!
+}
+
+input SubmissionCreateWithoutTagsInput {
+  name: String!
+  steps: SubmissionCreatestepsInput
+  notes: SubmissionCreatenotesInput
+  position: PositionCreateOneWithoutSubmissionsInput!
+  user: UserCreateOneWithoutSubmissionsInput!
+}
+
+input SubmissionCreateWithoutUserInput {
+  name: String!
+  steps: SubmissionCreatestepsInput
+  notes: SubmissionCreatenotesInput
+  position: PositionCreateOneWithoutSubmissionsInput!
+  tags: TagCreateManyWithoutSubmissionsInput
+}
+
+"""An edge in a connection."""
+type SubmissionEdge {
+  """The item at the end of the edge."""
+  node: Submission!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum SubmissionOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  name_ASC
+  name_DESC
+}
+
+type SubmissionPreviousValues {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  steps: [String!]
+  notes: [String!]
+}
+
+type SubmissionSubscriptionPayload {
+  mutation: MutationType!
+  node: Submission
+  updatedFields: [String!]
+  previousValues: SubmissionPreviousValues
+}
+
+input SubmissionSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [SubmissionSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [SubmissionSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [SubmissionSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: SubmissionWhereInput
+}
+
+input SubmissionUpdateInput {
+  name: String
+  steps: SubmissionUpdatestepsInput
+  notes: SubmissionUpdatenotesInput
+  position: PositionUpdateOneWithoutSubmissionsInput
+  tags: TagUpdateManyWithoutSubmissionsInput
+  user: UserUpdateOneWithoutSubmissionsInput
+}
+
+input SubmissionUpdateManyWithoutPositionInput {
+  create: [SubmissionCreateWithoutPositionInput!]
+  connect: [SubmissionWhereUniqueInput!]
+  disconnect: [SubmissionWhereUniqueInput!]
+  delete: [SubmissionWhereUniqueInput!]
+  update: [SubmissionUpdateWithWhereUniqueWithoutPositionInput!]
+  upsert: [SubmissionUpsertWithWhereUniqueWithoutPositionInput!]
+}
+
+input SubmissionUpdateManyWithoutTagsInput {
+  create: [SubmissionCreateWithoutTagsInput!]
+  connect: [SubmissionWhereUniqueInput!]
+  disconnect: [SubmissionWhereUniqueInput!]
+  delete: [SubmissionWhereUniqueInput!]
+  update: [SubmissionUpdateWithWhereUniqueWithoutTagsInput!]
+  upsert: [SubmissionUpsertWithWhereUniqueWithoutTagsInput!]
+}
+
+input SubmissionUpdateManyWithoutUserInput {
+  create: [SubmissionCreateWithoutUserInput!]
+  connect: [SubmissionWhereUniqueInput!]
+  disconnect: [SubmissionWhereUniqueInput!]
+  delete: [SubmissionWhereUniqueInput!]
+  update: [SubmissionUpdateWithWhereUniqueWithoutUserInput!]
+  upsert: [SubmissionUpsertWithWhereUniqueWithoutUserInput!]
+}
+
+input SubmissionUpdatenotesInput {
+  set: [String!]
+}
+
+input SubmissionUpdatestepsInput {
+  set: [String!]
+}
+
+input SubmissionUpdateWithoutPositionDataInput {
+  name: String
+  steps: SubmissionUpdatestepsInput
+  notes: SubmissionUpdatenotesInput
+  tags: TagUpdateManyWithoutSubmissionsInput
+  user: UserUpdateOneWithoutSubmissionsInput
+}
+
+input SubmissionUpdateWithoutTagsDataInput {
+  name: String
+  steps: SubmissionUpdatestepsInput
+  notes: SubmissionUpdatenotesInput
+  position: PositionUpdateOneWithoutSubmissionsInput
+  user: UserUpdateOneWithoutSubmissionsInput
+}
+
+input SubmissionUpdateWithoutUserDataInput {
+  name: String
+  steps: SubmissionUpdatestepsInput
+  notes: SubmissionUpdatenotesInput
+  position: PositionUpdateOneWithoutSubmissionsInput
+  tags: TagUpdateManyWithoutSubmissionsInput
+}
+
+input SubmissionUpdateWithWhereUniqueWithoutPositionInput {
+  where: SubmissionWhereUniqueInput!
+  data: SubmissionUpdateWithoutPositionDataInput!
+}
+
+input SubmissionUpdateWithWhereUniqueWithoutTagsInput {
+  where: SubmissionWhereUniqueInput!
+  data: SubmissionUpdateWithoutTagsDataInput!
+}
+
+input SubmissionUpdateWithWhereUniqueWithoutUserInput {
+  where: SubmissionWhereUniqueInput!
+  data: SubmissionUpdateWithoutUserDataInput!
+}
+
+input SubmissionUpsertWithWhereUniqueWithoutPositionInput {
+  where: SubmissionWhereUniqueInput!
+  update: SubmissionUpdateWithoutPositionDataInput!
+  create: SubmissionCreateWithoutPositionInput!
+}
+
+input SubmissionUpsertWithWhereUniqueWithoutTagsInput {
+  where: SubmissionWhereUniqueInput!
+  update: SubmissionUpdateWithoutTagsDataInput!
+  create: SubmissionCreateWithoutTagsInput!
+}
+
+input SubmissionUpsertWithWhereUniqueWithoutUserInput {
+  where: SubmissionWhereUniqueInput!
+  update: SubmissionUpdateWithoutUserDataInput!
+  create: SubmissionCreateWithoutUserInput!
+}
+
+input SubmissionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [SubmissionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [SubmissionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [SubmissionWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  name: String
+
+  """All values that are not equal to given value."""
+  name_not: String
+
+  """All values that are contained in given list."""
+  name_in: [String!]
+
+  """All values that are not contained in given list."""
+  name_not_in: [String!]
+
+  """All values less than the given value."""
+  name_lt: String
+
+  """All values less than or equal the given value."""
+  name_lte: String
+
+  """All values greater than the given value."""
+  name_gt: String
+
+  """All values greater than or equal the given value."""
+  name_gte: String
+
+  """All values containing the given string."""
+  name_contains: String
+
+  """All values not containing the given string."""
+  name_not_contains: String
+
+  """All values starting with the given string."""
+  name_starts_with: String
+
+  """All values not starting with the given string."""
+  name_not_starts_with: String
+
+  """All values ending with the given string."""
+  name_ends_with: String
+
+  """All values not ending with the given string."""
+  name_not_ends_with: String
+  position: PositionWhereInput
+  tags_every: TagWhereInput
+  tags_some: TagWhereInput
+  tags_none: TagWhereInput
+  user: UserWhereInput
+}
+
+input SubmissionWhereUniqueInput {
+  id: ID
+}
+
+type Subscription {
+  file(where: FileSubscriptionWhereInput): FileSubscriptionPayload
+  user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
+  position(where: PositionSubscriptionWhereInput): PositionSubscriptionPayload
+  submission(where: SubmissionSubscriptionWhereInput): SubmissionSubscriptionPayload
+  transition(where: TransitionSubscriptionWhereInput): TransitionSubscriptionPayload
+  topic(where: TopicSubscriptionWhereInput): TopicSubscriptionPayload
+  tag(where: TagSubscriptionWhereInput): TagSubscriptionPayload
+}
+
+type Tag implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  submissions(where: SubmissionWhereInput, orderBy: SubmissionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Submission!]
+  transitions(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Transition!]
+  user(where: UserWhereInput): User!
+}
+
+"""A connection to a list of items."""
+type TagConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [TagEdge]!
+  aggregate: AggregateTag!
+}
+
+input TagCreateInput {
+  name: String!
+  submissions: SubmissionCreateManyWithoutTagsInput
+  transitions: TransitionCreateManyWithoutTagsInput
+  user: UserCreateOneWithoutTagsInput!
+}
+
+input TagCreateManyWithoutSubmissionsInput {
+  create: [TagCreateWithoutSubmissionsInput!]
+  connect: [TagWhereUniqueInput!]
+}
+
+input TagCreateManyWithoutTransitionsInput {
+  create: [TagCreateWithoutTransitionsInput!]
+  connect: [TagWhereUniqueInput!]
+}
+
+input TagCreateManyWithoutUserInput {
+  create: [TagCreateWithoutUserInput!]
+  connect: [TagWhereUniqueInput!]
+}
+
+input TagCreateWithoutSubmissionsInput {
+  name: String!
+  transitions: TransitionCreateManyWithoutTagsInput
+  user: UserCreateOneWithoutTagsInput!
+}
+
+input TagCreateWithoutTransitionsInput {
+  name: String!
+  submissions: SubmissionCreateManyWithoutTagsInput
+  user: UserCreateOneWithoutTagsInput!
+}
+
+input TagCreateWithoutUserInput {
+  name: String!
+  submissions: SubmissionCreateManyWithoutTagsInput
+  transitions: TransitionCreateManyWithoutTagsInput
+}
+
+"""An edge in a connection."""
+type TagEdge {
+  """The item at the end of the edge."""
+  node: Tag!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum TagOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  name_ASC
+  name_DESC
+}
+
+type TagPreviousValues {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+}
+
+type TagSubscriptionPayload {
+  mutation: MutationType!
+  node: Tag
+  updatedFields: [String!]
+  previousValues: TagPreviousValues
+}
+
+input TagSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [TagSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [TagSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [TagSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: TagWhereInput
+}
+
+input TagUpdateInput {
+  name: String
+  submissions: SubmissionUpdateManyWithoutTagsInput
+  transitions: TransitionUpdateManyWithoutTagsInput
+  user: UserUpdateOneWithoutTagsInput
+}
+
+input TagUpdateManyWithoutSubmissionsInput {
+  create: [TagCreateWithoutSubmissionsInput!]
+  connect: [TagWhereUniqueInput!]
+  disconnect: [TagWhereUniqueInput!]
+  delete: [TagWhereUniqueInput!]
+  update: [TagUpdateWithWhereUniqueWithoutSubmissionsInput!]
+  upsert: [TagUpsertWithWhereUniqueWithoutSubmissionsInput!]
+}
+
+input TagUpdateManyWithoutTransitionsInput {
+  create: [TagCreateWithoutTransitionsInput!]
+  connect: [TagWhereUniqueInput!]
+  disconnect: [TagWhereUniqueInput!]
+  delete: [TagWhereUniqueInput!]
+  update: [TagUpdateWithWhereUniqueWithoutTransitionsInput!]
+  upsert: [TagUpsertWithWhereUniqueWithoutTransitionsInput!]
+}
+
+input TagUpdateManyWithoutUserInput {
+  create: [TagCreateWithoutUserInput!]
+  connect: [TagWhereUniqueInput!]
+  disconnect: [TagWhereUniqueInput!]
+  delete: [TagWhereUniqueInput!]
+  update: [TagUpdateWithWhereUniqueWithoutUserInput!]
+  upsert: [TagUpsertWithWhereUniqueWithoutUserInput!]
+}
+
+input TagUpdateWithoutSubmissionsDataInput {
+  name: String
+  transitions: TransitionUpdateManyWithoutTagsInput
+  user: UserUpdateOneWithoutTagsInput
+}
+
+input TagUpdateWithoutTransitionsDataInput {
+  name: String
+  submissions: SubmissionUpdateManyWithoutTagsInput
+  user: UserUpdateOneWithoutTagsInput
+}
+
+input TagUpdateWithoutUserDataInput {
+  name: String
+  submissions: SubmissionUpdateManyWithoutTagsInput
+  transitions: TransitionUpdateManyWithoutTagsInput
+}
+
+input TagUpdateWithWhereUniqueWithoutSubmissionsInput {
+  where: TagWhereUniqueInput!
+  data: TagUpdateWithoutSubmissionsDataInput!
+}
+
+input TagUpdateWithWhereUniqueWithoutTransitionsInput {
+  where: TagWhereUniqueInput!
+  data: TagUpdateWithoutTransitionsDataInput!
+}
+
+input TagUpdateWithWhereUniqueWithoutUserInput {
+  where: TagWhereUniqueInput!
+  data: TagUpdateWithoutUserDataInput!
+}
+
+input TagUpsertWithWhereUniqueWithoutSubmissionsInput {
+  where: TagWhereUniqueInput!
+  update: TagUpdateWithoutSubmissionsDataInput!
+  create: TagCreateWithoutSubmissionsInput!
+}
+
+input TagUpsertWithWhereUniqueWithoutTransitionsInput {
+  where: TagWhereUniqueInput!
+  update: TagUpdateWithoutTransitionsDataInput!
+  create: TagCreateWithoutTransitionsInput!
+}
+
+input TagUpsertWithWhereUniqueWithoutUserInput {
+  where: TagWhereUniqueInput!
+  update: TagUpdateWithoutUserDataInput!
+  create: TagCreateWithoutUserInput!
+}
+
+input TagWhereInput {
+  """Logical AND on all given filters."""
+  AND: [TagWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [TagWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [TagWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  name: String
+
+  """All values that are not equal to given value."""
+  name_not: String
+
+  """All values that are contained in given list."""
+  name_in: [String!]
+
+  """All values that are not contained in given list."""
+  name_not_in: [String!]
+
+  """All values less than the given value."""
+  name_lt: String
+
+  """All values less than or equal the given value."""
+  name_lte: String
+
+  """All values greater than the given value."""
+  name_gt: String
+
+  """All values greater than or equal the given value."""
+  name_gte: String
+
+  """All values containing the given string."""
+  name_contains: String
+
+  """All values not containing the given string."""
+  name_not_contains: String
+
+  """All values starting with the given string."""
+  name_starts_with: String
+
+  """All values not starting with the given string."""
+  name_not_starts_with: String
+
+  """All values ending with the given string."""
+  name_ends_with: String
+
+  """All values not ending with the given string."""
+  name_not_ends_with: String
+  submissions_every: SubmissionWhereInput
+  submissions_some: SubmissionWhereInput
+  submissions_none: SubmissionWhereInput
+  transitions_every: TransitionWhereInput
+  transitions_some: TransitionWhereInput
+  transitions_none: TransitionWhereInput
+  user: UserWhereInput
+}
+
+input TagWhereUniqueInput {
+  id: ID
+}
+
+type Topic implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  notes: [String!]
+  user(where: UserWhereInput): User!
+}
+
+"""A connection to a list of items."""
+type TopicConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [TopicEdge]!
+  aggregate: AggregateTopic!
+}
+
+input TopicCreateInput {
+  name: String!
+  notes: TopicCreatenotesInput
+  user: UserCreateOneWithoutTopicsInput!
+}
+
+input TopicCreateManyWithoutUserInput {
+  create: [TopicCreateWithoutUserInput!]
+  connect: [TopicWhereUniqueInput!]
+}
+
+input TopicCreatenotesInput {
+  set: [String!]
+}
+
+input TopicCreateWithoutUserInput {
+  name: String!
+  notes: TopicCreatenotesInput
+}
+
+"""An edge in a connection."""
+type TopicEdge {
+  """The item at the end of the edge."""
+  node: Topic!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum TopicOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  name_ASC
+  name_DESC
+}
+
+type TopicPreviousValues {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  notes: [String!]
+}
+
+type TopicSubscriptionPayload {
+  mutation: MutationType!
+  node: Topic
+  updatedFields: [String!]
+  previousValues: TopicPreviousValues
+}
+
+input TopicSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [TopicSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [TopicSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [TopicSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: TopicWhereInput
+}
+
+input TopicUpdateInput {
+  name: String
+  notes: TopicUpdatenotesInput
+  user: UserUpdateOneWithoutTopicsInput
+}
+
+input TopicUpdateManyWithoutUserInput {
+  create: [TopicCreateWithoutUserInput!]
+  connect: [TopicWhereUniqueInput!]
+  disconnect: [TopicWhereUniqueInput!]
+  delete: [TopicWhereUniqueInput!]
+  update: [TopicUpdateWithWhereUniqueWithoutUserInput!]
+  upsert: [TopicUpsertWithWhereUniqueWithoutUserInput!]
+}
+
+input TopicUpdatenotesInput {
+  set: [String!]
+}
+
+input TopicUpdateWithoutUserDataInput {
+  name: String
+  notes: TopicUpdatenotesInput
+}
+
+input TopicUpdateWithWhereUniqueWithoutUserInput {
+  where: TopicWhereUniqueInput!
+  data: TopicUpdateWithoutUserDataInput!
+}
+
+input TopicUpsertWithWhereUniqueWithoutUserInput {
+  where: TopicWhereUniqueInput!
+  update: TopicUpdateWithoutUserDataInput!
+  create: TopicCreateWithoutUserInput!
+}
+
+input TopicWhereInput {
+  """Logical AND on all given filters."""
+  AND: [TopicWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [TopicWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [TopicWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  name: String
+
+  """All values that are not equal to given value."""
+  name_not: String
+
+  """All values that are contained in given list."""
+  name_in: [String!]
+
+  """All values that are not contained in given list."""
+  name_not_in: [String!]
+
+  """All values less than the given value."""
+  name_lt: String
+
+  """All values less than or equal the given value."""
+  name_lte: String
+
+  """All values greater than the given value."""
+  name_gt: String
+
+  """All values greater than or equal the given value."""
+  name_gte: String
+
+  """All values containing the given string."""
+  name_contains: String
+
+  """All values not containing the given string."""
+  name_not_contains: String
+
+  """All values starting with the given string."""
+  name_starts_with: String
+
+  """All values not starting with the given string."""
+  name_not_starts_with: String
+
+  """All values ending with the given string."""
+  name_ends_with: String
+
+  """All values not ending with the given string."""
+  name_not_ends_with: String
+  user: UserWhereInput
+}
+
+input TopicWhereUniqueInput {
+  id: ID
+}
+
+type Transition implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  steps: [String!]
+  notes: [String!]
+  startPosition(where: PositionWhereInput): Position!
+  endPosition(where: PositionWhereInput): Position!
+  tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag!]
+  user(where: UserWhereInput): User!
+}
+
+"""A connection to a list of items."""
+type TransitionConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [TransitionEdge]!
+  aggregate: AggregateTransition!
+}
+
+input TransitionCreateInput {
+  name: String!
+  steps: TransitionCreatestepsInput
+  notes: TransitionCreatenotesInput
+  startPosition: PositionCreateOneWithoutTransitionsFromInput!
+  endPosition: PositionCreateOneWithoutTransitionsToInput!
+  tags: TagCreateManyWithoutTransitionsInput
+  user: UserCreateOneWithoutTransitionsInput!
+}
+
+input TransitionCreateManyWithoutEndPositionInput {
+  create: [TransitionCreateWithoutEndPositionInput!]
+  connect: [TransitionWhereUniqueInput!]
+}
+
+input TransitionCreateManyWithoutStartPositionInput {
+  create: [TransitionCreateWithoutStartPositionInput!]
+  connect: [TransitionWhereUniqueInput!]
+}
+
+input TransitionCreateManyWithoutTagsInput {
+  create: [TransitionCreateWithoutTagsInput!]
+  connect: [TransitionWhereUniqueInput!]
+}
+
+input TransitionCreateManyWithoutUserInput {
+  create: [TransitionCreateWithoutUserInput!]
+  connect: [TransitionWhereUniqueInput!]
+}
+
+input TransitionCreatenotesInput {
+  set: [String!]
+}
+
+input TransitionCreatestepsInput {
+  set: [String!]
+}
+
+input TransitionCreateWithoutEndPositionInput {
+  name: String!
+  steps: TransitionCreatestepsInput
+  notes: TransitionCreatenotesInput
+  startPosition: PositionCreateOneWithoutTransitionsFromInput!
+  tags: TagCreateManyWithoutTransitionsInput
+  user: UserCreateOneWithoutTransitionsInput!
+}
+
+input TransitionCreateWithoutStartPositionInput {
+  name: String!
+  steps: TransitionCreatestepsInput
+  notes: TransitionCreatenotesInput
+  endPosition: PositionCreateOneWithoutTransitionsToInput!
+  tags: TagCreateManyWithoutTransitionsInput
+  user: UserCreateOneWithoutTransitionsInput!
+}
+
+input TransitionCreateWithoutTagsInput {
+  name: String!
+  steps: TransitionCreatestepsInput
+  notes: TransitionCreatenotesInput
+  startPosition: PositionCreateOneWithoutTransitionsFromInput!
+  endPosition: PositionCreateOneWithoutTransitionsToInput!
+  user: UserCreateOneWithoutTransitionsInput!
+}
+
+input TransitionCreateWithoutUserInput {
+  name: String!
+  steps: TransitionCreatestepsInput
+  notes: TransitionCreatenotesInput
+  startPosition: PositionCreateOneWithoutTransitionsFromInput!
+  endPosition: PositionCreateOneWithoutTransitionsToInput!
+  tags: TagCreateManyWithoutTransitionsInput
+}
+
+"""An edge in a connection."""
+type TransitionEdge {
+  """The item at the end of the edge."""
+  node: Transition!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum TransitionOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  name_ASC
+  name_DESC
+}
+
+type TransitionPreviousValues {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  steps: [String!]
+  notes: [String!]
+}
+
+type TransitionSubscriptionPayload {
+  mutation: MutationType!
+  node: Transition
+  updatedFields: [String!]
+  previousValues: TransitionPreviousValues
+}
+
+input TransitionSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [TransitionSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [TransitionSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [TransitionSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: TransitionWhereInput
+}
+
+input TransitionUpdateInput {
+  name: String
+  steps: TransitionUpdatestepsInput
+  notes: TransitionUpdatenotesInput
+  startPosition: PositionUpdateOneWithoutTransitionsFromInput
+  endPosition: PositionUpdateOneWithoutTransitionsToInput
+  tags: TagUpdateManyWithoutTransitionsInput
+  user: UserUpdateOneWithoutTransitionsInput
+}
+
+input TransitionUpdateManyWithoutEndPositionInput {
+  create: [TransitionCreateWithoutEndPositionInput!]
+  connect: [TransitionWhereUniqueInput!]
+  disconnect: [TransitionWhereUniqueInput!]
+  delete: [TransitionWhereUniqueInput!]
+  update: [TransitionUpdateWithWhereUniqueWithoutEndPositionInput!]
+  upsert: [TransitionUpsertWithWhereUniqueWithoutEndPositionInput!]
+}
+
+input TransitionUpdateManyWithoutStartPositionInput {
+  create: [TransitionCreateWithoutStartPositionInput!]
+  connect: [TransitionWhereUniqueInput!]
+  disconnect: [TransitionWhereUniqueInput!]
+  delete: [TransitionWhereUniqueInput!]
+  update: [TransitionUpdateWithWhereUniqueWithoutStartPositionInput!]
+  upsert: [TransitionUpsertWithWhereUniqueWithoutStartPositionInput!]
+}
+
+input TransitionUpdateManyWithoutTagsInput {
+  create: [TransitionCreateWithoutTagsInput!]
+  connect: [TransitionWhereUniqueInput!]
+  disconnect: [TransitionWhereUniqueInput!]
+  delete: [TransitionWhereUniqueInput!]
+  update: [TransitionUpdateWithWhereUniqueWithoutTagsInput!]
+  upsert: [TransitionUpsertWithWhereUniqueWithoutTagsInput!]
+}
+
+input TransitionUpdateManyWithoutUserInput {
+  create: [TransitionCreateWithoutUserInput!]
+  connect: [TransitionWhereUniqueInput!]
+  disconnect: [TransitionWhereUniqueInput!]
+  delete: [TransitionWhereUniqueInput!]
+  update: [TransitionUpdateWithWhereUniqueWithoutUserInput!]
+  upsert: [TransitionUpsertWithWhereUniqueWithoutUserInput!]
+}
+
+input TransitionUpdatenotesInput {
+  set: [String!]
+}
+
+input TransitionUpdatestepsInput {
+  set: [String!]
+}
+
+input TransitionUpdateWithoutEndPositionDataInput {
+  name: String
+  steps: TransitionUpdatestepsInput
+  notes: TransitionUpdatenotesInput
+  startPosition: PositionUpdateOneWithoutTransitionsFromInput
+  tags: TagUpdateManyWithoutTransitionsInput
+  user: UserUpdateOneWithoutTransitionsInput
+}
+
+input TransitionUpdateWithoutStartPositionDataInput {
+  name: String
+  steps: TransitionUpdatestepsInput
+  notes: TransitionUpdatenotesInput
+  endPosition: PositionUpdateOneWithoutTransitionsToInput
+  tags: TagUpdateManyWithoutTransitionsInput
+  user: UserUpdateOneWithoutTransitionsInput
+}
+
+input TransitionUpdateWithoutTagsDataInput {
+  name: String
+  steps: TransitionUpdatestepsInput
+  notes: TransitionUpdatenotesInput
+  startPosition: PositionUpdateOneWithoutTransitionsFromInput
+  endPosition: PositionUpdateOneWithoutTransitionsToInput
+  user: UserUpdateOneWithoutTransitionsInput
+}
+
+input TransitionUpdateWithoutUserDataInput {
+  name: String
+  steps: TransitionUpdatestepsInput
+  notes: TransitionUpdatenotesInput
+  startPosition: PositionUpdateOneWithoutTransitionsFromInput
+  endPosition: PositionUpdateOneWithoutTransitionsToInput
+  tags: TagUpdateManyWithoutTransitionsInput
+}
+
+input TransitionUpdateWithWhereUniqueWithoutEndPositionInput {
+  where: TransitionWhereUniqueInput!
+  data: TransitionUpdateWithoutEndPositionDataInput!
+}
+
+input TransitionUpdateWithWhereUniqueWithoutStartPositionInput {
+  where: TransitionWhereUniqueInput!
+  data: TransitionUpdateWithoutStartPositionDataInput!
+}
+
+input TransitionUpdateWithWhereUniqueWithoutTagsInput {
+  where: TransitionWhereUniqueInput!
+  data: TransitionUpdateWithoutTagsDataInput!
+}
+
+input TransitionUpdateWithWhereUniqueWithoutUserInput {
+  where: TransitionWhereUniqueInput!
+  data: TransitionUpdateWithoutUserDataInput!
+}
+
+input TransitionUpsertWithWhereUniqueWithoutEndPositionInput {
+  where: TransitionWhereUniqueInput!
+  update: TransitionUpdateWithoutEndPositionDataInput!
+  create: TransitionCreateWithoutEndPositionInput!
+}
+
+input TransitionUpsertWithWhereUniqueWithoutStartPositionInput {
+  where: TransitionWhereUniqueInput!
+  update: TransitionUpdateWithoutStartPositionDataInput!
+  create: TransitionCreateWithoutStartPositionInput!
+}
+
+input TransitionUpsertWithWhereUniqueWithoutTagsInput {
+  where: TransitionWhereUniqueInput!
+  update: TransitionUpdateWithoutTagsDataInput!
+  create: TransitionCreateWithoutTagsInput!
+}
+
+input TransitionUpsertWithWhereUniqueWithoutUserInput {
+  where: TransitionWhereUniqueInput!
+  update: TransitionUpdateWithoutUserDataInput!
+  create: TransitionCreateWithoutUserInput!
+}
+
+input TransitionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [TransitionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [TransitionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [TransitionWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  name: String
+
+  """All values that are not equal to given value."""
+  name_not: String
+
+  """All values that are contained in given list."""
+  name_in: [String!]
+
+  """All values that are not contained in given list."""
+  name_not_in: [String!]
+
+  """All values less than the given value."""
+  name_lt: String
+
+  """All values less than or equal the given value."""
+  name_lte: String
+
+  """All values greater than the given value."""
+  name_gt: String
+
+  """All values greater than or equal the given value."""
+  name_gte: String
+
+  """All values containing the given string."""
+  name_contains: String
+
+  """All values not containing the given string."""
+  name_not_contains: String
+
+  """All values starting with the given string."""
+  name_starts_with: String
+
+  """All values not starting with the given string."""
+  name_not_starts_with: String
+
+  """All values ending with the given string."""
+  name_ends_with: String
+
+  """All values not ending with the given string."""
+  name_not_ends_with: String
+  startPosition: PositionWhereInput
+  endPosition: PositionWhereInput
+  tags_every: TagWhereInput
+  tags_some: TagWhereInput
+  tags_none: TagWhereInput
+  user: UserWhereInput
+}
+
+input TransitionWhereUniqueInput {
+  id: ID
+}
+
+type User implements Node {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  email: String!
+  password: String!
+  positions(where: PositionWhereInput, orderBy: PositionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Position!]
+  submissions(where: SubmissionWhereInput, orderBy: SubmissionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Submission!]
+  transitions(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Transition!]
+  topics(where: TopicWhereInput, orderBy: TopicOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Topic!]
+  tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag!]
+}
+
+"""A connection to a list of items."""
+type UserConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [UserEdge]!
+  aggregate: AggregateUser!
+}
+
+input UserCreateInput {
+  email: String!
+  password: String!
+  positions: PositionCreateManyWithoutUserInput
+  submissions: SubmissionCreateManyWithoutUserInput
+  transitions: TransitionCreateManyWithoutUserInput
+  topics: TopicCreateManyWithoutUserInput
+  tags: TagCreateManyWithoutUserInput
+}
+
+input UserCreateOneWithoutPositionsInput {
+  create: UserCreateWithoutPositionsInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutSubmissionsInput {
+  create: UserCreateWithoutSubmissionsInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutTagsInput {
+  create: UserCreateWithoutTagsInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutTopicsInput {
+  create: UserCreateWithoutTopicsInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateOneWithoutTransitionsInput {
+  create: UserCreateWithoutTransitionsInput
+  connect: UserWhereUniqueInput
+}
+
+input UserCreateWithoutPositionsInput {
+  email: String!
+  password: String!
+  submissions: SubmissionCreateManyWithoutUserInput
+  transitions: TransitionCreateManyWithoutUserInput
+  topics: TopicCreateManyWithoutUserInput
+  tags: TagCreateManyWithoutUserInput
+}
+
+input UserCreateWithoutSubmissionsInput {
+  email: String!
+  password: String!
+  positions: PositionCreateManyWithoutUserInput
+  transitions: TransitionCreateManyWithoutUserInput
+  topics: TopicCreateManyWithoutUserInput
+  tags: TagCreateManyWithoutUserInput
+}
+
+input UserCreateWithoutTagsInput {
+  email: String!
+  password: String!
+  positions: PositionCreateManyWithoutUserInput
+  submissions: SubmissionCreateManyWithoutUserInput
+  transitions: TransitionCreateManyWithoutUserInput
+  topics: TopicCreateManyWithoutUserInput
+}
+
+input UserCreateWithoutTopicsInput {
+  email: String!
+  password: String!
+  positions: PositionCreateManyWithoutUserInput
+  submissions: SubmissionCreateManyWithoutUserInput
+  transitions: TransitionCreateManyWithoutUserInput
+  tags: TagCreateManyWithoutUserInput
+}
+
+input UserCreateWithoutTransitionsInput {
+  email: String!
+  password: String!
+  positions: PositionCreateManyWithoutUserInput
+  submissions: SubmissionCreateManyWithoutUserInput
+  topics: TopicCreateManyWithoutUserInput
+  tags: TagCreateManyWithoutUserInput
+}
+
+"""An edge in a connection."""
+type UserEdge {
+  """The item at the end of the edge."""
+  node: User!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum UserOrderByInput {
+  id_ASC
+  id_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  email_ASC
+  email_DESC
+  password_ASC
+  password_DESC
+}
+
+type UserPreviousValues {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  email: String!
+  password: String!
+}
+
+type UserSubscriptionPayload {
+  mutation: MutationType!
+  node: User
+  updatedFields: [String!]
+  previousValues: UserPreviousValues
+}
+
+input UserSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [UserSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [UserSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [UserSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: UserWhereInput
+}
+
+input UserUpdateInput {
+  email: String
+  password: String
+  positions: PositionUpdateManyWithoutUserInput
+  submissions: SubmissionUpdateManyWithoutUserInput
+  transitions: TransitionUpdateManyWithoutUserInput
+  topics: TopicUpdateManyWithoutUserInput
+  tags: TagUpdateManyWithoutUserInput
+}
+
+input UserUpdateOneWithoutPositionsInput {
+  create: UserCreateWithoutPositionsInput
+  connect: UserWhereUniqueInput
+  delete: Boolean
+  update: UserUpdateWithoutPositionsDataInput
+  upsert: UserUpsertWithoutPositionsInput
+}
+
+input UserUpdateOneWithoutSubmissionsInput {
+  create: UserCreateWithoutSubmissionsInput
+  connect: UserWhereUniqueInput
+  delete: Boolean
+  update: UserUpdateWithoutSubmissionsDataInput
+  upsert: UserUpsertWithoutSubmissionsInput
+}
+
+input UserUpdateOneWithoutTagsInput {
+  create: UserCreateWithoutTagsInput
+  connect: UserWhereUniqueInput
+  delete: Boolean
+  update: UserUpdateWithoutTagsDataInput
+  upsert: UserUpsertWithoutTagsInput
+}
+
+input UserUpdateOneWithoutTopicsInput {
+  create: UserCreateWithoutTopicsInput
+  connect: UserWhereUniqueInput
+  delete: Boolean
+  update: UserUpdateWithoutTopicsDataInput
+  upsert: UserUpsertWithoutTopicsInput
+}
+
+input UserUpdateOneWithoutTransitionsInput {
+  create: UserCreateWithoutTransitionsInput
+  connect: UserWhereUniqueInput
+  delete: Boolean
+  update: UserUpdateWithoutTransitionsDataInput
+  upsert: UserUpsertWithoutTransitionsInput
+}
+
+input UserUpdateWithoutPositionsDataInput {
+  email: String
+  password: String
+  submissions: SubmissionUpdateManyWithoutUserInput
+  transitions: TransitionUpdateManyWithoutUserInput
+  topics: TopicUpdateManyWithoutUserInput
+  tags: TagUpdateManyWithoutUserInput
+}
+
+input UserUpdateWithoutSubmissionsDataInput {
+  email: String
+  password: String
+  positions: PositionUpdateManyWithoutUserInput
+  transitions: TransitionUpdateManyWithoutUserInput
+  topics: TopicUpdateManyWithoutUserInput
+  tags: TagUpdateManyWithoutUserInput
+}
+
+input UserUpdateWithoutTagsDataInput {
+  email: String
+  password: String
+  positions: PositionUpdateManyWithoutUserInput
+  submissions: SubmissionUpdateManyWithoutUserInput
+  transitions: TransitionUpdateManyWithoutUserInput
+  topics: TopicUpdateManyWithoutUserInput
+}
+
+input UserUpdateWithoutTopicsDataInput {
+  email: String
+  password: String
+  positions: PositionUpdateManyWithoutUserInput
+  submissions: SubmissionUpdateManyWithoutUserInput
+  transitions: TransitionUpdateManyWithoutUserInput
+  tags: TagUpdateManyWithoutUserInput
+}
+
+input UserUpdateWithoutTransitionsDataInput {
+  email: String
+  password: String
+  positions: PositionUpdateManyWithoutUserInput
+  submissions: SubmissionUpdateManyWithoutUserInput
+  topics: TopicUpdateManyWithoutUserInput
+  tags: TagUpdateManyWithoutUserInput
+}
+
+input UserUpsertWithoutPositionsInput {
+  update: UserUpdateWithoutPositionsDataInput!
+  create: UserCreateWithoutPositionsInput!
+}
+
+input UserUpsertWithoutSubmissionsInput {
+  update: UserUpdateWithoutSubmissionsDataInput!
+  create: UserCreateWithoutSubmissionsInput!
+}
+
+input UserUpsertWithoutTagsInput {
+  update: UserUpdateWithoutTagsDataInput!
+  create: UserCreateWithoutTagsInput!
+}
+
+input UserUpsertWithoutTopicsInput {
+  update: UserUpdateWithoutTopicsDataInput!
+  create: UserCreateWithoutTopicsInput!
+}
+
+input UserUpsertWithoutTransitionsInput {
+  update: UserUpdateWithoutTransitionsDataInput!
+  create: UserCreateWithoutTransitionsInput!
+}
+
+input UserWhereInput {
+  """Logical AND on all given filters."""
+  AND: [UserWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [UserWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [UserWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  createdAt: DateTime
+
+  """All values that are not equal to given value."""
+  createdAt_not: DateTime
+
+  """All values that are contained in given list."""
+  createdAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  createdAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  createdAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  createdAt_lte: DateTime
+
+  """All values greater than the given value."""
+  createdAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  createdAt_gte: DateTime
+  updatedAt: DateTime
+
+  """All values that are not equal to given value."""
+  updatedAt_not: DateTime
+
+  """All values that are contained in given list."""
+  updatedAt_in: [DateTime!]
+
+  """All values that are not contained in given list."""
+  updatedAt_not_in: [DateTime!]
+
+  """All values less than the given value."""
+  updatedAt_lt: DateTime
+
+  """All values less than or equal the given value."""
+  updatedAt_lte: DateTime
+
+  """All values greater than the given value."""
+  updatedAt_gt: DateTime
+
+  """All values greater than or equal the given value."""
+  updatedAt_gte: DateTime
+  email: String
+
+  """All values that are not equal to given value."""
+  email_not: String
+
+  """All values that are contained in given list."""
+  email_in: [String!]
+
+  """All values that are not contained in given list."""
+  email_not_in: [String!]
+
+  """All values less than the given value."""
+  email_lt: String
+
+  """All values less than or equal the given value."""
+  email_lte: String
+
+  """All values greater than the given value."""
+  email_gt: String
+
+  """All values greater than or equal the given value."""
+  email_gte: String
+
+  """All values containing the given string."""
+  email_contains: String
+
+  """All values not containing the given string."""
+  email_not_contains: String
+
+  """All values starting with the given string."""
+  email_starts_with: String
+
+  """All values not starting with the given string."""
+  email_not_starts_with: String
+
+  """All values ending with the given string."""
+  email_ends_with: String
+
+  """All values not ending with the given string."""
+  email_not_ends_with: String
+  password: String
+
+  """All values that are not equal to given value."""
+  password_not: String
+
+  """All values that are contained in given list."""
+  password_in: [String!]
+
+  """All values that are not contained in given list."""
+  password_not_in: [String!]
+
+  """All values less than the given value."""
+  password_lt: String
+
+  """All values less than or equal the given value."""
+  password_lte: String
+
+  """All values greater than the given value."""
+  password_gt: String
+
+  """All values greater than or equal the given value."""
+  password_gte: String
+
+  """All values containing the given string."""
+  password_contains: String
+
+  """All values not containing the given string."""
+  password_not_contains: String
+
+  """All values starting with the given string."""
+  password_starts_with: String
+
+  """All values not starting with the given string."""
+  password_not_starts_with: String
+
+  """All values ending with the given string."""
+  password_ends_with: String
+
+  """All values not ending with the given string."""
+  password_not_ends_with: String
+  positions_every: PositionWhereInput
+  positions_some: PositionWhereInput
+  positions_none: PositionWhereInput
+  submissions_every: SubmissionWhereInput
+  submissions_some: SubmissionWhereInput
+  submissions_none: SubmissionWhereInput
+  transitions_every: TransitionWhereInput
+  transitions_some: TransitionWhereInput
+  transitions_none: TransitionWhereInput
+  topics_every: TopicWhereInput
+  topics_some: TopicWhereInput
+  topics_none: TopicWhereInput
+  tags_every: TagWhereInput
+  tags_some: TagWhereInput
+  tags_none: TagWhereInput
+}
+
+input UserWhereUniqueInput {
+  id: ID
+  email: String
+}

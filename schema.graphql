@@ -1,0 +1,18 @@
+# import User from './generated/prisma.graphql'
+# import Position from './generated/prisma.graphql'
+
+type AuthenticateUserPayload {
+  id: ID!
+  email: String!
+  token: String!
+}
+
+type Query {
+  user(id: ID!): User!
+  positions: [Position!]!
+}
+
+type Mutation {
+  authenticateUser(email: String!, password: String!): AuthenticateUserPayload
+  signup(name: String!): User!
+}

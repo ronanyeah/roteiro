@@ -1,12 +1,12 @@
 const { GraphQLClient } = require("graphql-request");
 const faker = require("faker");
 
-const { GRAPHQL_ENDPOINT, TOKEN } = process.env;
+const { PRISMA_ENDPOINT, TOKEN } = process.env;
 
-if (!GRAPHQL_ENDPOINT) throw Error("missing api endpoint");
+if (!PRISMA_ENDPOINT) throw Error("missing api endpoint");
 if (!TOKEN) throw Error("missing api token");
 
-const client = new GraphQLClient(GRAPHQL_ENDPOINT, {
+const client = new GraphQLClient(PRISMA_ENDPOINT, {
   headers: {
     Authorization: "Bearer " + TOKEN
   }
@@ -20,6 +20,8 @@ const makePair = (id, xs) => [
 ];
 
 const formatArray = xs => xs.map(JSON.stringify).join(", ");
+
+const formatIds = xs => xs.map(x => `{ id: ${JSON.stringify(x)} }`).join(", ");
 
 const pickN = (n, xs) => faker.helpers.shuffle(xs).slice(0, n);
 
@@ -39,42 +41,42 @@ const concatMap = (fn, xs) => xs.map(fn).reduce((acc, x) => acc.concat(x), []);
 
 const getUsers = () =>
   client.request(`{
-  allUsers {
+  users {
     id
   }
 }`);
 
 const getPositions = () =>
   client.request(`{
-  allPositions {
+  positions {
     id
   }
 }`);
 
 const getSubmissions = () =>
   client.request(`{
-  allSubmissions {
+  submissions {
     id
   }
 }`);
 
 const getTags = () =>
   client.request(`{
-  allTags {
+  tags {
     id
   }
 }`);
 
 const getTopics = () =>
   client.request(`{
-  allTopics {
+  topics {
     id
   }
 }`);
 
 const getTransitions = () =>
   client.request(`{
-  allTransitions {
+  transitions {
     id
   }
 }`);
@@ -84,7 +86,7 @@ const getTransitions = () =>
 const signUp = () =>
   client.request(`
   mutation {
-    signupUser(email: "ronan@yeah.com", password: "pw") {
+    createUser(data: { email: "ronan@yeah.com", password: "pw" }) {
       id
     }
   }
@@ -93,9 +95,9 @@ const signUp = () =>
 const createPosition = userId =>
   client.request(`
   mutation {
-    createPosition(name: "${faker.commerce.productAdjective() +
+    createPosition(data: { name: "${faker.commerce.productAdjective() +
       " " +
-      faker.name.lastName()}", notes: [${lorem()}], userId: "${userId}") {
+      faker.name.lastName()}", notes: { set: [${lorem()}] }, user: { connect: { id: "${userId}" } } }) {
       id
       name
     }
@@ -105,9 +107,9 @@ const createPosition = userId =>
 const createSubmission = (userId, positionId, tagIds) =>
   client.request(`
   mutation {
-    createSubmission(name: "${faker.name.jobArea()}", positionId: "${positionId}", notes: [${lorem()}], steps: [${lorem()}], tagsIds: [${formatArray(
+    createSubmission(data: { name: "${faker.name.jobArea()}", position: { connect: { id: "${positionId}" } }, notes: { set: [${lorem()}] }, steps: { set: [${lorem()}] }, tags: { connect: [${formatIds(
     pickN(2, tagIds)
-  )}], userId: "${userId}") {
+  )}] }, user: { connect: { id: "${userId}" } } }) {
       id
       name
     }
@@ -117,9 +119,9 @@ const createSubmission = (userId, positionId, tagIds) =>
 const createTransition = (userId, start, end, tagIds) =>
   client.request(`
   mutation {
-    createTransition(name: "${faker.name.jobArea()}", startPositionId: "${start}", endPositionId: "${end}", notes: [${lorem()}], steps: [${lorem()}], tagsIds: [${formatArray(
+    createTransition(data: { name: "${faker.name.jobArea()}", startPosition: { connect: { id: "${start}" } }, endPosition: { connect: { id: "${end}" } }, notes: { set: [${lorem()}] }, steps: { set: [${lorem()}] }, tags: { connect: [${formatIds(
     pickN(2, tagIds)
-  )}], userId: "${userId}") {
+  )}] }, user: { connect: { id: "${userId}" } } }) {
       id
       name
     }
@@ -129,7 +131,7 @@ const createTransition = (userId, start, end, tagIds) =>
 const createTag = userId =>
   client.request(`
   mutation {
-    createTag(name: "${faker.lorem.word()}", userId: "${userId}") {
+    createTag(data: { name: "${faker.lorem.word()}", user: { connect: { id: "${userId}" } } }) {
       id
       name
     }
@@ -139,7 +141,7 @@ const createTag = userId =>
 const createTopic = userId =>
   client.request(`
   mutation {
-    createTopic(name: "${faker.random.word()}", notes: [${lorem()}], userId: "${userId}") {
+    createTopic(data: { name: "${faker.random.word()}", notes: { set: [${lorem()}] }, user: { connect: { id: "${userId}" } } }) {
       id
       name
     }
@@ -149,7 +151,7 @@ const createTopic = userId =>
 const deleteSubmission = id =>
   client.request(`
   mutation {
-    deleteSubmission(id: "${id}") {
+    deleteSubmission(where: { id: "${id}" }) {
       id
     }
   }
@@ -158,7 +160,7 @@ const deleteSubmission = id =>
 const deleteTag = id =>
   client.request(`
   mutation {
-    deleteTag(id: "${id}") {
+    deleteTag(where: { id: "${id}" }) {
       id
     }
   }
@@ -167,7 +169,7 @@ const deleteTag = id =>
 const deleteTopic = id =>
   client.request(`
   mutation {
-    deleteTopic(id: "${id}") {
+    deleteTopic(where: { id: "${id}" }) {
       id
     }
   }
@@ -176,7 +178,7 @@ const deleteTopic = id =>
 const deleteTransition = id =>
   client.request(`
   mutation {
-    deleteTransition(id: "${id}") {
+    deleteTransition(where: { id: "${id}" }) {
       id
     }
   }
@@ -185,7 +187,7 @@ const deleteTransition = id =>
 const deletePosition = id =>
   client.request(`
   mutation {
-    deletePosition(id: "${id}") {
+    deletePosition(where: { id: "${id}" }) {
       id
     }
   }
@@ -194,14 +196,14 @@ const deletePosition = id =>
 const deleteUser = id =>
   client.request(`
   mutation {
-    deleteUser(id: "${id}") {
+    deleteUser(where: { id: "${id}" }) {
       id
     }
   }
 `);
 
 const fill = async () => {
-  const userId = (await signUp()).signupUser.id;
+  const userId = (await signUp()).createUser.id;
 
   const posIds = (await Promise.all(
     times(10, () => createPosition(userId))
@@ -234,22 +236,22 @@ const fill = async () => {
 };
 
 const clear = async () => {
-  const subIds = (await getSubmissions()).allSubmissions.map(x => x.id);
+  const subIds = (await getSubmissions()).submissions.map(x => x.id);
   await Promise.all(subIds.map(deleteSubmission));
 
-  const trIds = (await getTransitions()).allTransitions.map(x => x.id);
+  const trIds = (await getTransitions()).transitions.map(x => x.id);
   await Promise.all(trIds.map(deleteTransition));
 
-  const posIds = (await getPositions()).allPositions.map(x => x.id);
+  const posIds = (await getPositions()).positions.map(x => x.id);
   await Promise.all(posIds.map(deletePosition));
 
-  const tagIds = (await getTags()).allTags.map(x => x.id);
+  const tagIds = (await getTags()).tags.map(x => x.id);
   await Promise.all(tagIds.map(deleteTag));
 
-  const topicIds = (await getTopics()).allTopics.map(x => x.id);
+  const topicIds = (await getTopics()).topics.map(x => x.id);
   await Promise.all(topicIds.map(deleteTopic));
 
-  const userIds = (await getUsers()).allUsers.map(x => x.id);
+  const userIds = (await getUsers()).users.map(x => x.id);
   await Promise.all(userIds.map(deleteUser));
 
   return "OK";
