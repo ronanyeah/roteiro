@@ -1,14 +1,3 @@
-type File @model {
-  id: ID! @unique
-  createdAt: DateTime!
-  contentType: String!
-  name: String!
-  secret: String! @unique
-  size: Int!
-  updatedAt: DateTime!
-  url: String! @unique
-}
-
 type User @model {
   id: ID! @unique
   createdAt: DateTime!

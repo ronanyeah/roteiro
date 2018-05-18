@@ -104,7 +104,7 @@ fetchPosition : Id -> B.Request B.Query (Maybe Position)
 fetchPosition (Id id) =
     position
         |> B.nullable
-        |> B.field "Position" [ ( "id", Arg.string id ) ]
+        |> B.field "position" [ ( "id", Arg.string id ) ]
         |> B.extract
         |> B.queryDocument
         |> B.request ()
@@ -115,8 +115,6 @@ fetchPositions =
     B.list info
         |> B.field "positions" []
         |> B.extract
-        |> B.field "user" []
-        |> B.extract
         |> B.queryDocument
         |> B.request ()
 
@@ -125,7 +123,7 @@ fetchSubmission : Id -> B.Request B.Query (Maybe Submission)
 fetchSubmission (Id id) =
     submission
         |> B.nullable
-        |> B.field "Submission" [ ( "id", Arg.string id ) ]
+        |> B.field "submission" [ ( "id", Arg.string id ) ]
         |> B.extract
         |> B.queryDocument
         |> B.request ()
@@ -136,8 +134,6 @@ fetchSubmissions =
     B.list submission
         |> B.field "submissions" []
         |> B.extract
-        |> B.field "user" []
-        |> B.extract
         |> B.queryDocument
         |> B.request ()
 
@@ -146,7 +142,7 @@ fetchTag : Id -> B.Request B.Query (Maybe Tag)
 fetchTag (Id id) =
     tag
         |> B.nullable
-        |> B.field "Tag" [ ( "id", Arg.string id ) ]
+        |> B.field "tag" [ ( "id", Arg.string id ) ]
         |> B.extract
         |> B.queryDocument
         |> B.request ()
@@ -157,8 +153,6 @@ fetchTags =
     B.list info
         |> B.field "tags" []
         |> B.extract
-        |> B.field "user" []
-        |> B.extract
         |> B.queryDocument
         |> B.request ()
 
@@ -167,7 +161,7 @@ fetchTopic : Id -> B.Request B.Query (Maybe Topic)
 fetchTopic (Id id) =
     topic
         |> B.nullable
-        |> B.field "Topic" [ ( "id", Arg.string id ) ]
+        |> B.field "topic" [ ( "id", Arg.string id ) ]
         |> B.extract
         |> B.queryDocument
         |> B.request ()
@@ -178,8 +172,6 @@ fetchTopics =
     B.list info
         |> B.field "topics" []
         |> B.extract
-        |> B.field "user" []
-        |> B.extract
         |> B.queryDocument
         |> B.request ()
 
@@ -188,7 +180,7 @@ fetchTransition : Id -> B.Request B.Query (Maybe Transition)
 fetchTransition (Id id) =
     transition
         |> B.nullable
-        |> B.field "Transition" [ ( "id", Arg.string id ) ]
+        |> B.field "transition" [ ( "id", Arg.string id ) ]
         |> B.extract
         |> B.queryDocument
         |> B.request ()
@@ -198,8 +190,6 @@ fetchTransitions : B.Request B.Query (List Transition)
 fetchTransitions =
     B.list transition
         |> B.field "transitions" []
-        |> B.extract
-        |> B.field "user" []
         |> B.extract
         |> B.queryDocument
         |> B.request ()
@@ -236,7 +226,7 @@ signUp email password =
             B.request () <|
                 B.mutationDocument <|
                     B.extract <|
-                        B.field "signupUser"
+                        B.field "signUpUser"
                             [ ( "email", Arg.string email )
                             , ( "password", Arg.string password )
                             ]

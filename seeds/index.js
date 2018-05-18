@@ -1,5 +1,6 @@
 const { GraphQLClient } = require("graphql-request");
 const faker = require("faker");
+const bcryptjs = require("bcryptjs");
 
 const { PRISMA_ENDPOINT, TOKEN } = process.env;
 
@@ -86,7 +87,10 @@ const getTransitions = () =>
 const signUp = () =>
   client.request(`
   mutation {
-    createUser(data: { email: "ronan@yeah.com", password: "pw" }) {
+    createUser(data: { email: "ronan@yeah.com", password: "${bcryptjs.hashSync(
+      "pw",
+      bcryptjs.genSaltSync()
+    )}" }) {
       id
     }
   }
