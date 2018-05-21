@@ -7,9 +7,4 @@ node_modules
 
 public
 
-dev.env
-prod.env
-
-.graphcoolrc
-
-elm-analyse.json
+src/Api

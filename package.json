@@ -41,6 +41,7 @@
     "node-sass": "^4.9.0",
     "prisma": "^1.8.3",
     "prisma-binding": "^2.0.0",
+    "ramda": "^0.25.0",
     "sass-loader": "^7.0.0",
     "style-loader": "^0.21.0",
     "validator": "^10.2.0",

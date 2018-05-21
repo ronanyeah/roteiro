@@ -1,5 +1,6 @@
 module Router exposing (router)
 
+import Api.Scalar exposing (Id(..))
 import Navigation exposing (Location)
 import RemoteData exposing (RemoteData(..))
 import Types exposing (..)

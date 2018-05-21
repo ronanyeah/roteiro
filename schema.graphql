@@ -21,6 +21,39 @@ type Query {
 }
 
 type Mutation {
-  authenticateUser(email: String!, password: String!): AuthResponse
-  signUpUser(email: String!, password: String!): AuthResponse
+  authenticateUser(email: String!, password: String!): AuthResponse!
+  signUpUser(email: String!, password: String!): AuthResponse!
+  createPosition(name: String!, notes: [String!]!): Position!
+  createTransition(
+    name: String!
+    notes: [String!]!
+    steps: [String!]!
+  ): Transition!
+  createSubmission(
+    name: String!
+    notes: [String!]!
+    steps: [String!]!
+  ): Submission!
+  createTag(name: String!): Tag!
+  createTopic(name: String!, notes: [String!]!): Topic!
+  updatePosition(id: ID!, name: String!, notes: [String!]!): Position!
+  updateTransition(
+    id: ID!
+    name: String!
+    notes: [String!]!
+    steps: [String!]!
+  ): Transition!
+  updateSubmission(
+    id: ID!
+    name: String!
+    notes: [String!]!
+    steps: [String!]!
+  ): Submission!
+  updateTag(id: ID!, name: String!): Tag!
+  updateTopic(id: ID!, name: String!, notes: [String!]!): Topic!
+  deletePosition(id: ID!): ID!
+  deleteTransition(id: ID!): ID!
+  deleteSubmission(id: ID!): ID!
+  deleteTag(id: ID!): ID!
+  deleteTopic(id: ID!): ID!
 }

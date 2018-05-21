@@ -1,16 +1,140 @@
 module Update exposing (..)
 
+import Api.Mutation
+import Api.Object
+import Api.Object.AuthResponse
+import Api.Object.Position
+import Api.Object.Submission
+import Api.Object.Tag
+import Api.Object.Topic
+import Api.Object.Transition
+import Api.Query
+import Api.Scalar exposing (Id(..))
 import Array
-import Data exposing (createPosition, createSubmission, createTag, createTopic, createTransition, fetchPosition, fetchPositions, fetchSubmission, fetchSubmissions, fetchTag, fetchTags, fetchTopic, fetchTopics, fetchTransition, fetchTransitions, mutation, query, updatePosition, updateSubmission, updateTag, updateTopic, updateTransition)
+import Graphqelm.Field
+import Graphqelm.Http
+import Graphqelm.Operation exposing (RootMutation, RootQuery)
+import Graphqelm.SelectionSet exposing (SelectionSet, with)
 import Json.Encode as Encode
 import Navigation
 import Ports
 import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
-import Task
 import Types exposing (..)
-import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, find, formatErrors, goTo, log, logError, removeNull, taskToGcData, unwrap)
+import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, find, formatErrors, goTo, log, unwrap)
 import Validate
+
+
+topicInfo : SelectionSet Info Api.Object.Topic
+topicInfo =
+    Api.Object.Topic.selection Info
+        |> with Api.Object.Topic.id
+        |> with Api.Object.Topic.name
+
+
+topic : SelectionSet Topic Api.Object.Topic
+topic =
+    Api.Object.Topic.selection Topic
+        |> with Api.Object.Topic.id
+        |> with Api.Object.Topic.name
+        |> with (Api.Object.Topic.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
+
+
+positionInfo : SelectionSet Info Api.Object.Position
+positionInfo =
+    Api.Object.Position.selection Info
+        |> with Api.Object.Position.id
+        |> with Api.Object.Position.name
+
+
+position : SelectionSet Position Api.Object.Position
+position =
+    Api.Object.Position.selection Position
+        |> with Api.Object.Position.id
+        |> with Api.Object.Position.name
+        |> with (Api.Object.Position.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Position.submissions identity submissionInfo |> Graphqelm.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Position.transitionsFrom identity transition |> Graphqelm.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Position.transitionsTo identity transition |> Graphqelm.Field.map (Maybe.withDefault []))
+
+
+transition : SelectionSet Transition Api.Object.Transition
+transition =
+    Api.Object.Transition.selection Transition
+        |> with Api.Object.Transition.id
+        |> with Api.Object.Transition.name
+        |> with (Api.Object.Transition.startPosition identity positionInfo)
+        |> with (Api.Object.Transition.endPosition identity positionInfo)
+        |> with (Api.Object.Transition.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Transition.steps |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Transition.tags identity tagInfo |> Graphqelm.Field.map (Maybe.withDefault []))
+
+
+transitionInfo : SelectionSet Info Api.Object.Transition
+transitionInfo =
+    Api.Object.Transition.selection Info
+        |> with Api.Object.Transition.id
+        |> with Api.Object.Transition.name
+
+
+submissionInfo : SelectionSet Info Api.Object.Submission
+submissionInfo =
+    Api.Object.Submission.selection Info
+        |> with Api.Object.Submission.id
+        |> with Api.Object.Submission.name
+
+
+submission : SelectionSet Submission Api.Object.Submission
+submission =
+    Api.Object.Submission.selection Submission
+        |> with Api.Object.Submission.id
+        |> with Api.Object.Submission.name
+        |> with (Api.Object.Submission.steps |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Submission.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Submission.position identity positionInfo)
+        |> with (Api.Object.Submission.tags identity tagInfo |> Graphqelm.Field.map (Maybe.withDefault []))
+
+
+tagInfo : SelectionSet Info Api.Object.Tag
+tagInfo =
+    Api.Object.Tag.selection Info
+        |> with Api.Object.Tag.id
+        |> with Api.Object.Tag.name
+
+
+tag : SelectionSet Tag Api.Object.Tag
+tag =
+    Api.Object.Tag.selection Tag
+        |> with Api.Object.Tag.id
+        |> with Api.Object.Tag.name
+        |> with (Api.Object.Tag.submissions identity submissionInfo |> Graphqelm.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Tag.transitions identity transitionInfo |> Graphqelm.Field.map (Maybe.withDefault []))
+
+
+auth : SelectionSet Auth Api.Object.AuthResponse
+auth =
+    Api.Object.AuthResponse.selection Auth
+        |> with Api.Object.AuthResponse.id
+        |> with Api.Object.AuthResponse.email
+        |> with Api.Object.AuthResponse.token
+
+
+fetch : String -> Graphqelm.Field.Field a RootQuery -> (GqlResult a -> Msg) -> Cmd Msg
+fetch token sel msg =
+    Api.Query.selection identity
+        |> with sel
+        |> Graphqelm.Http.queryRequest "/api"
+        |> Graphqelm.Http.withHeader "authorization" ("Bearer " ++ token)
+        |> Graphqelm.Http.send msg
+
+
+mutation : String -> Graphqelm.Field.Field a RootMutation -> (GqlResult a -> Msg) -> Cmd Msg
+mutation token sel msg =
+    Api.Mutation.selection identity
+        |> with sel
+        |> Graphqelm.Http.mutationRequest "/api"
+        |> Graphqelm.Http.withHeader "authorization" ("Bearer " ++ token)
+        |> Graphqelm.Http.send msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -137,7 +261,7 @@ update msg model =
                             model.form
                                 |> addErrors (formatErrors err)
                       }
-                    , Cmd.none
+                    , log err
                     )
 
         CbCreateOrUpdateSubmission res ->
@@ -307,74 +431,149 @@ update msg model =
                     )
 
         CbPosition res ->
-            ( { model
-                | view = ViewApp <| ViewPosition res
-              }
-            , logError res
-            )
+            case res of
+                Ok (Just data) ->
+                    ( { model
+                        | view = ViewApp <| ViewPosition <| RemoteData.Success data
+                      }
+                    , Cmd.none
+                    )
+
+                Ok Nothing ->
+                    ( model
+                    , goTo Start
+                    )
+
+                Err err ->
+                    ( model, log err )
 
         CbPositions res ->
-            ( { model
-                | positions = res
-              }
-            , logError res
-            )
+            case res of
+                Ok data ->
+                    ( { model
+                        | positions = RemoteData.Success data
+                      }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( model, log err )
 
         CbSubmission res ->
-            ( { model
-                | view = ViewApp <| ViewSubmission res
-              }
-            , logError res
-            )
+            case res of
+                Ok (Just data) ->
+                    ( { model
+                        | view = ViewApp <| ViewSubmission <| RemoteData.Success data
+                      }
+                    , Cmd.none
+                    )
+
+                Ok Nothing ->
+                    ( model
+                    , goTo Start
+                    )
+
+                Err err ->
+                    ( model, log err )
 
         CbSubmissions res ->
-            ( { model
-                | view = ViewApp <| ViewSubmissions res
-              }
-            , logError res
-            )
+            case res of
+                Ok data ->
+                    ( { model
+                        | view = ViewApp <| ViewSubmissions <| RemoteData.Success data
+                      }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( model, log err )
 
         CbTag res ->
-            ( { model
-                | view = ViewApp <| ViewTag res
-              }
-            , logError res
-            )
+            case res of
+                Ok (Just data) ->
+                    ( { model
+                        | view = ViewApp <| ViewTag <| RemoteData.Success data
+                      }
+                    , Cmd.none
+                    )
+
+                Ok Nothing ->
+                    ( model
+                    , goTo Start
+                    )
+
+                Err err ->
+                    ( model, log err )
 
         CbTags res ->
-            ( { model
-                | tags = res
-              }
-            , logError res
-            )
+            case res of
+                Ok data ->
+                    ( { model
+                        | tags = RemoteData.Success data
+                      }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( model, log err )
 
         CbTopic res ->
-            ( { model
-                | view = ViewApp <| ViewTopic res
-              }
-            , logError res
-            )
+            case res of
+                Ok (Just data) ->
+                    ( { model
+                        | view = ViewApp <| ViewTopic <| RemoteData.Success data
+                      }
+                    , Cmd.none
+                    )
+
+                Ok Nothing ->
+                    ( model
+                    , goTo Start
+                    )
+
+                Err err ->
+                    ( model, log err )
 
         CbTopics res ->
-            ( { model
-                | view = ViewApp <| ViewTopics res
-              }
-            , logError res
-            )
+            case res of
+                Ok data ->
+                    ( { model
+                        | view = ViewApp <| ViewTopics <| RemoteData.Success data
+                      }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( model, log err )
 
         CbTransition res ->
-            ( { model
-                | view = ViewApp <| ViewTransition res
-              }
-            , logError res
-            )
+            case res of
+                Ok (Just data) ->
+                    ( { model
+                        | view = ViewApp <| ViewTransition <| RemoteData.Success data
+                      }
+                    , Cmd.none
+                    )
+
+                Ok Nothing ->
+                    ( model
+                    , goTo Start
+                    )
+
+                Err err ->
+                    ( model, log err )
 
         CbTransitions res ->
-            ( { model
-                | view = ViewApp <| ViewTransitions res
-              }
-            , logError res
-            )
+            case res of
+                Ok data ->
+                    ( { model
+                        | view = ViewApp <| ViewTransitions <| RemoteData.Success data
+                      }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( model, log err )
 
         Confirm maybeM ->
             ( { model | confirm = maybeM }, Cmd.none )
@@ -383,9 +582,9 @@ update msg model =
             protect
                 (\auth ->
                     ( model
-                    , Data.deletePosition id
-                        |> mutation auth.token
-                        |> Task.attempt CbDeletePosition
+                    , mutation auth.token
+                        (Api.Mutation.deletePosition { id = id })
+                        CbDeletePosition
                     )
                 )
 
@@ -393,9 +592,9 @@ update msg model =
             protect
                 (\auth ->
                     ( model
-                    , Data.deleteSubmission id
-                        |> mutation auth.token
-                        |> Task.attempt CbDeleteSubmission
+                    , mutation auth.token
+                        (Api.Mutation.deleteSubmission { id = id })
+                        CbDeleteSubmission
                     )
                 )
 
@@ -403,9 +602,9 @@ update msg model =
             protect
                 (\auth ->
                     ( model
-                    , Data.deleteTag id
-                        |> mutation auth.token
-                        |> Task.attempt CbDeleteTag
+                    , mutation auth.token
+                        (Api.Mutation.deleteTag { id = id })
+                        CbDeleteTag
                     )
                 )
 
@@ -413,9 +612,9 @@ update msg model =
             protect
                 (\auth ->
                     ( model
-                    , Data.deleteTopic id
-                        |> mutation auth.token
-                        |> Task.attempt CbDeleteTopic
+                    , mutation auth.token
+                        (Api.Mutation.deleteTopic { id = id })
+                        CbDeleteTopic
                     )
                 )
 
@@ -423,9 +622,9 @@ update msg model =
             protect
                 (\auth ->
                     ( model
-                    , Data.deleteTransition id
-                        |> mutation auth.token
-                        |> Task.attempt CbDeleteTransition
+                    , mutation auth.token
+                        (Api.Mutation.deleteTransition { id = id })
+                        CbDeleteTransition
                     )
                 )
 
@@ -528,8 +727,16 @@ update msg model =
 
         LoginSubmit ->
             ( model
-            , Data.login model.form.email model.form.password
-                |> Task.attempt CbAuth
+            , Api.Mutation.selection identity
+                |> with
+                    (Api.Mutation.authenticateUser
+                        { email = model.form.email
+                        , password = model.form.password
+                        }
+                        auth
+                    )
+                |> Graphqelm.Http.mutationRequest "/api"
+                |> Graphqelm.Http.send CbAuth
             )
 
         Logout ->
@@ -560,9 +767,9 @@ update msg model =
                     case Validate.position model.form of
                         Ok ( name, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , createPosition auth.id name notes
-                                |> mutation auth.token
-                                |> Task.attempt CbCreateOrUpdatePosition
+                            , mutation auth.token
+                                (Api.Mutation.createPosition { name = name, notes = notes } position)
+                                CbCreateOrUpdatePosition
                             )
 
                         Err errs ->
@@ -577,9 +784,15 @@ update msg model =
                     case Validate.submission model.form of
                         Ok ( name, startId, steps, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , createSubmission auth.id name startId steps notes
-                                |> mutation auth.token
-                                |> Task.attempt CbCreateOrUpdateSubmission
+                            , mutation auth.token
+                                (Api.Mutation.createSubmission
+                                    { name = name
+                                    , steps = steps
+                                    , notes = notes
+                                    }
+                                    submission
+                                )
+                                CbCreateOrUpdateSubmission
                             )
 
                         Err errs ->
@@ -594,9 +807,11 @@ update msg model =
                     case Validate.tag model.form of
                         Ok name ->
                             ( { model | form = clearErrors model.form }
-                            , createTag auth.id name
-                                |> mutation auth.token
-                                |> Task.attempt CbCreateOrUpdateTag
+                            , mutation auth.token
+                                (Api.Mutation.createTag { name = name }
+                                    tag
+                                )
+                                CbCreateOrUpdateTag
                             )
 
                         Err errs ->
@@ -611,9 +826,9 @@ update msg model =
                     case Validate.topic model.form of
                         Ok ( name, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , createTopic auth.id name notes
-                                |> mutation auth.token
-                                |> Task.attempt CbCreateOrUpdateTopic
+                            , mutation auth.token
+                                (Api.Mutation.createTopic { name = name, notes = notes } topic)
+                                CbCreateOrUpdateTopic
                             )
 
                         Err errs ->
@@ -628,15 +843,18 @@ update msg model =
                     case Validate.transition model.form of
                         Ok ( name, startId, endId, steps, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , createTransition
-                                auth.id
-                                name
-                                startId
-                                endId
-                                steps
-                                notes
-                                |> mutation auth.token
-                                |> Task.attempt CbCreateOrUpdateTransition
+                            , mutation auth.token
+                                (Api.Mutation.createTransition
+                                    { name = name
+
+                                    --startId = startId
+                                    --endId = endId
+                                    , steps = steps
+                                    , notes = notes
+                                    }
+                                    transition
+                                )
+                                CbCreateOrUpdateTransition
                             )
 
                         Err errs ->
@@ -649,12 +867,17 @@ update msg model =
             protect
                 (\auth ->
                     case Validate.position model.form of
-                        Ok args ->
+                        Ok ( name, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , args
-                                |> uncurry (updatePosition model.form.id)
-                                |> mutation auth.token
-                                |> Task.attempt CbCreateOrUpdatePosition
+                            , mutation auth.token
+                                (Api.Mutation.updatePosition
+                                    { id = model.form.id
+                                    , name = name
+                                    , notes = notes
+                                    }
+                                    position
+                                )
+                                CbCreateOrUpdatePosition
                             )
 
                         Err errs ->
@@ -669,9 +892,16 @@ update msg model =
                     case Validate.submission model.form of
                         Ok ( name, position, steps, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , updateSubmission model.form.id name position steps notes model.form.tags
-                                |> mutation auth.token
-                                |> Task.attempt CbCreateOrUpdateSubmission
+                            , mutation auth.token
+                                (Api.Mutation.updateSubmission
+                                    { id = model.form.id
+                                    , name = name
+                                    , steps = steps
+                                    , notes = notes
+                                    }
+                                    submission
+                                )
+                                CbCreateOrUpdateSubmission
                             )
 
                         Err errs ->
@@ -686,10 +916,14 @@ update msg model =
                     case Validate.tag model.form of
                         Ok name ->
                             ( { model | form = clearErrors model.form }
-                            , name
-                                |> updateTag model.form.id
-                                |> mutation auth.token
-                                |> Task.attempt CbCreateOrUpdateTag
+                            , mutation auth.token
+                                (Api.Mutation.updateTag
+                                    { id = model.form.id
+                                    , name = name
+                                    }
+                                    tag
+                                )
+                                CbCreateOrUpdateTag
                             )
 
                         Err errs ->
@@ -702,12 +936,17 @@ update msg model =
             protect
                 (\auth ->
                     case Validate.topic model.form of
-                        Ok args ->
+                        Ok ( name, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , args
-                                |> uncurry (updateTopic model.form.id)
-                                |> mutation auth.token
-                                |> Task.attempt CbCreateOrUpdateTopic
+                            , mutation auth.token
+                                (Api.Mutation.updateTopic
+                                    { id = model.form.id
+                                    , name = name
+                                    , notes = notes
+                                    }
+                                    topic
+                                )
+                                CbCreateOrUpdateTopic
                             )
 
                         Err errs ->
@@ -722,9 +961,19 @@ update msg model =
                     case Validate.transition model.form of
                         Ok ( name, startId, endId, steps, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , updateTransition model.form.id name startId endId steps notes model.form.tags
-                                |> mutation auth.token
-                                |> Task.attempt CbCreateOrUpdateTransition
+                            , mutation auth.token
+                                (Api.Mutation.updateTransition
+                                    { id = model.form.id
+                                    , name = name
+
+                                    --startId = startId
+                                    --endId = endId
+                                    , steps = steps
+                                    , notes = notes
+                                    }
+                                    transition
+                                )
+                                CbCreateOrUpdateTransition
                             )
 
                         Err errs ->
@@ -744,8 +993,16 @@ update msg model =
 
         SignUpSubmit ->
             ( model
-            , Data.signUp model.form.email model.form.password
-                |> Task.attempt CbAuth
+            , Api.Mutation.selection identity
+                |> with
+                    (Api.Mutation.signUpUser
+                        { email = model.form.email
+                        , password = model.form.password
+                        }
+                        auth
+                    )
+                |> Graphqelm.Http.mutationRequest "/api"
+                |> Graphqelm.Http.send CbAuth
             )
 
         ToggleEndPosition ->
@@ -922,9 +1179,7 @@ update msg model =
                         protect
                             (\auth ->
                                 ( { model | view = ViewApp <| ViewPosition Loading }
-                                , fetchPosition id
-                                    |> query auth.token
-                                    |> taskToGcData (removeNull >> CbPosition)
+                                , fetch auth.token (Api.Query.position { id = id } position) CbPosition
                                 )
                             )
 
@@ -932,9 +1187,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp ViewPositions, positions = Loading }
-                            , fetchPositions
-                                |> query auth.token
-                                |> taskToGcData CbPositions
+                            , fetch auth.token (Api.Query.positions positionInfo) CbPositions
                             )
                         )
 
@@ -945,9 +1198,7 @@ update msg model =
                         protect
                             (\auth ->
                                 ( { model | view = ViewApp <| ViewSubmission Loading }
-                                , fetchSubmission id
-                                    |> query auth.token
-                                    |> taskToGcData (removeNull >> CbSubmission)
+                                , fetch auth.token (Api.Query.submission { id = id } submission) CbSubmission
                                 )
                             )
 
@@ -955,9 +1206,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp <| ViewSubmissions Loading }
-                            , fetchSubmissions
-                                |> query auth.token
-                                |> taskToGcData CbSubmissions
+                            , fetch auth.token (Api.Query.submissions submission) CbSubmissions
                             )
                         )
 
@@ -968,9 +1217,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp <| ViewTag Loading }
-                            , fetchTag id
-                                |> query auth.token
-                                |> taskToGcData (removeNull >> CbTag)
+                            , fetch auth.token (Api.Query.tag { id = id } tag) CbTag
                             )
                         )
 
@@ -978,9 +1225,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp ViewTags, tags = Loading }
-                            , fetchTags
-                                |> query auth.token
-                                |> taskToGcData CbTags
+                            , fetch auth.token (Api.Query.tags tagInfo) CbTags
                             )
                         )
 
@@ -991,9 +1236,7 @@ update msg model =
                         protect
                             (\auth ->
                                 ( { model | view = ViewApp <| ViewTopic Loading }
-                                , fetchTopic id
-                                    |> query auth.token
-                                    |> taskToGcData (removeNull >> CbTopic)
+                                , fetch auth.token (Api.Query.topic { id = id } topic) CbTopic
                                 )
                             )
 
@@ -1001,9 +1244,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp <| ViewTopics Loading }
-                            , fetchTopics
-                                |> query auth.token
-                                |> taskToGcData CbTopics
+                            , fetch auth.token (Api.Query.topics topicInfo) CbTopics
                             )
                         )
 
@@ -1014,9 +1255,7 @@ update msg model =
                         protect
                             (\auth ->
                                 ( { model | view = ViewApp <| ViewTransition Loading }
-                                , fetchTransition id
-                                    |> query auth.token
-                                    |> taskToGcData (removeNull >> CbTransition)
+                                , fetch auth.token (Api.Query.transition { id = id } transition) CbTransition
                                 )
                             )
 
@@ -1024,9 +1263,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp <| ViewTransitions Loading }
-                            , fetchTransitions
-                                |> query auth.token
-                                |> taskToGcData CbTransitions
+                            , fetch auth.token (Api.Query.transitions transition) CbTransitions
                             )
                         )
 
@@ -1049,7 +1286,7 @@ saveAuth auth =
         |> Ports.saveAuth
 
 
-maybeFetchTags : String -> GcData a -> Cmd Msg
+maybeFetchTags : String -> RemoteData.WebData a -> Cmd Msg
 maybeFetchTags token data =
     if
         case data of
@@ -1065,14 +1302,12 @@ maybeFetchTags token data =
             RemoteData.Success _ ->
                 False
     then
-        fetchTags
-            |> query token
-            |> taskToGcData CbTags
+        fetch token (Api.Query.tags tagInfo) CbTags
     else
         Cmd.none
 
 
-maybeFetchPositions : String -> GcData a -> Cmd Msg
+maybeFetchPositions : String -> RemoteData.WebData a -> Cmd Msg
 maybeFetchPositions token data =
     if
         case data of
@@ -1088,9 +1323,7 @@ maybeFetchPositions token data =
             RemoteData.Success _ ->
                 False
     then
-        fetchPositions
-            |> query token
-            |> taskToGcData CbPositions
+        fetch token (Api.Query.positions positionInfo) CbPositions
     else
         Cmd.none
 

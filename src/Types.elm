@@ -1,36 +1,42 @@
 module Types exposing (..)
 
+import Api.Scalar exposing (Id)
 import Array exposing (Array)
+import Graphqelm.Http
 import Http
 import Navigation exposing (Location)
 import RemoteData exposing (RemoteData)
 import Window
 
 
+type alias GqlResult a =
+    Result (Graphqelm.Http.Error a) a
+
+
 type Msg
     = AddTag Info
     | Cancel
-    | CbAuth (Result GcError Auth)
-    | CbCreateOrUpdatePosition (Result GcError Position)
-    | CbCreateOrUpdateSubmission (Result GcError Submission)
-    | CbCreateOrUpdateTag (Result GcError Tag)
-    | CbCreateOrUpdateTopic (Result GcError Topic)
-    | CbCreateOrUpdateTransition (Result GcError Transition)
-    | CbDeletePosition (Result GcError Id)
-    | CbDeleteSubmission (Result GcError Id)
-    | CbDeleteTag (Result GcError Id)
-    | CbDeleteTopic (Result GcError Id)
-    | CbDeleteTransition (Result GcError Id)
-    | CbPosition (GcData Position)
-    | CbPositions (GcData (List Info))
-    | CbSubmission (GcData Submission)
-    | CbSubmissions (GcData (List Submission))
-    | CbTag (GcData Tag)
-    | CbTags (GcData (List Info))
-    | CbTopic (GcData Topic)
-    | CbTopics (GcData (List Info))
-    | CbTransition (GcData Transition)
-    | CbTransitions (GcData (List Transition))
+    | CbAuth (GqlResult Auth)
+    | CbCreateOrUpdatePosition (GqlResult Position)
+    | CbCreateOrUpdateSubmission (GqlResult Submission)
+    | CbCreateOrUpdateTag (GqlResult Tag)
+    | CbCreateOrUpdateTopic (GqlResult Topic)
+    | CbCreateOrUpdateTransition (GqlResult Transition)
+    | CbDeletePosition (GqlResult Id)
+    | CbDeleteSubmission (GqlResult Id)
+    | CbDeleteTag (GqlResult Id)
+    | CbDeleteTopic (GqlResult Id)
+    | CbDeleteTransition (GqlResult Id)
+    | CbPosition (GqlResult (Maybe Position))
+    | CbPositions (GqlResult (List Info))
+    | CbSubmission (GqlResult (Maybe Submission))
+    | CbSubmissions (GqlResult (List Submission))
+    | CbTag (GqlResult (Maybe Tag))
+    | CbTags (GqlResult (List Info))
+    | CbTopic (GqlResult (Maybe Topic))
+    | CbTopics (GqlResult (List Info))
+    | CbTransition (GqlResult (Maybe Transition))
+    | CbTransitions (GqlResult (List Transition))
     | Confirm (Maybe Msg)
     | DeletePosition Id
     | DeleteSubmission Id
@@ -90,17 +96,17 @@ type AppView
     | ViewEditTag
     | ViewEditTopic
     | ViewEditTransition
-    | ViewPosition (GcData Position)
+    | ViewPosition (RemoteData Http.Error Position)
     | ViewPositions
     | ViewStart
-    | ViewSubmission (GcData Submission)
-    | ViewSubmissions (GcData (List Submission))
-    | ViewTag (GcData Tag)
+    | ViewSubmission (RemoteData Http.Error Submission)
+    | ViewSubmissions (RemoteData Http.Error (List Submission))
+    | ViewTag (RemoteData Http.Error Tag)
     | ViewTags
-    | ViewTopic (GcData Topic)
-    | ViewTopics (GcData (List Info))
-    | ViewTransition (GcData Transition)
-    | ViewTransitions (GcData (List Transition))
+    | ViewTopic (RemoteData Http.Error Topic)
+    | ViewTopics (RemoteData Http.Error (List Info))
+    | ViewTransition (RemoteData Http.Error Transition)
+    | ViewTransitions (RemoteData Http.Error (List Transition))
 
 
 type FaIcon
@@ -130,31 +136,6 @@ type FaIcon
     | Tags
 
 
-type Id
-    = Id String
-
-
-type alias GcData a =
-    RemoteData GcError a
-
-
-{-| An error from Graphcool.
--}
-type GcError
-    = HttpError Http.Error
-    | GcError (List ApiError)
-
-
-{-| <https://www.graph.cool/docs/reference/graphql-api/error-handling-aecou7haj9>
--}
-type ApiError
-    = InsufficientPermissions
-    | RelationIsRequired
-    | FunctionExecutionError String
-    | ApiError Int String
-    | Other String
-
-
 type alias Info =
     { id : Id
     , name : String
@@ -165,8 +146,8 @@ type alias Model =
     { view : View
     , auth : Maybe Auth
     , previousRoute : Maybe Route
-    , positions : GcData (List Info)
-    , tags : GcData (List Info)
+    , positions : RemoteData Http.Error (List Info)
+    , tags : RemoteData Http.Error (List Info)
     , device : Device
     , size : Window.Size
     , confirm : Maybe Msg
@@ -274,12 +255,4 @@ type alias Transition =
     , notes : Array String
     , steps : Array String
     , tags : List Info
-    }
-
-
-type alias AllData =
-    { transitions : List Transition
-    , positions : List Position
-    , submissions : List Submission
-    , topics : List Topic
     }

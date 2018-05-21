@@ -1,9 +1,11 @@
 module Utils exposing (..)
 
+import Api.Scalar exposing (Id(..))
 import Array exposing (Array)
 import Dict exposing (Dict)
 import Element exposing (Attribute, Element, centerX, centerY, el, html, none)
 import Element.Input as Input exposing (Label)
+import Graphqelm.Http
 import Html
 import Html.Attributes
 import Json.Decode as Decode exposing (Decoder)
@@ -11,8 +13,7 @@ import Navigation
 import Ports
 import Regex exposing (Regex)
 import RemoteData
-import Task exposing (Task)
-import Types exposing (ApiError(..), AppView(..), Auth, Device(Desktop, Mobile), FaIcon(..), Form, GcData, GcError(..), Id(..), Model, Route(..), View(..))
+import Types exposing (AppView(..), Auth, Device(Desktop, Mobile), FaIcon(..), Form, Model, Route(..), View(..))
 import Window
 
 
@@ -133,17 +134,6 @@ isJust =
     unwrap False <| always True
 
 
-removeNull : GcData (Maybe b) -> GcData b
-removeNull =
-    RemoteData.andThen
-        (Maybe.map RemoteData.Success
-            >> (Maybe.withDefault <|
-                    RemoteData.Failure <|
-                        GcError [ Other "Data does not exist" ]
-               )
-        )
-
-
 noLabel : Label msg
 noLabel =
     Input.labelAbove [] none
@@ -170,38 +160,15 @@ classifyDevice { width } =
         Desktop
 
 
-taskToGcData : (GcData a -> msg) -> Task GcError a -> Cmd msg
-taskToGcData msg =
-    RemoteData.asCmd
-        >> Cmd.map msg
-
-
-formatErrors : GcError -> List String
+formatErrors : Graphqelm.Http.Error a -> List String
 formatErrors err =
     case err of
-        HttpError _ ->
+        Graphqelm.Http.HttpError _ ->
             [ "Some HTTP bullshit." ]
 
-        GcError errs ->
+        Graphqelm.Http.GraphqlError _ errs ->
             errs
-                |> List.map
-                    (\e ->
-                        case e of
-                            InsufficientPermissions ->
-                                "Not authorised."
-
-                            FunctionExecutionError txt ->
-                                txt
-
-                            RelationIsRequired ->
-                                "Relation is required!"
-
-                            ApiError code txt ->
-                                "Code: " ++ toString code ++ ", Message: " ++ txt
-
-                            Other str ->
-                                str
-                    )
+                |> List.map .message
 
 
 addErrors : List String -> Form -> Form
@@ -453,7 +420,7 @@ del (Id id) =
     Dict.remove id
 
 
-remoteUnwrap : a -> (b -> a) -> GcData b -> a
+remoteUnwrap : a -> (b -> a) -> RemoteData.WebData b -> a
 remoteUnwrap default fn =
     RemoteData.map fn
         >> RemoteData.withDefault default
@@ -463,16 +430,6 @@ unwrap : b -> (a -> b) -> Maybe a -> b
 unwrap default fn =
     Maybe.map fn
         >> Maybe.withDefault default
-
-
-logError : GcData a -> Cmd msg
-logError data =
-    case data of
-        RemoteData.Failure err ->
-            log err
-
-        _ ->
-            Cmd.none
 
 
 log : a -> Cmd msg

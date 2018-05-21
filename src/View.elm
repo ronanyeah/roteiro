@@ -1,5 +1,6 @@
 module View exposing (..)
 
+import Api.Scalar exposing (Id(..))
 import Array exposing (Array)
 import Color
 import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, none, padding, paragraph, pointer, px, row, scrollbarY, spaceEvenly, spacing, text, width)
@@ -14,7 +15,7 @@ import Regex
 import RemoteData exposing (RemoteData(..))
 import Style
 import Types exposing (..)
-import Utils exposing (formatErrors, icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, remoteUnwrap, when, whenJust)
+import Utils exposing (icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, remoteUnwrap, when, whenJust)
 
 
 view : Model -> Html Msg
@@ -856,7 +857,7 @@ block txt msg =
         }
 
 
-viewPickPosition : (Info -> Msg) -> GcData (List Info) -> Element Msg
+viewPickPosition : (Info -> Msg) -> RemoteData.WebData (List Info) -> Element Msg
 viewPickPosition msg ps =
     el [ width fill, height fill, Background.color Style.c ] <|
         paragraph [ padding 20 ]
@@ -875,7 +876,7 @@ viewPickPosition msg ps =
             )
 
 
-viewRemote : (a -> Element Msg) -> GcData a -> Element Msg
+viewRemote : (a -> Element Msg) -> RemoteData.WebData a -> Element Msg
 viewRemote fn data =
     case data of
         NotAsked ->
@@ -890,9 +891,7 @@ viewRemote fn data =
                 ]
 
         Failure err ->
-            err
-                |> formatErrors
-                |> viewErrors
+            viewErrors [ toString err ]
 
         Success a ->
             fn a
@@ -1253,7 +1252,7 @@ viewTechList route xs =
             )
 
 
-editTags : GcData (List Info) -> List Info -> Element Msg
+editTags : RemoteData.WebData (List Info) -> List Info -> Element Msg
 editTags tags xs =
     el [ centerX ] <|
         column [ spacing 20 ]

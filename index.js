@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
 const validator = require("validator");
 const { promisify } = require("util");
+const { dissoc, evolve, pipe } = require("ramda");
 const { PRISMA_ENDPOINT, APP_SECRET } = process.env;
 
 const verify = promisify(jwt.verify);
@@ -18,6 +19,11 @@ const getUserId = async req => {
 
   return userId;
 };
+
+const clean = pipe(
+  dissoc("id"),
+  evolve({ steps: xs => ({ set: xs }), notes: xs => ({ set: xs }) })
+);
 
 const resolvers = {
   Query: {
@@ -172,6 +178,43 @@ const resolvers = {
     }
   },
   Mutation: {
+    updatePosition: async (_, args, ctx, info) => {
+      const userId = await getUserId(ctx.request);
+
+      const isOwner = await ctx.db.exists.Position({
+        where: {
+          AND: [{ id: args.id }, { user: { id: userId } }]
+        }
+      });
+
+      if (!isOwner) {
+        return Error("Oops!");
+      }
+
+      return ctx.db.mutation.updatePosition(
+        {
+          data: clean(args),
+          where: { id: args.id }
+        },
+        info
+      );
+    },
+
+    createPosition: async (_, { name, notes }, ctx, info) => {
+      const userId = await getUserId(ctx.request);
+
+      return ctx.db.mutation.createPosition(
+        {
+          data: {
+            name,
+            notes,
+            user: { connect: { id: userId } }
+          }
+        },
+        info
+      );
+    },
+
     authenticateUser: async (_, { email, password }, ctx, _info) => {
       const user = await ctx.db.query.user(
         { where: { email } },
@@ -192,10 +235,10 @@ const resolvers = {
         : Error("Incorrect password!");
     },
 
-    signUpUser: async (_, args, context, _info) =>
+    signUpUser: async (_, args, ctx, _info) =>
       !validator.isEmail(args.email)
         ? Error("Not a valid email address!")
-        : context.db.mutation
+        : ctx.db.mutation
             .createUser(
               {
                 data: {

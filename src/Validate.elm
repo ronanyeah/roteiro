@@ -1,7 +1,8 @@
 module Validate exposing (..)
 
+import Api.Scalar exposing (Id(..))
 import Array
-import Types exposing (Form, Id(..))
+import Types exposing (Form)
 import Utils exposing (filterEmpty)
 
 
