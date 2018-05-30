@@ -7,7 +7,7 @@ type AuthResponse {
 }
 
 type Query {
-  user(id: ID!): User!
+  user: User
   position(id: ID!): Position
   positions: [Position!]!
   transition(id: ID!): Transition

@@ -27,11 +27,11 @@ const clean = pipe(
 
 const resolvers = {
   Query: {
-    user: (_, args, context, info) =>
-      context.db.query.user(
+    user: async (_, __, ctx, info) =>
+      ctx.db.query.user(
         {
           where: {
-            id: args.id
+            id: await getUserId(ctx.request)
           }
         },
         info
