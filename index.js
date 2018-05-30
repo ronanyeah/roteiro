@@ -182,9 +182,7 @@ const resolvers = {
       const userId = await getUserId(ctx.request);
 
       const isOwner = await ctx.db.exists.Position({
-        where: {
-          AND: [{ id: args.id }, { user: { id: userId } }]
-        }
+        AND: [{ id: args.id }, { user: { id: userId } }]
       });
 
       if (!isOwner) {
