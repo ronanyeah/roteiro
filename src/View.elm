@@ -843,7 +843,7 @@ blocks route =
         (\{ id, name } ->
             block name <| NavigateTo <| route id
         )
-        >> paragraph []
+        >> column []
 
 
 block : String -> msg -> Element msg
@@ -851,9 +851,8 @@ block txt msg =
     button [ padding 10 ]
         { onPress = Just <| msg
         , label =
-            paragraph Style.block
-                [ text txt
-                ]
+            el Style.block <|
+                text txt
         }
 
 
