@@ -3,7 +3,7 @@ module View exposing (..)
 import Api.Scalar exposing (Id(..))
 import Array exposing (Array)
 import Color
-import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, none, padding, paragraph, pointer, px, row, scrollbarY, spaceEvenly, spacing, text, width)
+import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, none, padding, paragraph, pointer, px, row, scrollbarY, shrink, spaceEvenly, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -157,7 +157,7 @@ view model =
                                                     )
                                                 , viewTechList SubmissionRoute submissions
                                                 ]
-                                            , column []
+                                            , column [ spacing 20 ]
                                                 [ addNewRow Arrow
                                                     (SetRouteThenNavigate
                                                         (PositionRoute id)
@@ -170,24 +170,28 @@ view model =
                                                     (transitionsFrom
                                                         |> List.map
                                                             (\transition ->
-                                                                paragraph
-                                                                    [ centerY, centerX ]
-                                                                    [ button []
+                                                                column
+                                                                    []
+                                                                    [ button [ centerX ]
                                                                         { onPress = Just <| NavigateTo <| TransitionRoute transition.id
                                                                         , label =
                                                                             el Style.link <|
                                                                                 text transition.name
                                                                         }
-                                                                    , text " ("
-                                                                    , el [] <| text name
-                                                                    , el [ padding 20 ] <| icon Arrow Style.mattIcon
-                                                                    , button []
-                                                                        { onPress = Just <| NavigateTo <| PositionRoute transition.endPosition.id
-                                                                        , label =
-                                                                            el Style.link <|
-                                                                                text transition.endPosition.name
-                                                                        }
-                                                                    , text ")"
+                                                                    , el [ centerX ] <|
+                                                                        row
+                                                                            [ spacing 5 ]
+                                                                            [ text "( "
+                                                                            , text name
+                                                                            , icon Arrow Style.mattIcon
+                                                                            , button []
+                                                                                { onPress = Just <| NavigateTo <| PositionRoute transition.endPosition.id
+                                                                                , label =
+                                                                                    el Style.link <|
+                                                                                        text transition.endPosition.name
+                                                                                }
+                                                                            , text " )"
+                                                                            ]
                                                                     ]
                                                             )
                                                     )
@@ -195,24 +199,28 @@ view model =
                                                     (transitionsTo
                                                         |> List.map
                                                             (\transition ->
-                                                                paragraph
-                                                                    [ centerY, centerX ]
-                                                                    [ button []
+                                                                column
+                                                                    []
+                                                                    [ button [ centerX ]
                                                                         { onPress = Just <| NavigateTo <| TransitionRoute transition.id
                                                                         , label =
                                                                             el Style.link <|
                                                                                 text transition.name
                                                                         }
-                                                                    , text " ("
-                                                                    , button []
-                                                                        { onPress = Just <| NavigateTo <| PositionRoute transition.startPosition.id
-                                                                        , label =
-                                                                            el Style.link <|
-                                                                                text transition.startPosition.name
-                                                                        }
-                                                                    , el [ padding 20 ] <| icon Arrow Style.mattIcon
-                                                                    , el [] <| text name
-                                                                    , text ")"
+                                                                    , el [ centerX ] <|
+                                                                        row
+                                                                            [ spacing 5 ]
+                                                                            [ text "( "
+                                                                            , button []
+                                                                                { onPress = Just <| NavigateTo <| PositionRoute transition.endPosition.id
+                                                                                , label =
+                                                                                    el Style.link <|
+                                                                                        text transition.startPosition.name
+                                                                                }
+                                                                            , icon Arrow Style.mattIcon
+                                                                            , text name
+                                                                            , text " )"
+                                                                            ]
                                                                     ]
                                                             )
                                                     )
@@ -939,25 +947,28 @@ pickPosition msg position =
 
 editRow : String -> FaIcon -> Msg -> Element Msg
 editRow name faIcon editMsg =
-    row
-        [ spacing 20 ]
-        [ icon faIcon Style.mattIcon
-        , paragraph
-            [ Font.size 35
-            , Font.color Style.e
+    column
+        []
+        [ el [ centerX ] <| icon faIcon Style.mattIcon
+        , row []
+            [ paragraph
+                [ Font.size 35
+                , Font.color Style.e
+                , width fill
+                ]
+                [ text name ]
+            , Input.button []
+                { onPress = Just editMsg
+                , label = icon Write Style.actionIcon
+                }
             ]
-            [ text name ]
-        , Input.button []
-            { onPress = Just editMsg
-            , label = icon Write Style.actionIcon
-            }
         ]
 
 
 addNewRow : FaIcon -> Msg -> Element Msg
 addNewRow fa msg =
     el [ centerX ] <|
-        row [ spacing 20, padding 30 ]
+        row [ spacing 20 ]
             [ icon fa Style.mattIcon
             , plus msg
             ]
@@ -1084,7 +1095,7 @@ stepsEditor form =
     column
         [ spacing 10
         , width fill
-        , height Element.shrink
+        , height shrink
         ]
         [ icon Cogs (centerX :: Style.bigIcon)
         , steps
@@ -1136,7 +1147,7 @@ notesEditor form =
     column
         [ spacing 10
         , width fill
-        , height Element.shrink
+        , height shrink
         ]
         [ icon Notes (centerX :: Style.bigIcon)
         , notes
@@ -1189,7 +1200,9 @@ viewNotes notes =
                                     text note
                         in
                         paragraph
-                            [ spacing 5 ]
+                            [ spacing 5
+                            , width fill
+                            ]
                             [ el [ Font.color Style.e ] <| text "• "
                             , content
                             ]
@@ -1242,7 +1255,8 @@ viewTechList route xs =
                             { onPress = Just <| NavigateTo <| route t.id
                             , label =
                                 paragraph
-                                    []
+                                    [ width fill
+                                    ]
                                     [ el [ Font.color Style.e ] <| text "• "
                                     , el Style.link <| text t.name
                                     ]
