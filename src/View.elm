@@ -859,8 +859,9 @@ block txt msg =
     button [ padding 10 ]
         { onPress = Just <| msg
         , label =
-            el Style.block <|
-                text txt
+            paragraph Style.block
+                [ text txt
+                ]
         }
 
 

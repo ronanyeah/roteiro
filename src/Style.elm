@@ -1,7 +1,7 @@
 module Style exposing (..)
 
 import Color exposing (Color, rgb)
-import Element exposing (Attribute, height, mouseOver, padding, pointer, px, width)
+import Element exposing (Attribute, fill, height, mouseOver, padding, pointer, px, width)
 import Element.Background as Background
 import Element.Font as Font
 
@@ -24,6 +24,7 @@ block =
         [ Font.color Color.darkGrey
         ]
     , padding 10
+    , width fill
     ]
 
 
@@ -33,6 +34,7 @@ choice =
     , font
     , pointer
     , Font.color Color.darkGrey
+    , width fill
     , mouseOver
         [ Font.color e
         ]
