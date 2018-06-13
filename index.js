@@ -22,7 +22,13 @@ const getUserId = async req => {
 
 const clean = pipe(
   dissoc("id"),
-  evolve({ steps: xs => ({ set: xs }), notes: xs => ({ set: xs }) })
+  evolve({
+    steps: xs => ({ set: xs }),
+    notes: xs => ({ set: xs }),
+    startPosition: id => ({ connect: { id } }),
+    endPosition: id => ({ connect: { id } }),
+    position: id => ({ connect: { id } })
+  })
 );
 
 const resolvers = {

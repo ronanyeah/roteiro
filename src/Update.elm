@@ -789,6 +789,7 @@ update msg model =
                                     { name = name
                                     , steps = steps
                                     , notes = notes
+                                    , position = startId
                                     }
                                     submission
                                 )
@@ -846,9 +847,8 @@ update msg model =
                             , mutation auth.token
                                 (Api.Mutation.createTransition
                                     { name = name
-
-                                    --startId = startId
-                                    --endId = endId
+                                    , startPosition = startId
+                                    , endPosition = endId
                                     , steps = steps
                                     , notes = notes
                                     }
