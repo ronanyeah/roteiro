@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
 const validator = require("validator");
 const { promisify } = require("util");
-const { dissoc, evolve, pipe } = require("ramda");
+const { dissoc, evolve, pipe, assoc } = require("ramda");
 const { PRISMA_ENDPOINT, APP_SECRET } = process.env;
 
 const verify = promisify(jwt.verify);
@@ -198,20 +198,65 @@ const resolvers = {
       );
     },
 
-    createPosition: async (_, { name, notes }, ctx, info) => {
-      const userId = await getUserId(ctx.request);
-
-      return ctx.db.mutation.createPosition(
+    createPosition: async (_, args, ctx, info) =>
+      ctx.db.mutation.createPosition(
         {
-          data: {
-            name,
-            notes,
-            user: { connect: { id: userId } }
-          }
+          data: assoc(
+            "user",
+            { connect: { id: await getUserId(ctx.request) } },
+            clean(args)
+          )
         },
         info
-      );
-    },
+      ),
+
+    createSubmission: async (_, args, ctx, info) =>
+      ctx.db.mutation.createSubmission(
+        {
+          data: assoc(
+            "user",
+            { connect: { id: await getUserId(ctx.request) } },
+            clean(args)
+          )
+        },
+        info
+      ),
+
+    createTransition: async (_, args, ctx, info) =>
+      ctx.db.mutation.createTransition(
+        {
+          data: assoc(
+            "user",
+            { connect: { id: await getUserId(ctx.request) } },
+            clean(args)
+          )
+        },
+        info
+      ),
+
+    createTag: async (_, args, ctx, info) =>
+      ctx.db.mutation.createTag(
+        {
+          data: assoc(
+            "user",
+            { connect: { id: await getUserId(ctx.request) } },
+            clean(args)
+          )
+        },
+        info
+      ),
+
+    createTopic: async (_, args, ctx, info) =>
+      ctx.db.mutation.createTopic(
+        {
+          data: assoc(
+            "user",
+            { connect: { id: await getUserId(ctx.request) } },
+            clean(args)
+          )
+        },
+        info
+      ),
 
     authenticateUser: async (_, { email, password }, ctx, _info) => {
       const user = await ctx.db.query.user(
