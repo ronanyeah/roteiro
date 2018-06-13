@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "gen": "graphql get-schema --project prisma",
+    "gen-elm": "graphqelm http://localhost:4000",
     "deploy": "prisma deploy",
     "test": "echo \"100% coverage!\" && exit 0",
     "watch": "webpack-dev-server --hot",
@@ -33,6 +34,7 @@
     "elm-hot-loader": "^0.5.4",
     "elm-webpack-loader": "^4.5.0",
     "faker": "^4.1.0",
+    "graphqelm": "^3.1.12",
     "graphql": "^0.13.2",
     "graphql-cli": "^2.16.2",
     "graphql-request": "^1.6.0",
