@@ -189,6 +189,86 @@ const resolvers = {
       );
     },
 
+    updateSubmission: async (_, args, ctx, info) => {
+      const userId = await getUserId(ctx.request);
+
+      const isOwner = await ctx.db.exists.Submission({
+        AND: [{ id: args.id }, { user: { id: userId } }]
+      });
+
+      if (!isOwner) {
+        return Error("Oops!");
+      }
+
+      return ctx.db.mutation.updateSubmission(
+        {
+          data: clean(args),
+          where: { id: args.id }
+        },
+        info
+      );
+    },
+
+    updateTag: async (_, args, ctx, info) => {
+      const userId = await getUserId(ctx.request);
+
+      const isOwner = await ctx.db.exists.Tag({
+        AND: [{ id: args.id }, { user: { id: userId } }]
+      });
+
+      if (!isOwner) {
+        return Error("Oops!");
+      }
+
+      return ctx.db.mutation.updateTag(
+        {
+          data: clean(args),
+          where: { id: args.id }
+        },
+        info
+      );
+    },
+
+    updateTopic: async (_, args, ctx, info) => {
+      const userId = await getUserId(ctx.request);
+
+      const isOwner = await ctx.db.exists.Topic({
+        AND: [{ id: args.id }, { user: { id: userId } }]
+      });
+
+      if (!isOwner) {
+        return Error("Oops!");
+      }
+
+      return ctx.db.mutation.updateTopic(
+        {
+          data: clean(args),
+          where: { id: args.id }
+        },
+        info
+      );
+    },
+
+    updateTransition: async (_, args, ctx, info) => {
+      const userId = await getUserId(ctx.request);
+
+      const isOwner = await ctx.db.exists.Transition({
+        AND: [{ id: args.id }, { user: { id: userId } }]
+      });
+
+      if (!isOwner) {
+        return Error("Oops!");
+      }
+
+      return ctx.db.mutation.updateTransition(
+        {
+          data: clean(args),
+          where: { id: args.id }
+        },
+        info
+      );
+    },
+
     createPosition: async (_, args, ctx, info) =>
       ctx.db.mutation.createPosition(
         {

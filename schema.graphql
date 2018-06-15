@@ -45,12 +45,15 @@ type Mutation {
     name: String!
     notes: [String!]!
     steps: [String!]!
+    startPosition: ID!
+    endPosition: ID!
   ): Transition!
   updateSubmission(
     id: ID!
     name: String!
     notes: [String!]!
     steps: [String!]!
+    position: ID!
   ): Submission!
   updateTag(id: ID!, name: String!): Tag!
   updateTopic(id: ID!, name: String!, notes: [String!]!): Topic!

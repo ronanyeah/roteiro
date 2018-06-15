@@ -898,6 +898,7 @@ update msg model =
                                     , name = name
                                     , steps = steps
                                     , notes = notes
+                                    , position = position
                                     }
                                     submission
                                 )
@@ -965,9 +966,8 @@ update msg model =
                                 (Api.Mutation.updateTransition
                                     { id = model.form.id
                                     , name = name
-
-                                    --startId = startId
-                                    --endId = endId
+                                    , startPosition = startId
+                                    , endPosition = endId
                                     , steps = steps
                                     , notes = notes
                                     }
