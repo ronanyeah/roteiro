@@ -43,18 +43,15 @@ const resolvers = {
         info
       ),
 
-    positions: async (_, args, ctx, info) => {
-      const userId = await getUserId(ctx.request);
-
-      return ctx.db.query.positions(
+    positions: async (_, args, ctx, info) =>
+      ctx.db.query.positions(
         {
           where: {
-            user: { id: userId }
+            user: { id: await getUserId(ctx.request) }
           }
         },
         info
-      );
-    },
+      ),
 
     position: async (_, args, ctx, info) => {
       const userId = await getUserId(ctx.request);
@@ -71,18 +68,15 @@ const resolvers = {
         .then(([x]) => x || null);
     },
 
-    transitions: async (_, args, ctx, info) => {
-      const userId = await getUserId(ctx.request);
-
-      return ctx.db.query.transitions(
+    transitions: async (_, args, ctx, info) =>
+      ctx.db.query.transitions(
         {
           where: {
-            user: { id: userId }
+            user: { id: await getUserId(ctx.request) }
           }
         },
         info
-      );
-    },
+      ),
 
     transition: async (_, args, ctx, info) => {
       const userId = await getUserId(ctx.request);
@@ -99,18 +93,15 @@ const resolvers = {
         .then(([x]) => x || null);
     },
 
-    submissions: async (_, args, ctx, info) => {
-      const userId = await getUserId(ctx.request);
-
-      return ctx.db.query.submissions(
+    submissions: async (_, args, ctx, info) =>
+      ctx.db.query.submissions(
         {
           where: {
-            user: { id: userId }
+            user: { id: await getUserId(ctx.request) }
           }
         },
         info
-      );
-    },
+      ),
 
     submission: async (_, args, ctx, info) => {
       const userId = await getUserId(ctx.request);
@@ -127,18 +118,15 @@ const resolvers = {
         .then(([x]) => x || null);
     },
 
-    tags: async (_, args, ctx, info) => {
-      const userId = await getUserId(ctx.request);
-
-      return ctx.db.query.tags(
+    tags: async (_, args, ctx, info) =>
+      ctx.db.query.tags(
         {
           where: {
-            user: { id: userId }
+            user: { id: await getUserId(ctx.request) }
           }
         },
         info
-      );
-    },
+      ),
 
     tag: async (_, args, ctx, info) => {
       const userId = await getUserId(ctx.request);
@@ -155,18 +143,15 @@ const resolvers = {
         .then(([x]) => x || null);
     },
 
-    topics: async (_, args, ctx, info) => {
-      const userId = await getUserId(ctx.request);
-
-      return ctx.db.query.topics(
+    topics: async (_, args, ctx, info) =>
+      ctx.db.query.topics(
         {
           where: {
-            user: { id: userId }
+            user: { id: await getUserId(ctx.request) }
           }
         },
         info
-      );
-    },
+      ),
 
     topic: async (_, args, ctx, info) => {
       const userId = await getUserId(ctx.request);
