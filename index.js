@@ -5,7 +5,7 @@ const bcryptjs = require("bcryptjs");
 const validator = require("validator");
 const { promisify } = require("util");
 const { dissoc, evolve, pipe, assoc } = require("ramda");
-const { PRISMA_ENDPOINT, APP_SECRET } = process.env;
+const { PRISMA_DEBUG, PRISMA_ENDPOINT, APP_SECRET } = process.env;
 
 const verify = promisify(jwt.verify);
 const sign = promisify(jwt.sign);
@@ -313,8 +313,8 @@ new GraphQLServer({
     ...req,
     db: new Prisma({
       typeDefs: "./generated/prisma.graphql",
-      endpoint: PRISMA_ENDPOINT
-      //debug: true
+      endpoint: PRISMA_ENDPOINT,
+      debug: PRISMA_DEBUG === "true"
     })
   })
 }).start(() =>
