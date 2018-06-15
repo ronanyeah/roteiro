@@ -350,7 +350,7 @@ view model =
                                         column [ height <| px model.size.height, scrollbarY ]
                                             [ editRow t.name Arrow <| EditTransition t
                                             , paragraph
-                                                [ centerY, centerX ]
+                                                [ centerY, centerX, width fill ]
                                                 [ button []
                                                     { onPress = Just <| NavigateTo <| PositionRoute startPosition.id
                                                     , label =
@@ -1307,7 +1307,7 @@ viewTags tags =
                                     { onPress = Just <| NavigateTo <| TagRoute t.id
                                     , label =
                                         paragraph
-                                            []
+                                            [ width fill ]
                                             [ el [ Font.color Style.e, padding 5 ] <| text "• "
                                             , el Style.link <| text t.name
                                             ]
