@@ -74,7 +74,7 @@ module.exports = {
     new CopyWebpackPlugin([
       "static",
       {
-        from: "./node_modules/@fortawesome/fontawesome-free-webfonts/webfonts",
+        from: "./node_modules/@fortawesome/fontawesome-free/webfonts",
         to: "webfonts"
       }
     ])
