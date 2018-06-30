@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
 const validator = require("validator");
 const { promisify } = require("util");
+const { resolve } = require("path");
 const { dissoc, evolve, pipe, assoc } = require("ramda");
 const { PRISMA_DEBUG, PRISMA_ENDPOINT, APP_SECRET } = process.env;
 
@@ -372,12 +373,12 @@ const resolvers = {
 };
 
 new GraphQLServer({
-  typeDefs: "./schema.graphql",
+  typeDefs: resolve(__dirname, "../schema.graphql"),
   resolvers,
   context: req => ({
     ...req,
     db: new Prisma({
-      typeDefs: "./generated/prisma.graphql",
+      typeDefs: resolve(__dirname, "../generated/prisma.graphql"),
       endpoint: PRISMA_ENDPOINT,
       debug: PRISMA_DEBUG === "true"
     })
