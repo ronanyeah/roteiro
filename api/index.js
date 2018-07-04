@@ -336,6 +336,10 @@ const resolvers = {
         "{ id, email, password }"
       );
 
+      if (!validator.isEmail(email)) {
+        return Error("Not a valid email address!");
+      }
+
       if (!user) {
         return Error("Email is not in use!");
       }
