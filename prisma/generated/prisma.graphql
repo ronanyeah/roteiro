@@ -1,6 +1,3 @@
-# source: http://localhost:4466
-# timestamp: Fri May 18 2018 01:38:46 GMT+0100 (IST)
-
 type AggregatePosition {
   count: Int!
 }
@@ -26,16 +23,14 @@ type AggregateUser {
 }
 
 type BatchPayload {
-  """The number of nodes that have been affected by the Batch operation."""
+  # The number of nodes that have been affected by the Batch operation.
   count: Long!
 }
 
 scalar DateTime
 
-"""
-The `Long` scalar type represents non-fractional signed whole numeric values.
-Long can represent values between -(2^63) and 2^63 - 1.
-"""
+# The `Long` scalar type represents non-fractional signed whole numeric values.
+# Long can represent values between -(2^63) and 2^63 - 1.
 scalar Long
 
 type Mutation {
@@ -83,24 +78,24 @@ enum MutationType {
   DELETED
 }
 
-"""An object with an ID"""
+# An object with an ID
 interface Node {
-  """The id of the object."""
+  # The id of the object.
   id: ID!
 }
 
-"""Information about pagination in a connection."""
+# Information about pagination in a connection.
 type PageInfo {
-  """When paginating forwards, are there more items?"""
+  # When paginating forwards, are there more items?
   hasNextPage: Boolean!
 
-  """When paginating backwards, are there more items?"""
+  # When paginating backwards, are there more items?
   hasPreviousPage: Boolean!
 
-  """When paginating backwards, the cursor to continue."""
+  # When paginating backwards, the cursor to continue.
   startCursor: String
 
-  """When paginating forwards, the cursor to continue."""
+  # When paginating forwards, the cursor to continue.
   endCursor: String
 }
 
@@ -116,12 +111,12 @@ type Position implements Node {
   user(where: UserWhereInput): User!
 }
 
-"""A connection to a list of items."""
+# A connection to a list of items.
 type PositionConnection {
-  """Information to aid in pagination."""
+  # Information to aid in pagination.
   pageInfo: PageInfo!
 
-  """A list of edges."""
+  # A list of edges.
   edges: [PositionEdge]!
   aggregate: AggregatePosition!
 }
@@ -191,12 +186,12 @@ input PositionCreateWithoutUserInput {
   transitionsTo: TransitionCreateManyWithoutEndPositionInput
 }
 
-"""An edge in a connection."""
+# An edge in a connection.
 type PositionEdge {
-  """The item at the end of the edge."""
+  # The item at the end of the edge.
   node: Position!
 
-  """A cursor for use in pagination."""
+  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -227,33 +222,25 @@ type PositionSubscriptionPayload {
 }
 
 input PositionSubscriptionWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [PositionSubscriptionWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [PositionSubscriptionWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [PositionSubscriptionWhereInput!]
 
-  """
-  The subscription event gets dispatched when it's listed in mutation_in
-  """
+  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
 
-  """
-  The subscription event gets only dispatched when one of the updated fields names is included in this list
-  """
+  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
 
-  """
-  The subscription event gets only dispatched when all of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
 
-  """
-  The subscription event gets only dispatched when some of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: PositionWhereInput
 }
@@ -363,137 +350,137 @@ input PositionUpsertWithWhereUniqueWithoutUserInput {
 }
 
 input PositionWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [PositionWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [PositionWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [PositionWhereInput!]
   id: ID
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   id_not: ID
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   id_in: [ID!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   id_not_in: [ID!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   id_lt: ID
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   id_lte: ID
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   id_gt: ID
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   id_gte: ID
 
-  """All values containing the given string."""
+  # All values containing the given string.
   id_contains: ID
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   id_not_contains: ID
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   id_starts_with: ID
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   id_not_starts_with: ID
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   id_ends_with: ID
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   createdAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   createdAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   createdAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   createdAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   createdAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   updatedAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   updatedAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   updatedAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   updatedAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   name: String
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   name_not: String
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   name_in: [String!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   name_not_in: [String!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   name_lt: String
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   name_lte: String
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   name_gt: String
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   name_gte: String
 
-  """All values containing the given string."""
+  # All values containing the given string.
   name_contains: String
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   name_not_contains: String
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   name_starts_with: String
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   name_not_starts_with: String
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   name_ends_with: String
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   name_not_ends_with: String
   submissions_every: SubmissionWhereInput
   submissions_some: SubmissionWhereInput
@@ -531,9 +518,9 @@ type Query {
   topicsConnection(where: TopicWhereInput, orderBy: TopicOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TopicConnection!
   tagsConnection(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TagConnection!
 
-  """Fetches an object given its ID"""
+  # Fetches an object given its ID
   node(
-    """The ID of an object"""
+    # The ID of an object
     id: ID!
   ): Node
 }
@@ -550,12 +537,12 @@ type Submission implements Node {
   user(where: UserWhereInput): User!
 }
 
-"""A connection to a list of items."""
+# A connection to a list of items.
 type SubmissionConnection {
-  """Information to aid in pagination."""
+  # Information to aid in pagination.
   pageInfo: PageInfo!
 
-  """A list of edges."""
+  # A list of edges.
   edges: [SubmissionEdge]!
   aggregate: AggregateSubmission!
 }
@@ -616,12 +603,12 @@ input SubmissionCreateWithoutUserInput {
   tags: TagCreateManyWithoutSubmissionsInput
 }
 
-"""An edge in a connection."""
+# An edge in a connection.
 type SubmissionEdge {
-  """The item at the end of the edge."""
+  # The item at the end of the edge.
   node: Submission!
 
-  """A cursor for use in pagination."""
+  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -653,33 +640,25 @@ type SubmissionSubscriptionPayload {
 }
 
 input SubmissionSubscriptionWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [SubmissionSubscriptionWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [SubmissionSubscriptionWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [SubmissionSubscriptionWhereInput!]
 
-  """
-  The subscription event gets dispatched when it's listed in mutation_in
-  """
+  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
 
-  """
-  The subscription event gets only dispatched when one of the updated fields names is included in this list
-  """
+  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
 
-  """
-  The subscription event gets only dispatched when all of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
 
-  """
-  The subscription event gets only dispatched when some of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: SubmissionWhereInput
 }
@@ -786,137 +765,137 @@ input SubmissionUpsertWithWhereUniqueWithoutUserInput {
 }
 
 input SubmissionWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [SubmissionWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [SubmissionWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [SubmissionWhereInput!]
   id: ID
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   id_not: ID
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   id_in: [ID!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   id_not_in: [ID!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   id_lt: ID
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   id_lte: ID
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   id_gt: ID
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   id_gte: ID
 
-  """All values containing the given string."""
+  # All values containing the given string.
   id_contains: ID
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   id_not_contains: ID
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   id_starts_with: ID
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   id_not_starts_with: ID
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   id_ends_with: ID
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   createdAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   createdAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   createdAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   createdAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   createdAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   updatedAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   updatedAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   updatedAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   updatedAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   name: String
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   name_not: String
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   name_in: [String!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   name_not_in: [String!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   name_lt: String
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   name_lte: String
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   name_gt: String
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   name_gte: String
 
-  """All values containing the given string."""
+  # All values containing the given string.
   name_contains: String
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   name_not_contains: String
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   name_starts_with: String
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   name_not_starts_with: String
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   name_ends_with: String
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   name_not_ends_with: String
   position: PositionWhereInput
   tags_every: TagWhereInput
@@ -948,12 +927,12 @@ type Tag implements Node {
   user(where: UserWhereInput): User!
 }
 
-"""A connection to a list of items."""
+# A connection to a list of items.
 type TagConnection {
-  """Information to aid in pagination."""
+  # Information to aid in pagination.
   pageInfo: PageInfo!
 
-  """A list of edges."""
+  # A list of edges.
   edges: [TagEdge]!
   aggregate: AggregateTag!
 }
@@ -998,12 +977,12 @@ input TagCreateWithoutUserInput {
   transitions: TransitionCreateManyWithoutTagsInput
 }
 
-"""An edge in a connection."""
+# An edge in a connection.
 type TagEdge {
-  """The item at the end of the edge."""
+  # The item at the end of the edge.
   node: Tag!
 
-  """A cursor for use in pagination."""
+  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -1033,33 +1012,25 @@ type TagSubscriptionPayload {
 }
 
 input TagSubscriptionWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [TagSubscriptionWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [TagSubscriptionWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [TagSubscriptionWhereInput!]
 
-  """
-  The subscription event gets dispatched when it's listed in mutation_in
-  """
+  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
 
-  """
-  The subscription event gets only dispatched when one of the updated fields names is included in this list
-  """
+  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
 
-  """
-  The subscription event gets only dispatched when all of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
 
-  """
-  The subscription event gets only dispatched when some of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: TagWhereInput
 }
@@ -1150,137 +1121,137 @@ input TagUpsertWithWhereUniqueWithoutUserInput {
 }
 
 input TagWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [TagWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [TagWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [TagWhereInput!]
   id: ID
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   id_not: ID
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   id_in: [ID!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   id_not_in: [ID!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   id_lt: ID
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   id_lte: ID
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   id_gt: ID
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   id_gte: ID
 
-  """All values containing the given string."""
+  # All values containing the given string.
   id_contains: ID
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   id_not_contains: ID
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   id_starts_with: ID
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   id_not_starts_with: ID
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   id_ends_with: ID
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   createdAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   createdAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   createdAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   createdAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   createdAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   updatedAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   updatedAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   updatedAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   updatedAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   name: String
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   name_not: String
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   name_in: [String!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   name_not_in: [String!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   name_lt: String
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   name_lte: String
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   name_gt: String
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   name_gte: String
 
-  """All values containing the given string."""
+  # All values containing the given string.
   name_contains: String
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   name_not_contains: String
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   name_starts_with: String
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   name_not_starts_with: String
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   name_ends_with: String
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   name_not_ends_with: String
   submissions_every: SubmissionWhereInput
   submissions_some: SubmissionWhereInput
@@ -1304,12 +1275,12 @@ type Topic implements Node {
   user(where: UserWhereInput): User!
 }
 
-"""A connection to a list of items."""
+# A connection to a list of items.
 type TopicConnection {
-  """Information to aid in pagination."""
+  # Information to aid in pagination.
   pageInfo: PageInfo!
 
-  """A list of edges."""
+  # A list of edges.
   edges: [TopicEdge]!
   aggregate: AggregateTopic!
 }
@@ -1334,12 +1305,12 @@ input TopicCreateWithoutUserInput {
   notes: TopicCreatenotesInput
 }
 
-"""An edge in a connection."""
+# An edge in a connection.
 type TopicEdge {
-  """The item at the end of the edge."""
+  # The item at the end of the edge.
   node: Topic!
 
-  """A cursor for use in pagination."""
+  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -1370,33 +1341,25 @@ type TopicSubscriptionPayload {
 }
 
 input TopicSubscriptionWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [TopicSubscriptionWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [TopicSubscriptionWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [TopicSubscriptionWhereInput!]
 
-  """
-  The subscription event gets dispatched when it's listed in mutation_in
-  """
+  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
 
-  """
-  The subscription event gets only dispatched when one of the updated fields names is included in this list
-  """
+  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
 
-  """
-  The subscription event gets only dispatched when all of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
 
-  """
-  The subscription event gets only dispatched when some of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: TopicWhereInput
 }
@@ -1437,137 +1400,137 @@ input TopicUpsertWithWhereUniqueWithoutUserInput {
 }
 
 input TopicWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [TopicWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [TopicWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [TopicWhereInput!]
   id: ID
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   id_not: ID
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   id_in: [ID!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   id_not_in: [ID!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   id_lt: ID
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   id_lte: ID
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   id_gt: ID
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   id_gte: ID
 
-  """All values containing the given string."""
+  # All values containing the given string.
   id_contains: ID
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   id_not_contains: ID
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   id_starts_with: ID
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   id_not_starts_with: ID
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   id_ends_with: ID
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   createdAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   createdAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   createdAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   createdAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   createdAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   updatedAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   updatedAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   updatedAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   updatedAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   name: String
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   name_not: String
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   name_in: [String!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   name_not_in: [String!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   name_lt: String
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   name_lte: String
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   name_gt: String
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   name_gte: String
 
-  """All values containing the given string."""
+  # All values containing the given string.
   name_contains: String
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   name_not_contains: String
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   name_starts_with: String
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   name_not_starts_with: String
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   name_ends_with: String
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   name_not_ends_with: String
   user: UserWhereInput
 }
@@ -1589,12 +1552,12 @@ type Transition implements Node {
   user(where: UserWhereInput): User!
 }
 
-"""A connection to a list of items."""
+# A connection to a list of items.
 type TransitionConnection {
-  """Information to aid in pagination."""
+  # Information to aid in pagination.
   pageInfo: PageInfo!
 
-  """A list of edges."""
+  # A list of edges.
   edges: [TransitionEdge]!
   aggregate: AggregateTransition!
 }
@@ -1673,12 +1636,12 @@ input TransitionCreateWithoutUserInput {
   tags: TagCreateManyWithoutTransitionsInput
 }
 
-"""An edge in a connection."""
+# An edge in a connection.
 type TransitionEdge {
-  """The item at the end of the edge."""
+  # The item at the end of the edge.
   node: Transition!
 
-  """A cursor for use in pagination."""
+  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -1710,33 +1673,25 @@ type TransitionSubscriptionPayload {
 }
 
 input TransitionSubscriptionWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [TransitionSubscriptionWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [TransitionSubscriptionWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [TransitionSubscriptionWhereInput!]
 
-  """
-  The subscription event gets dispatched when it's listed in mutation_in
-  """
+  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
 
-  """
-  The subscription event gets only dispatched when one of the updated fields names is included in this list
-  """
+  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
 
-  """
-  The subscription event gets only dispatched when all of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
 
-  """
-  The subscription event gets only dispatched when some of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: TransitionWhereInput
 }
@@ -1876,137 +1831,137 @@ input TransitionUpsertWithWhereUniqueWithoutUserInput {
 }
 
 input TransitionWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [TransitionWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [TransitionWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [TransitionWhereInput!]
   id: ID
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   id_not: ID
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   id_in: [ID!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   id_not_in: [ID!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   id_lt: ID
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   id_lte: ID
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   id_gt: ID
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   id_gte: ID
 
-  """All values containing the given string."""
+  # All values containing the given string.
   id_contains: ID
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   id_not_contains: ID
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   id_starts_with: ID
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   id_not_starts_with: ID
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   id_ends_with: ID
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   createdAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   createdAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   createdAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   createdAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   createdAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   updatedAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   updatedAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   updatedAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   updatedAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   name: String
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   name_not: String
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   name_in: [String!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   name_not_in: [String!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   name_lt: String
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   name_lte: String
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   name_gt: String
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   name_gte: String
 
-  """All values containing the given string."""
+  # All values containing the given string.
   name_contains: String
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   name_not_contains: String
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   name_starts_with: String
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   name_not_starts_with: String
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   name_ends_with: String
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   name_not_ends_with: String
   startPosition: PositionWhereInput
   endPosition: PositionWhereInput
@@ -2033,12 +1988,12 @@ type User implements Node {
   tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag!]
 }
 
-"""A connection to a list of items."""
+# A connection to a list of items.
 type UserConnection {
-  """Information to aid in pagination."""
+  # Information to aid in pagination.
   pageInfo: PageInfo!
 
-  """A list of edges."""
+  # A list of edges.
   edges: [UserEdge]!
   aggregate: AggregateUser!
 }
@@ -2123,12 +2078,12 @@ input UserCreateWithoutTransitionsInput {
   tags: TagCreateManyWithoutUserInput
 }
 
-"""An edge in a connection."""
+# An edge in a connection.
 type UserEdge {
-  """The item at the end of the edge."""
+  # The item at the end of the edge.
   node: User!
 
-  """A cursor for use in pagination."""
+  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -2161,33 +2116,25 @@ type UserSubscriptionPayload {
 }
 
 input UserSubscriptionWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [UserSubscriptionWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [UserSubscriptionWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [UserSubscriptionWhereInput!]
 
-  """
-  The subscription event gets dispatched when it's listed in mutation_in
-  """
+  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
 
-  """
-  The subscription event gets only dispatched when one of the updated fields names is included in this list
-  """
+  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
 
-  """
-  The subscription event gets only dispatched when all of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
 
-  """
-  The subscription event gets only dispatched when some of the field names included in this list have been updated
-  """
+  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: UserWhereInput
 }
@@ -2313,177 +2260,177 @@ input UserUpsertWithoutTransitionsInput {
 }
 
 input UserWhereInput {
-  """Logical AND on all given filters."""
+  # Logical AND on all given filters.
   AND: [UserWhereInput!]
 
-  """Logical OR on all given filters."""
+  # Logical OR on all given filters.
   OR: [UserWhereInput!]
 
-  """Logical NOT on all given filters combined by AND."""
+  # Logical NOT on all given filters combined by AND.
   NOT: [UserWhereInput!]
   id: ID
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   id_not: ID
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   id_in: [ID!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   id_not_in: [ID!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   id_lt: ID
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   id_lte: ID
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   id_gt: ID
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   id_gte: ID
 
-  """All values containing the given string."""
+  # All values containing the given string.
   id_contains: ID
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   id_not_contains: ID
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   id_starts_with: ID
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   id_not_starts_with: ID
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   id_ends_with: ID
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   createdAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   createdAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   createdAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   createdAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   createdAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   updatedAt_not: DateTime
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   updatedAt_lt: DateTime
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   updatedAt_lte: DateTime
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   updatedAt_gt: DateTime
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   email: String
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   email_not: String
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   email_in: [String!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   email_not_in: [String!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   email_lt: String
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   email_lte: String
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   email_gt: String
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   email_gte: String
 
-  """All values containing the given string."""
+  # All values containing the given string.
   email_contains: String
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   email_not_contains: String
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   email_starts_with: String
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   email_not_starts_with: String
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   email_ends_with: String
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   email_not_ends_with: String
   password: String
 
-  """All values that are not equal to given value."""
+  # All values that are not equal to given value.
   password_not: String
 
-  """All values that are contained in given list."""
+  # All values that are contained in given list.
   password_in: [String!]
 
-  """All values that are not contained in given list."""
+  # All values that are not contained in given list.
   password_not_in: [String!]
 
-  """All values less than the given value."""
+  # All values less than the given value.
   password_lt: String
 
-  """All values less than or equal the given value."""
+  # All values less than or equal the given value.
   password_lte: String
 
-  """All values greater than the given value."""
+  # All values greater than the given value.
   password_gt: String
 
-  """All values greater than or equal the given value."""
+  # All values greater than or equal the given value.
   password_gte: String
 
-  """All values containing the given string."""
+  # All values containing the given string.
   password_contains: String
 
-  """All values not containing the given string."""
+  # All values not containing the given string.
   password_not_contains: String
 
-  """All values starting with the given string."""
+  # All values starting with the given string.
   password_starts_with: String
 
-  """All values not starting with the given string."""
+  # All values not starting with the given string.
   password_not_starts_with: String
 
-  """All values ending with the given string."""
+  # All values ending with the given string.
   password_ends_with: String
 
-  """All values not ending with the given string."""
+  # All values not ending with the given string.
   password_not_ends_with: String
   positions_every: PositionWhereInput
   positions_some: PositionWhereInput
@@ -2506,3 +2453,4 @@ input UserWhereUniqueInput {
   id: ID
   email: String
 }
+

@@ -373,12 +373,12 @@ const resolvers = {
 };
 
 new GraphQLServer({
-  typeDefs: resolve(__dirname, "../schema.graphql"),
+  typeDefs: resolve(__dirname, "./schema.graphql"),
   resolvers,
   context: req => ({
     ...req,
     db: new Prisma({
-      typeDefs: resolve(__dirname, "../generated/prisma.graphql"),
+      typeDefs: resolve(__dirname, "../prisma/generated/prisma.graphql"),
       endpoint: PRISMA_ENDPOINT,
       debug: PRISMA_DEBUG === "true"
     })
