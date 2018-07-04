@@ -372,7 +372,18 @@ const resolvers = {
                 { token: await sign({ userId: user.id }, APP_SECRET) },
                 user
               )
-            )
+            ),
+
+    changePassword: async (_, { password }, ctx, _info) => {
+      const userId = await getUserId(ctx.request);
+
+      return ctx.db.mutation
+        .updateUser({
+          data: { password: await bcryptjs.hash(password, 10) },
+          where: { id: userId }
+        })
+        .then(_ => true);
+    }
   }
 };
 

@@ -23,6 +23,7 @@ type Query {
 type Mutation {
   authenticateUser(email: String!, password: String!): AuthResponse!
   signUpUser(email: String!, password: String!): AuthResponse!
+  changePassword(password: String!): Boolean!
   createPosition(name: String!, notes: [String!]!): Position!
   createTransition(
     name: String!
