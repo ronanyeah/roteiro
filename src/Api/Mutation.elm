@@ -57,6 +57,20 @@ signUpUser requiredArgs object =
     Object.selectionField "signUpUser" [ Argument.required "email" requiredArgs.email Encode.string, Argument.required "password" requiredArgs.password Encode.string ] object identity
 
 
+type alias ChangePasswordRequiredArguments =
+    { password : String }
+
+
+{-|
+
+  - password -
+
+-}
+changePassword : ChangePasswordRequiredArguments -> Field Bool RootMutation
+changePassword requiredArgs =
+    Object.fieldDecoder "changePassword" [ Argument.required "password" requiredArgs.password Encode.string ] Decode.bool
+
+
 type alias CreatePositionRequiredArguments =
     { name : String, notes : List String }
 

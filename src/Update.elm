@@ -244,6 +244,22 @@ update msg model =
                     , log err
                     )
 
+        CbChangePassword res ->
+            case res of
+                Ok _ ->
+                    ( model
+                    , goTo Start
+                    )
+
+                Err err ->
+                    ( { model
+                        | form =
+                            model.form
+                                |> addErrors (formatErrors err)
+                      }
+                    , log err
+                    )
+
         CbCreateOrUpdatePosition res ->
             case res of
                 Ok a ->
@@ -574,6 +590,32 @@ update msg model =
 
                 Err err ->
                     ( model, log err )
+
+        ChangePasswordSubmit ->
+            protect
+                (\auth ->
+                    if
+                        String.length model.form.password
+                            > 0
+                            && model.form.password
+                            == model.form.confirmPassword
+                    then
+                        ( { model | form = clearErrors model.form }
+                        , mutation auth.token
+                            (Api.Mutation.changePassword { password = model.form.password })
+                            CbChangePassword
+                        )
+                    else
+                        ( { model
+                            | form =
+                                model.form
+                                    |> (\f ->
+                                            { f | errors = [ "Lame pw effort" ] }
+                                       )
+                          }
+                        , Cmd.none
+                        )
+                )
 
         Confirm maybeM ->
             ( { model | confirm = maybeM }, Cmd.none )
@@ -1035,6 +1077,17 @@ update msg model =
             in
             ( { model | form = form, selectingEndPosition = False }, Cmd.none )
 
+        UpdateConfirmPassword str ->
+            ( { model
+                | form =
+                    model.form
+                        |> (\f ->
+                                { f | confirmPassword = str }
+                           )
+              }
+            , Cmd.none
+            )
+
         UpdatePassword str ->
             ( { model
                 | form =
@@ -1190,6 +1243,11 @@ update msg model =
                             , fetch auth.token (Api.Query.positions positionInfo) CbPositions
                             )
                         )
+
+                SettingsRoute ->
+                    ( { model | form = emptyForm, view = ViewApp ViewSettings }
+                    , Cmd.none
+                    )
 
                 SubmissionRoute id ->
                     if dataIsLoaded model.view id then

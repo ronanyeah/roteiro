@@ -238,6 +238,34 @@ view model =
                                             ]
                                     )
 
+                        ViewSettings ->
+                            column [ padding 20 ]
+                                [ el [ centerX ] <| icon Cogs Style.mattIcon
+                                , el [] <| text "Change Password:"
+                                , viewErrors model.form.errors
+                                , Input.newPassword Style.field
+                                    { onChange = Just UpdatePassword
+                                    , text = model.form.password
+                                    , label = Input.labelLeft [] none
+                                    , placeholder = Nothing
+                                    , show = False
+                                    }
+                                , Input.newPassword Style.field
+                                    { onChange = Just UpdateConfirmPassword
+                                    , text = model.form.confirmPassword
+                                    , label = Input.labelLeft [] none
+                                    , placeholder = Nothing
+                                    , show = False
+                                    }
+                                , Input.button [ centerX ]
+                                    { onPress =
+                                        Just ChangePasswordSubmit
+                                    , label =
+                                        icon SignIn
+                                            Style.actionIcon
+                                    }
+                                ]
+
                         ViewSubmission data ->
                             data
                                 |> viewRemote
@@ -806,6 +834,16 @@ icons isSidebar view =
                 )
         }
     , button [ centerX ]
+        { onPress = Just <| nav SettingsRoute
+        , label =
+            icon Cogs
+                (if view == ViewSettings then
+                    ballIcon
+                 else
+                    Style.actionIcon
+                )
+        }
+    , button [ centerX ]
         { onPress = Just <| Logout
         , label =
             icon SignOut Style.actionIcon
@@ -1321,7 +1359,7 @@ viewErrors : List String -> Element Msg
 viewErrors errs =
     when (errs |> List.isEmpty |> not) <|
         column
-            [ spacing 15 ]
+            [ spacing 15, height shrink ]
             [ el [ centerX ] <| icon Warning Style.mattIcon
             , viewNotes <| Array.fromList errs
             ]

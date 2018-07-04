@@ -62,8 +62,7 @@ onTopic (SelectionSet fields decoder) =
     FragmentSelectionSet "Topic" fields decoder
 
 
-{-| The id of the object.
--}
+{-| -}
 id : Field Api.Scalar.Id Api.Interface.Node
 id =
     Object.fieldDecoder "id" [] (Decode.oneOf [ Decode.string, Decode.float |> Decode.map toString, Decode.int |> Decode.map toString, Decode.bool |> Decode.map toString ] |> Decode.map Api.Scalar.Id)

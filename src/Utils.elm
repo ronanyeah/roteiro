@@ -101,6 +101,9 @@ goTo route =
         Login ->
             "/login"
 
+        SettingsRoute ->
+            "/settings"
+
         SignUp ->
             "/sign-up"
 
@@ -482,6 +485,7 @@ emptyForm =
     , tags = Array.empty
     , email = ""
     , password = ""
+    , confirmPassword = ""
     }
 
 

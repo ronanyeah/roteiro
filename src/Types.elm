@@ -17,6 +17,7 @@ type Msg
     = AddTag Info
     | Cancel
     | CbAuth (GqlResult Auth)
+    | CbChangePassword (GqlResult Bool)
     | CbCreateOrUpdatePosition (GqlResult Position)
     | CbCreateOrUpdateSubmission (GqlResult Submission)
     | CbCreateOrUpdateTag (GqlResult Tag)
@@ -37,6 +38,7 @@ type Msg
     | CbTopics (GqlResult (List Info))
     | CbTransition (GqlResult (Maybe Transition))
     | CbTransitions (GqlResult (List Transition))
+    | ChangePasswordSubmit
     | Confirm (Maybe Msg)
     | DeletePosition Id
     | DeleteSubmission Id
@@ -73,6 +75,7 @@ type Msg
     | UpdateEndPosition Info
     | UpdateForm Form
     | UpdatePassword String
+    | UpdateConfirmPassword String
     | UpdateStartPosition Info
     | UrlChange Location
     | WindowSize Window.Size
@@ -98,6 +101,7 @@ type AppView
     | ViewEditTransition
     | ViewPosition (RemoteData Http.Error Position)
     | ViewPositions
+    | ViewSettings
     | ViewStart
     | ViewSubmission (RemoteData Http.Error Submission)
     | ViewSubmissions (RemoteData Http.Error (List Submission))
@@ -172,6 +176,7 @@ type Route
     | CreateTransitionRoute (Maybe String) (Maybe String)
     | PositionRoute Id
     | Positions
+    | SettingsRoute
     | SubmissionRoute Id
     | Submissions
     | Login
@@ -244,6 +249,7 @@ type alias Form =
     , tags : Array Info
     , email : String
     , password : String
+    , confirmPassword : String
     }
 
 

@@ -20,6 +20,7 @@ routes =
     , map CreateTopicRoute (s "app" </> s "topics" </> s "new")
     , map CreateTransitionRoute (s "app" </> s "transitions" </> s "new" <?> stringParam "start" <?> stringParam "end")
     , map (Id >> PositionRoute) (s "app" </> s "positions" </> string)
+    , map SettingsRoute (s "app" </> s "settings")
     , map (Id >> SubmissionRoute) (s "app" </> s "submissions" </> string)
     , map (Id >> TagRoute) (s "app" </> s "tags" </> string)
     , map (Id >> TopicRoute) (s "app" </> s "topics" </> string)
