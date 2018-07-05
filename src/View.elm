@@ -10,6 +10,7 @@ import Element.Font as Font
 import Element.Input as Input exposing (button)
 import Html exposing (Html)
 import Html.Attributes
+import Keydown exposing (onEnter, onKeydown)
 import List.Extra exposing (groupWhile)
 import Regex
 import RemoteData exposing (RemoteData(..))
@@ -239,18 +240,22 @@ view model =
                                     )
 
                         ViewSettings ->
+                            let
+                                style =
+                                    onKeydown [ onEnter ChangePasswordSubmit ] :: Style.field
+                            in
                             column [ padding 20 ]
                                 [ el [ centerX ] <| icon Cogs Style.mattIcon
                                 , el [] <| text "Change Password:"
                                 , viewErrors model.form.errors
-                                , Input.newPassword Style.field
+                                , Input.newPassword style
                                     { onChange = Just UpdatePassword
                                     , text = model.form.password
                                     , label = Input.labelLeft [] none
                                     , placeholder = Nothing
                                     , show = False
                                     }
-                                , Input.newPassword Style.field
+                                , Input.newPassword style
                                     { onChange = Just UpdateConfirmPassword
                                     , text = model.form.confirmPassword
                                     , label = Input.labelLeft [] none
