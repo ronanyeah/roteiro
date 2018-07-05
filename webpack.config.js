@@ -8,8 +8,10 @@ if (!GRAPHQL_ENDPOINT) throw Error("missing api endpoint");
 
 const publicFolder = resolve("./public");
 
+const production = NODE_ENV === "production";
+
 module.exports = {
-  mode: NODE_ENV === "production" ? "production" : "development",
+  mode: production ? "production" : "development",
   entry: "./src/index.js",
   output: {
     path: publicFolder,
@@ -37,7 +39,14 @@ module.exports = {
             loader: "css-loader"
           },
           {
-            loader: "sass-loader"
+            loader: "sass-loader",
+            options: {
+              data: `$fa-font-path: "${
+                production
+                  ? "https://use.fontawesome.com/releases/v5.1.0/webfonts"
+                  : "/webfonts"
+              }";`
+            }
           }
         ]
       },
@@ -73,10 +82,14 @@ module.exports = {
     new webpack.NoEmitOnErrorsPlugin(),
     new CopyWebpackPlugin([
       "static",
-      {
-        from: "./node_modules/@fortawesome/fontawesome-free/webfonts",
-        to: "webfonts"
-      }
+      ...(production
+        ? []
+        : [
+            {
+              from: "./node_modules/@fortawesome/fontawesome-free/webfonts",
+              to: "webfonts"
+            }
+          ])
     ])
   ]
 };
