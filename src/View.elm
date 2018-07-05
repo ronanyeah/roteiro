@@ -3,7 +3,7 @@ module View exposing (..)
 import Api.Scalar exposing (Id(..))
 import Array exposing (Array)
 import Color
-import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, mouseOver, newTabLink, noHover, none, padding, paragraph, pointer, px, row, scrollbarY, shrink, spaceEvenly, spacing, text, width)
+import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, maximum, mouseOver, newTabLink, noHover, none, padding, paragraph, pointer, px, row, scrollbarY, shrink, spaceEvenly, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -99,7 +99,7 @@ view model =
                                 ]
 
                         ViewEditSubmission ->
-                            column [ height <| px model.size.height, scrollbarY ]
+                            column [ height <| px model.size.height, scrollbarY, spacing 30 ]
                                 [ editHeader Bolt
                                 , viewErrors model.form.errors
                                 , nameEdit model.form
@@ -128,7 +128,7 @@ view model =
                                 ]
 
                         ViewEditTransition ->
-                            column [ height <| px model.size.height, scrollbarY ]
+                            column [ height <| px model.size.height, scrollbarY, spacing 30 ]
                                 [ editHeader Arrow
                                 , viewErrors model.form.errors
                                 , nameEdit model.form
@@ -950,18 +950,19 @@ viewRemote fn data =
 
 viewSubmissionPicker : Form -> Element Msg
 viewSubmissionPicker form =
-    paragraph
-        [ spacing 10, centerX ]
-        [ icon Flag Style.mattIcon
-        , pickPosition ToggleStartPosition form.startPosition
-        ]
+    el [ centerX ] <|
+        paragraph
+            [ spacing 10, width fill ]
+            [ el [ centerX ] <| icon Flag Style.mattIcon
+            , pickPosition ToggleStartPosition form.startPosition
+            ]
 
 
 viewTransitionPickers : Form -> Element Msg
 viewTransitionPickers form =
     el [ centerX ] <|
         paragraph
-            [ centerY ]
+            [ centerY, width fill ]
             [ pickPosition ToggleStartPosition form.startPosition
             , el [ padding 20 ] <| icon Arrow Style.mattIcon
             , pickPosition ToggleEndPosition form.endPosition
@@ -992,7 +993,7 @@ pickPosition msg position =
 editRow : String -> FaIcon -> Msg -> Element Msg
 editRow name faIcon editMsg =
     column
-        []
+        [ height shrink, spacing 10 ]
         [ el [ centerX ] <| icon faIcon Style.mattIcon
         , row []
             [ paragraph
@@ -1021,7 +1022,7 @@ addNewRow fa msg =
 nameEdit : Form -> Element Msg
 nameEdit form =
     Input.text
-        (centerX :: Style.field)
+        ([ centerX, fill |> maximum 500 |> width ] ++ Style.field)
         { onChange = Just <| \str -> UpdateForm { form | name = str }
         , text = form.name
         , label = noLabel
@@ -1107,10 +1108,10 @@ stepsEditor form =
                             Input.multiline
                                 (Style.field
                                     ++ [ htmlAttribute <| Html.Attributes.rows 4
-                                       , htmlAttribute <| Html.Attributes.cols 40
                                        , htmlAttribute <| Html.Attributes.wrap "hard"
                                        , htmlAttribute <| Html.Attributes.style [ ( "white-space", "normal" ) ]
                                        , centerX
+                                       , fill |> maximum 500 |> width
                                        ]
                                 )
                                 { onChange =
@@ -1159,10 +1160,10 @@ notesEditor form =
                             Input.multiline
                                 (Style.field
                                     ++ [ htmlAttribute <| Html.Attributes.rows 4
-                                       , htmlAttribute <| Html.Attributes.cols 40
                                        , htmlAttribute <| Html.Attributes.wrap "hard"
                                        , htmlAttribute <| Html.Attributes.style [ ( "white-space", "normal" ) ]
                                        , centerX
+                                       , fill |> maximum 500 |> width
                                        ]
                                 )
                                 { onChange =
@@ -1201,7 +1202,7 @@ notesEditor form =
 
 viewSteps : Array String -> Element Msg
 viewSteps steps =
-    el [] <|
+    el [ width fill ] <|
         column
             []
             (steps
@@ -1313,7 +1314,7 @@ editTags : RemoteData.WebData (List Info) -> List Info -> Element Msg
 editTags tags xs =
     el [ centerX ] <|
         column [ spacing 20 ]
-            [ icon Tags Style.mattIcon
+            [ el [ centerX ] <| icon Tags Style.mattIcon
             , tags
                 |> remoteUnwrap (icon Waiting Style.mattIcon)
                     (List.filter
@@ -1322,14 +1323,14 @@ editTags tags xs =
                             (\tag ->
                                 block (tag.name ++ " +") <| AddTag tag
                             )
-                        >> paragraph [ padding 20 ]
+                        >> paragraph [ padding 20, width fill ]
                     )
             , xs
                 |> List.indexedMap
                     (\i tag ->
                         block (tag.name ++ " -") <| RemoveTag i
                     )
-                |> paragraph [ padding 20 ]
+                |> paragraph [ padding 20, width fill ]
             ]
 
 
