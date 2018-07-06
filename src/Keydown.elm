@@ -1,7 +1,6 @@
 module Keydown exposing (..)
 
 import Element exposing (Attribute, htmlAttribute)
-import Html
 import Html.Events exposing (on)
 import Json.Decode as Decode exposing (Decoder)
 
