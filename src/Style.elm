@@ -91,26 +91,36 @@ font =
         ]
 
 
+{-| light red
+-}
 a : Color
 a =
     rgb 195 106 104
 
 
+{-| grey
+-}
 b : Color
 b =
     rgb 108 109 104
 
 
+{-| red
+-}
 c : Color
 c =
     rgb 182 55 48
 
 
+{-| bright red
+-}
 d : Color
 d =
     rgb 217 56 49
 
 
+{-| yellow
+-}
 e : Color
 e =
     rgb 231 191 122
