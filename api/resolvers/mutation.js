@@ -42,6 +42,18 @@ const update = async (dataName, ctx, args, info) => {
   );
 };
 
+const create = async (dataName, ctx, args, info) =>
+  ctx.db.mutation[`create${dataName}`](
+    {
+      data: assoc(
+        "user",
+        { connect: { id: await getUserId(ctx.request) } },
+        clean(args)
+      )
+    },
+    info
+  );
+
 module.exports = {
   deletePosition: async (_, args, ctx, _info) =>
     deleteOne("Position", ctx, args.id),
@@ -70,64 +82,17 @@ module.exports = {
     update("Transition", ctx, args, info),
 
   createPosition: async (_, args, ctx, info) =>
-    ctx.db.mutation.createPosition(
-      {
-        data: assoc(
-          "user",
-          { connect: { id: await getUserId(ctx.request) } },
-          clean(args)
-        )
-      },
-      info
-    ),
+    create("Position", ctx, args, info),
 
   createSubmission: async (_, args, ctx, info) =>
-    ctx.db.mutation.createSubmission(
-      {
-        data: assoc(
-          "user",
-          { connect: { id: await getUserId(ctx.request) } },
-          clean(args)
-        )
-      },
-      info
-    ),
+    create("Submission", ctx, args, info),
 
   createTransition: async (_, args, ctx, info) =>
-    ctx.db.mutation.createTransition(
-      {
-        data: assoc(
-          "user",
-          { connect: { id: await getUserId(ctx.request) } },
-          clean(args)
-        )
-      },
-      info
-    ),
+    create("Transition", ctx, args, info),
 
-  createTag: async (_, args, ctx, info) =>
-    ctx.db.mutation.createTag(
-      {
-        data: assoc(
-          "user",
-          { connect: { id: await getUserId(ctx.request) } },
-          clean(args)
-        )
-      },
-      info
-    ),
+  createTag: async (_, args, ctx, info) => create("Tag", ctx, args, info),
 
-  createTopic: async (_, args, ctx, info) =>
-    ctx.db.mutation.createTopic(
-      {
-        data: assoc(
-          "user",
-          { connect: { id: await getUserId(ctx.request) } },
-          clean(args)
-        )
-      },
-      info
-    ),
+  createTopic: async (_, args, ctx, info) => create("Topic", ctx, args, info),
 
   authenticateUser: async (_, { email, password }, ctx, _info) => {
     const user = await ctx.db.query.user(
