@@ -22,6 +22,26 @@ const deleteOne = async (ctx, dataName, dataId) => {
   }).then(prop("id"));
 };
 
+const update = async (ctx, dataName, args, info) => {
+  const userId = await getUserId(ctx.request);
+
+  const isOwner = await ctx.db.exists[dataName]({
+    AND: [{ id: args.id }, { user: { id: userId } }]
+  });
+
+  if (!isOwner) {
+    return Error("Oops!");
+  }
+
+  return ctx.db.mutation[`update${dataName}`](
+    {
+      data: clean(args),
+      where: { id: args.id }
+    },
+    info
+  );
+};
+
 module.exports = {
   deletePosition: async (_, args, ctx, _info) =>
     deleteOne(ctx, "Position", args.id),
@@ -36,105 +56,18 @@ module.exports = {
 
   deleteTopic: async (_, args, ctx, _info) => deleteOne(ctx, "Topic", args.id),
 
-  updatePosition: async (_, args, ctx, info) => {
-    const userId = await getUserId(ctx.request);
+  updatePosition: async (_, args, ctx, info) =>
+    update(ctx, "Position", args, info),
 
-    const isOwner = await ctx.db.exists.Position({
-      AND: [{ id: args.id }, { user: { id: userId } }]
-    });
+  updateSubmission: async (_, args, ctx, info) =>
+    update(ctx, "Submission", args, info),
 
-    if (!isOwner) {
-      return Error("Oops!");
-    }
+  updateTag: async (_, args, ctx, info) => update(ctx, "Tag", args, info),
 
-    return ctx.db.mutation.updatePosition(
-      {
-        data: clean(args),
-        where: { id: args.id }
-      },
-      info
-    );
-  },
+  updateTopic: async (_, args, ctx, info) => update(ctx, "Topic", args, info),
 
-  updateSubmission: async (_, args, ctx, info) => {
-    const userId = await getUserId(ctx.request);
-
-    const isOwner = await ctx.db.exists.Submission({
-      AND: [{ id: args.id }, { user: { id: userId } }]
-    });
-
-    if (!isOwner) {
-      return Error("Oops!");
-    }
-
-    return ctx.db.mutation.updateSubmission(
-      {
-        data: clean(args),
-        where: { id: args.id }
-      },
-      info
-    );
-  },
-
-  updateTag: async (_, args, ctx, info) => {
-    const userId = await getUserId(ctx.request);
-
-    const isOwner = await ctx.db.exists.Tag({
-      AND: [{ id: args.id }, { user: { id: userId } }]
-    });
-
-    if (!isOwner) {
-      return Error("Oops!");
-    }
-
-    return ctx.db.mutation.updateTag(
-      {
-        data: clean(args),
-        where: { id: args.id }
-      },
-      info
-    );
-  },
-
-  updateTopic: async (_, args, ctx, info) => {
-    const userId = await getUserId(ctx.request);
-
-    const isOwner = await ctx.db.exists.Topic({
-      AND: [{ id: args.id }, { user: { id: userId } }]
-    });
-
-    if (!isOwner) {
-      return Error("Oops!");
-    }
-
-    return ctx.db.mutation.updateTopic(
-      {
-        data: clean(args),
-        where: { id: args.id }
-      },
-      info
-    );
-  },
-
-  updateTransition: async (_, args, ctx, info) => {
-    const userId = await getUserId(ctx.request);
-
-    const isOwner = await ctx.db.exists.Transition({
-      AND: [{ id: args.id }, { user: { id: userId } }]
-    });
-
-    if (!isOwner) {
-      return Error("Oops!");
-    }
-
-    return ctx.db.mutation.updateTransition(
-      {
-        data: clean(args),
-        where: { id: args.id }
-      },
-      info
-    );
-  },
+  updateTransition: async (_, args, ctx, info) =>
+    update(ctx, "Transition", args, info),
 
   createPosition: async (_, args, ctx, info) =>
     ctx.db.mutation.createPosition(
