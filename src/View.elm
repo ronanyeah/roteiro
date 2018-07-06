@@ -583,9 +583,20 @@ view model =
             model.confirm
                 |> whenJust
                     (\msg ->
-                        el [ centerX, centerY, padding 10, spacing 20 ] <|
+                        el
+                            [ centerX
+                            , centerY
+                            , padding 10
+                            , spacing 20
+                            , Background.color Style.c
+                            , Border.rounded 5
+                            , Border.color Style.e
+                            , Border.width 2
+                            , Border.solid
+                            ]
+                        <|
                             column
-                                [ centerX ]
+                                []
                                 [ icon Question (centerX :: Style.bigIcon)
                                 , row
                                     [ spacing 40 ]
