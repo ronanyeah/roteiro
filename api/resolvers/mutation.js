@@ -6,7 +6,7 @@ const { clean, getUserId, sign, hash } = require("../utils.js");
 
 const { APP_SECRET } = process.env;
 
-const deleteOne = async (ctx, dataName, dataId) => {
+const deleteOne = async (dataName, ctx, dataId) => {
   const userId = await getUserId(ctx.request);
 
   const isOwner = await ctx.db.exists[dataName]({
@@ -22,7 +22,7 @@ const deleteOne = async (ctx, dataName, dataId) => {
   }).then(prop("id"));
 };
 
-const update = async (ctx, dataName, args, info) => {
+const update = async (dataName, ctx, args, info) => {
   const userId = await getUserId(ctx.request);
 
   const isOwner = await ctx.db.exists[dataName]({
@@ -44,30 +44,30 @@ const update = async (ctx, dataName, args, info) => {
 
 module.exports = {
   deletePosition: async (_, args, ctx, _info) =>
-    deleteOne(ctx, "Position", args.id),
+    deleteOne("Position", ctx, args.id),
 
   deleteSubmission: async (_, args, ctx, _info) =>
-    deleteOne(ctx, "Submission", args.id),
+    deleteOne("Submission", ctx, args.id),
 
   deleteTransition: async (_, args, ctx, _info) =>
-    deleteOne(ctx, "Transition", args.id),
+    deleteOne("Transition", ctx, args.id),
 
-  deleteTag: async (_, args, ctx, _info) => deleteOne(ctx, "Tag", args.id),
+  deleteTag: async (_, args, ctx, _info) => deleteOne("Tag", ctx, args.id),
 
-  deleteTopic: async (_, args, ctx, _info) => deleteOne(ctx, "Topic", args.id),
+  deleteTopic: async (_, args, ctx, _info) => deleteOne("Topic", ctx, args.id),
 
   updatePosition: async (_, args, ctx, info) =>
-    update(ctx, "Position", args, info),
+    update("Position", ctx, args, info),
 
   updateSubmission: async (_, args, ctx, info) =>
-    update(ctx, "Submission", args, info),
+    update("Submission", ctx, args, info),
 
-  updateTag: async (_, args, ctx, info) => update(ctx, "Tag", args, info),
+  updateTag: async (_, args, ctx, info) => update("Tag", ctx, args, info),
 
-  updateTopic: async (_, args, ctx, info) => update(ctx, "Topic", args, info),
+  updateTopic: async (_, args, ctx, info) => update("Topic", ctx, args, info),
 
   updateTransition: async (_, args, ctx, info) =>
-    update(ctx, "Transition", args, info),
+    update("Transition", ctx, args, info),
 
   createPosition: async (_, args, ctx, info) =>
     ctx.db.mutation.createPosition(
