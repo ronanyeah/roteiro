@@ -1,4 +1,4 @@
-const { assoc } = require("ramda");
+const { assoc, prop } = require("ramda");
 const bcryptjs = require("bcryptjs");
 const validator = require("validator");
 
@@ -6,7 +6,36 @@ const { clean, getUserId, sign, hash } = require("../utils.js");
 
 const { APP_SECRET } = process.env;
 
+const deleteOne = async (ctx, dataName, dataId) => {
+  const userId = await getUserId(ctx.request);
+
+  const isOwner = await ctx.db.exists[dataName]({
+    AND: [{ id: dataId }, { user: { id: userId } }]
+  });
+
+  if (!isOwner) {
+    return Error("Oops!");
+  }
+
+  return ctx.db.mutation[`delete${dataName}`]({
+    where: { id: dataId }
+  }).then(prop("id"));
+};
+
 module.exports = {
+  deletePosition: async (_, args, ctx, _info) =>
+    deleteOne(ctx, "Position", args.id),
+
+  deleteSubmission: async (_, args, ctx, _info) =>
+    deleteOne(ctx, "Submission", args.id),
+
+  deleteTransition: async (_, args, ctx, _info) =>
+    deleteOne(ctx, "Transition", args.id),
+
+  deleteTag: async (_, args, ctx, _info) => deleteOne(ctx, "Tag", args.id),
+
+  deleteTopic: async (_, args, ctx, _info) => deleteOne(ctx, "Topic", args.id),
+
   updatePosition: async (_, args, ctx, info) => {
     const userId = await getUserId(ctx.request);
 
