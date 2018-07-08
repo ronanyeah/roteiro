@@ -175,6 +175,11 @@ type Route
     | CreateTagRoute
     | CreateTopicRoute
     | CreateTransitionRoute (Maybe String) (Maybe String)
+    | EditPositionRoute Id
+    | EditSubmissionRoute Id
+    | EditTagRoute Id
+    | EditTopicRoute Id
+    | EditTransitionRoute Id
     | PositionRoute Id
     | Positions
     | SettingsRoute

@@ -83,6 +83,21 @@ goTo route =
             in
             "/transitions/new" ++ suffix
 
+        EditPositionRoute (Id id) ->
+            "/positions/" ++ id ++ "/edit"
+
+        EditSubmissionRoute (Id id) ->
+            "/submissions/" ++ id ++ "/edit"
+
+        EditTransitionRoute (Id id) ->
+            "/transitions/" ++ id ++ "/edit"
+
+        EditTagRoute (Id id) ->
+            "/tags/" ++ id ++ "/edit"
+
+        EditTopicRoute (Id id) ->
+            "/topics/" ++ id ++ "/edit"
+
         NotFound ->
             "/start"
 

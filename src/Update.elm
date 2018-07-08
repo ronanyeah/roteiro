@@ -1216,6 +1216,21 @@ update msg model =
                             )
                         )
 
+                EditPositionRoute id ->
+                    ( model, Cmd.none )
+
+                EditSubmissionRoute _ ->
+                    ( model, Cmd.none )
+
+                EditTransitionRoute _ ->
+                    ( model, Cmd.none )
+
+                EditTagRoute _ ->
+                    ( model, Cmd.none )
+
+                EditTopicRoute _ ->
+                    ( model, Cmd.none )
+
                 NotFound ->
                     ( model
                     , Cmd.batch
