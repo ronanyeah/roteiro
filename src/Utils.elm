@@ -176,12 +176,12 @@ formatErrors err =
 
 addErrors : List String -> Form -> Form
 addErrors errs f =
-    { f | errors = errs }
+    { f | errors = Just errs }
 
 
 clearErrors : Form -> Form
 clearErrors f =
-    { f | errors = [] }
+    { f | errors = Just [] }
 
 
 appendCmd : Cmd msg -> ( model, Cmd msg ) -> ( model, Cmd msg )
@@ -295,6 +295,9 @@ icon fa attrs =
 
                 Arrow ->
                     "fa-long-arrow-alt-right"
+
+                ArrowDown ->
+                    "fa-long-arrow-alt-down"
 
                 Bolt ->
                     "fa-bolt"
@@ -477,7 +480,7 @@ emptyForm : Form
 emptyForm =
     { name = ""
     , id = Id ""
-    , errors = []
+    , errors = Just []
     , startPosition = Nothing
     , endPosition = Nothing
     , steps = Array.empty

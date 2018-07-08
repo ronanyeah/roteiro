@@ -610,7 +610,7 @@ update msg model =
                             | form =
                                 model.form
                                     |> (\f ->
-                                            { f | errors = [ "Lame pw effort" ] }
+                                            { f | errors = Just [ "Lame pw effort" ] }
                                        )
                           }
                         , Cmd.none
@@ -768,7 +768,7 @@ update msg model =
                 )
 
         LoginSubmit ->
-            ( model
+            ( { model | form = model.form |> (\f -> { f | errors = Nothing }) }
             , Api.Mutation.selection identity
                 |> with
                     (Api.Mutation.authenticateUser

@@ -116,6 +116,7 @@ type AppView
 type FaIcon
     = Flag
     | Arrow
+    | ArrowDown
     | Write
     | Trash
     | Cross
@@ -241,7 +242,7 @@ type alias Submission =
 type alias Form =
     { name : String
     , id : Id
-    , errors : List String
+    , errors : Maybe (List String)
     , startPosition : Maybe Info
     , endPosition : Maybe Info
     , notes : Array String
