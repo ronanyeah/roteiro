@@ -79,7 +79,7 @@ view model =
                                 ]
 
                         ViewCreateTransition ->
-                            column []
+                            column [ spacing 50 ]
                                 [ createHeader Arrow
                                 , viewErrors model.form.errors
                                 , nameEdit model.form
@@ -898,11 +898,11 @@ viewSubmissionPicker form =
 viewTransitionPickers : Form -> Element Msg
 viewTransitionPickers form =
     el [ centerX ] <|
-        paragraph
-            [ centerY, width fill ]
-            [ pickPosition ToggleStartPosition form.startPosition
-            , el [ padding 20 ] <| icon Arrow Style.mattIcon
-            , pickPosition ToggleEndPosition form.endPosition
+        column
+            [ width shrink ]
+            [ el [ centerX ] <| pickPosition ToggleStartPosition form.startPosition
+            , el [ padding 20, centerX ] <| icon ArrowDown Style.mattIcon
+            , el [ centerX ] <| pickPosition ToggleEndPosition form.endPosition
             ]
 
 
@@ -913,7 +913,7 @@ pickPosition msg position =
             actionIcon Question (Just msg)
 
         Just { name } ->
-            Input.button [ centerX ]
+            Input.button []
                 { onPress =
                     Just msg
                 , label =
@@ -1023,7 +1023,7 @@ stepsEditor form =
         buttons =
             el [ centerX ] <|
                 row
-                    []
+                    [ spacing 10 ]
                     [ plus (UpdateForm { form | steps = Array.push "" form.steps })
                     , when (not <| Array.isEmpty form.steps) <|
                         minus (UpdateForm { form | steps = Array.slice 0 -1 form.steps })
@@ -1075,7 +1075,7 @@ notesEditor form =
         buttons =
             el [ centerX ] <|
                 row
-                    []
+                    [ spacing 10 ]
                     [ plus (UpdateForm { form | notes = Array.push "" form.notes })
                     , when (not <| Array.isEmpty form.notes) <|
                         minus (UpdateForm { form | notes = Array.slice 0 -1 form.notes })
