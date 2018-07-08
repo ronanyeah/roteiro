@@ -98,7 +98,7 @@ view model =
                                 , editButtons SaveEditPosition <| DeletePosition model.form.id
                                 ]
 
-                        ViewEditSubmission ->
+                        ViewEditSubmission _ ->
                             column [ height <| px model.size.height, scrollbarY, spacing 30 ]
                                 [ editHeader Bolt
                                 , viewErrors model.form.errors
@@ -110,7 +110,7 @@ view model =
                                 , editButtons SaveEditSubmission <| DeleteSubmission model.form.id
                                 ]
 
-                        ViewEditTag ->
+                        ViewEditTag _ ->
                             column [ height <| px model.size.height, scrollbarY ]
                                 [ editHeader Tags
                                 , viewErrors model.form.errors
@@ -118,7 +118,7 @@ view model =
                                 , editButtons SaveEditTag <| DeleteTag model.form.id
                                 ]
 
-                        ViewEditTopic ->
+                        ViewEditTopic _ ->
                             column [ height <| px model.size.height, scrollbarY ]
                                 [ editHeader Book
                                 , viewErrors model.form.errors
@@ -127,7 +127,7 @@ view model =
                                 , editButtons SaveEditTopic <| DeleteTopic model.form.id
                                 ]
 
-                        ViewEditTransition ->
+                        ViewEditTransition _ ->
                             column [ height <| px model.size.height, scrollbarY, spacing 30 ]
                                 [ editHeader Arrow
                                 , viewErrors model.form.errors

@@ -236,7 +236,7 @@ isSubmissionView view =
         ViewCreateSubmission ->
             True
 
-        ViewEditSubmission ->
+        ViewEditSubmission _ ->
             True
 
         _ ->
@@ -255,7 +255,7 @@ isTagView view =
         ViewCreateTag ->
             True
 
-        ViewEditTag ->
+        ViewEditTag _ ->
             True
 
         _ ->
@@ -274,7 +274,7 @@ isTopicView view =
         ViewCreateTopic ->
             True
 
-        ViewEditTopic ->
+        ViewEditTopic _ ->
             True
 
         _ ->
@@ -293,7 +293,7 @@ isTransitionView view =
         ViewCreateTransition ->
             True
 
-        ViewEditTransition ->
+        ViewEditTransition _ ->
             True
 
         _ ->
@@ -414,13 +414,13 @@ notEditing view =
         ViewEditPosition _ ->
             False
 
-        ViewEditSubmission ->
+        ViewEditSubmission _ ->
             False
 
-        ViewEditTopic ->
+        ViewEditTopic _ ->
             False
 
-        ViewEditTransition ->
+        ViewEditTransition _ ->
             False
 
         _ ->

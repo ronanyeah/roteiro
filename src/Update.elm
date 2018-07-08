@@ -209,28 +209,24 @@ update msg model =
                     , goTo <| PositionRoute p.id
                     )
 
-                ViewApp ViewEditSubmission ->
-                    ( { model | confirm = Nothing }
-                    , goTo
-                        Submissions
+                ViewApp (ViewEditSubmission s) ->
+                    ( { model | confirm = Nothing, view = ViewApp (ViewSubmission (Success s)) }
+                    , goTo <| SubmissionRoute s.id
                     )
 
-                ViewApp ViewEditTag ->
-                    ( { model | confirm = Nothing }
-                    , goTo
-                        TagsRoute
+                ViewApp (ViewEditTag t) ->
+                    ( { model | confirm = Nothing, view = ViewApp (ViewTag (Success t)) }
+                    , goTo <| TagRoute t.id
                     )
 
-                ViewApp ViewEditTopic ->
-                    ( { model | confirm = Nothing }
-                    , goTo
-                        Topics
+                ViewApp (ViewEditTopic t) ->
+                    ( { model | confirm = Nothing, view = ViewApp (ViewTopic (Success t)) }
+                    , goTo <| TopicRoute t.id
                     )
 
-                ViewApp ViewEditTransition ->
-                    ( { model | confirm = Nothing }
-                    , goTo
-                        Transitions
+                ViewApp (ViewEditTransition t) ->
+                    ( { model | confirm = Nothing, view = ViewApp (ViewTransition (Success t)) }
+                    , goTo <| TransitionRoute t.id
                     )
 
                 _ ->
@@ -1172,7 +1168,7 @@ update msg model =
                                 |> unwrap ( model, goTo <| SubmissionRoute id )
                                     (\x ->
                                         ( { model
-                                            | view = ViewApp ViewEditSubmission
+                                            | view = ViewApp (ViewEditSubmission x)
                                             , form =
                                                 { emptyForm
                                                     | name = x.name
@@ -1207,7 +1203,7 @@ update msg model =
                                 |> unwrap ( model, goTo <| TransitionRoute id )
                                     (\x ->
                                         ( { model
-                                            | view = ViewApp ViewEditTransition
+                                            | view = ViewApp (ViewEditTransition x)
                                             , form =
                                                 { emptyForm
                                                     | name = x.name
@@ -1240,7 +1236,7 @@ update msg model =
                         |> unwrap ( model, goTo <| TagRoute id )
                             (\x ->
                                 ( { model
-                                    | view = ViewApp ViewEditTag
+                                    | view = ViewApp (ViewEditTag x)
                                     , form =
                                         { emptyForm
                                             | name = x.name
@@ -1265,7 +1261,7 @@ update msg model =
                         |> unwrap ( model, goTo <| TopicRoute id )
                             (\x ->
                                 ( { model
-                                    | view = ViewApp ViewEditTopic
+                                    | view = ViewApp (ViewEditTopic x)
                                     , form =
                                         { emptyForm
                                             | name = x.name

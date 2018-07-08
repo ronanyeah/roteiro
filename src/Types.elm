@@ -89,12 +89,11 @@ type AppView
     | ViewCreateTag
     | ViewCreateTopic
     | ViewCreateTransition
-      -- TODO: Add data to all the edit unions
     | ViewEditPosition Position
-    | ViewEditSubmission
-    | ViewEditTag
-    | ViewEditTopic
-    | ViewEditTransition
+    | ViewEditSubmission Submission
+    | ViewEditTag Tag
+    | ViewEditTopic Topic
+    | ViewEditTransition Transition
     | ViewPosition (RemoteData Http.Error Position)
     | ViewPositions
     | ViewSettings
