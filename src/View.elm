@@ -152,7 +152,7 @@ view model =
                                             , scrollbarY
                                             , spacing 20
                                             ]
-                                            [ editRow name Flag <| EditPosition position
+                                            [ editRow name Flag <| NavigateTo <| EditPositionRoute position.id
                                             , viewNotes notes
                                             , column
                                                 [ centerX
@@ -243,7 +243,7 @@ view model =
                                 |> viewRemote
                                     (\sub ->
                                         column [ height <| px model.size.height, scrollbarY ]
-                                            [ editRow sub.name Bolt <| EditSubmission sub
+                                            [ editRow sub.name Bolt <| NavigateTo <| EditSubmissionRoute sub.id
                                             , row
                                                 [ spacing 10 ]
                                                 [ icon Flag Style.mattIcon
@@ -301,7 +301,7 @@ view model =
                                 |> viewRemote
                                     (\t ->
                                         column [ height <| px model.size.height, scrollbarY ]
-                                            [ editRow t.name Tags <| EditTag t
+                                            [ editRow t.name Tags <| NavigateTo <| EditTagRoute t.id
                                             , column []
                                                 [ icon Bolt Style.mattIcon
                                                 , viewTechList SubmissionRoute t.submissions
@@ -328,7 +328,7 @@ view model =
                                 |> viewRemote
                                     (\t ->
                                         column [ height <| px model.size.height, scrollbarY ]
-                                            [ editRow t.name Book <| EditTopic t
+                                            [ editRow t.name Book <| NavigateTo <| EditTopicRoute t.id
                                             , viewNotes t.notes
                                             ]
                                     )
@@ -348,7 +348,7 @@ view model =
                                 |> viewRemote
                                     (\t ->
                                         column [ height <| px model.size.height, scrollbarY ]
-                                            [ editRow t.name Arrow <| EditTransition t
+                                            [ editRow t.name Arrow <| NavigateTo <| EditTransitionRoute t.id
                                             , viewTransitionPositions False True True t
                                             , viewSteps t.steps
                                             , viewNotes t.notes

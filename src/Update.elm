@@ -681,103 +681,6 @@ update msg model =
                     )
                 )
 
-        EditPosition p ->
-            let
-                form =
-                    { emptyForm
-                        | name = p.name
-                        , notes = p.notes
-                        , id = p.id
-                    }
-            in
-            ( { model
-                | view = ViewApp (ViewEditPosition p)
-                , form = form
-              }
-            , Cmd.none
-            )
-
-        EditSubmission s ->
-            protect
-                (\auth ->
-                    let
-                        form =
-                            { emptyForm
-                                | name = s.name
-                                , steps = s.steps
-                                , notes = s.notes
-                                , startPosition = Just s.position
-                                , id = s.id
-                                , tags = s.tags |> Array.fromList
-                            }
-                    in
-                    ( { model
-                        | view = ViewApp ViewEditSubmission
-                        , form = form
-                      }
-                    , Cmd.batch
-                        [ maybeFetchPositions auth.token model.positions
-                        , maybeFetchTags auth.token model.tags
-                        ]
-                    )
-                )
-
-        EditTag t ->
-            let
-                form =
-                    { emptyForm
-                        | name = t.name
-                        , id = t.id
-                    }
-            in
-            ( { model
-                | view = ViewApp ViewEditTag
-                , form = form
-              }
-            , Cmd.none
-            )
-
-        EditTopic t ->
-            let
-                form =
-                    { emptyForm
-                        | name = t.name
-                        , notes = t.notes
-                        , id = t.id
-                    }
-            in
-            ( { model
-                | view = ViewApp ViewEditTopic
-                , form = form
-              }
-            , Cmd.none
-            )
-
-        EditTransition t ->
-            protect
-                (\auth ->
-                    let
-                        form =
-                            { emptyForm
-                                | name = t.name
-                                , id = t.id
-                                , steps = t.steps
-                                , notes = t.notes
-                                , startPosition = Just t.startPosition
-                                , endPosition = Just t.endPosition
-                            }
-                    in
-                    ( { model
-                        | view = ViewApp ViewEditTransition
-                        , form = form
-                      }
-                    , Cmd.batch
-                        [ maybeFetchPositions auth.token model.positions
-                        , maybeFetchTags auth.token model.tags
-                        ]
-                    )
-                )
-
         LoginSubmit ->
             ( { model | form = model.form |> (\f -> { f | errors = Nothing }) }
             , Api.Mutation.selection identity
@@ -1228,19 +1131,151 @@ update msg model =
                         )
 
                 EditPositionRoute id ->
-                    ( model, Cmd.none )
+                    (case model.view of
+                        ViewApp (ViewPosition (Success x)) ->
+                            if x.id == id then
+                                Just x
+                            else
+                                Nothing
 
-                EditSubmissionRoute _ ->
-                    ( model, Cmd.none )
+                        _ ->
+                            Nothing
+                    )
+                        |> unwrap ( model, goTo <| PositionRoute id )
+                            (\x ->
+                                ( { model
+                                    | view = ViewApp (ViewEditPosition x)
+                                    , form =
+                                        { emptyForm
+                                            | name = x.name
+                                            , notes = x.notes
+                                            , id = x.id
+                                        }
+                                  }
+                                , Cmd.none
+                                )
+                            )
 
-                EditTransitionRoute _ ->
-                    ( model, Cmd.none )
+                EditSubmissionRoute id ->
+                    protect
+                        (\auth ->
+                            (case model.view of
+                                ViewApp (ViewSubmission (Success x)) ->
+                                    if x.id == id then
+                                        Just x
+                                    else
+                                        Nothing
 
-                EditTagRoute _ ->
-                    ( model, Cmd.none )
+                                _ ->
+                                    Nothing
+                            )
+                                |> unwrap ( model, goTo <| SubmissionRoute id )
+                                    (\x ->
+                                        ( { model
+                                            | view = ViewApp ViewEditSubmission
+                                            , form =
+                                                { emptyForm
+                                                    | name = x.name
+                                                    , steps = x.steps
+                                                    , notes = x.notes
+                                                    , startPosition = Just x.position
+                                                    , id = x.id
+                                                    , tags = x.tags |> Array.fromList
+                                                }
+                                          }
+                                        , Cmd.batch
+                                            [ maybeFetchPositions auth.token model.positions
+                                            , maybeFetchTags auth.token model.tags
+                                            ]
+                                        )
+                                    )
+                        )
 
-                EditTopicRoute _ ->
-                    ( model, Cmd.none )
+                EditTransitionRoute id ->
+                    protect
+                        (\auth ->
+                            (case model.view of
+                                ViewApp (ViewTransition (Success x)) ->
+                                    if x.id == id then
+                                        Just x
+                                    else
+                                        Nothing
+
+                                _ ->
+                                    Nothing
+                            )
+                                |> unwrap ( model, goTo <| TransitionRoute id )
+                                    (\x ->
+                                        ( { model
+                                            | view = ViewApp ViewEditTransition
+                                            , form =
+                                                { emptyForm
+                                                    | name = x.name
+                                                    , id = x.id
+                                                    , steps = x.steps
+                                                    , notes = x.notes
+                                                    , startPosition = Just x.startPosition
+                                                    , endPosition = Just x.endPosition
+                                                }
+                                          }
+                                        , Cmd.batch
+                                            [ maybeFetchPositions auth.token model.positions
+                                            , maybeFetchTags auth.token model.tags
+                                            ]
+                                        )
+                                    )
+                        )
+
+                EditTagRoute id ->
+                    (case model.view of
+                        ViewApp (ViewTag (Success x)) ->
+                            if x.id == id then
+                                Just x
+                            else
+                                Nothing
+
+                        _ ->
+                            Nothing
+                    )
+                        |> unwrap ( model, goTo <| TagRoute id )
+                            (\x ->
+                                ( { model
+                                    | view = ViewApp ViewEditTag
+                                    , form =
+                                        { emptyForm
+                                            | name = x.name
+                                            , id = x.id
+                                        }
+                                  }
+                                , Cmd.none
+                                )
+                            )
+
+                EditTopicRoute id ->
+                    (case model.view of
+                        ViewApp (ViewTopic (Success x)) ->
+                            if x.id == id then
+                                Just x
+                            else
+                                Nothing
+
+                        _ ->
+                            Nothing
+                    )
+                        |> unwrap ( model, goTo <| TopicRoute id )
+                            (\x ->
+                                ( { model
+                                    | view = ViewApp ViewEditTopic
+                                    , form =
+                                        { emptyForm
+                                            | name = x.name
+                                            , id = x.id
+                                            , notes = x.notes
+                                        }
+                                  }
+                                , Cmd.none
+                                )
+                            )
 
                 NotFound ->
                     ( model

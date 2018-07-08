@@ -45,11 +45,6 @@ type Msg
     | DeleteTag Id
     | DeleteTopic Id
     | DeleteTransition Id
-    | EditPosition Position
-    | EditSubmission Submission
-    | EditTag Tag
-    | EditTopic Topic
-    | EditTransition Transition
     | LoginSubmit
     | Logout
     | NavigateTo Route
