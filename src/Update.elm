@@ -192,10 +192,9 @@ update msg model =
                         |> goTo
                     )
 
-                ViewApp (ViewEditPosition _) ->
-                    ( { model | confirm = Nothing }
-                    , goTo
-                        Positions
+                ViewApp (ViewEditPosition p) ->
+                    ( { model | confirm = Nothing, view = ViewApp (ViewPosition (Success p)) }
+                    , goTo <| PositionRoute p.id
                     )
 
                 ViewApp ViewEditSubmission ->
