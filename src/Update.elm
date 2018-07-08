@@ -170,20 +170,32 @@ update msg model =
         Cancel ->
             case model.view of
                 ViewApp ViewCreatePosition ->
-                    ( model, goTo Positions )
+                    ( { model | previousRoute = Nothing }
+                    , model.previousRoute
+                        |> Maybe.withDefault Positions
+                        |> goTo
+                    )
 
                 ViewApp ViewCreateSubmission ->
-                    ( model
+                    ( { model | previousRoute = Nothing }
                     , model.previousRoute
                         |> Maybe.withDefault Submissions
                         |> goTo
                     )
 
                 ViewApp ViewCreateTag ->
-                    ( model, goTo TagsRoute )
+                    ( { model | previousRoute = Nothing }
+                    , model.previousRoute
+                        |> Maybe.withDefault TagsRoute
+                        |> goTo
+                    )
 
                 ViewApp ViewCreateTopic ->
-                    ( model, goTo Topics )
+                    ( { model | previousRoute = Nothing }
+                    , model.previousRoute
+                        |> Maybe.withDefault Topics
+                        |> goTo
+                    )
 
                 ViewApp ViewCreateTransition ->
                     ( { model | previousRoute = Nothing }
