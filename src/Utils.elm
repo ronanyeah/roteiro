@@ -287,6 +287,11 @@ isTransitionView view =
 
 icon : FaIcon -> List (Attribute msg) -> Element msg
 icon fa attrs =
+    el attrs <| el [ centerX, centerY ] <| faIcon fa
+
+
+faIcon : FaIcon -> Element msg
+faIcon fa =
     let
         faClass =
             (case fa of
@@ -365,10 +370,10 @@ icon fa attrs =
                 Bars ->
                     "fa-bars"
             )
-                |> (++) "fas "
+                |> (++) "fas fa-fw "
                 |> Html.Attributes.class
     in
-    el attrs <| el [ centerX, centerY ] <| html <| Html.span [ faClass ] []
+    el [] <| html <| Html.span [ faClass ] []
 
 
 sort : List { r | name : String } -> List { r | name : String }

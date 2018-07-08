@@ -16,7 +16,7 @@ import Regex
 import RemoteData exposing (RemoteData(..))
 import Style
 import Types exposing (..)
-import Utils exposing (icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, remoteUnwrap, unwrap, when, whenJust)
+import Utils exposing (faIcon, icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, remoteUnwrap, unwrap, when, whenJust)
 
 
 view : Model -> Html Msg
@@ -235,13 +235,7 @@ view model =
                                     , placeholder = Nothing
                                     , show = False
                                     }
-                                , Input.button [ centerX ]
-                                    { onPress =
-                                        Just ChangePasswordSubmit
-                                    , label =
-                                        icon SignIn
-                                            Style.actionIcon
-                                    }
+                                , actionIcon SignIn (Just ChangePasswordSubmit)
                                 ]
 
                         ViewSubmission data ->
@@ -432,12 +426,7 @@ view model =
                                 [ Font.size 45, Font.color Style.e, centerX ]
                               <|
                                 text "ROTEIRO"
-                            , Input.button [ centerX ]
-                                { onPress = Just <| NavigateTo SignUp
-                                , label =
-                                    icon NewUser
-                                        Style.actionIcon
-                                }
+                            , actionIcon NewUser (Just <| NavigateTo SignUp)
                             , viewErrors model.form.errors
                             , Input.email
                                 ([ centerX
@@ -470,14 +459,7 @@ view model =
                                 (model.form.errors
                                     |> unwrap (icon Waiting Style.mattIcon)
                                         (always
-                                            (Input.button []
-                                                { onPress =
-                                                    Just <| LoginSubmit
-                                                , label =
-                                                    icon SignIn
-                                                        Style.actionIcon
-                                                }
-                                            )
+                                            (actionIcon SignIn (Just <| LoginSubmit))
                                         )
                                 )
                             ]
@@ -508,13 +490,7 @@ view model =
                                 [ Font.size 45, Font.color Style.e, centerX ]
                               <|
                                 text "ROTEIRO"
-                            , Input.button [ centerX ]
-                                { onPress =
-                                    Just <| NavigateTo Login
-                                , label =
-                                    icon SignIn
-                                        Style.actionIcon
-                                }
+                            , actionIcon SignIn (Just <| NavigateTo Login)
                             , viewErrors model.form.errors
                             , Input.email
                                 ([ centerX, width inputWidth ] ++ Style.field)
@@ -535,13 +511,7 @@ view model =
                                 , placeholder = Nothing
                                 , show = False
                                 }
-                            , Input.button [ centerX ]
-                                { onPress =
-                                    Just <| SignUpSubmit
-                                , label =
-                                    icon NewUser
-                                        Style.actionIcon
-                                }
+                            , actionIcon NewUser (Just <| SignUpSubmit)
                             ]
 
                 ViewWaiting ->
@@ -568,20 +538,8 @@ view model =
                                 [ icon Question (centerX :: Style.bigIcon)
                                 , row
                                     [ spacing 40 ]
-                                    [ Input.button []
-                                        { onPress =
-                                            Just msg
-                                        , label =
-                                            icon Tick
-                                                Style.actionIcon
-                                        }
-                                    , Input.button []
-                                        { onPress =
-                                            Just <| Confirm Nothing
-                                        , label =
-                                            icon Cross
-                                                Style.actionIcon
-                                        }
+                                    [ actionIcon Tick (Just msg)
+                                    , actionIcon Cross (Just <| Confirm Nothing)
                                     ]
                                 ]
                     )
@@ -952,13 +910,7 @@ pickPosition : Msg -> Maybe Info -> Element Msg
 pickPosition msg position =
     case position of
         Nothing ->
-            Input.button [ centerX ]
-                { onPress =
-                    Just msg
-                , label =
-                    icon Question
-                        Style.actionIcon
-                }
+            actionIcon Question (Just msg)
 
         Just { name } ->
             Input.button [ centerX ]
@@ -981,10 +933,7 @@ editRow name faIcon editMsg =
                 , width fill
                 ]
                 [ text name ]
-            , Input.button []
-                { onPress = Just editMsg
-                , label = icon Write Style.actionIcon
-                }
+            , actionIcon Write (Just editMsg)
             ]
         ]
 
@@ -1010,22 +959,12 @@ nameEdit form =
 
 plus : msg -> Element msg
 plus msg =
-    Input.button []
-        { onPress = Just msg
-        , label =
-            icon Plus
-                Style.actionIcon
-        }
+    actionIcon Plus (Just msg)
 
 
 minus : msg -> Element msg
 minus msg =
-    Input.button []
-        { onPress = Just msg
-        , label =
-            icon Minus
-                Style.actionIcon
-        }
+    actionIcon Minus (Just msg)
 
 
 editButtons : Msg -> Msg -> Element Msg
@@ -1033,24 +972,9 @@ editButtons save delete =
     el [ centerX ] <|
         row
             [ spacing 20 ]
-            [ Input.button [ padding 10 ]
-                { onPress = Just save
-                , label =
-                    icon Tick
-                        Style.actionIcon
-                }
-            , Input.button [ padding 10 ]
-                { onPress = Just Cancel
-                , label =
-                    icon Cross
-                        Style.actionIcon
-                }
-            , Input.button [ padding 10 ]
-                { onPress = Just <| Confirm <| Just delete
-                , label =
-                    icon Trash
-                        Style.actionIcon
-                }
+            [ actionIcon Tick (Just save)
+            , actionIcon Cross (Just Cancel)
+            , actionIcon Trash (Just <| Confirm <| Just delete)
             ]
 
 
@@ -1059,18 +983,8 @@ createButtons save =
     el [ centerX ] <|
         row
             [ spacing 20 ]
-            [ Input.button [ padding 10 ]
-                { onPress = Just save
-                , label =
-                    icon Tick
-                        Style.actionIcon
-                }
-            , Input.button [ padding 10 ]
-                { onPress = Just Cancel
-                , label =
-                    icon Cross
-                        Style.actionIcon
-                }
+            [ actionIcon Tick (Just save)
+            , actionIcon Cross (Just Cancel)
             ]
 
 
@@ -1402,3 +1316,22 @@ domain s =
         |> Maybe.andThen (.submatches >> List.head)
         |> Maybe.andThen identity
         |> Maybe.withDefault s
+
+
+actionIcon : FaIcon -> Maybe msg -> Element msg
+actionIcon fa msg =
+    Input.button
+        [ Font.color Style.e
+        , Border.solid
+        , Border.width 2
+        , Border.color Style.e
+        , padding 5
+        , Border.rounded 5
+        , mouseOver
+            [ Background.color Style.e
+            , Font.color Style.c
+            ]
+        ]
+        { onPress = msg
+        , label = el [ centerX, centerY ] <| faIcon fa
+        }
