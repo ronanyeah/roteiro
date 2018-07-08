@@ -346,13 +346,13 @@ view model =
                         ViewTransition data ->
                             data
                                 |> viewRemote
-                                    (\({ steps, startPosition, endPosition, notes, tags } as t) ->
+                                    (\t ->
                                         column [ height <| px model.size.height, scrollbarY ]
                                             [ editRow t.name Arrow <| EditTransition t
                                             , viewTransitionPositions False True True t
-                                            , viewSteps steps
-                                            , viewNotes notes
-                                            , viewTags tags
+                                            , viewSteps t.steps
+                                            , viewNotes t.notes
+                                            , viewTags t.tags
                                             ]
                                     )
 
@@ -623,19 +623,19 @@ view model =
 
 
 createHeader : FaIcon -> Element msg
-createHeader faIcon =
+createHeader fa =
     el [ centerX ] <|
         row [ spacing 20, padding 20 ]
-            [ icon faIcon Style.mattIcon
+            [ icon fa Style.mattIcon
             , icon Plus Style.mattIcon
             ]
 
 
 editHeader : FaIcon -> Element msg
-editHeader faIcon =
+editHeader fa =
     el [ centerX ] <|
         row [ spacing 20, padding 20 ]
-            [ icon faIcon Style.mattIcon
+            [ icon fa Style.mattIcon
             , icon Write Style.mattIcon
             ]
 
@@ -922,10 +922,10 @@ pickPosition msg position =
 
 
 editRow : String -> FaIcon -> Msg -> Element Msg
-editRow name faIcon editMsg =
+editRow name fa editMsg =
     column
         [ width shrink, height shrink, spacing 10, centerX, padding 20 ]
-        [ el [ centerX ] <| icon faIcon Style.mattIcon
+        [ el [ centerX ] <| icon fa Style.mattIcon
         , row []
             [ paragraph
                 [ Font.size 35
