@@ -94,6 +94,7 @@ type AppView
     | ViewCreateTag
     | ViewCreateTopic
     | ViewCreateTransition
+      -- TODO: Add data to all the edit unions
     | ViewEditPosition Position
     | ViewEditSubmission
     | ViewEditTag
