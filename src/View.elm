@@ -1200,26 +1200,25 @@ viewTechList route xs =
 
 editTags : RemoteData.WebData (List Info) -> List Info -> Element Msg
 editTags tags xs =
-    el [ centerX ] <|
-        column [ spacing 20 ]
-            [ el [ centerX ] <| icon Tags Style.mattIcon
-            , tags
-                |> remoteUnwrap (icon Waiting Style.mattIcon)
-                    (List.filter
-                        (flip List.member xs >> not)
-                        >> List.map
-                            (\tag ->
-                                block (tag.name ++ " +") <| AddTag tag
-                            )
-                        >> paragraph [ padding 20, width fill ]
-                    )
-            , xs
-                |> List.indexedMap
-                    (\i tag ->
-                        block (tag.name ++ " -") <| RemoveTag i
-                    )
-                |> paragraph [ padding 20, width fill ]
-            ]
+    column [ spacing 30, width shrink, centerX ]
+        [ el [ centerX ] <| icon Tags Style.mattIcon
+        , xs
+            |> List.indexedMap
+                (\i tag ->
+                    block (tag.name ++ " -") <| RemoveTag i
+                )
+            |> paragraph [ width fill ]
+        , tags
+            |> remoteUnwrap (icon Waiting Style.mattIcon)
+                (List.filter
+                    (flip List.member xs >> not)
+                    >> List.map
+                        (\tag ->
+                            block (tag.name ++ " +") <| AddTag tag
+                        )
+                    >> paragraph [ width fill ]
+                )
+        ]
 
 
 viewTags : List Info -> Element Msg
