@@ -6,18 +6,14 @@ const { clean, getUserId, sign, hash } = require("../utils.js");
 
 const { APP_SECRET } = process.env;
 
-const deleteOne = async (dataName, ctx, dataId) => {
-  const userId = await getUserId(ctx.request);
-
-  const isOwner = await ctx.db.exists[dataName]({
+const deleteOne = async (userId, existsFn, deleteFn, dataId) => {
+  const isOwner = await existsFn({
     AND: [{ id: dataId }, { user: { id: userId } }]
   });
 
-  if (!isOwner) {
-    return Error("Oops!");
-  }
+  if (!isOwner) throw Error("Resource not available!");
 
-  return ctx.db.mutation[`delete${dataName}`]({
+  return deleteFn({
     where: { id: dataId }
   }).then(prop("id"));
 };
@@ -92,17 +88,43 @@ const create = async (userId, createFn, args, info) => {
 
 module.exports = {
   deletePosition: async (_, args, ctx, _info) =>
-    deleteOne("Position", ctx, args.id),
+    deleteOne(
+      await getUserId(ctx.request),
+      ctx.db.exists.Position,
+      ctx.db.mutation.deletePosition,
+      args.id
+    ),
 
   deleteSubmission: async (_, args, ctx, _info) =>
-    deleteOne("Submission", ctx, args.id),
+    deleteOne(
+      await getUserId(ctx.request),
+      ctx.db.exists.Submission,
+      ctx.db.mutation.deleteSubmission,
+      args.id
+    ),
 
+  deleteTag: async (_, args, ctx, _info) =>
+    deleteOne(
+      await getUserId(ctx.request),
+      ctx.db.exists.Tag,
+      ctx.db.mutation.deleteTag,
+      args.id
+    ),
+
+  deleteTopic: async (_, args, ctx, _info) =>
+    deleteOne(
+      await getUserId(ctx.request),
+      ctx.db.exists.Topic,
+      ctx.db.mutation.deleteTopic,
+      args.id
+    ),
   deleteTransition: async (_, args, ctx, _info) =>
-    deleteOne("Transition", ctx, args.id),
-
-  deleteTag: async (_, args, ctx, _info) => deleteOne("Tag", ctx, args.id),
-
-  deleteTopic: async (_, args, ctx, _info) => deleteOne("Topic", ctx, args.id),
+    deleteOne(
+      await getUserId(ctx.request),
+      ctx.db.exists.Transition,
+      ctx.db.mutation.deleteTransition,
+      args.id
+    ),
 
   updatePosition: async (_, args, ctx, info) =>
     update(
