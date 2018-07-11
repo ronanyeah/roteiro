@@ -87,7 +87,7 @@ createPosition requiredArgs object =
 
 
 type alias CreateTransitionRequiredArguments =
-    { name : String, notes : List String, steps : List String, startPosition : Api.Scalar.Id, endPosition : Api.Scalar.Id }
+    { name : String, notes : List String, steps : List String, startPosition : Api.Scalar.Id, endPosition : Api.Scalar.Id, tags : List Api.Scalar.Id }
 
 
 {-|
@@ -97,15 +97,16 @@ type alias CreateTransitionRequiredArguments =
   - steps -
   - startPosition -
   - endPosition -
+  - tags -
 
 -}
 createTransition : CreateTransitionRequiredArguments -> SelectionSet decodesTo Api.Object.Transition -> Field decodesTo RootMutation
 createTransition requiredArgs object =
-    Object.selectionField "createTransition" [ Argument.required "name" requiredArgs.name Encode.string, Argument.required "notes" requiredArgs.notes (Encode.string |> Encode.list), Argument.required "steps" requiredArgs.steps (Encode.string |> Encode.list), Argument.required "startPosition" requiredArgs.startPosition (\(Api.Scalar.Id raw) -> Encode.string raw), Argument.required "endPosition" requiredArgs.endPosition (\(Api.Scalar.Id raw) -> Encode.string raw) ] object identity
+    Object.selectionField "createTransition" [ Argument.required "name" requiredArgs.name Encode.string, Argument.required "notes" requiredArgs.notes (Encode.string |> Encode.list), Argument.required "steps" requiredArgs.steps (Encode.string |> Encode.list), Argument.required "startPosition" requiredArgs.startPosition (\(Api.Scalar.Id raw) -> Encode.string raw), Argument.required "endPosition" requiredArgs.endPosition (\(Api.Scalar.Id raw) -> Encode.string raw), Argument.required "tags" requiredArgs.tags ((\(Api.Scalar.Id raw) -> Encode.string raw) |> Encode.list) ] object identity
 
 
 type alias CreateSubmissionRequiredArguments =
-    { name : String, notes : List String, steps : List String, position : Api.Scalar.Id }
+    { name : String, notes : List String, steps : List String, tags : List Api.Scalar.Id, position : Api.Scalar.Id }
 
 
 {-|
@@ -113,12 +114,13 @@ type alias CreateSubmissionRequiredArguments =
   - name -
   - notes -
   - steps -
+  - tags -
   - position -
 
 -}
 createSubmission : CreateSubmissionRequiredArguments -> SelectionSet decodesTo Api.Object.Submission -> Field decodesTo RootMutation
 createSubmission requiredArgs object =
-    Object.selectionField "createSubmission" [ Argument.required "name" requiredArgs.name Encode.string, Argument.required "notes" requiredArgs.notes (Encode.string |> Encode.list), Argument.required "steps" requiredArgs.steps (Encode.string |> Encode.list), Argument.required "position" requiredArgs.position (\(Api.Scalar.Id raw) -> Encode.string raw) ] object identity
+    Object.selectionField "createSubmission" [ Argument.required "name" requiredArgs.name Encode.string, Argument.required "notes" requiredArgs.notes (Encode.string |> Encode.list), Argument.required "steps" requiredArgs.steps (Encode.string |> Encode.list), Argument.required "tags" requiredArgs.tags ((\(Api.Scalar.Id raw) -> Encode.string raw) |> Encode.list), Argument.required "position" requiredArgs.position (\(Api.Scalar.Id raw) -> Encode.string raw) ] object identity
 
 
 type alias CreateTagRequiredArguments =
@@ -167,7 +169,7 @@ updatePosition requiredArgs object =
 
 
 type alias UpdateTransitionRequiredArguments =
-    { id : Api.Scalar.Id, name : String, notes : List String, steps : List String, startPosition : Api.Scalar.Id, endPosition : Api.Scalar.Id }
+    { id : Api.Scalar.Id, name : String, notes : List String, steps : List String, startPosition : Api.Scalar.Id, endPosition : Api.Scalar.Id, tags : List Api.Scalar.Id }
 
 
 {-|
@@ -178,15 +180,16 @@ type alias UpdateTransitionRequiredArguments =
   - steps -
   - startPosition -
   - endPosition -
+  - tags -
 
 -}
 updateTransition : UpdateTransitionRequiredArguments -> SelectionSet decodesTo Api.Object.Transition -> Field decodesTo RootMutation
 updateTransition requiredArgs object =
-    Object.selectionField "updateTransition" [ Argument.required "id" requiredArgs.id (\(Api.Scalar.Id raw) -> Encode.string raw), Argument.required "name" requiredArgs.name Encode.string, Argument.required "notes" requiredArgs.notes (Encode.string |> Encode.list), Argument.required "steps" requiredArgs.steps (Encode.string |> Encode.list), Argument.required "startPosition" requiredArgs.startPosition (\(Api.Scalar.Id raw) -> Encode.string raw), Argument.required "endPosition" requiredArgs.endPosition (\(Api.Scalar.Id raw) -> Encode.string raw) ] object identity
+    Object.selectionField "updateTransition" [ Argument.required "id" requiredArgs.id (\(Api.Scalar.Id raw) -> Encode.string raw), Argument.required "name" requiredArgs.name Encode.string, Argument.required "notes" requiredArgs.notes (Encode.string |> Encode.list), Argument.required "steps" requiredArgs.steps (Encode.string |> Encode.list), Argument.required "startPosition" requiredArgs.startPosition (\(Api.Scalar.Id raw) -> Encode.string raw), Argument.required "endPosition" requiredArgs.endPosition (\(Api.Scalar.Id raw) -> Encode.string raw), Argument.required "tags" requiredArgs.tags ((\(Api.Scalar.Id raw) -> Encode.string raw) |> Encode.list) ] object identity
 
 
 type alias UpdateSubmissionRequiredArguments =
-    { id : Api.Scalar.Id, name : String, notes : List String, steps : List String, position : Api.Scalar.Id }
+    { id : Api.Scalar.Id, name : String, notes : List String, steps : List String, tags : List Api.Scalar.Id, position : Api.Scalar.Id }
 
 
 {-|
@@ -195,12 +198,13 @@ type alias UpdateSubmissionRequiredArguments =
   - name -
   - notes -
   - steps -
+  - tags -
   - position -
 
 -}
 updateSubmission : UpdateSubmissionRequiredArguments -> SelectionSet decodesTo Api.Object.Submission -> Field decodesTo RootMutation
 updateSubmission requiredArgs object =
-    Object.selectionField "updateSubmission" [ Argument.required "id" requiredArgs.id (\(Api.Scalar.Id raw) -> Encode.string raw), Argument.required "name" requiredArgs.name Encode.string, Argument.required "notes" requiredArgs.notes (Encode.string |> Encode.list), Argument.required "steps" requiredArgs.steps (Encode.string |> Encode.list), Argument.required "position" requiredArgs.position (\(Api.Scalar.Id raw) -> Encode.string raw) ] object identity
+    Object.selectionField "updateSubmission" [ Argument.required "id" requiredArgs.id (\(Api.Scalar.Id raw) -> Encode.string raw), Argument.required "name" requiredArgs.name Encode.string, Argument.required "notes" requiredArgs.notes (Encode.string |> Encode.list), Argument.required "steps" requiredArgs.steps (Encode.string |> Encode.list), Argument.required "tags" requiredArgs.tags ((\(Api.Scalar.Id raw) -> Encode.string raw) |> Encode.list), Argument.required "position" requiredArgs.position (\(Api.Scalar.Id raw) -> Encode.string raw) ] object identity
 
 
 type alias UpdateTagRequiredArguments =

@@ -1,4 +1,4 @@
-const { assoc, prop } = require("ramda");
+const { pipe, reject, pluck, assoc, prop, contains, __ } = require("ramda");
 const bcryptjs = require("bcryptjs");
 const validator = require("validator");
 
@@ -22,37 +22,73 @@ const deleteOne = async (dataName, ctx, dataId) => {
   }).then(prop("id"));
 };
 
-const update = async (dataName, ctx, args, info) => {
-  const userId = await getUserId(ctx.request);
+const update = async (userId, queryFn, existsFn, updateFn, args, info) => {
+  const argsFn = await (args.tags
+    ? (async () => {
+        const [data] = await queryFn(
+          {
+            where: {
+              AND: [{ id: args.id }, { user: { id: userId } }]
+            }
+          },
+          "{ tags { id } }"
+        );
+        if (!data) throw Error("Resource not available!");
 
-  const isOwner = await ctx.db.exists[dataName]({
-    AND: [{ id: args.id }, { user: { id: userId } }]
-  });
+        const currentTags = pluck("id", data.tags);
 
-  if (!isOwner) {
-    return Error("Oops!");
-  }
+        const tagData = {
+          connect: reject(contains(__, currentTags), args.tags).map(id => ({
+            id
+          })),
+          disconnect: reject(contains(__, args.tags), currentTags).map(id => ({
+            id
+          }))
+        };
 
-  return ctx.db.mutation[`update${dataName}`](
+        return pipe(
+          clean,
+          assoc("tags", tagData)
+        );
+      })()
+    : (async () => {
+        const isOwner = await existsFn({
+          AND: [{ id: args.id }, { user: { id: userId } }]
+        });
+
+        if (!isOwner) throw Error("Resource not available!");
+
+        return clean;
+      })());
+
+  return updateFn(
     {
-      data: clean(args),
+      data: argsFn(args),
       where: { id: args.id }
     },
     info
   );
 };
 
-const create = async (dataName, ctx, args, info) =>
-  ctx.db.mutation[`create${dataName}`](
-    {
-      data: assoc(
-        "user",
-        { connect: { id: await getUserId(ctx.request) } },
-        clean(args)
+const create = async (userId, createFn, args, info) => {
+  const argsFn = args.tags
+    ? pipe(
+        clean,
+        assoc("tags", {
+          connect: args.tags.map(id => ({
+            id
+          }))
+        })
       )
+    : clean;
+
+  return createFn(
+    {
+      data: assoc("user", { connect: { id: userId } }, argsFn(args))
     },
     info
   );
+};
 
 module.exports = {
   deletePosition: async (_, args, ctx, _info) =>
@@ -69,30 +105,89 @@ module.exports = {
   deleteTopic: async (_, args, ctx, _info) => deleteOne("Topic", ctx, args.id),
 
   updatePosition: async (_, args, ctx, info) =>
-    update("Position", ctx, args, info),
+    update(
+      await getUserId(ctx.request),
+      ctx.db.query.positions,
+      ctx.db.exists.Position,
+      ctx.db.mutation.updatePosition,
+      args,
+      info
+    ),
 
   updateSubmission: async (_, args, ctx, info) =>
-    update("Submission", ctx, args, info),
+    update(
+      await getUserId(ctx.request),
+      ctx.db.query.submissions,
+      ctx.db.exists.Submission,
+      ctx.db.mutation.updateSubmission,
+      args,
+      info
+    ),
 
-  updateTag: async (_, args, ctx, info) => update("Tag", ctx, args, info),
+  updateTag: async (_, args, ctx, info) =>
+    update(
+      await getUserId(ctx.request),
+      ctx.db.query.tags,
+      ctx.db.exists.Tag,
+      ctx.db.mutation.updateTag,
+      args,
+      info
+    ),
 
-  updateTopic: async (_, args, ctx, info) => update("Topic", ctx, args, info),
+  updateTopic: async (_, args, ctx, info) =>
+    update(
+      await getUserId(ctx.request),
+      ctx.db.query.topics,
+      ctx.db.exists.Topic,
+      ctx.db.mutation.updateTopic,
+      args,
+      info
+    ),
 
   updateTransition: async (_, args, ctx, info) =>
-    update("Transition", ctx, args, info),
+    update(
+      await getUserId(ctx.request),
+      ctx.db.query.transitions,
+      ctx.db.exists.Transition,
+      ctx.db.mutation.updateTransition,
+      args,
+      info
+    ),
 
   createPosition: async (_, args, ctx, info) =>
-    create("Position", ctx, args, info),
+    create(
+      await getUserId(ctx.request),
+      ctx.db.mutation.createPosition,
+      args,
+      info
+    ),
 
   createSubmission: async (_, args, ctx, info) =>
-    create("Submission", ctx, args, info),
+    create(
+      await getUserId(ctx.request),
+      ctx.db.mutation.createSubmission,
+      args,
+      info
+    ),
 
   createTransition: async (_, args, ctx, info) =>
-    create("Transition", ctx, args, info),
+    create(
+      await getUserId(ctx.request),
+      ctx.db.mutation.createTransition,
+      args,
+      info
+    ),
 
-  createTag: async (_, args, ctx, info) => create("Tag", ctx, args, info),
+  createTag: async (_, args, ctx, info) =>
+    create(await getUserId(ctx.request), ctx.db.mutation.createTag, args, info),
 
-  createTopic: async (_, args, ctx, info) => create("Topic", ctx, args, info),
+  createTopic: async (_, args, ctx, info) =>
+    create(
+      await getUserId(ctx.request),
+      ctx.db.mutation.createTopic,
+      args,
+      info
+    ),
 
   authenticateUser: async (_, { email, password }, ctx, _info) => {
     const user = await ctx.db.query.user(

@@ -734,7 +734,7 @@ update msg model =
             protect
                 (\auth ->
                     case Validate.submission model.form of
-                        Ok ( name, startId, steps, notes ) ->
+                        Ok ( name, startId, steps, notes, tags ) ->
                             ( { model | form = clearErrors model.form }
                             , mutation auth.token
                                 (Api.Mutation.createSubmission
@@ -742,6 +742,7 @@ update msg model =
                                     , steps = steps
                                     , notes = notes
                                     , position = startId
+                                    , tags = tags
                                     }
                                     submission
                                 )
@@ -794,7 +795,7 @@ update msg model =
             protect
                 (\auth ->
                     case Validate.transition model.form of
-                        Ok ( name, startId, endId, steps, notes ) ->
+                        Ok ( name, startId, endId, steps, notes, tags ) ->
                             ( { model | form = clearErrors model.form }
                             , mutation auth.token
                                 (Api.Mutation.createTransition
@@ -803,6 +804,7 @@ update msg model =
                                     , endPosition = endId
                                     , steps = steps
                                     , notes = notes
+                                    , tags = tags
                                     }
                                     transition
                                 )
@@ -842,7 +844,7 @@ update msg model =
             protect
                 (\auth ->
                     case Validate.submission model.form of
-                        Ok ( name, position, steps, notes ) ->
+                        Ok ( name, position, steps, notes, tags ) ->
                             ( { model | form = clearErrors model.form }
                             , mutation auth.token
                                 (Api.Mutation.updateSubmission
@@ -851,6 +853,7 @@ update msg model =
                                     , steps = steps
                                     , notes = notes
                                     , position = position
+                                    , tags = tags
                                     }
                                     submission
                                 )
@@ -912,7 +915,7 @@ update msg model =
             protect
                 (\auth ->
                     case Validate.transition model.form of
-                        Ok ( name, startId, endId, steps, notes ) ->
+                        Ok ( name, startId, endId, steps, notes, tags ) ->
                             ( { model | form = clearErrors model.form }
                             , mutation auth.token
                                 (Api.Mutation.updateTransition
@@ -922,6 +925,7 @@ update msg model =
                                     , endPosition = endId
                                     , steps = steps
                                     , notes = notes
+                                    , tags = tags
                                     }
                                     transition
                                 )
@@ -1212,6 +1216,7 @@ update msg model =
                                                     , notes = x.notes
                                                     , startPosition = Just x.startPosition
                                                     , endPosition = Just x.endPosition
+                                                    , tags = x.tags |> Array.fromList
                                                 }
                                           }
                                         , Cmd.batch

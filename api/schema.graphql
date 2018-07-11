@@ -31,11 +31,13 @@ type Mutation {
     steps: [String!]!
     startPosition: ID!
     endPosition: ID!
+    tags: [ID!]!
   ): Transition!
   createSubmission(
     name: String!
     notes: [String!]!
     steps: [String!]!
+    tags: [ID!]!
     position: ID!
   ): Submission!
   createTag(name: String!): Tag!
@@ -48,12 +50,14 @@ type Mutation {
     steps: [String!]!
     startPosition: ID!
     endPosition: ID!
+    tags: [ID!]!
   ): Transition!
   updateSubmission(
     id: ID!
     name: String!
     notes: [String!]!
     steps: [String!]!
+    tags: [ID!]!
     position: ID!
   ): Submission!
   updateTag(id: ID!, name: String!): Tag!

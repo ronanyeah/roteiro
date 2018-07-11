@@ -29,8 +29,8 @@ position { name, notes } =
         Ok ( name, notes |> Array.toList |> filterEmpty )
 
 
-submission : Form -> Result (List String) ( String, Id, List String, List String )
-submission { name, startPosition, steps, notes } =
+submission : Form -> Result (List String) ( String, Id, List String, List String, List Id )
+submission { name, startPosition, steps, notes, tags } =
     case ( name, startPosition ) of
         ( "", Nothing ) ->
             Err [ emptyNameField, startPositionMissing ]
@@ -47,6 +47,7 @@ submission { name, startPosition, steps, notes } =
                 , id
                 , steps |> Array.toList |> filterEmpty
                 , notes |> Array.toList |> filterEmpty
+                , tags |> Array.toList |> List.map .id
                 )
 
 
@@ -66,8 +67,8 @@ topic { name, notes } =
         Ok ( name, notes |> Array.toList |> filterEmpty )
 
 
-transition : Form -> Result (List String) ( String, Id, Id, List String, List String )
-transition { name, startPosition, endPosition, steps, notes } =
+transition : Form -> Result (List String) ( String, Id, Id, List String, List String, List Id )
+transition { name, startPosition, endPosition, tags, steps, notes } =
     [ if String.isEmpty name then
         Just emptyNameField
       else
@@ -96,6 +97,7 @@ transition { name, startPosition, endPosition, steps, notes } =
                                 , end.id
                                 , steps |> Array.toList |> filterEmpty
                                 , notes |> Array.toList |> filterEmpty
+                                , tags |> Array.toList |> List.map .id
                                 )
 
                         _ ->
