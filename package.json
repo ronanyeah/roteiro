@@ -9,7 +9,7 @@
     "gen-prisma": "get-graphql-schema http://localhost:4466 > ./prisma/generated/prisma.graphql",
     "gen-elm": "graphqelm http://localhost:4000",
     "watch:client": "webpack-dev-server --hot",
-    "watch:server": "nodemon ./api/index.js",
+    "watch:server": "nodemon --inspect ./api/index.js",
     "build-client": "webpack && npm run build-redirects",
     "build-redirects": "node build-redirects.js",
     "test": "echo \"100% coverage!\" && exit 0"
