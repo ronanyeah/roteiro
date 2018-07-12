@@ -51,7 +51,7 @@ view model =
                                 ]
 
                         ViewCreateSubmission ->
-                            column []
+                            column [ height <| px model.size.height, scrollbarY, spacing 50 ]
                                 [ createHeader Bolt
                                 , viewErrors model.form.errors
                                 , nameEdit model.form
@@ -887,23 +887,21 @@ viewRemote fn data =
 
 viewSubmissionPicker : Form -> Element Msg
 viewSubmissionPicker form =
-    el [ centerX ] <|
-        paragraph
-            [ spacing 10, width fill ]
-            [ el [ centerX ] <| icon Flag Style.mattIcon
-            , pickPosition ToggleStartPosition form.startPosition
-            ]
+    column
+        [ width shrink, centerX, spacing 20, height shrink ]
+        [ el [ centerX ] <| icon Flag Style.mattIcon
+        , pickPosition ToggleStartPosition form.startPosition
+        ]
 
 
 viewTransitionPickers : Form -> Element Msg
 viewTransitionPickers form =
-    el [ centerX ] <|
-        column
-            [ width shrink ]
-            [ el [ centerX ] <| pickPosition ToggleStartPosition form.startPosition
-            , el [ padding 20, centerX ] <| icon ArrowDown Style.mattIcon
-            , el [ centerX ] <| pickPosition ToggleEndPosition form.endPosition
-            ]
+    column
+        [ width shrink, centerX, spacing 20 ]
+        [ el [ centerX ] <| pickPosition ToggleStartPosition form.startPosition
+        , el [ centerX ] <| icon ArrowDown Style.mattIcon
+        , el [ centerX ] <| pickPosition ToggleEndPosition form.endPosition
+        ]
 
 
 pickPosition : Msg -> Maybe Info -> Element Msg
@@ -926,7 +924,7 @@ editRow name fa editMsg =
     column
         [ width shrink, height shrink, spacing 10, centerX, padding 20 ]
         [ el [ centerX ] <| icon fa Style.mattIcon
-        , row []
+        , row [ spacing 10 ]
             [ paragraph
                 [ Font.size 35
                 , Font.color Style.e
