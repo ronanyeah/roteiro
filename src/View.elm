@@ -25,376 +25,22 @@ view model =
         content =
             case model.view of
                 ViewApp appView ->
-                    case appView of
-                        ViewStart ->
-                            el [ centerY, centerX ] <|
-                                column [ spacing 20 ]
-                                    [ decorativeImage
-                                        [ height <| px 100
-                                        , width <| px 100
-                                        , centerX
-                                        ]
-                                        { src = "/map.svg" }
-                                    , el
-                                        [ Font.size 45, Font.color Style.e, centerX ]
-                                      <|
-                                        text "ROTEIRO"
-                                    ]
-
-                        ViewCreatePosition ->
-                            column []
-                                [ createHeader Flag
-                                , viewErrors model.form.errors
-                                , nameEdit model.form
-                                , notesEditor model.form
-                                , createButtons SaveCreatePosition
+                    if model.device == Desktop then
+                        row
+                            [ width fill
+                            , height fill
+                            ]
+                            [ links appView
+                            , el
+                                [ width <| px <| round <| toFloat model.size.width * 0.8
+                                , height <| px model.size.height
+                                , scrollbarY
                                 ]
-
-                        ViewCreateSubmission ->
-                            column [ height <| px model.size.height, scrollbarY, spacing 50 ]
-                                [ createHeader Bolt
-                                , viewErrors model.form.errors
-                                , nameEdit model.form
-                                , viewSubmissionPicker model.form
-                                , stepsEditor model.form
-                                , notesEditor model.form
-                                , createButtons SaveCreateSubmission
-                                ]
-
-                        ViewCreateTag ->
-                            column []
-                                [ createHeader Tags
-                                , viewErrors model.form.errors
-                                , nameEdit model.form
-                                , createButtons SaveCreateTag
-                                ]
-
-                        ViewCreateTopic ->
-                            column []
-                                [ createHeader Book
-                                , viewErrors model.form.errors
-                                , nameEdit model.form
-                                , notesEditor model.form
-                                , createButtons SaveCreateTopic
-                                ]
-
-                        ViewCreateTransition ->
-                            column [ spacing 50 ]
-                                [ createHeader Arrow
-                                , viewErrors model.form.errors
-                                , nameEdit model.form
-                                , viewTransitionPickers model.form
-                                , stepsEditor model.form
-                                , notesEditor model.form
-                                , createButtons SaveCreateTransition
-                                ]
-
-                        ViewEditPosition _ ->
-                            column [ height <| px model.size.height, scrollbarY ]
-                                [ editHeader Flag
-                                , viewErrors model.form.errors
-                                , nameEdit model.form
-                                , notesEditor model.form
-                                , editButtons SaveEditPosition <| DeletePosition model.form.id
-                                ]
-
-                        ViewEditSubmission _ ->
-                            column [ height <| px model.size.height, scrollbarY, spacing 30 ]
-                                [ editHeader Bolt
-                                , viewErrors model.form.errors
-                                , nameEdit model.form
-                                , viewSubmissionPicker model.form
-                                , stepsEditor model.form
-                                , notesEditor model.form
-                                , editTags model.tags <| Array.toList model.form.tags
-                                , editButtons SaveEditSubmission <| DeleteSubmission model.form.id
-                                ]
-
-                        ViewEditTag _ ->
-                            column [ height <| px model.size.height, scrollbarY ]
-                                [ editHeader Tags
-                                , viewErrors model.form.errors
-                                , nameEdit model.form
-                                , editButtons SaveEditTag <| DeleteTag model.form.id
-                                ]
-
-                        ViewEditTopic _ ->
-                            column [ height <| px model.size.height, scrollbarY ]
-                                [ editHeader Book
-                                , viewErrors model.form.errors
-                                , nameEdit model.form
-                                , notesEditor model.form
-                                , editButtons SaveEditTopic <| DeleteTopic model.form.id
-                                ]
-
-                        ViewEditTransition _ ->
-                            column [ height <| px model.size.height, scrollbarY, spacing 30 ]
-                                [ editHeader Arrow
-                                , viewErrors model.form.errors
-                                , nameEdit model.form
-                                , viewTransitionPickers model.form
-                                , stepsEditor model.form
-                                , notesEditor model.form
-                                , editTags model.tags <| Array.toList model.form.tags
-                                , editButtons SaveEditTransition <| DeleteTransition model.form.id
-                                ]
-
-                        ViewPosition data ->
-                            data
-                                |> viewRemote
-                                    (\({ name, notes, submissions, transitionsFrom, transitionsTo, id } as position) ->
-                                        let
-                                            (Id idStr) =
-                                                id
-                                        in
-                                        column
-                                            [ height <| px model.size.height
-                                            , scrollbarY
-                                            , spacing 20
-                                            ]
-                                            [ editRow name Flag <| NavigateTo <| EditPositionRoute position.id
-                                            , viewNotes notes
-                                            , column
-                                                [ centerX
-                                                , Border.rounded 5
-                                                , Border.width 2
-                                                , Border.color Style.e
-                                                , Border.solid
-                                                , width fill
-                                                , padding 10
-                                                ]
-                                                [ addNewRow Bolt
-                                                    (SetRouteThenNavigate
-                                                        (PositionRoute id)
-                                                        (CreateSubmissionRoute <| Just idStr)
-                                                    )
-                                                , viewTechList SubmissionRoute submissions
-                                                ]
-                                            , column
-                                                [ centerX
-                                                , Border.rounded 5
-                                                , Border.width 2
-                                                , Border.color Style.e
-                                                , Border.solid
-                                                , width fill
-                                                , padding 10
-                                                , spacing 10
-                                                ]
-                                                [ addNewRow Arrow
-                                                    (SetRouteThenNavigate
-                                                        (PositionRoute id)
-                                                        (CreateTransitionRoute
-                                                            (Just idStr)
-                                                            Nothing
-                                                        )
-                                                    )
-                                                , column [ spacing 10 ]
-                                                    (transitionsFrom
-                                                        |> List.map
-                                                            (viewTransitionPositions True False True)
-                                                    )
-                                                , column [ spacing 10 ]
-                                                    (transitionsTo
-                                                        |> List.map
-                                                            (viewTransitionPositions True True False)
-                                                    )
-                                                ]
-                                            ]
-                                    )
-
-                        ViewPositions ->
-                            model.positions
-                                |> viewRemote
-                                    (\positions ->
-                                        column [ height <| px model.size.height, scrollbarY ]
-                                            [ addNewRow Flag <| NavigateTo CreatePositionRoute
-                                            , blocks PositionRoute positions
-                                            ]
-                                    )
-
-                        ViewSettings ->
-                            let
-                                style =
-                                    onKeydown [ onEnter ChangePasswordSubmit ] :: Style.field
-                            in
-                            column [ padding 20 ]
-                                [ el [ centerX ] <| icon Cogs Style.mattIcon
-                                , el [] <| text "Change Password:"
-                                , viewErrors model.form.errors
-                                , Input.newPassword style
-                                    { onChange = Just UpdatePassword
-                                    , text = model.form.password
-                                    , label = Input.labelLeft [] none
-                                    , placeholder = Nothing
-                                    , show = False
-                                    }
-                                , Input.newPassword style
-                                    { onChange = Just UpdateConfirmPassword
-                                    , text = model.form.confirmPassword
-                                    , label = Input.labelLeft [] none
-                                    , placeholder = Nothing
-                                    , show = False
-                                    }
-                                , actionIcon SignIn (Just ChangePasswordSubmit)
-                                ]
-
-                        ViewSubmission data ->
-                            data
-                                |> viewRemote
-                                    (\sub ->
-                                        column [ height <| px model.size.height, scrollbarY ]
-                                            [ editRow sub.name Bolt <| NavigateTo <| EditSubmissionRoute sub.id
-                                            , row
-                                                [ spacing 10 ]
-                                                [ icon Flag Style.mattIcon
-                                                , button []
-                                                    { onPress = Just <| NavigateTo <| PositionRoute sub.position.id
-                                                    , label =
-                                                        el Style.link <|
-                                                            text sub.position.name
-                                                    }
-                                                ]
-                                            , viewSteps sub.steps
-                                            , viewNotes sub.notes
-                                            , viewTags sub.tags
-                                            ]
-                                    )
-
-                        ViewSubmissions data ->
-                            data
-                                |> viewRemote
-                                    (\submissions ->
-                                        column [ height <| px model.size.height, scrollbarY ]
-                                            [ addNewRow Bolt <|
-                                                NavigateTo
-                                                    (CreateSubmissionRoute Nothing)
-                                            , column [ spacing 20 ] <|
-                                                (submissions
-                                                    |> List.sortBy (.position >> .id >> (\(Id id) -> id))
-                                                    |> groupWhile (\a b -> a.position.id == b.position.id)
-                                                    |> List.map
-                                                        (\g ->
-                                                            el [ centerX ] <|
-                                                                column
-                                                                    []
-                                                                    [ g
-                                                                        |> List.head
-                                                                        |> Maybe.map .position
-                                                                        |> whenJust
-                                                                            (\{ id, name } ->
-                                                                                button [ centerX ]
-                                                                                    { onPress = Just <| NavigateTo <| PositionRoute id
-                                                                                    , label =
-                                                                                        paragraph Style.choice
-                                                                                            [ text name ]
-                                                                                    }
-                                                                            )
-                                                                    , blocks SubmissionRoute g
-                                                                    ]
-                                                        )
-                                                )
-                                            ]
-                                    )
-
-                        ViewTag data ->
-                            data
-                                |> viewRemote
-                                    (\t ->
-                                        column [ height <| px model.size.height, scrollbarY ]
-                                            [ editRow t.name Tags <| NavigateTo <| EditTagRoute t.id
-                                            , column []
-                                                [ icon Bolt Style.mattIcon
-                                                , viewTechList SubmissionRoute t.submissions
-                                                ]
-                                            , column []
-                                                [ icon Arrow Style.mattIcon
-                                                , viewTechList TransitionRoute t.transitions
-                                                ]
-                                            ]
-                                    )
-
-                        ViewTags ->
-                            model.tags
-                                |> viewRemote
-                                    (\tags ->
-                                        column [ height <| px model.size.height, scrollbarY ]
-                                            [ addNewRow Tags <| NavigateTo CreateTagRoute
-                                            , blocks TagRoute tags
-                                            ]
-                                    )
-
-                        ViewTopic data ->
-                            data
-                                |> viewRemote
-                                    (\t ->
-                                        column [ height <| px model.size.height, scrollbarY ]
-                                            [ editRow t.name Book <| NavigateTo <| EditTopicRoute t.id
-                                            , viewNotes t.notes
-                                            ]
-                                    )
-
-                        ViewTopics data ->
-                            data
-                                |> viewRemote
-                                    (\topics ->
-                                        column [ height <| px model.size.height, scrollbarY ]
-                                            [ addNewRow Book <| NavigateTo CreateTopicRoute
-                                            , blocks TopicRoute topics
-                                            ]
-                                    )
-
-                        ViewTransition data ->
-                            data
-                                |> viewRemote
-                                    (\t ->
-                                        column [ height <| px model.size.height, scrollbarY ]
-                                            [ editRow t.name Arrow <| NavigateTo <| EditTransitionRoute t.id
-                                            , viewTransitionPositions False True True t
-                                            , viewSteps t.steps
-                                            , viewNotes t.notes
-                                            , viewTags t.tags
-                                            ]
-                                    )
-
-                        ViewTransitions data ->
-                            data
-                                |> viewRemote
-                                    (\transitions ->
-                                        column [ height <| px model.size.height, scrollbarY ]
-                                            [ addNewRow Arrow <|
-                                                NavigateTo
-                                                    (CreateTransitionRoute Nothing Nothing)
-                                            , column [ spacing 20 ] <|
-                                                (transitions
-                                                    |> List.sortBy
-                                                        (.startPosition >> .id >> (\(Id id) -> id))
-                                                    |> groupWhile
-                                                        (\a b ->
-                                                            a.startPosition.id == b.startPosition.id
-                                                        )
-                                                    |> List.map
-                                                        (\g ->
-                                                            el [ centerX ] <|
-                                                                column
-                                                                    []
-                                                                    [ g
-                                                                        |> List.head
-                                                                        |> Maybe.map .startPosition
-                                                                        |> whenJust
-                                                                            (\{ id, name } ->
-                                                                                button [ centerX ]
-                                                                                    { onPress = Just <| NavigateTo <| PositionRoute id
-                                                                                    , label =
-                                                                                        paragraph Style.choice
-                                                                                            [ text name ]
-                                                                                    }
-                                                                            )
-                                                                    , blocks TransitionRoute g
-                                                                    ]
-                                                        )
-                                                )
-                                            ]
-                                    )
+                              <|
+                                viewApp model appView
+                            ]
+                    else
+                        viewApp model appView
 
                 ViewLogin ->
                     let
@@ -564,62 +210,410 @@ view model =
             else
                 behind none
     in
-    case model.device of
-        Desktop ->
-            layoutWith
-                { options =
-                    [ Element.focusStyle
-                        { borderColor = Nothing
-                        , backgroundColor = Nothing
-                        , shadow = Nothing
-                        }
-                    ]
+    layoutWith
+        { options =
+            [ Element.focusStyle
+                { borderColor = Nothing
+                , backgroundColor = Nothing
+                , shadow = Nothing
                 }
-                [ Background.color Style.c
-                , Style.font
-                , modal
+            ]
+                |> (if model.device == Mobile then
+                        (::) noHover
+                    else
+                        identity
+                   )
+        }
+        [ Background.color Style.c
+        , Style.font
+        , modal
+        ]
+        content
+
+
+viewApp : Model -> AppView -> Element Msg
+viewApp model appView =
+    let
+        col =
+            column [ height <| px model.size.height, scrollbarY, spacing 50 ]
+    in
+    case appView of
+        ViewStart ->
+            el [ centerY, centerX ] <|
+                column [ spacing 20 ]
+                    [ decorativeImage
+                        [ height <| px 100
+                        , width <| px 100
+                        , centerX
+                        ]
+                        { src = "/map.svg" }
+                    , el
+                        [ Font.size 45, Font.color Style.e, centerX ]
+                      <|
+                        text "ROTEIRO"
+                    ]
+
+        ViewCreatePosition ->
+            col
+                [ createHeader Flag
+                , viewErrors model.form.errors
+                , nameEdit model.form
+                , notesEditor model.form
+                , createButtons SaveCreatePosition
                 ]
-            <|
-                case model.view of
-                    ViewLogin ->
-                        content
 
-                    ViewSignUp ->
-                        content
+        ViewCreateSubmission ->
+            col
+                [ createHeader Bolt
+                , viewErrors model.form.errors
+                , nameEdit model.form
+                , viewSubmissionPicker model.form
+                , stepsEditor model.form
+                , notesEditor model.form
+                , createButtons SaveCreateSubmission
+                ]
 
-                    ViewWaiting ->
-                        content
+        ViewCreateTag ->
+            col
+                [ createHeader Tags
+                , viewErrors model.form.errors
+                , nameEdit model.form
+                , createButtons SaveCreateTag
+                ]
 
-                    ViewApp appView ->
-                        row
-                            [ width fill
-                            , height fill
-                            ]
-                            [ links appView
-                            , el
-                                [ width <| px <| round <| toFloat model.size.width * 0.8
-                                , height <| px model.size.height
-                                , scrollbarY
+        ViewCreateTopic ->
+            col
+                [ createHeader Book
+                , viewErrors model.form.errors
+                , nameEdit model.form
+                , notesEditor model.form
+                , createButtons SaveCreateTopic
+                ]
+
+        ViewCreateTransition ->
+            col
+                [ createHeader Arrow
+                , viewErrors model.form.errors
+                , nameEdit model.form
+                , viewTransitionPickers model.form
+                , stepsEditor model.form
+                , notesEditor model.form
+                , createButtons SaveCreateTransition
+                ]
+
+        ViewEditPosition _ ->
+            col
+                [ editHeader Flag
+                , viewErrors model.form.errors
+                , nameEdit model.form
+                , notesEditor model.form
+                , editButtons SaveEditPosition <| DeletePosition model.form.id
+                ]
+
+        ViewEditSubmission _ ->
+            col
+                [ editHeader Bolt
+                , viewErrors model.form.errors
+                , nameEdit model.form
+                , viewSubmissionPicker model.form
+                , stepsEditor model.form
+                , notesEditor model.form
+                , editTags model.tags <| Array.toList model.form.tags
+                , editButtons SaveEditSubmission <| DeleteSubmission model.form.id
+                ]
+
+        ViewEditTag _ ->
+            col
+                [ editHeader Tags
+                , viewErrors model.form.errors
+                , nameEdit model.form
+                , editButtons SaveEditTag <| DeleteTag model.form.id
+                ]
+
+        ViewEditTopic _ ->
+            col
+                [ editHeader Book
+                , viewErrors model.form.errors
+                , nameEdit model.form
+                , notesEditor model.form
+                , editButtons SaveEditTopic <| DeleteTopic model.form.id
+                ]
+
+        ViewEditTransition _ ->
+            col
+                [ editHeader Arrow
+                , viewErrors model.form.errors
+                , nameEdit model.form
+                , viewTransitionPickers model.form
+                , stepsEditor model.form
+                , notesEditor model.form
+                , editTags model.tags <| Array.toList model.form.tags
+                , editButtons SaveEditTransition <| DeleteTransition model.form.id
+                ]
+
+        ViewPosition data ->
+            data
+                |> viewRemote
+                    (\({ name, notes, submissions, transitionsFrom, transitionsTo, id } as position) ->
+                        let
+                            (Id idStr) =
+                                id
+                        in
+                        col
+                            [ editRow name Flag <| NavigateTo <| EditPositionRoute position.id
+                            , viewNotes notes
+                            , column
+                                [ centerX
+                                , Border.rounded 5
+                                , Border.width 2
+                                , Border.color Style.e
+                                , Border.solid
+                                , width shrink
+                                , padding 30
+                                , spacing 10
+                                , height shrink
                                 ]
-                                content
+                                [ addNewRow Bolt
+                                    (SetRouteThenNavigate
+                                        (PositionRoute id)
+                                        (CreateSubmissionRoute <| Just idStr)
+                                    )
+                                , viewTechList SubmissionRoute submissions
+                                ]
+                            , column
+                                [ centerX
+                                , Border.rounded 5
+                                , Border.width 2
+                                , Border.color Style.e
+                                , Border.solid
+                                , width shrink
+                                , padding 30
+                                , spacing 10
+                                , height shrink
+                                ]
+                                [ addNewRow Arrow
+                                    (SetRouteThenNavigate
+                                        (PositionRoute id)
+                                        (CreateTransitionRoute
+                                            (Just idStr)
+                                            Nothing
+                                        )
+                                    )
+                                , if
+                                    List.isEmpty transitionsFrom
+                                        && List.isEmpty transitionsTo
+                                  then
+                                    none
+                                  else
+                                    column [ spacing 10 ]
+                                        [ column [ spacing 10 ]
+                                            (transitionsFrom
+                                                |> List.map
+                                                    (viewTransitionPositions True False True)
+                                            )
+                                        , column [ spacing 10 ]
+                                            (transitionsTo
+                                                |> List.map
+                                                    (viewTransitionPositions True True False)
+                                            )
+                                        ]
+                                ]
                             ]
+                    )
 
-        Mobile ->
-            layoutWith
-                { options =
-                    [ noHover
-                    , Element.focusStyle
-                        { borderColor = Nothing
-                        , backgroundColor = Nothing
-                        , shadow = Nothing
-                        }
-                    ]
-                }
-                [ Background.color Style.c
-                , Style.font
-                , modal
+        ViewPositions ->
+            model.positions
+                |> viewRemote
+                    (\positions ->
+                        col
+                            [ addNewRow Flag <| NavigateTo CreatePositionRoute
+                            , blocks PositionRoute positions
+                            ]
+                    )
+
+        ViewSettings ->
+            let
+                style =
+                    onKeydown [ onEnter ChangePasswordSubmit ] :: Style.field
+            in
+            column [ padding 20 ]
+                [ el [ centerX ] <| icon Cogs Style.mattIcon
+                , el [] <| text "Change Password:"
+                , viewErrors model.form.errors
+                , Input.newPassword style
+                    { onChange = Just UpdatePassword
+                    , text = model.form.password
+                    , label = Input.labelLeft [] none
+                    , placeholder = Nothing
+                    , show = False
+                    }
+                , Input.newPassword style
+                    { onChange = Just UpdateConfirmPassword
+                    , text = model.form.confirmPassword
+                    , label = Input.labelLeft [] none
+                    , placeholder = Nothing
+                    , show = False
+                    }
+                , actionIcon SignIn (Just ChangePasswordSubmit)
                 ]
-                content
+
+        ViewSubmission data ->
+            data
+                |> viewRemote
+                    (\sub ->
+                        col
+                            [ editRow sub.name Bolt <| NavigateTo <| EditSubmissionRoute sub.id
+                            , row
+                                [ spacing 10 ]
+                                [ icon Flag Style.mattIcon
+                                , button []
+                                    { onPress = Just <| NavigateTo <| PositionRoute sub.position.id
+                                    , label =
+                                        el Style.link <|
+                                            text sub.position.name
+                                    }
+                                ]
+                            , viewSteps sub.steps
+                            , viewNotes sub.notes
+                            , viewTags sub.tags
+                            ]
+                    )
+
+        ViewSubmissions data ->
+            data
+                |> viewRemote
+                    (\submissions ->
+                        col
+                            [ addNewRow Bolt <|
+                                NavigateTo
+                                    (CreateSubmissionRoute Nothing)
+                            , column [ spacing 20 ] <|
+                                (submissions
+                                    |> List.sortBy (.position >> .id >> (\(Id id) -> id))
+                                    |> groupWhile (\a b -> a.position.id == b.position.id)
+                                    |> List.map
+                                        (\g ->
+                                            el [ centerX ] <|
+                                                column
+                                                    []
+                                                    [ g
+                                                        |> List.head
+                                                        |> Maybe.map .position
+                                                        |> whenJust
+                                                            (\{ id, name } ->
+                                                                button [ centerX ]
+                                                                    { onPress = Just <| NavigateTo <| PositionRoute id
+                                                                    , label =
+                                                                        paragraph Style.choice
+                                                                            [ text name ]
+                                                                    }
+                                                            )
+                                                    , blocks SubmissionRoute g
+                                                    ]
+                                        )
+                                )
+                            ]
+                    )
+
+        ViewTag data ->
+            data
+                |> viewRemote
+                    (\t ->
+                        col
+                            [ editRow t.name Tags <| NavigateTo <| EditTagRoute t.id
+                            , column [ height shrink, width shrink, centerX, spacing 10 ]
+                                [ el [ centerX ] <| icon Bolt Style.mattIcon
+                                , viewTechList SubmissionRoute t.submissions
+                                ]
+                            , column [ height shrink, width shrink, centerX, spacing 10 ]
+                                [ el [ centerX ] <| icon Arrow Style.mattIcon
+                                , viewTechList TransitionRoute t.transitions
+                                ]
+                            ]
+                    )
+
+        ViewTags ->
+            model.tags
+                |> viewRemote
+                    (\tags ->
+                        col
+                            [ addNewRow Tags <| NavigateTo CreateTagRoute
+                            , blocks TagRoute tags
+                            ]
+                    )
+
+        ViewTopic data ->
+            data
+                |> viewRemote
+                    (\t ->
+                        col
+                            [ editRow t.name Book <| NavigateTo <| EditTopicRoute t.id
+                            , viewNotes t.notes
+                            ]
+                    )
+
+        ViewTopics data ->
+            data
+                |> viewRemote
+                    (\topics ->
+                        col
+                            [ addNewRow Book <| NavigateTo CreateTopicRoute
+                            , blocks TopicRoute topics
+                            ]
+                    )
+
+        ViewTransition data ->
+            data
+                |> viewRemote
+                    (\t ->
+                        col
+                            [ editRow t.name Arrow <| NavigateTo <| EditTransitionRoute t.id
+                            , viewTransitionPositions False True True t
+                            , viewSteps t.steps
+                            , viewNotes t.notes
+                            , viewTags t.tags
+                            ]
+                    )
+
+        ViewTransitions data ->
+            data
+                |> viewRemote
+                    (\transitions ->
+                        col
+                            [ addNewRow Arrow <|
+                                NavigateTo
+                                    (CreateTransitionRoute Nothing Nothing)
+                            , column [ spacing 20 ] <|
+                                (transitions
+                                    |> List.sortBy
+                                        (.startPosition >> .id >> (\(Id id) -> id))
+                                    |> groupWhile
+                                        (\a b ->
+                                            a.startPosition.id == b.startPosition.id
+                                        )
+                                    |> List.map
+                                        (\g ->
+                                            el [ centerX ] <|
+                                                column
+                                                    []
+                                                    [ g
+                                                        |> List.head
+                                                        |> Maybe.map .startPosition
+                                                        |> whenJust
+                                                            (\{ id, name } ->
+                                                                button [ centerX ]
+                                                                    { onPress = Just <| NavigateTo <| PositionRoute id
+                                                                    , label =
+                                                                        paragraph Style.choice
+                                                                            [ text name ]
+                                                                    }
+                                                            )
+                                                    , blocks TransitionRoute g
+                                                    ]
+                                        )
+                                )
+                            ]
+                    )
 
 
 createHeader : FaIcon -> Element msg
@@ -1113,32 +1107,32 @@ viewSteps steps =
 
 viewNotes : Array String -> Element msg
 viewNotes notes =
-    el [] <|
-        column
-            []
-            (notes
-                |> Array.toList
-                |> List.map
-                    (\note ->
-                        let
-                            content =
-                                if Regex.contains matchLink note then
-                                    newTabLink [ Font.underline ]
-                                        { url = note
-                                        , label = text <| domain note
-                                        }
-                                else
-                                    text note
-                        in
-                        paragraph
-                            [ spacing 5
-                            , width fill
+    column
+        []
+        (notes
+            |> Array.toList
+            |> List.map
+                (\note ->
+                    let
+                        content =
+                            if Regex.contains matchLink note then
+                                newTabLink [ Font.underline ]
+                                    { url = note
+                                    , label = text <| domain note
+                                    }
+                            else
+                                text note
+                    in
+                    row []
+                        [ el [ Font.color Style.e ] <| text "• "
+                        , paragraph
+                            [ width fill
                             ]
-                            [ el [ Font.color Style.e ] <| text "• "
-                            , content
+                            [ content
                             ]
-                    )
-            )
+                        ]
+                )
+        )
 
 
 viewTransitions : List Transition -> Element Msg
@@ -1175,7 +1169,7 @@ viewTransitions ts =
 viewTechList : (Id -> Route) -> List { r | name : String, id : Id } -> Element Msg
 viewTechList route xs =
     if List.isEmpty xs then
-        el [] <| text "None!"
+        none
     else
         column
             []
