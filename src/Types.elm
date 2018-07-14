@@ -3,9 +3,8 @@ module Types exposing (..)
 import Api.Scalar exposing (Id)
 import Array exposing (Array)
 import Graphqelm.Http
-import Http
 import Navigation exposing (Location)
-import RemoteData exposing (RemoteData)
+import RemoteData exposing (WebData)
 import Window
 
 
@@ -94,18 +93,18 @@ type AppView
     | ViewEditTag Tag
     | ViewEditTopic Topic
     | ViewEditTransition Transition
-    | ViewPosition (RemoteData Http.Error Position)
+    | ViewPosition (WebData Position)
     | ViewPositions
     | ViewSettings
     | ViewStart
-    | ViewSubmission (RemoteData Http.Error Submission)
-    | ViewSubmissions (RemoteData Http.Error (List Submission))
-    | ViewTag (RemoteData Http.Error Tag)
+    | ViewSubmission (WebData Submission)
+    | ViewSubmissions (WebData (List Submission))
+    | ViewTag (WebData Tag)
     | ViewTags
-    | ViewTopic (RemoteData Http.Error Topic)
-    | ViewTopics (RemoteData Http.Error (List Info))
-    | ViewTransition (RemoteData Http.Error Transition)
-    | ViewTransitions (RemoteData Http.Error (List Transition))
+    | ViewTopic (WebData Topic)
+    | ViewTopics (WebData (List Info))
+    | ViewTransition (WebData Transition)
+    | ViewTransitions (WebData (List Transition))
 
 
 type FaIcon
@@ -146,8 +145,8 @@ type alias Model =
     { view : View
     , auth : Maybe Auth
     , previousRoute : Maybe Route
-    , positions : RemoteData Http.Error (List Info)
-    , tags : RemoteData Http.Error (List Info)
+    , positions : WebData (List Info)
+    , tags : WebData (List Info)
     , device : Device
     , size : Window.Size
     , confirm : Maybe Msg
