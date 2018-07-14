@@ -235,7 +235,12 @@ viewApp : Model -> AppView -> Element Msg
 viewApp model appView =
     let
         col =
-            column [ height <| px model.size.height, scrollbarY, spacing 50 ]
+            column
+                [ height shrink
+                , scrollbarY
+                , spacing 50
+                , padding 20
+                ]
     in
     case appView of
         ViewStart ->
@@ -915,18 +920,16 @@ pickPosition msg position =
 
 editRow : String -> FaIcon -> Msg -> Element Msg
 editRow name fa editMsg =
-    column
-        [ width shrink, height shrink, spacing 10, centerX, padding 20 ]
+    row
+        [ width shrink, height shrink, spacing 20, centerX ]
         [ el [ centerX ] <| icon fa Style.mattIcon
-        , row [ spacing 10 ]
-            [ paragraph
-                [ Font.size 35
-                , Font.color Style.e
-                , width fill
-                ]
-                [ text name ]
-            , actionIcon Write (Just editMsg)
+        , paragraph
+            [ Font.size 35
+            , Font.color Style.e
+            , width fill
             ]
+            [ text name ]
+        , actionIcon Write (Just editMsg)
         ]
 
 
@@ -1108,28 +1111,24 @@ viewSteps steps =
 viewNotes : Array String -> Element msg
 viewNotes notes =
     column
-        []
+        [ Font.size 25, width shrink, centerX ]
         (notes
             |> Array.toList
             |> List.map
                 (\note ->
-                    let
-                        content =
-                            if Regex.contains matchLink note then
-                                newTabLink [ Font.underline ]
-                                    { url = note
-                                    , label = text <| domain note
-                                    }
-                            else
-                                text note
-                    in
-                    row []
-                        [ el [ Font.color Style.e ] <| text "• "
-                        , paragraph
-                            [ width fill
-                            ]
-                            [ content
-                            ]
+                    row [ fill |> maximum 500 |> width ]
+                        [ el [ Font.color Style.e, Element.alignTop ] <| text "• "
+                        , if Regex.contains matchLink note then
+                            newTabLink [ Font.underline ]
+                                { url = note
+                                , label = text <| domain note
+                                }
+                          else
+                            paragraph
+                                [ width fill
+                                ]
+                                [ text note
+                                ]
                         ]
                 )
         )
