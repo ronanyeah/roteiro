@@ -1082,23 +1082,23 @@ notesEditor form =
 
 viewSteps : Array String -> Element Msg
 viewSteps steps =
-    el [ width fill ] <|
-        column
-            []
-            (steps
-                |> Array.toList
-                |> List.indexedMap
-                    (\i step ->
-                        row
-                            [ spacing 10 ]
-                            [ el [ Font.color Style.e ] <| text <| (toString (i + 1) ++ ".")
-                            , paragraph
-                                [ width fill ]
-                                [ text step
-                                ]
+    column
+        [ Font.size 25, width shrink, centerX ]
+        (steps
+            |> Array.toList
+            |> List.indexedMap
+                (\i step ->
+                    row [ fill |> maximum 500 |> width ]
+                        [ el [ Font.color Style.e, Element.alignTop ] <|
+                            text <|
+                                (toString (i + 1) ++ ".")
+                        , paragraph
+                            [ width fill ]
+                            [ text step
                             ]
-                    )
-            )
+                        ]
+                )
+        )
 
 
 viewNotes : Array String -> Element msg
