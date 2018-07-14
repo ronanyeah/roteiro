@@ -1281,9 +1281,25 @@ update msg model =
                     else
                         protect
                             (\auth ->
-                                ( { model | view = ViewApp <| ViewPosition Loading }
-                                , fetch auth.token (Api.Query.position { id = id } position) CbPosition
+                                (case model.view of
+                                    ViewApp (ViewEditPosition position) ->
+                                        if position.id == id then
+                                            Just position
+                                        else
+                                            Nothing
+
+                                    _ ->
+                                        Nothing
                                 )
+                                    |> unwrap
+                                        ( { model | view = ViewApp <| ViewPosition Loading }
+                                        , fetch auth.token (Api.Query.position { id = id } position) CbPosition
+                                        )
+                                        (\p ->
+                                            ( { model | view = ViewApp <| ViewPosition <| Success p }
+                                            , Cmd.none
+                                            )
+                                        )
                             )
 
                 Positions ->
