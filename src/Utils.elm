@@ -56,8 +56,8 @@ goTo route =
         CreatePositionRoute ->
             "/positions/new"
 
-        CreateSubmissionRoute maybeStartPosition ->
-            "/submissions/new" ++ (maybeStartPosition |> unwrap "" ((++) "?start="))
+        CreateSubmissionRoute ->
+            "/submissions/new"
 
         CreateTagRoute ->
             "/tags/new"
@@ -65,23 +65,8 @@ goTo route =
         CreateTopicRoute ->
             "/topics/new"
 
-        CreateTransitionRoute maybeStartPosition maybeEndPosition ->
-            let
-                suffix =
-                    case ( maybeStartPosition, maybeEndPosition ) of
-                        ( Nothing, Nothing ) ->
-                            ""
-
-                        ( Just p, Nothing ) ->
-                            "?start=" ++ p
-
-                        ( Nothing, Just p ) ->
-                            "?start=" ++ p
-
-                        ( Just p1, Just p2 ) ->
-                            "?start=" ++ p1 ++ "&end=" ++ p2
-            in
-            "/transitions/new" ++ suffix
+        CreateTransitionRoute ->
+            "/transitions/new"
 
         EditPositionRoute (Id id) ->
             "/positions/" ++ id ++ "/edit"

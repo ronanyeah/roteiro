@@ -360,10 +360,6 @@ viewApp model appView =
             data
                 |> viewRemote
                     (\({ name, notes, submissions, transitionsFrom, transitionsTo, id } as position) ->
-                        let
-                            (Id idStr) =
-                                id
-                        in
                         col
                             [ editRow name Flag <| NavigateTo <| EditPositionRoute position.id
                             , viewNotes notes
@@ -381,7 +377,7 @@ viewApp model appView =
                                 [ addNewRow Bolt
                                     (SetRouteThenNavigate
                                         (PositionRoute id)
-                                        (CreateSubmissionRoute <| Just idStr)
+                                        CreateSubmissionRoute
                                     )
                                 , viewTechList SubmissionRoute submissions
                                 ]
@@ -399,10 +395,7 @@ viewApp model appView =
                                 [ addNewRow Arrow
                                     (SetRouteThenNavigate
                                         (PositionRoute id)
-                                        (CreateTransitionRoute
-                                            (Just idStr)
-                                            Nothing
-                                        )
+                                        CreateTransitionRoute
                                     )
                                 , if
                                     List.isEmpty transitionsFrom
@@ -491,7 +484,7 @@ viewApp model appView =
                         col
                             [ addNewRow Bolt <|
                                 NavigateTo
-                                    (CreateSubmissionRoute Nothing)
+                                    CreateSubmissionRoute
                             , column [ spacing 20 ] <|
                                 (submissions
                                     |> List.sortBy (.position >> .id >> (\(Id id) -> id))
@@ -587,7 +580,7 @@ viewApp model appView =
                         col
                             [ addNewRow Arrow <|
                                 NavigateTo
-                                    (CreateTransitionRoute Nothing Nothing)
+                                    CreateTransitionRoute
                             , column [ spacing 20 ] <|
                                 (transitions
                                     |> List.sortBy

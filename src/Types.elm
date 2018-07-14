@@ -166,10 +166,10 @@ type Device
 type Route
     = NotFound
     | CreatePositionRoute
-    | CreateSubmissionRoute (Maybe String)
+    | CreateSubmissionRoute
     | CreateTagRoute
     | CreateTopicRoute
-    | CreateTransitionRoute (Maybe String) (Maybe String)
+    | CreateTransitionRoute
     | EditPositionRoute Id
     | EditSubmissionRoute Id
     | EditTagRoute Id

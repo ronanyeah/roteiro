@@ -1046,23 +1046,17 @@ update msg model =
                     , Cmd.none
                     )
 
-                CreateSubmissionRoute maybeStart ->
+                CreateSubmissionRoute ->
                     protect
                         (\auth ->
                             let
                                 start =
-                                    model.positions
-                                        |> RemoteData.toMaybe
-                                        |> Maybe.map2 (,) maybeStart
-                                        |> Maybe.andThen
-                                            (\( p, positions ) ->
-                                                positions
-                                                    |> find (.id >> (==) (Id p))
-                                            )
-                                        |> Maybe.map
-                                            (\{ id, name } ->
-                                                Info id name
-                                            )
+                                    case model.view of
+                                        ViewApp (ViewPosition (Success { id, name })) ->
+                                            Just <| Info id name
+
+                                        _ ->
+                                            Nothing
 
                                 form =
                                     { emptyForm
@@ -1096,23 +1090,17 @@ update msg model =
                     , Cmd.none
                     )
 
-                CreateTransitionRoute maybeStart _ ->
+                CreateTransitionRoute ->
                     protect
                         (\auth ->
                             let
                                 start =
-                                    model.positions
-                                        |> RemoteData.toMaybe
-                                        |> Maybe.map2 (,) maybeStart
-                                        |> Maybe.andThen
-                                            (\( p, positions ) ->
-                                                positions
-                                                    |> find (.id >> (==) (Id p))
-                                            )
-                                        |> Maybe.map
-                                            (\{ id, name } ->
-                                                Info id name
-                                            )
+                                    case model.view of
+                                        ViewApp (ViewPosition (Success { id, name })) ->
+                                            Just <| Info id name
+
+                                        _ ->
+                                            Nothing
 
                                 form =
                                     { emptyForm
