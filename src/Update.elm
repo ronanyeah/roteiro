@@ -1,20 +1,12 @@
 module Update exposing (..)
 
+import Api
 import Api.Mutation
-import Api.Object
-import Api.Object.AuthResponse
-import Api.Object.Position
-import Api.Object.Submission
-import Api.Object.Tag
-import Api.Object.Topic
-import Api.Object.Transition
 import Api.Query
 import Api.Scalar exposing (Id(..))
 import Array
-import Graphqelm.Field
 import Graphqelm.Http
-import Graphqelm.Operation exposing (RootMutation, RootQuery)
-import Graphqelm.SelectionSet exposing (SelectionSet, with)
+import Graphqelm.SelectionSet
 import Json.Encode as Encode
 import Navigation
 import Ports
@@ -23,118 +15,6 @@ import Router exposing (router)
 import Types exposing (..)
 import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, unwrap)
 import Validate
-
-
-topicInfo : SelectionSet Info Api.Object.Topic
-topicInfo =
-    Api.Object.Topic.selection Info
-        |> with Api.Object.Topic.id
-        |> with Api.Object.Topic.name
-
-
-topic : SelectionSet Topic Api.Object.Topic
-topic =
-    Api.Object.Topic.selection Topic
-        |> with Api.Object.Topic.id
-        |> with Api.Object.Topic.name
-        |> with (Api.Object.Topic.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
-
-
-positionInfo : SelectionSet Info Api.Object.Position
-positionInfo =
-    Api.Object.Position.selection Info
-        |> with Api.Object.Position.id
-        |> with Api.Object.Position.name
-
-
-position : SelectionSet Position Api.Object.Position
-position =
-    Api.Object.Position.selection Position
-        |> with Api.Object.Position.id
-        |> with Api.Object.Position.name
-        |> with (Api.Object.Position.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Position.submissions identity submissionInfo |> Graphqelm.Field.map (Maybe.withDefault []))
-        |> with (Api.Object.Position.transitionsFrom identity transition |> Graphqelm.Field.map (Maybe.withDefault []))
-        |> with (Api.Object.Position.transitionsTo identity transition |> Graphqelm.Field.map (Maybe.withDefault []))
-
-
-transition : SelectionSet Transition Api.Object.Transition
-transition =
-    Api.Object.Transition.selection Transition
-        |> with Api.Object.Transition.id
-        |> with Api.Object.Transition.name
-        |> with (Api.Object.Transition.startPosition identity positionInfo)
-        |> with (Api.Object.Transition.endPosition identity positionInfo)
-        |> with (Api.Object.Transition.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Transition.steps |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Transition.tags identity tagInfo |> Graphqelm.Field.map (Maybe.withDefault []))
-
-
-transitionInfo : SelectionSet Info Api.Object.Transition
-transitionInfo =
-    Api.Object.Transition.selection Info
-        |> with Api.Object.Transition.id
-        |> with Api.Object.Transition.name
-
-
-submissionInfo : SelectionSet Info Api.Object.Submission
-submissionInfo =
-    Api.Object.Submission.selection Info
-        |> with Api.Object.Submission.id
-        |> with Api.Object.Submission.name
-
-
-submission : SelectionSet Submission Api.Object.Submission
-submission =
-    Api.Object.Submission.selection Submission
-        |> with Api.Object.Submission.id
-        |> with Api.Object.Submission.name
-        |> with (Api.Object.Submission.steps |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Submission.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Submission.position identity positionInfo)
-        |> with (Api.Object.Submission.tags identity tagInfo |> Graphqelm.Field.map (Maybe.withDefault []))
-
-
-tagInfo : SelectionSet Info Api.Object.Tag
-tagInfo =
-    Api.Object.Tag.selection Info
-        |> with Api.Object.Tag.id
-        |> with Api.Object.Tag.name
-
-
-tag : SelectionSet Tag Api.Object.Tag
-tag =
-    Api.Object.Tag.selection Tag
-        |> with Api.Object.Tag.id
-        |> with Api.Object.Tag.name
-        |> with (Api.Object.Tag.submissions identity submissionInfo |> Graphqelm.Field.map (Maybe.withDefault []))
-        |> with (Api.Object.Tag.transitions identity transitionInfo |> Graphqelm.Field.map (Maybe.withDefault []))
-
-
-auth : SelectionSet Auth Api.Object.AuthResponse
-auth =
-    Api.Object.AuthResponse.selection Auth
-        |> with Api.Object.AuthResponse.id
-        |> with Api.Object.AuthResponse.email
-        |> with Api.Object.AuthResponse.token
-
-
-fetch : String -> Graphqelm.Field.Field a RootQuery -> (GqlResult a -> Msg) -> Cmd Msg
-fetch token sel msg =
-    Api.Query.selection identity
-        |> with sel
-        |> Graphqelm.Http.queryRequest "/api"
-        |> Graphqelm.Http.withHeader "authorization" ("Bearer " ++ token)
-        |> Graphqelm.Http.send msg
-
-
-mutation : String -> Graphqelm.Field.Field a RootMutation -> (GqlResult a -> Msg) -> Cmd Msg
-mutation token sel msg =
-    Api.Mutation.selection identity
-        |> with sel
-        |> Graphqelm.Http.mutationRequest "/api"
-        |> Graphqelm.Http.withHeader "authorization" ("Bearer " ++ token)
-        |> Graphqelm.Http.send msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -608,7 +488,7 @@ update msg model =
                             == model.form.confirmPassword
                     then
                         ( { model | form = clearErrors model.form }
-                        , mutation auth.token
+                        , Api.mutation auth.token
                             (Api.Mutation.changePassword { password = model.form.password })
                             CbChangePassword
                         )
@@ -631,7 +511,7 @@ update msg model =
             protect
                 (\auth ->
                     ( model
-                    , mutation auth.token
+                    , Api.mutation auth.token
                         (Api.Mutation.deletePosition { id = id })
                         CbDeletePosition
                     )
@@ -641,7 +521,7 @@ update msg model =
             protect
                 (\auth ->
                     ( model
-                    , mutation auth.token
+                    , Api.mutation auth.token
                         (Api.Mutation.deleteSubmission { id = id })
                         CbDeleteSubmission
                     )
@@ -651,7 +531,7 @@ update msg model =
             protect
                 (\auth ->
                     ( model
-                    , mutation auth.token
+                    , Api.mutation auth.token
                         (Api.Mutation.deleteTag { id = id })
                         CbDeleteTag
                     )
@@ -661,7 +541,7 @@ update msg model =
             protect
                 (\auth ->
                     ( model
-                    , mutation auth.token
+                    , Api.mutation auth.token
                         (Api.Mutation.deleteTopic { id = id })
                         CbDeleteTopic
                     )
@@ -671,7 +551,7 @@ update msg model =
             protect
                 (\auth ->
                     ( model
-                    , mutation auth.token
+                    , Api.mutation auth.token
                         (Api.Mutation.deleteTransition { id = id })
                         CbDeleteTransition
                     )
@@ -680,12 +560,12 @@ update msg model =
         LoginSubmit ->
             ( { model | form = model.form |> (\f -> { f | errors = Nothing }) }
             , Api.Mutation.selection identity
-                |> with
+                |> Graphqelm.SelectionSet.with
                     (Api.Mutation.authenticateUser
                         { email = model.form.email
                         , password = model.form.password
                         }
-                        auth
+                        Api.auth
                     )
                 |> Graphqelm.Http.mutationRequest "/api"
                 |> Graphqelm.Http.send CbAuth
@@ -719,8 +599,13 @@ update msg model =
                     case Validate.position model.form of
                         Ok ( name, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , mutation auth.token
-                                (Api.Mutation.createPosition { name = name, notes = notes } position)
+                            , Api.mutation auth.token
+                                (Api.Mutation.createPosition
+                                    { name = name
+                                    , notes = notes
+                                    }
+                                    Api.position
+                                )
                                 CbCreateOrUpdatePosition
                             )
 
@@ -736,7 +621,7 @@ update msg model =
                     case Validate.submission model.form of
                         Ok ( name, startId, steps, notes, tags ) ->
                             ( { model | form = clearErrors model.form }
-                            , mutation auth.token
+                            , Api.mutation auth.token
                                 (Api.Mutation.createSubmission
                                     { name = name
                                     , steps = steps
@@ -744,7 +629,7 @@ update msg model =
                                     , position = startId
                                     , tags = tags
                                     }
-                                    submission
+                                    Api.submission
                                 )
                                 CbCreateOrUpdateSubmission
                             )
@@ -761,9 +646,9 @@ update msg model =
                     case Validate.tag model.form of
                         Ok name ->
                             ( { model | form = clearErrors model.form }
-                            , mutation auth.token
+                            , Api.mutation auth.token
                                 (Api.Mutation.createTag { name = name }
-                                    tag
+                                    Api.tag
                                 )
                                 CbCreateOrUpdateTag
                             )
@@ -780,8 +665,13 @@ update msg model =
                     case Validate.topic model.form of
                         Ok ( name, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , mutation auth.token
-                                (Api.Mutation.createTopic { name = name, notes = notes } topic)
+                            , Api.mutation auth.token
+                                (Api.Mutation.createTopic
+                                    { name = name
+                                    , notes = notes
+                                    }
+                                    Api.topic
+                                )
                                 CbCreateOrUpdateTopic
                             )
 
@@ -797,7 +687,7 @@ update msg model =
                     case Validate.transition model.form of
                         Ok ( name, startId, endId, steps, notes, tags ) ->
                             ( { model | form = clearErrors model.form }
-                            , mutation auth.token
+                            , Api.mutation auth.token
                                 (Api.Mutation.createTransition
                                     { name = name
                                     , startPosition = startId
@@ -806,7 +696,7 @@ update msg model =
                                     , notes = notes
                                     , tags = tags
                                     }
-                                    transition
+                                    Api.transition
                                 )
                                 CbCreateOrUpdateTransition
                             )
@@ -823,13 +713,13 @@ update msg model =
                     case Validate.position model.form of
                         Ok ( name, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , mutation auth.token
+                            , Api.mutation auth.token
                                 (Api.Mutation.updatePosition
                                     { id = model.form.id
                                     , name = name
                                     , notes = notes
                                     }
-                                    position
+                                    Api.position
                                 )
                                 CbCreateOrUpdatePosition
                             )
@@ -846,7 +736,7 @@ update msg model =
                     case Validate.submission model.form of
                         Ok ( name, position, steps, notes, tags ) ->
                             ( { model | form = clearErrors model.form }
-                            , mutation auth.token
+                            , Api.mutation auth.token
                                 (Api.Mutation.updateSubmission
                                     { id = model.form.id
                                     , name = name
@@ -855,7 +745,7 @@ update msg model =
                                     , position = position
                                     , tags = tags
                                     }
-                                    submission
+                                    Api.submission
                                 )
                                 CbCreateOrUpdateSubmission
                             )
@@ -872,12 +762,12 @@ update msg model =
                     case Validate.tag model.form of
                         Ok name ->
                             ( { model | form = clearErrors model.form }
-                            , mutation auth.token
+                            , Api.mutation auth.token
                                 (Api.Mutation.updateTag
                                     { id = model.form.id
                                     , name = name
                                     }
-                                    tag
+                                    Api.tag
                                 )
                                 CbCreateOrUpdateTag
                             )
@@ -894,13 +784,13 @@ update msg model =
                     case Validate.topic model.form of
                         Ok ( name, notes ) ->
                             ( { model | form = clearErrors model.form }
-                            , mutation auth.token
+                            , Api.mutation auth.token
                                 (Api.Mutation.updateTopic
                                     { id = model.form.id
                                     , name = name
                                     , notes = notes
                                     }
-                                    topic
+                                    Api.topic
                                 )
                                 CbCreateOrUpdateTopic
                             )
@@ -917,7 +807,7 @@ update msg model =
                     case Validate.transition model.form of
                         Ok ( name, startId, endId, steps, notes, tags ) ->
                             ( { model | form = clearErrors model.form }
-                            , mutation auth.token
+                            , Api.mutation auth.token
                                 (Api.Mutation.updateTransition
                                     { id = model.form.id
                                     , name = name
@@ -927,7 +817,7 @@ update msg model =
                                     , notes = notes
                                     , tags = tags
                                     }
-                                    transition
+                                    Api.transition
                                 )
                                 CbCreateOrUpdateTransition
                             )
@@ -950,12 +840,12 @@ update msg model =
         SignUpSubmit ->
             ( model
             , Api.Mutation.selection identity
-                |> with
+                |> Graphqelm.SelectionSet.with
                     (Api.Mutation.signUpUser
                         { email = model.form.email
                         , password = model.form.password
                         }
-                        auth
+                        Api.auth
                     )
                 |> Graphqelm.Http.mutationRequest "/api"
                 |> Graphqelm.Http.send CbAuth
@@ -1293,7 +1183,7 @@ update msg model =
                                 )
                                     |> unwrap
                                         ( { model | view = ViewApp <| ViewPosition Loading }
-                                        , fetch auth.token (Api.Query.position { id = id } position) CbPosition
+                                        , Api.fetch auth.token (Api.Query.position { id = id } Api.position) CbPosition
                                         )
                                         (\p ->
                                             ( { model | view = ViewApp <| ViewPosition <| Success p }
@@ -1306,7 +1196,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp ViewPositions, positions = Loading }
-                            , fetch auth.token (Api.Query.positions positionInfo) CbPositions
+                            , Api.fetch auth.token (Api.Query.positions Api.positionInfo) CbPositions
                             )
                         )
 
@@ -1322,7 +1212,7 @@ update msg model =
                         protect
                             (\auth ->
                                 ( { model | view = ViewApp <| ViewSubmission Loading }
-                                , fetch auth.token (Api.Query.submission { id = id } submission) CbSubmission
+                                , Api.fetch auth.token (Api.Query.submission { id = id } Api.submission) CbSubmission
                                 )
                             )
 
@@ -1330,7 +1220,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp <| ViewSubmissions Loading }
-                            , fetch auth.token (Api.Query.submissions submission) CbSubmissions
+                            , Api.fetch auth.token (Api.Query.submissions Api.submission) CbSubmissions
                             )
                         )
 
@@ -1341,7 +1231,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp <| ViewTag Loading }
-                            , fetch auth.token (Api.Query.tag { id = id } tag) CbTag
+                            , Api.fetch auth.token (Api.Query.tag { id = id } Api.tag) CbTag
                             )
                         )
 
@@ -1349,7 +1239,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp ViewTags, tags = Loading }
-                            , fetch auth.token (Api.Query.tags tagInfo) CbTags
+                            , Api.fetch auth.token (Api.Query.tags Api.tagInfo) CbTags
                             )
                         )
 
@@ -1360,7 +1250,7 @@ update msg model =
                         protect
                             (\auth ->
                                 ( { model | view = ViewApp <| ViewTopic Loading }
-                                , fetch auth.token (Api.Query.topic { id = id } topic) CbTopic
+                                , Api.fetch auth.token (Api.Query.topic { id = id } Api.topic) CbTopic
                                 )
                             )
 
@@ -1368,7 +1258,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp <| ViewTopics Loading }
-                            , fetch auth.token (Api.Query.topics topicInfo) CbTopics
+                            , Api.fetch auth.token (Api.Query.topics Api.topicInfo) CbTopics
                             )
                         )
 
@@ -1379,7 +1269,7 @@ update msg model =
                         protect
                             (\auth ->
                                 ( { model | view = ViewApp <| ViewTransition Loading }
-                                , fetch auth.token (Api.Query.transition { id = id } transition) CbTransition
+                                , Api.fetch auth.token (Api.Query.transition { id = id } Api.transition) CbTransition
                                 )
                             )
 
@@ -1387,7 +1277,7 @@ update msg model =
                     protect
                         (\auth ->
                             ( { model | view = ViewApp <| ViewTransitions Loading }
-                            , fetch auth.token (Api.Query.transitions transition) CbTransitions
+                            , Api.fetch auth.token (Api.Query.transitions Api.transition) CbTransitions
                             )
                         )
 
@@ -1426,7 +1316,7 @@ maybeFetchTags token data =
             RemoteData.Success _ ->
                 False
     then
-        fetch token (Api.Query.tags tagInfo) CbTags
+        Api.fetch token (Api.Query.tags Api.tagInfo) CbTags
     else
         Cmd.none
 
@@ -1447,7 +1337,7 @@ maybeFetchPositions token data =
             RemoteData.Success _ ->
                 False
     then
-        fetch token (Api.Query.positions positionInfo) CbPositions
+        Api.fetch token (Api.Query.positions Api.positionInfo) CbPositions
     else
         Cmd.none
 
