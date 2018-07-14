@@ -17,19 +17,6 @@ import Types exposing (AppView(..), Auth, Device(Desktop, Mobile), FaIcon(..), F
 import Window
 
 
-find : (a -> Bool) -> List a -> Maybe a
-find predicate xs =
-    case xs of
-        x :: tail ->
-            if predicate x then
-                Just x
-            else
-                find predicate tail
-
-        [] ->
-            Nothing
-
-
 authDecoder : Decoder Auth
 authDecoder =
     Decode.map3 Auth

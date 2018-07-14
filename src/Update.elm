@@ -21,7 +21,7 @@ import Ports
 import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Types exposing (..)
-import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, find, formatErrors, goTo, log, unwrap)
+import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, unwrap)
 import Validate
 
 
