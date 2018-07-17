@@ -235,25 +235,64 @@ module.exports = {
       : Error("Incorrect password!");
   },
 
-  signUpUser: async (_, args, ctx, _info) =>
-    !validator.isEmail(args.email)
-      ? Error("Not a valid email address!")
-      : ctx.db.mutation
-          .createUser(
-            {
-              data: {
-                ...args,
-                password: await hash(args.password)
-              }
-            },
-            "{ id, email, password }"
-          )
-          .then(async user =>
-            Object.assign(
-              { token: await sign({ userId: user.id }, APP_SECRET) },
-              user
-            )
-          ),
+  signUpUser: async (_, args, ctx, _info) => {
+    if (!isEmail(args.email)) {
+      return Error("Not a valid email address!");
+    }
+
+    const user = await ctx.db.mutation.createUser(
+      {
+        data: {
+          ...args,
+          password: await hash(args.password)
+        }
+      },
+      "{ id, email, password }"
+    );
+
+    const sc = await ctx.db.mutation.createPosition({
+      data: {
+        user: { connect: { id: user.id } },
+        name: "Side Control (Top)",
+        notes: { set: ["Info here!"] }
+      }
+    });
+
+    const mount = await ctx.db.mutation.createPosition({
+      data: {
+        user: { connect: { id: user.id } },
+        name: "Mount (Top)",
+        notes: { set: ["Info here!"] }
+      }
+    });
+
+    await Promise.all([
+      ctx.db.mutation.createSubmission({
+        data: {
+          user: { connect: { id: user.id } },
+          position: { connect: { id: sc.id } },
+          name: "Kimura",
+          notes: { set: ["Info here!"] },
+          steps: { set: ["Do this!"] }
+        }
+      }),
+      ctx.db.mutation.createTransition({
+        data: {
+          user: { connect: { id: user.id } },
+          startPosition: { connect: { id: sc.id } },
+          endPosition: { connect: { id: mount.id } },
+          name: "Knee slide",
+          notes: { set: ["Info here!"] },
+          steps: { set: ["Do this!"] }
+        }
+      })
+    ]);
+
+    return Object.assign(
+      { token: await sign({ userId: user.id }, APP_SECRET) },
+      user
+    );
+  },
 
   changePassword: async (_, { password }, ctx, _info) => {
     const userId = await getUserId(ctx.request);
