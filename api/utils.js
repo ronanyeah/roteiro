@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcryptjs = require("bcryptjs");
 const { dissoc, evolve, pipe } = require("ramda");
 const { promisify } = require("util");
+const { normalizeEmail } = require("validator");
 
 const { APP_SECRET } = process.env;
 
@@ -21,6 +22,7 @@ module.exports = {
   clean: pipe(
     dissoc("id"),
     evolve({
+      email: normalizeEmail,
       steps: xs => ({ set: xs }),
       notes: xs => ({ set: xs }),
       startPosition: id => ({ connect: { id } }),

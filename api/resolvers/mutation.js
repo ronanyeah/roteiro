@@ -1,6 +1,6 @@
 const { pipe, reject, pluck, assoc, prop, contains, __ } = require("ramda");
 const bcryptjs = require("bcryptjs");
-const validator = require("validator");
+const { normalizeEmail, isEmail } = require("validator");
 
 const { clean, getUserId, sign, hash } = require("../utils.js");
 
@@ -212,14 +212,14 @@ module.exports = {
     ),
 
   authenticateUser: async (_, { email, password }, ctx, _info) => {
-    const user = await ctx.db.query.user(
-      { where: { email } },
-      "{ id, email, password }"
-    );
-
-    if (!validator.isEmail(email)) {
+    if (!isEmail(email)) {
       return Error("Not a valid email address!");
     }
+
+    const user = await ctx.db.query.user(
+      { where: { email: normalizeEmail(email) } },
+      "{ id, email, password }"
+    );
 
     if (!user) {
       return Error("Email is not in use!");
