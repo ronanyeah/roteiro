@@ -51,14 +51,40 @@
   },
   "devDependencies": {
     "elm-hot-loader": "^0.5.4",
+    "eslint": "^5.1.0",
+    "eslint-plugin-fp": "^2.3.0",
     "get-graphql-schema": "^2.1.1",
     "graphqelm": "^3.1.12",
     "graphql-request": "^1.6.0",
     "nodemon": "^1.18.2",
     "now": "^11.2.9",
+    "prettier": "^1.13.7",
     "webpack-dev-server": "^3.1.4"
   },
   "now": {
     "alias": "roteiro"
+  },
+  "eslintConfig": {
+    "rules": {
+      "no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ]
+    },
+    "plugins": [
+      "fp"
+    ],
+    "extends": [
+      "plugin:fp/recommended",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 8,
+      "ecmaFeatures": {
+        "experimentalObjectRestSpread": true
+      }
+    }
   }
 }
