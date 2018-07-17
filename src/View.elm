@@ -72,7 +72,7 @@ view model =
                                 [ Font.size 45, Font.color Style.e, centerX ]
                               <|
                                 text "ROTEIRO"
-                            , actionIcon NewUser (Just <| NavigateTo SignUp)
+                            , el [ centerX ] <| actionIcon NewUser (Just <| NavigateTo SignUp)
                             , viewErrors model.form.errors
                             , Input.email
                                 ([ centerX
@@ -136,7 +136,7 @@ view model =
                                 [ Font.size 45, Font.color Style.e, centerX ]
                               <|
                                 text "ROTEIRO"
-                            , actionIcon SignIn (Just <| NavigateTo Login)
+                            , el [ centerX ] <| actionIcon SignIn (Just <| NavigateTo Login)
                             , viewErrors model.form.errors
                             , Input.email
                                 ([ centerX, width inputWidth ] ++ Style.field)
@@ -157,7 +157,7 @@ view model =
                                 , placeholder = Nothing
                                 , show = False
                                 }
-                            , actionIcon NewUser (Just <| SignUpSubmit)
+                            , el [ centerX ] <| actionIcon NewUser (Just <| SignUpSubmit)
                             ]
 
                 ViewWaiting ->
