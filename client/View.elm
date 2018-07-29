@@ -72,7 +72,13 @@ view model =
                                 [ Font.size 45, Font.color Style.e, centerX ]
                               <|
                                 text "ROTEIRO"
-                            , el [ centerX ] <| actionIcon NewUser (Just <| NavigateTo SignUp)
+                            , row
+                                [ width shrink
+                                , centerX
+                                , spacing 10
+                                , Font.color Style.e
+                                ]
+                                [ icon SignIn Style.mattIcon, text "Login" ]
                             , viewErrors model.form.errors
                             , Input.email
                                 ([ centerX
@@ -85,7 +91,7 @@ view model =
                                 , label =
                                     Input.labelLeft [] <|
                                         icon Email Style.bigIcon
-                                , placeholder = Nothing
+                                , placeholder = Just <| Input.placeholder [] <| el [ centerY ] <| text "email address"
                                 }
                             , Input.currentPassword
                                 ([ centerX
@@ -98,16 +104,20 @@ view model =
                                 , label =
                                     Input.labelLeft [] <|
                                         icon Lock Style.bigIcon
-                                , placeholder = Nothing
+                                , placeholder = Just <| Input.placeholder [] <| el [ centerY ] <| text "password"
                                 , show = False
                                 }
                             , el [ centerX ]
                                 (model.form.errors
                                     |> unwrap (icon Waiting Style.mattIcon)
                                         (always
-                                            (actionIcon SignIn (Just <| LoginSubmit))
+                                            (actionIcon Arrow (Just <| LoginSubmit))
                                         )
                                 )
+                            , button [ centerX, Font.underline ]
+                                { onPress = Just <| NavigateTo SignUp
+                                , label = text "Need to sign up?"
+                                }
                             ]
 
                 ViewSignUp ->
@@ -136,7 +146,13 @@ view model =
                                 [ Font.size 45, Font.color Style.e, centerX ]
                               <|
                                 text "ROTEIRO"
-                            , el [ centerX ] <| actionIcon SignIn (Just <| NavigateTo Login)
+                            , row
+                                [ width shrink
+                                , centerX
+                                , spacing 10
+                                , Font.color Style.e
+                                ]
+                                [ icon NewUser Style.mattIcon, text "Sign Up" ]
                             , viewErrors model.form.errors
                             , Input.email
                                 ([ centerX, width inputWidth ] ++ Style.field)
@@ -145,7 +161,7 @@ view model =
                                 , label =
                                     Input.labelLeft [] <|
                                         icon Email Style.bigIcon
-                                , placeholder = Nothing
+                                , placeholder = Just <| Input.placeholder [] <| el [ centerY ] <| text "email address"
                                 }
                             , Input.currentPassword
                                 ([ centerX, width inputWidth ] ++ Style.field)
@@ -154,10 +170,14 @@ view model =
                                 , label =
                                     Input.labelLeft [] <|
                                         icon Lock Style.bigIcon
-                                , placeholder = Nothing
+                                , placeholder = Just <| Input.placeholder [] <| el [ centerY ] <| text "password"
                                 , show = False
                                 }
-                            , el [ centerX ] <| actionIcon NewUser (Just <| SignUpSubmit)
+                            , el [ centerX ] <| actionIcon Arrow (Just <| SignUpSubmit)
+                            , button [ centerX, Font.underline ]
+                                { onPress = Just <| NavigateTo Login
+                                , label = text "Need to log in?"
+                                }
                             ]
 
         confirm =
@@ -1234,7 +1254,14 @@ viewErrors =
     whenJust
         (\errs ->
             column
-                [ spacing 15, height shrink ]
+                [ spacing 15
+                , padding 10
+                , height shrink
+                , Border.rounded 5
+                , Border.color Style.e
+                , Border.width 2
+                , Border.solid
+                ]
                 [ el [ centerX ] <| icon Warning Style.mattIcon
                 , viewNotes <| Array.fromList errs
                 ]
