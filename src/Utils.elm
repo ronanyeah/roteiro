@@ -188,12 +188,6 @@ clearErrors f =
     { f | errors = Just [] }
 
 
-appendCmd : Cmd msg -> ( model, Cmd msg ) -> ( model, Cmd msg )
-appendCmd newCmd =
-    Tuple.mapSecond
-        (List.singleton >> (::) newCmd >> Cmd.batch)
-
-
 isPositionView : AppView -> Bool
 isPositionView view =
     case view of
