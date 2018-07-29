@@ -13,7 +13,11 @@ if (
 const Elm = require("./Main.elm");
 
 const app = Elm.Main.embed(document.body, {
-  auth: localStorage.getItem("ROTEIRO")
+  maybeAuth: localStorage.getItem("ROTEIRO"),
+  size: {
+    width: window.innerWidth,
+    height: window.innerHeight
+  }
 });
 
 app.ports.saveAuth.subscribe(auth =>

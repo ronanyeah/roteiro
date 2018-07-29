@@ -9,7 +9,8 @@ import Window
 
 
 type alias Flags =
-    { auth : Maybe String
+    { maybeAuth : Maybe String
+    , size : Window.Size
     }
 
 

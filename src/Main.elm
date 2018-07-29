@@ -2,10 +2,9 @@ module Main exposing (main)
 
 import Json.Decode
 import Navigation exposing (Location)
-import Task
 import Types exposing (Flags, Model, Msg(..))
 import Update exposing (update)
-import Utils exposing (appendCmd, authDecoder, emptyModel, goTo, unwrap)
+import Utils exposing (authDecoder, emptyModel, goTo, unwrap)
 import View exposing (view)
 import Window
 
@@ -21,18 +20,22 @@ main =
 
 
 init : Flags -> Location -> ( Model, Cmd Msg )
-init { auth } location =
-    auth
+init { maybeAuth, size } location =
+    let
+        startModel =
+            { emptyModel
+                | device = size |> Utils.classifyDevice
+                , size = size
+            }
+    in
+    maybeAuth
         |> Maybe.andThen
             (Json.Decode.decodeString authDecoder >> Result.toMaybe)
         |> unwrap
-            ( emptyModel
-            , Cmd.batch
-                [ Task.perform WindowSize Window.size
-                , goTo Types.Login
-                ]
+            ( startModel
+            , goTo Types.Login
             )
-            (\data ->
-                update (UrlChange location) { emptyModel | auth = Just data }
-                    |> appendCmd (Task.perform WindowSize Window.size)
+            (\auth ->
+                update (UrlChange location)
+                    { startModel | auth = Just auth }
             )
