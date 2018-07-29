@@ -71,7 +71,17 @@
         {
           "argsIgnorePattern": "^_"
         }
+      ],
+      "fp/no-mutation": [
+        "error",
+        {
+          "commonjs": true
+        }
       ]
+    },
+    "env": {
+      "node": true,
+      "window": true
     },
     "plugins": [
       "fp"
