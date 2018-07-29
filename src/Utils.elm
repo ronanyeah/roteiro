@@ -470,7 +470,7 @@ filterEmpty =
 
 emptyModel : Model
 emptyModel =
-    { view = ViewWaiting
+    { view = ViewLogin
     , auth = Nothing
     , previousRoute = Nothing
     , positions = RemoteData.NotAsked

@@ -160,9 +160,6 @@ view model =
                             , el [ centerX ] <| actionIcon NewUser (Just <| SignUpSubmit)
                             ]
 
-                ViewWaiting ->
-                    el [ centerX, centerY ] <| icon Waiting Style.bigIcon
-
         confirm =
             model.confirm
                 |> whenJust

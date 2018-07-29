@@ -84,7 +84,6 @@ type View
     = ViewApp AppView
     | ViewLogin
     | ViewSignUp
-    | ViewWaiting
 
 
 type AppView
