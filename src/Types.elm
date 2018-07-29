@@ -8,6 +8,11 @@ import RemoteData exposing (WebData)
 import Window
 
 
+type alias Flags =
+    { auth : Maybe String
+    }
+
+
 type alias GqlResult a =
     Result (Graphqelm.Http.Error a) a
 

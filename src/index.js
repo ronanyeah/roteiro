@@ -19,20 +19,8 @@ if (
 
 const Elm = require("./Main.elm");
 
-const getStoredData = () => {
-  const data = localStorage.getItem("ROTEIRO");
-
-  if (!data) return null;
-
-  try {
-    return JSON.parse(data);
-  } catch (_) {
-    return null;
-  }
-};
-
 const app = Elm.Main.embed(document.body, {
-  auth: getStoredData()
+  auth: localStorage.getItem("ROTEIRO")
 });
 
 app.ports.saveAuth.subscribe(auth =>
