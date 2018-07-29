@@ -2,13 +2,6 @@ require("../node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss");
 require("../node_modules/@fortawesome/fontawesome-free/scss/solid.scss");
 require("./fonts.scss");
 
-if (window.navigator.serviceWorker) {
-  window.navigator.serviceWorker
-    .register("/sw.js")
-    .then(console.log)
-    .catch(console.error);
-}
-
 if (
   window.URLSearchParams &&
   new window.URLSearchParams(document.location.search).get("applaunch") ===
