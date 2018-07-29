@@ -8,6 +8,7 @@ import Element.Input as Input exposing (Label)
 import Graphqelm.Http
 import Html
 import Html.Attributes
+import Http
 import Json.Decode as Decode exposing (Decoder)
 import Navigation
 import Ports
@@ -153,8 +154,24 @@ classifyDevice { width } =
 formatErrors : Graphqelm.Http.Error a -> List String
 formatErrors err =
     case err of
-        Graphqelm.Http.HttpError _ ->
-            [ "Some HTTP bullshit." ]
+        Graphqelm.Http.HttpError e ->
+            case e of
+                Http.BadStatus { status } ->
+                    [ "Http Code: " ++ toString status.code
+                    , "Message: " ++ status.message
+                    ]
+
+                Http.BadPayload _ _ ->
+                    [ "Bad Payload" ]
+
+                Http.BadUrl _ ->
+                    [ "Bad Url" ]
+
+                Http.NetworkError ->
+                    [ "Network Error" ]
+
+                Http.Timeout ->
+                    [ "Timeout" ]
 
         Graphqelm.Http.GraphqlError _ errs ->
             errs
