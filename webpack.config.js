@@ -1,6 +1,7 @@
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const { resolve } = require("path");
 const webpack = require("webpack");
+const { readFileSync } = require("fs");
 
 const { GRAPHQL_ENDPOINT, DEBUG, NODE_ENV } = process.env;
 
@@ -19,6 +20,10 @@ module.exports = {
   },
   devServer: {
     contentBase: publicFolder,
+    https: {
+      key: readFileSync("./https/key.txt"),
+      cert: readFileSync("./https/cert.txt")
+    },
     proxy: {
       "/api": {
         target: GRAPHQL_ENDPOINT,
