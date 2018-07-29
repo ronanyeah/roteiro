@@ -1,11 +1,13 @@
+require("../node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss");
+require("../node_modules/@fortawesome/fontawesome-free/scss/fa-solid.scss");
+require("./fonts.scss");
+
 if (window.navigator.serviceWorker) {
   window.navigator.serviceWorker
     .register("/sw.js")
     .then(console.log)
     .catch(console.error);
 }
-
-require("./index.scss");
 
 if (
   window.URLSearchParams &&
