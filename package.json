@@ -2,7 +2,6 @@
   "name": "roteiro",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/index.js",
   "scripts": {
     "start": "node ./api/index.js",
     "deploy-prisma": "prisma deploy",

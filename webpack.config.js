@@ -13,7 +13,7 @@ const production = NODE_ENV === "production";
 
 module.exports = {
   mode: production ? "production" : "development",
-  entry: "./src/index.js",
+  entry: "./client/index.js",
   output: {
     path: publicFolder,
     filename: "bundle.js"

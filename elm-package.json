@@ -3,7 +3,7 @@
   "summary": "helpful summary of your project, less than 80 characters",
   "repository": "https://github.com/user/project.git",
   "license": "BSD3",
-  "source-directories": ["./src"],
+  "source-directories": ["./client"],
   "exposed-modules": [],
   "dependencies": {
     "dillonkearns/graphqelm": "11.1.0 <= v < 12.0.0",
