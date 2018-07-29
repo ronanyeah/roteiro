@@ -46,11 +46,7 @@ module.exports = {
           {
             loader: "sass-loader",
             options: {
-              data: `$fa-font-path: "${
-                production
-                  ? "https://use.fontawesome.com/releases/v5.1.0/webfonts"
-                  : "/webfonts"
-              }";`
+              data: '$fa-font-path: "/webfonts";'
             }
           }
         ]
@@ -87,14 +83,10 @@ module.exports = {
     new webpack.NoEmitOnErrorsPlugin(),
     new CopyWebpackPlugin([
       "static",
-      ...(production
-        ? []
-        : [
-            {
-              from: "./node_modules/@fortawesome/fontawesome-free/webfonts",
-              to: "webfonts"
-            }
-          ])
+      {
+        from: "./node_modules/@fortawesome/fontawesome-free/webfonts",
+        to: "webfonts"
+      }
     ])
   ]
 };
