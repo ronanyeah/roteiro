@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Json.Decode
 import Navigation exposing (Location)
+import Router exposing (router)
 import Types exposing (Flags, Model, Msg(..))
 import Update exposing (update)
 import Utils exposing (authDecoder, emptyModel, goTo, unwrap)
@@ -33,7 +34,14 @@ init { maybeAuth, size } location =
             (Json.Decode.decodeString authDecoder >> Result.toMaybe)
         |> unwrap
             ( startModel
-            , goTo Types.Login
+            , (case router location of
+                Types.SignUp ->
+                    Types.SignUp
+
+                _ ->
+                    Types.Login
+              )
+                |> goTo
             )
             (\auth ->
                 update (UrlChange location)
