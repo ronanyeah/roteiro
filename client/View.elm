@@ -3,7 +3,7 @@ module View exposing (..)
 import Api.Scalar exposing (Id(..))
 import Array exposing (Array)
 import Color
-import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, maximum, mouseOver, newTabLink, noHover, none, padding, paragraph, pointer, px, row, scrollbarY, shrink, spaceEvenly, spacing, text, width)
+import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, maximum, mouseOver, newTabLink, noHover, none, padding, paragraph, px, row, scrollbarY, shrink, spaceEvenly, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -16,7 +16,7 @@ import Regex
 import RemoteData exposing (RemoteData(..))
 import Style
 import Types exposing (..)
-import Utils exposing (faIcon, icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, remoteUnwrap, unwrap, when, whenJust)
+import Utils exposing (icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, unwrap, when, whenJust)
 
 
 view : Model -> Html Msg
@@ -109,7 +109,7 @@ view model =
                                 }
                             , el [ centerX ]
                                 (model.form.errors
-                                    |> unwrap (icon Waiting Style.mattIcon)
+                                    |> unwrap spinner
                                         (always
                                             (actionIcon Arrow (Just <| LoginSubmit))
                                         )
@@ -253,7 +253,7 @@ viewApp model appView =
     let
         col =
             column
-                [ height shrink
+                [ shrink |> maximum model.size.height |> height
                 , scrollbarY
                 , spacing 50
                 , padding 20
@@ -653,7 +653,6 @@ ballIcon : List (Attribute msg)
 ballIcon =
     [ Font.color Style.c
     , Font.size 35
-    , pointer
     , Background.color Style.e
     , Border.rounded 30
     , width <| px 60
@@ -675,7 +674,7 @@ links view =
             , spacing 20
             ]
         <|
-            icons False view
+            icons NavigateTo view
 
 
 sidebar : Bool -> AppView -> Attribute Msg
@@ -697,7 +696,14 @@ sidebar isOpen view =
                 , spaceEvenly
                 ]
               <|
-                icons True view
+                (icons SidebarNavigate view
+                    ++ [ Input.button (centerX :: Style.actionIcon)
+                            { onPress =
+                                Just <| ToggleSidebar
+                            , label = icon Cross []
+                            }
+                       ]
+                )
             ]
             |> inFront
     else
@@ -714,104 +720,48 @@ sidebar isOpen view =
             |> inFront
 
 
-icons : Bool -> AppView -> List (Element Msg)
-icons isSidebar view =
+icons : (Route -> Msg) -> AppView -> List (Element Msg)
+icons nav view =
     let
-        nav =
-            if isSidebar then
-                SidebarNavigate
+        active isActive =
+            if isActive then
+                centerX :: ballIcon
             else
-                NavigateTo
+                centerX :: Style.actionIcon
     in
-    [ button [ centerX ]
+    [ button (active <| view == ViewStart)
         { onPress = Just <| nav Start
-        , label =
-            icon Home
-                (if view == ViewStart then
-                    ballIcon
-                 else
-                    Style.actionIcon
-                )
+        , label = icon Home []
         }
-    , button [ centerX ]
+    , button (active <| isPositionView view)
         { onPress = Just <| nav Positions
-        , label =
-            icon Flag
-                (if isPositionView view then
-                    ballIcon
-                 else
-                    Style.actionIcon
-                )
+        , label = icon Flag []
         }
-    , button [ centerX ]
+    , button (active <| isTransitionView view)
         { onPress = Just <| nav Transitions
-        , label =
-            icon Arrow
-                (if isTransitionView view then
-                    ballIcon
-                 else
-                    Style.actionIcon
-                )
+        , label = icon Arrow []
         }
-    , button [ centerX ]
+    , button (active <| isSubmissionView view)
         { onPress = Just <| nav Submissions
-        , label =
-            icon Bolt
-                (if isSubmissionView view then
-                    ballIcon
-                 else
-                    Style.actionIcon
-                )
+        , label = icon Bolt []
         }
-    , button [ centerX ]
-        { onPress =
-            Just <| nav TagsRoute
-        , label =
-            icon Tags
-                (if isTagView view then
-                    ballIcon
-                 else
-                    Style.actionIcon
-                )
+    , button (active <| isTagView view)
+        { onPress = Just <| nav TagsRoute
+        , label = icon Tags []
         }
-    , button [ centerX ]
+    , button (active <| isTopicView view)
         { onPress = Just <| nav Topics
-        , label =
-            icon Book
-                (if isTopicView view then
-                    ballIcon
-                 else
-                    Style.actionIcon
-                )
+        , label = icon Book []
         }
-    , button [ centerX ]
+    , button (active <| view == ViewSettings)
         { onPress = Just <| nav SettingsRoute
-        , label =
-            icon Cogs
-                (if view == ViewSettings then
-                    ballIcon
-                 else
-                    Style.actionIcon
-                )
+        , label = icon Cogs []
         }
-    , button [ centerX ]
+    , button (centerX :: Style.actionIcon)
         { onPress = Just <| Logout
-        , label =
-            icon SignOut Style.actionIcon
+        , label = icon SignOut []
         }
     ]
-        ++ (if isSidebar then
-                [ Input.button
-                    [ centerX ]
-                    { onPress =
-                        Just <| ToggleSidebar
-                    , label =
-                        icon Cross Style.actionIcon
-                    }
-                ]
-            else
-                []
-           )
 
 
 transitionPositions : Info -> Info -> Element Msg
@@ -880,12 +830,13 @@ viewRemote fn data =
             el [ centerX ] <| text "not asked"
 
         Loading ->
-            icon Waiting
+            el
                 [ Font.color Style.e
                 , Font.size 60
                 , centerX
                 , centerY
                 ]
+                spinner
 
         Failure err ->
             viewErrors (Just [ toString err ])
@@ -1210,7 +1161,7 @@ editTags tags xs =
                 )
             |> paragraph [ width fill ]
         , tags
-            |> remoteUnwrap (icon Waiting Style.mattIcon)
+            |> viewRemote
                 (List.filter
                     (flip List.member xs >> not)
                     >> List.map
@@ -1340,5 +1291,19 @@ actionIcon fa msg =
             ]
         ]
         { onPress = msg
-        , label = el [ centerX, centerY ] <| faIcon fa
+        , label = icon fa [ centerX, centerY ]
         }
+
+
+spinner : Element msg
+spinner =
+    icon Waiting
+        ((Html.Attributes.style
+            [ ( "animation"
+              , "rotation 2s infinite linear"
+              )
+            ]
+            |> Element.htmlAttribute
+         )
+            :: Style.mattIcon
+        )

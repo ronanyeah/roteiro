@@ -3,7 +3,7 @@ module Utils exposing (..)
 import Api.Scalar exposing (Id(..))
 import Array exposing (Array)
 import Dict exposing (Dict)
-import Element exposing (Attribute, Element, centerX, centerY, el, html, none)
+import Element exposing (Attribute, Element, el, html, none)
 import Element.Input as Input exposing (Label)
 import Graphqelm.Http
 import Html
@@ -285,11 +285,6 @@ isTransitionView view =
 
 icon : FaIcon -> List (Attribute msg) -> Element msg
 icon fa attrs =
-    el attrs <| el [ centerX, centerY ] <| faIcon fa
-
-
-faIcon : FaIcon -> Element msg
-faIcon fa =
     let
         faClass =
             (case fa of
@@ -342,7 +337,7 @@ faIcon fa =
                     "fa-times"
 
                 Waiting ->
-                    "fa-spinner fa-pulse"
+                    "fa-circle-notch"
 
                 Warning ->
                     "fa-exclamation"
@@ -371,7 +366,7 @@ faIcon fa =
                 |> (++) "fas fa-fw "
                 |> Html.Attributes.class
     in
-    el [] <| html <| Html.span [ faClass ] []
+    el attrs <| html <| Html.span [ faClass ] []
 
 
 sort : List { r | name : String } -> List { r | name : String }
@@ -427,12 +422,6 @@ get (Id id) =
 del : Id -> Dict String { r | id : Id } -> Dict String { r | id : Id }
 del (Id id) =
     Dict.remove id
-
-
-remoteUnwrap : a -> (b -> a) -> RemoteData.WebData b -> a
-remoteUnwrap default fn =
-    RemoteData.map fn
-        >> RemoteData.withDefault default
 
 
 unwrap : b -> (a -> b) -> Maybe a -> b
