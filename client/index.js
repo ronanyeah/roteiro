@@ -1,6 +1,5 @@
 require("../node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss");
 require("../node_modules/@fortawesome/fontawesome-free/scss/solid.scss");
-require("./fonts.scss");
 
 if (
   window.URLSearchParams &&

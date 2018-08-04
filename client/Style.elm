@@ -88,6 +88,7 @@ font : Attribute msg
 font =
     Font.family
         [ Font.typeface "Cuprum"
+        , Font.sansSerif
         ]
 
 
