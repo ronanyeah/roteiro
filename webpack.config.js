@@ -3,9 +3,11 @@ const { resolve } = require("path");
 const webpack = require("webpack");
 const { readFileSync } = require("fs");
 
-const { GRAPHQL_ENDPOINT, DEBUG, NODE_ENV } = process.env;
+const { DEBUG, NODE_ENV, API_URL } = process.env;
 
-if (!GRAPHQL_ENDPOINT) throw Error("missing api endpoint");
+if (!API_URL) {
+  throw Error("missing api endpoint");
+}
 
 const publicFolder = resolve("./public");
 
@@ -23,12 +25,6 @@ module.exports = {
     https: {
       key: readFileSync("./https/key.txt"),
       cert: readFileSync("./https/cert.txt")
-    },
-    proxy: {
-      "/api": {
-        target: GRAPHQL_ENDPOINT,
-        pathRewrite: { "^/api": "" }
-      }
     },
     historyApiFallback: true
   },
@@ -79,6 +75,9 @@ module.exports = {
     ]
   },
   plugins: [
+    new webpack.DefinePlugin({
+      API_URL: `"${API_URL}"`
+    }),
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new CopyWebpackPlugin([

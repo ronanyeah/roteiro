@@ -15,7 +15,7 @@ import Graphqelm.Field
 import Graphqelm.Http
 import Graphqelm.Operation exposing (RootMutation, RootQuery)
 import Graphqelm.SelectionSet exposing (SelectionSet, with)
-import Types exposing (Auth, GqlResult, Info, Msg(..), Position, Submission, Tag, Topic, Transition)
+import Types exposing (Auth, Form, GqlResult, Info, Msg(..), Position, Submission, Tag, Token(Token), Topic, Transition, Url(Url))
 import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, unwrap)
 
 
@@ -107,25 +107,59 @@ tag =
 
 auth : SelectionSet Auth Api.Object.AuthResponse
 auth =
-    Api.Object.AuthResponse.selection Auth
+    Api.Object.AuthResponse.selection
+        (\id email token ->
+            { token = Token token
+            , id = id
+            , email = email
+            }
+        )
         |> with Api.Object.AuthResponse.id
         |> with Api.Object.AuthResponse.email
         |> with Api.Object.AuthResponse.token
 
 
-fetch : String -> Graphqelm.Field.Field a RootQuery -> (GqlResult a -> Msg) -> Cmd Msg
-fetch token sel msg =
+fetch : Url -> Token -> Graphqelm.Field.Field a RootQuery -> (GqlResult a -> Msg) -> Cmd Msg
+fetch (Url apiUrl) (Token token) sel msg =
     Api.Query.selection identity
         |> with sel
-        |> Graphqelm.Http.queryRequest "/api"
+        |> Graphqelm.Http.queryRequest apiUrl
         |> Graphqelm.Http.withHeader "authorization" ("Bearer " ++ token)
         |> Graphqelm.Http.send msg
 
 
-mutation : String -> Graphqelm.Field.Field a RootMutation -> (GqlResult a -> Msg) -> Cmd Msg
-mutation token sel msg =
+mutation : Url -> Token -> Graphqelm.Field.Field a RootMutation -> (GqlResult a -> Msg) -> Cmd Msg
+mutation (Url apiUrl) (Token token) sel msg =
     Api.Mutation.selection identity
         |> with sel
-        |> Graphqelm.Http.mutationRequest "/api"
+        |> Graphqelm.Http.mutationRequest apiUrl
         |> Graphqelm.Http.withHeader "authorization" ("Bearer " ++ token)
         |> Graphqelm.Http.send msg
+
+
+login : Url -> Form -> Cmd Msg
+login (Url apiUrl) form =
+    Api.Mutation.selection identity
+        |> Graphqelm.SelectionSet.with
+            (Api.Mutation.authenticateUser
+                { email = form.email
+                , password = form.password
+                }
+                auth
+            )
+        |> Graphqelm.Http.mutationRequest apiUrl
+        |> Graphqelm.Http.send CbAuth
+
+
+signUp : Url -> Form -> Cmd Msg
+signUp (Url apiUrl) form =
+    Api.Mutation.selection identity
+        |> Graphqelm.SelectionSet.with
+            (Api.Mutation.signUpUser
+                { email = form.email
+                , password = form.password
+                }
+                auth
+            )
+        |> Graphqelm.Http.mutationRequest apiUrl
+        |> Graphqelm.Http.send CbAuth

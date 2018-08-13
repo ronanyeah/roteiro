@@ -23,7 +23,7 @@ authDecoder =
     Decode.map3 Auth
         (Decode.field "id" (Decode.map Id Decode.string))
         (Decode.field "email" Decode.string)
-        (Decode.field "token" Decode.string)
+        (Decode.field "token" (Decode.map Types.Token Decode.string))
 
 
 listRemove : Int -> List a -> List a
@@ -185,7 +185,7 @@ addErrors errs f =
 
 clearErrors : Form -> Form
 clearErrors f =
-    { f | errors = Just [] }
+    { f | errors = Nothing }
 
 
 isPositionView : AppView -> Bool
@@ -454,6 +454,7 @@ filterEmpty =
 emptyModel : Model
 emptyModel =
     { view = ViewLogin
+    , apiUrl = Types.Url ""
     , auth = Nothing
     , previousRoute = Nothing
     , positions = RemoteData.NotAsked

@@ -8,7 +8,8 @@ const app = Elm.Main.embed(document.body, {
   size: {
     width: window.innerWidth,
     height: window.innerHeight
-  }
+  },
+  apiUrl: API_URL
 });
 
 app.ports.saveAuth.subscribe(auth =>

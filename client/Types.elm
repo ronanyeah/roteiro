@@ -8,9 +8,18 @@ import RemoteData exposing (WebData)
 import Window
 
 
+type Url
+    = Url String
+
+
+type Token
+    = Token String
+
+
 type alias Flags =
     { maybeAuth : Maybe String
     , size : Window.Size
+    , apiUrl : String
     }
 
 
@@ -148,6 +157,7 @@ type alias Info =
 
 type alias Model =
     { view : View
+    , apiUrl : Url
     , auth : Maybe Auth
     , previousRoute : Maybe Route
     , positions : WebData (List Info)
@@ -198,7 +208,7 @@ type Route
 type alias Auth =
     { id : Id
     , email : String
-    , token : String
+    , token : Token
     }
 
 
