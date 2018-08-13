@@ -5,7 +5,7 @@ const { resolve } = require("path");
 const Query = require("./resolvers/query.js");
 const Mutation = require("./resolvers/mutation.js");
 
-const { PRISMA_DEBUG, PRISMA_ENDPOINT } = process.env;
+const { PRISMA_DEBUG, PRISMA_ENDPOINT, PRISMA_SECRET } = require("./config.js");
 
 new GraphQLServer({
   typeDefs: resolve(__dirname, "./schema.graphql"),
@@ -18,6 +18,7 @@ new GraphQLServer({
     db: new Prisma({
       typeDefs: resolve(__dirname, "../prisma/generated/prisma.graphql"),
       endpoint: PRISMA_ENDPOINT,
+      secret: PRISMA_SECRET,
       debug: PRISMA_DEBUG === "true"
     })
   })

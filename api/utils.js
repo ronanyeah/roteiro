@@ -4,7 +4,7 @@ const { dissoc, evolve, pipe } = require("ramda");
 const { promisify } = require("util");
 const { normalizeEmail } = require("validator");
 
-const { APP_SECRET } = process.env;
+const { APP_SECRET } = require("./config.js");
 
 const verify = promisify(jwt.verify);
 

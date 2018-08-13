@@ -4,7 +4,7 @@ const { normalizeEmail, isEmail } = require("validator");
 
 const { clean, getUserId, sign, hash } = require("../utils.js");
 
-const { APP_SECRET } = process.env;
+const { APP_SECRET } = require("../config.js");
 
 const deleteOne = async (userId, existsFn, deleteFn, dataId) => {
   const isOwner = await existsFn({
