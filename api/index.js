@@ -16,7 +16,7 @@ new GraphQLServer({
   context: req => ({
     ...req,
     db: new Prisma({
-      typeDefs: resolve(__dirname, "../prisma/generated/prisma.graphql"),
+      typeDefs: resolve(__dirname, "./prisma.graphql"),
       endpoint: PRISMA_ENDPOINT,
       secret: PRISMA_SECRET,
       debug: PRISMA_DEBUG === "true"
