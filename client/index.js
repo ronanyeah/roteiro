@@ -1,14 +1,6 @@
 require("../node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss");
 require("../node_modules/@fortawesome/fontawesome-free/scss/solid.scss");
 
-if (
-  window.URLSearchParams &&
-  new window.URLSearchParams(document.location.search).get("applaunch") ===
-    "true"
-) {
-  console.log("App Launch!");
-}
-
 const Elm = require("./Main.elm");
 
 const app = Elm.Main.embed(document.body, {
