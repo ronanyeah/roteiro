@@ -3,6 +3,7 @@ module View exposing (..)
 import Api.Scalar exposing (Id(..))
 import Array exposing (Array)
 import Color
+import Dict
 import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, maximum, mouseOver, newTabLink, noHover, none, padding, paragraph, px, row, scrollbarY, shrink, spaceEvenly, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
@@ -11,7 +12,6 @@ import Element.Input as Input exposing (button)
 import Html exposing (Html)
 import Html.Attributes
 import Keydown exposing (onEnter, onKeydown)
-import List.Extra exposing (groupWhile)
 import Regex
 import RemoteData exposing (RemoteData(..))
 import Style
@@ -502,31 +502,43 @@ viewApp model appView =
                             [ addNewRow Bolt <|
                                 NavigateTo
                                     CreateSubmissionRoute
-                            , column [ spacing 20 ] <|
-                                (submissions
-                                    |> List.sortBy (.position >> .id >> (\(Id id) -> id))
-                                    |> groupWhile (\a b -> a.position.id == b.position.id)
-                                    |> List.map
-                                        (\g ->
-                                            el [ centerX ] <|
-                                                column
-                                                    []
-                                                    [ g
-                                                        |> List.head
-                                                        |> Maybe.map .position
-                                                        |> whenJust
-                                                            (\{ id, name } ->
-                                                                button [ centerX ]
-                                                                    { onPress = Just <| NavigateTo <| PositionRoute id
-                                                                    , label =
-                                                                        paragraph Style.choice
-                                                                            [ text name ]
-                                                                    }
-                                                            )
-                                                    , blocks SubmissionRoute g
-                                                    ]
-                                        )
-                                )
+                            , submissions
+                                |> List.foldl
+                                    (\sub acc ->
+                                        case sub.position.id of
+                                            Id id ->
+                                                acc
+                                                    |> Dict.update
+                                                        ( id, sub.position.name )
+                                                        (\subs ->
+                                                            case subs of
+                                                                Just ss ->
+                                                                    Just <| sub :: ss
+
+                                                                Nothing ->
+                                                                    Just [ sub ]
+                                                        )
+                                    )
+                                    Dict.empty
+                                |> Dict.toList
+                                |> List.map
+                                    (\( ( positionId, positionName ), subs ) ->
+                                        column
+                                            [ width shrink, centerX ]
+                                            [ button [ centerX ]
+                                                { onPress =
+                                                    Just <|
+                                                        NavigateTo <|
+                                                            PositionRoute <|
+                                                                Id positionId
+                                                , label =
+                                                    paragraph Style.choice
+                                                        [ text positionName ]
+                                                }
+                                            , blocks SubmissionRoute subs
+                                            ]
+                                    )
+                                |> column [ spacing 20 ]
                             ]
                     )
 
@@ -598,35 +610,43 @@ viewApp model appView =
                             [ addNewRow Arrow <|
                                 NavigateTo
                                     CreateTransitionRoute
-                            , column [ spacing 20 ] <|
-                                (transitions
-                                    |> List.sortBy
-                                        (.startPosition >> .id >> (\(Id id) -> id))
-                                    |> groupWhile
-                                        (\a b ->
-                                            a.startPosition.id == b.startPosition.id
-                                        )
-                                    |> List.map
-                                        (\g ->
-                                            el [ centerX ] <|
-                                                column
-                                                    []
-                                                    [ g
-                                                        |> List.head
-                                                        |> Maybe.map .startPosition
-                                                        |> whenJust
-                                                            (\{ id, name } ->
-                                                                button [ centerX ]
-                                                                    { onPress = Just <| NavigateTo <| PositionRoute id
-                                                                    , label =
-                                                                        paragraph Style.choice
-                                                                            [ text name ]
-                                                                    }
-                                                            )
-                                                    , blocks TransitionRoute g
-                                                    ]
-                                        )
-                                )
+                            , transitions
+                                |> List.foldl
+                                    (\tr acc ->
+                                        case tr.startPosition.id of
+                                            Id id ->
+                                                acc
+                                                    |> Dict.update
+                                                        ( id, tr.startPosition.name )
+                                                        (\trs ->
+                                                            case trs of
+                                                                Just ts ->
+                                                                    Just <| tr :: ts
+
+                                                                Nothing ->
+                                                                    Just [ tr ]
+                                                        )
+                                    )
+                                    Dict.empty
+                                |> Dict.toList
+                                |> List.map
+                                    (\( ( startPositionId, startPositionName ), trs ) ->
+                                        column
+                                            [ width shrink, centerX ]
+                                            [ button [ centerX ]
+                                                { onPress =
+                                                    Just <|
+                                                        NavigateTo <|
+                                                            PositionRoute <|
+                                                                Id startPositionId
+                                                , label =
+                                                    paragraph Style.choice
+                                                        [ text startPositionName ]
+                                                }
+                                            , blocks TransitionRoute trs
+                                            ]
+                                    )
+                                |> column [ spacing 20 ]
                             ]
                     )
 
