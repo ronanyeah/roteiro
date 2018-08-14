@@ -258,6 +258,9 @@ viewApp model appView =
                 , spacing 50
                 , padding 20
                 ]
+
+        waiting =
+            not <| isJust model.form.errors
     in
     case appView of
         ViewStart ->
@@ -281,7 +284,7 @@ viewApp model appView =
                 , viewErrors model.form.errors
                 , nameEdit model.form
                 , notesEditor model.form
-                , createButtons SaveCreatePosition
+                , createButtons waiting SaveCreatePosition
                 ]
 
         ViewCreateSubmission ->
@@ -292,7 +295,7 @@ viewApp model appView =
                 , viewSubmissionPicker model.form
                 , stepsEditor model.form
                 , notesEditor model.form
-                , createButtons SaveCreateSubmission
+                , createButtons waiting SaveCreateSubmission
                 ]
 
         ViewCreateTag ->
@@ -300,7 +303,7 @@ viewApp model appView =
                 [ createHeader Tags
                 , viewErrors model.form.errors
                 , nameEdit model.form
-                , createButtons SaveCreateTag
+                , createButtons waiting SaveCreateTag
                 ]
 
         ViewCreateTopic ->
@@ -309,7 +312,7 @@ viewApp model appView =
                 , viewErrors model.form.errors
                 , nameEdit model.form
                 , notesEditor model.form
-                , createButtons SaveCreateTopic
+                , createButtons waiting SaveCreateTopic
                 ]
 
         ViewCreateTransition ->
@@ -320,7 +323,7 @@ viewApp model appView =
                 , viewTransitionPickers model.form
                 , stepsEditor model.form
                 , notesEditor model.form
-                , createButtons SaveCreateTransition
+                , createButtons waiting SaveCreateTransition
                 ]
 
         ViewEditPosition _ ->
@@ -329,7 +332,7 @@ viewApp model appView =
                 , viewErrors model.form.errors
                 , nameEdit model.form
                 , notesEditor model.form
-                , editButtons SaveEditPosition <| DeletePosition model.form.id
+                , editButtons waiting SaveEditPosition <| DeletePosition model.form.id
                 ]
 
         ViewEditSubmission _ ->
@@ -341,7 +344,7 @@ viewApp model appView =
                 , stepsEditor model.form
                 , notesEditor model.form
                 , editTags model.tags <| Array.toList model.form.tags
-                , editButtons SaveEditSubmission <| DeleteSubmission model.form.id
+                , editButtons waiting SaveEditSubmission <| DeleteSubmission model.form.id
                 ]
 
         ViewEditTag _ ->
@@ -349,7 +352,7 @@ viewApp model appView =
                 [ editHeader Tags
                 , viewErrors model.form.errors
                 , nameEdit model.form
-                , editButtons SaveEditTag <| DeleteTag model.form.id
+                , editButtons waiting SaveEditTag <| DeleteTag model.form.id
                 ]
 
         ViewEditTopic _ ->
@@ -358,7 +361,7 @@ viewApp model appView =
                 , viewErrors model.form.errors
                 , nameEdit model.form
                 , notesEditor model.form
-                , editButtons SaveEditTopic <| DeleteTopic model.form.id
+                , editButtons waiting SaveEditTopic <| DeleteTopic model.form.id
                 ]
 
         ViewEditTransition _ ->
@@ -370,7 +373,7 @@ viewApp model appView =
                 , stepsEditor model.form
                 , notesEditor model.form
                 , editTags model.tags <| Array.toList model.form.tags
-                , editButtons SaveEditTransition <| DeleteTransition model.form.id
+                , editButtons waiting SaveEditTransition <| DeleteTransition model.form.id
                 ]
 
         ViewPosition data ->
@@ -944,25 +947,31 @@ minus msg =
     actionIcon Minus (Just msg)
 
 
-editButtons : Msg -> Msg -> Element Msg
-editButtons save delete =
+editButtons : Bool -> Msg -> Msg -> Element Msg
+editButtons waiting save delete =
     el [ centerX ] <|
-        row
-            [ spacing 20 ]
-            [ actionIcon Tick (Just save)
-            , actionIcon Cross (Just Cancel)
-            , actionIcon Trash (Just <| Confirm <| Just delete)
-            ]
+        if waiting then
+            spinner
+        else
+            row
+                [ spacing 20 ]
+                [ actionIcon Tick (Just save)
+                , actionIcon Cross (Just Cancel)
+                , actionIcon Trash (Just <| Confirm <| Just delete)
+                ]
 
 
-createButtons : Msg -> Element Msg
-createButtons save =
+createButtons : Bool -> Msg -> Element Msg
+createButtons waiting save =
     el [ centerX ] <|
-        row
-            [ spacing 20 ]
-            [ actionIcon Tick (Just save)
-            , actionIcon Cross (Just Cancel)
-            ]
+        if waiting then
+            spinner
+        else
+            row
+                [ spacing 20 ]
+                [ actionIcon Tick (Just save)
+                , actionIcon Cross (Just Cancel)
+                ]
 
 
 stepsEditor : Form -> Element Msg

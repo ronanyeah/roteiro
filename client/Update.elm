@@ -510,7 +510,7 @@ update msg model =
         DeletePosition id ->
             protect
                 (\auth ->
-                    ( model
+                    ( { model | form = clearErrors model.form }
                     , Api.mutation
                         model.apiUrl
                         auth.token
@@ -522,7 +522,7 @@ update msg model =
         DeleteSubmission id ->
             protect
                 (\auth ->
-                    ( model
+                    ( { model | form = clearErrors model.form }
                     , Api.mutation
                         model.apiUrl
                         auth.token
@@ -534,7 +534,7 @@ update msg model =
         DeleteTag id ->
             protect
                 (\auth ->
-                    ( model
+                    ( { model | form = clearErrors model.form }
                     , Api.mutation
                         model.apiUrl
                         auth.token
@@ -546,7 +546,7 @@ update msg model =
         DeleteTopic id ->
             protect
                 (\auth ->
-                    ( model
+                    ( { model | form = clearErrors model.form }
                     , Api.mutation
                         model.apiUrl
                         auth.token
@@ -558,7 +558,7 @@ update msg model =
         DeleteTransition id ->
             protect
                 (\auth ->
-                    ( model
+                    ( { model | form = clearErrors model.form }
                     , Api.mutation
                         model.apiUrl
                         auth.token
