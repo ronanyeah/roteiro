@@ -3,6 +3,7 @@ module Types exposing (..)
 import Api.Scalar exposing (Id)
 import Array exposing (Array)
 import Graphqelm.Http
+import List.Nonempty exposing (Nonempty(Nonempty))
 import Navigation exposing (Location)
 import RemoteData exposing (WebData)
 import Window
@@ -14,6 +15,12 @@ type Url
 
 type Token
     = Token String
+
+
+type Status
+    = Ready
+    | Waiting
+    | Errors (Nonempty String)
 
 
 type alias Flags =
@@ -256,7 +263,7 @@ type alias Submission =
 type alias Form =
     { name : String
     , id : Id
-    , errors : Maybe (List String)
+    , status : Status
     , startPosition : Maybe Info
     , endPosition : Maybe Info
     , notes : Array String

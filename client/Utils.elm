@@ -10,11 +10,12 @@ import Html
 import Html.Attributes
 import Http
 import Json.Decode as Decode exposing (Decoder)
+import List.Nonempty as Ne
 import Navigation
 import Ports
 import Regex exposing (Regex)
 import RemoteData
-import Types exposing (AppView(..), Auth, Device(Desktop, Mobile), FaIcon(..), Form, Model, Route(..), View(..))
+import Types exposing (AppView(..), Auth, Device(Desktop, Mobile), FaIcon(..), Form, Model, Route(..), Status(..), View(..))
 import Window
 
 
@@ -180,12 +181,17 @@ formatErrors err =
 
 addErrors : List String -> Form -> Form
 addErrors errs f =
-    { f | errors = Just errs }
+    { f | status = errs |> Ne.fromList |> unwrap Ready Errors }
 
 
 clearErrors : Form -> Form
 clearErrors f =
-    { f | errors = Nothing }
+    { f | status = Ready }
+
+
+setWaiting : Form -> Form
+setWaiting f =
+    { f | status = Waiting }
 
 
 isPositionView : AppView -> Bool
@@ -473,7 +479,7 @@ emptyForm : Form
 emptyForm =
     { name = ""
     , id = Id ""
-    , errors = Just []
+    , status = Ready
     , startPosition = Nothing
     , endPosition = Nothing
     , steps = Array.empty

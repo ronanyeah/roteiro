@@ -6,12 +6,13 @@ import Api.Query
 import Api.Scalar exposing (Id(..))
 import Array
 import Json.Encode as Encode
+import List.Nonempty as Ne
 import Navigation
 import Ports
 import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Types exposing (..)
-import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, unwrap)
+import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, setWaiting, unwrap)
 import Validate
 
 
@@ -497,7 +498,12 @@ update msg model =
                             | form =
                                 model.form
                                     |> (\f ->
-                                            { f | errors = Just [ "Lame pw effort" ] }
+                                            { f
+                                                | status =
+                                                    "Lame pw effort"
+                                                        |> Ne.fromElement
+                                                        |> Errors
+                                            }
                                        )
                           }
                         , Cmd.none
@@ -510,7 +516,7 @@ update msg model =
         DeletePosition id ->
             protect
                 (\auth ->
-                    ( { model | form = clearErrors model.form }
+                    ( { model | form = setWaiting model.form }
                     , Api.mutation
                         model.apiUrl
                         auth.token
@@ -522,7 +528,7 @@ update msg model =
         DeleteSubmission id ->
             protect
                 (\auth ->
-                    ( { model | form = clearErrors model.form }
+                    ( { model | form = setWaiting model.form }
                     , Api.mutation
                         model.apiUrl
                         auth.token
@@ -534,7 +540,7 @@ update msg model =
         DeleteTag id ->
             protect
                 (\auth ->
-                    ( { model | form = clearErrors model.form }
+                    ( { model | form = setWaiting model.form }
                     , Api.mutation
                         model.apiUrl
                         auth.token
@@ -546,7 +552,7 @@ update msg model =
         DeleteTopic id ->
             protect
                 (\auth ->
-                    ( { model | form = clearErrors model.form }
+                    ( { model | form = setWaiting model.form }
                     , Api.mutation
                         model.apiUrl
                         auth.token
@@ -558,7 +564,7 @@ update msg model =
         DeleteTransition id ->
             protect
                 (\auth ->
-                    ( { model | form = clearErrors model.form }
+                    ( { model | form = setWaiting model.form }
                     , Api.mutation
                         model.apiUrl
                         auth.token
@@ -568,7 +574,7 @@ update msg model =
                 )
 
         LoginSubmit ->
-            ( { model | form = clearErrors model.form }
+            ( { model | form = setWaiting model.form }
             , Api.login model.apiUrl model.form
             )
 
@@ -599,7 +605,7 @@ update msg model =
                 (\auth ->
                     case Validate.position model.form of
                         Ok ( name, notes ) ->
-                            ( { model | form = clearErrors model.form }
+                            ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
                                 auth.token
@@ -623,7 +629,7 @@ update msg model =
                 (\auth ->
                     case Validate.submission model.form of
                         Ok ( name, startId, steps, notes, tags ) ->
-                            ( { model | form = clearErrors model.form }
+                            ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
                                 auth.token
@@ -650,7 +656,7 @@ update msg model =
                 (\auth ->
                     case Validate.tag model.form of
                         Ok name ->
-                            ( { model | form = clearErrors model.form }
+                            ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
                                 auth.token
@@ -671,7 +677,7 @@ update msg model =
                 (\auth ->
                     case Validate.topic model.form of
                         Ok ( name, notes ) ->
-                            ( { model | form = clearErrors model.form }
+                            ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
                                 auth.token
@@ -695,7 +701,7 @@ update msg model =
                 (\auth ->
                     case Validate.transition model.form of
                         Ok ( name, startId, endId, steps, notes, tags ) ->
-                            ( { model | form = clearErrors model.form }
+                            ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
                                 auth.token
@@ -723,7 +729,7 @@ update msg model =
                 (\auth ->
                     case Validate.position model.form of
                         Ok ( name, notes ) ->
-                            ( { model | form = clearErrors model.form }
+                            ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
                                 auth.token
@@ -748,7 +754,7 @@ update msg model =
                 (\auth ->
                     case Validate.submission model.form of
                         Ok ( name, position, steps, notes, tags ) ->
-                            ( { model | form = clearErrors model.form }
+                            ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
                                 auth.token
@@ -776,7 +782,7 @@ update msg model =
                 (\auth ->
                     case Validate.tag model.form of
                         Ok name ->
-                            ( { model | form = clearErrors model.form }
+                            ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
                                 auth.token
@@ -800,7 +806,7 @@ update msg model =
                 (\auth ->
                     case Validate.topic model.form of
                         Ok ( name, notes ) ->
-                            ( { model | form = clearErrors model.form }
+                            ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
                                 auth.token
@@ -825,7 +831,7 @@ update msg model =
                 (\auth ->
                     case Validate.transition model.form of
                         Ok ( name, startId, endId, steps, notes, tags ) ->
-                            ( { model | form = clearErrors model.form }
+                            ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
                                 auth.token
@@ -859,7 +865,7 @@ update msg model =
             update (NavigateTo route) { model | sidebarOpen = False }
 
         SignUpSubmit ->
-            ( { model | form = clearErrors model.form }
+            ( { model | form = setWaiting model.form }
             , Api.signUp model.apiUrl model.form
             )
 

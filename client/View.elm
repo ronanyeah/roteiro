@@ -12,11 +12,12 @@ import Element.Input as Input exposing (button)
 import Html exposing (Html)
 import Html.Attributes
 import Keydown exposing (onEnter, onKeydown)
+import List.Nonempty as Ne
 import Regex
 import RemoteData exposing (RemoteData(..))
 import Style
 import Types exposing (..)
-import Utils exposing (icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, unwrap, when, whenJust)
+import Utils exposing (icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, when, whenJust)
 
 
 view : Model -> Html Msg
@@ -75,7 +76,7 @@ view model =
                                 , Font.color Style.e
                                 ]
                                 [ icon SignIn Style.mattIcon, text "Login" ]
-                            , viewErrors model.form.errors
+                            , viewErrors model.form.status
                             , Input.email
                                 ([ centerX
                                  , width inputWidth
@@ -103,13 +104,11 @@ view model =
                                 , placeholder = Just <| Input.placeholder [] <| el [ centerY ] <| text "password"
                                 , show = False
                                 }
-                            , el [ centerX ]
-                                (model.form.errors
-                                    |> unwrap spinner
-                                        (always
-                                            (actionIcon Arrow (Just <| LoginSubmit))
-                                        )
-                                )
+                            , el [ centerX ] <|
+                                if model.form.status == Waiting then
+                                    spinner
+                                else
+                                    actionIcon Arrow (Just <| LoginSubmit)
                             , button [ centerX, Font.underline ]
                                 { onPress = Just <| NavigateTo SignUp
                                 , label = text "Need to sign up?"
@@ -149,7 +148,7 @@ view model =
                                 , Font.color Style.e
                                 ]
                                 [ icon NewUser Style.mattIcon, text "Sign Up" ]
-                            , viewErrors model.form.errors
+                            , viewErrors model.form.status
                             , Input.email
                                 ([ centerX, width inputWidth ] ++ Style.field)
                                 { onChange = Just UpdateEmail
@@ -169,7 +168,11 @@ view model =
                                 , placeholder = Just <| Input.placeholder [] <| el [ centerY ] <| text "password"
                                 , show = False
                                 }
-                            , el [ centerX ] <| actionIcon Arrow (Just <| SignUpSubmit)
+                            , el [ centerX ] <|
+                                if model.form.status == Waiting then
+                                    spinner
+                                else
+                                    actionIcon Arrow (Just <| SignUpSubmit)
                             , button [ centerX, Font.underline ]
                                 { onPress = Just <| NavigateTo Login
                                 , label = text "Need to log in?"
@@ -256,7 +259,7 @@ viewApp model appView =
                 ]
 
         waiting =
-            not <| isJust model.form.errors
+            model.form.status == Waiting
     in
     case appView of
         ViewStart ->
@@ -277,7 +280,7 @@ viewApp model appView =
         ViewCreatePosition ->
             col
                 [ createHeader Flag
-                , viewErrors model.form.errors
+                , viewErrors model.form.status
                 , nameEdit model.form
                 , notesEditor model.form
                 , createButtons waiting SaveCreatePosition
@@ -286,7 +289,7 @@ viewApp model appView =
         ViewCreateSubmission ->
             col
                 [ createHeader Bolt
-                , viewErrors model.form.errors
+                , viewErrors model.form.status
                 , nameEdit model.form
                 , viewSubmissionPicker model.form
                 , stepsEditor model.form
@@ -297,7 +300,7 @@ viewApp model appView =
         ViewCreateTag ->
             col
                 [ createHeader Tags
-                , viewErrors model.form.errors
+                , viewErrors model.form.status
                 , nameEdit model.form
                 , createButtons waiting SaveCreateTag
                 ]
@@ -305,7 +308,7 @@ viewApp model appView =
         ViewCreateTopic ->
             col
                 [ createHeader Book
-                , viewErrors model.form.errors
+                , viewErrors model.form.status
                 , nameEdit model.form
                 , notesEditor model.form
                 , createButtons waiting SaveCreateTopic
@@ -314,7 +317,7 @@ viewApp model appView =
         ViewCreateTransition ->
             col
                 [ createHeader Arrow
-                , viewErrors model.form.errors
+                , viewErrors model.form.status
                 , nameEdit model.form
                 , viewTransitionPickers model.form
                 , stepsEditor model.form
@@ -325,7 +328,7 @@ viewApp model appView =
         ViewEditPosition _ ->
             col
                 [ editHeader Flag
-                , viewErrors model.form.errors
+                , viewErrors model.form.status
                 , nameEdit model.form
                 , notesEditor model.form
                 , editButtons waiting SaveEditPosition <| DeletePosition model.form.id
@@ -334,7 +337,7 @@ viewApp model appView =
         ViewEditSubmission _ ->
             col
                 [ editHeader Bolt
-                , viewErrors model.form.errors
+                , viewErrors model.form.status
                 , nameEdit model.form
                 , viewSubmissionPicker model.form
                 , stepsEditor model.form
@@ -346,7 +349,7 @@ viewApp model appView =
         ViewEditTag _ ->
             col
                 [ editHeader Tags
-                , viewErrors model.form.errors
+                , viewErrors model.form.status
                 , nameEdit model.form
                 , editButtons waiting SaveEditTag <| DeleteTag model.form.id
                 ]
@@ -354,7 +357,7 @@ viewApp model appView =
         ViewEditTopic _ ->
             col
                 [ editHeader Book
-                , viewErrors model.form.errors
+                , viewErrors model.form.status
                 , nameEdit model.form
                 , notesEditor model.form
                 , editButtons waiting SaveEditTopic <| DeleteTopic model.form.id
@@ -363,7 +366,7 @@ viewApp model appView =
         ViewEditTransition _ ->
             col
                 [ editHeader Arrow
-                , viewErrors model.form.errors
+                , viewErrors model.form.status
                 , nameEdit model.form
                 , viewTransitionPickers model.form
                 , stepsEditor model.form
@@ -453,7 +456,7 @@ viewApp model appView =
             column [ padding 20 ]
                 [ el [ centerX ] <| icon Cogs Style.mattIcon
                 , el [] <| text "Change Password:"
-                , viewErrors model.form.errors
+                , viewErrors model.form.status
                 , Input.newPassword style
                     { onChange = Just UpdatePassword
                     , text = model.form.password
@@ -859,7 +862,7 @@ viewRemote fn data =
                 spinner
 
         Failure err ->
-            viewErrors (Just [ toString err ])
+            err |> toString |> Ne.fromElement |> Errors |> viewErrors
 
         Success a ->
             fn a
@@ -1075,50 +1078,44 @@ notesEditor form =
 
 
 viewSteps : Array String -> Element Msg
-viewSteps steps =
-    column
-        [ Font.size 25, width shrink, centerX ]
-        (steps
-            |> Array.toList
-            |> List.indexedMap
-                (\i step ->
-                    row [ fill |> maximum 500 |> width ]
-                        [ el [ Font.color Style.e, Element.alignTop ] <|
-                            text <|
-                                (toString (i + 1) ++ ".")
-                        , paragraph
-                            [ width fill ]
-                            [ text step
-                            ]
+viewSteps =
+    Array.toList
+        >> List.indexedMap
+            (\i step ->
+                row [ fill |> maximum 500 |> width ]
+                    [ el [ Font.color Style.e, Element.alignTop ] <|
+                        text <|
+                            (toString (i + 1) ++ ".")
+                    , paragraph
+                        [ width fill ]
+                        [ text step
                         ]
-                )
-        )
+                    ]
+            )
+        >> column [ Font.size 25, width shrink, centerX ]
 
 
 viewNotes : Array String -> Element msg
-viewNotes notes =
-    column
-        [ Font.size 25, width shrink, centerX ]
-        (notes
-            |> Array.toList
-            |> List.map
-                (\note ->
-                    row [ fill |> maximum 500 |> width ]
-                        [ el [ Font.color Style.e, Element.alignTop ] <| text "• "
-                        , if Regex.contains matchLink note then
-                            newTabLink [ Font.underline ]
-                                { url = note
-                                , label = text <| domain note
-                                }
-                          else
-                            paragraph
-                                [ width fill
-                                ]
-                                [ text note
-                                ]
-                        ]
-                )
-        )
+viewNotes =
+    Array.toList
+        >> List.map
+            (\note ->
+                row [ fill |> maximum 500 |> width ]
+                    [ el [ Font.color Style.e, Element.alignTop ] <| text "• "
+                    , if Regex.contains matchLink note then
+                        newTabLink [ Font.underline ]
+                            { url = note
+                            , label = text <| domain note
+                            }
+                      else
+                        paragraph
+                            [ width fill
+                            ]
+                            [ text note
+                            ]
+                    ]
+            )
+        >> column [ Font.size 25, width shrink, centerX ]
 
 
 viewTransitions : List Transition -> Element Msg
@@ -1201,35 +1198,40 @@ editTags tags xs =
 
 viewTags : List Info -> Element Msg
 viewTags tags =
-    el [ centerX ] <|
-        column [ spacing 20 ]
-            [ icon Tags Style.mattIcon
-            , if List.isEmpty tags then
-                el [] <| text "None!"
-              else
-                column
-                    []
-                    (tags
-                        |> List.map
-                            (\t ->
-                                button []
-                                    { onPress = Just <| NavigateTo <| TagRoute t.id
-                                    , label =
-                                        paragraph
-                                            [ width fill ]
-                                            [ el [ Font.color Style.e, padding 5 ] <| text "• "
-                                            , el Style.link <| text t.name
-                                            ]
-                                    }
-                            )
-                    )
-            ]
+    column [ spacing 20, width shrink, centerX ]
+        [ icon Tags Style.mattIcon
+        , if List.isEmpty tags then
+            el [] <| text "None!"
+          else
+            column
+                []
+                (tags
+                    |> List.map
+                        (\t ->
+                            button []
+                                { onPress = Just <| NavigateTo <| TagRoute t.id
+                                , label =
+                                    paragraph
+                                        [ width fill ]
+                                        [ el [ Font.color Style.e, padding 5 ] <| text "• "
+                                        , el Style.link <| text t.name
+                                        ]
+                                }
+                        )
+                )
+        ]
 
 
-viewErrors : Maybe (List String) -> Element Msg
-viewErrors =
-    whenJust
-        (\errs ->
+viewErrors : Status -> Element Msg
+viewErrors status =
+    case status of
+        Waiting ->
+            none
+
+        Ready ->
+            none
+
+        Errors es ->
             column
                 [ spacing 15
                 , padding 10
@@ -1238,13 +1240,12 @@ viewErrors =
                 , Border.color Style.e
                 , Border.width 2
                 , Border.solid
+                , width shrink
+                , centerX
                 ]
                 [ el [ centerX ] <| icon Warning Style.mattIcon
-                , viewNotes <| Array.fromList errs
+                , viewNotes <| Array.fromList <| Ne.toList es
                 ]
-                |> el [ centerX ]
-                |> when (errs |> List.isEmpty |> not)
-        )
 
 
 viewTransitionPositions : Bool -> Bool -> Bool -> Transition -> Element Msg
