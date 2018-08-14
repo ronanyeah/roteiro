@@ -579,7 +579,7 @@ update msg model =
             )
 
         Logout ->
-            ( { model | auth = Nothing }
+            ( { model | auth = Nothing, sidebarOpen = False, confirm = Nothing }
             , Cmd.batch
                 [ Ports.clearAuth ()
                 , goTo Login
