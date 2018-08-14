@@ -49,10 +49,6 @@ view model =
                                 px <| model.size.width // 3
                             else
                                 fill
-
-                        change =
-                            model.form.errors
-                                |> unwrap (always Nothing) (always Just)
                     in
                     el [ centerY, width fill, padding 20 ] <|
                         column
@@ -86,7 +82,7 @@ view model =
                                  ]
                                     ++ Style.field
                                 )
-                                { onChange = change UpdateEmail
+                                { onChange = Just UpdateEmail
                                 , text = model.form.email
                                 , label =
                                     Input.labelLeft [] <|
@@ -99,7 +95,7 @@ view model =
                                  ]
                                     ++ Style.field
                                 )
-                                { onChange = change UpdatePassword
+                                { onChange = Just UpdatePassword
                                 , text = model.form.password
                                 , label =
                                     Input.labelLeft [] <|
