@@ -707,15 +707,16 @@ sidebar isOpen view =
             ]
             |> inFront
     else
-        button [ alignRight ]
+        button
+            ([ alignRight
+             , Element.alignBottom
+             , Element.moveLeft 10
+             , Element.moveUp 10
+             ]
+                ++ ballIcon
+            )
             { onPress = Just ToggleSidebar
-            , label =
-                icon Bars
-                    [ height <| px 50
-                    , width <| px 50
-                    , Font.color Style.e
-                    , Font.size 30
-                    ]
+            , label = icon Bars []
             }
             |> inFront
 
