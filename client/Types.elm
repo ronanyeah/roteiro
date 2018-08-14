@@ -134,7 +134,7 @@ type FaIcon
     | Email
     | SignIn
     | SignOut
-    | Waiting
+    | Spinner
     | Home
     | Book
     | Notes

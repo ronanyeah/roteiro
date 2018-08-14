@@ -1327,7 +1327,7 @@ actionIcon fa msg =
 
 spinner : Element msg
 spinner =
-    icon Waiting
+    icon Spinner
         ((Html.Attributes.style
             [ ( "animation"
               , "rotation 2s infinite linear"

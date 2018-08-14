@@ -336,7 +336,7 @@ icon fa attrs =
                 Cross ->
                     "fa-times"
 
-                Waiting ->
+                Spinner ->
                     "fa-circle-notch"
 
                 Warning ->
