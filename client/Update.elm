@@ -1313,6 +1313,7 @@ saveAuth auth =
     , ( "email", Encode.string auth.email )
     ]
         |> Encode.object
+        |> Encode.encode 0
         |> Ports.saveAuth
 
 

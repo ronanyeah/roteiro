@@ -12,9 +12,7 @@ const app = Elm.Main.embed(document.body, {
   apiUrl: API_URL
 });
 
-app.ports.saveAuth.subscribe(auth =>
-  localStorage.setItem("ROTEIRO", JSON.stringify(auth))
-);
+app.ports.saveAuth.subscribe(auth => localStorage.setItem("ROTEIRO", auth));
 
 app.ports.clearAuth.subscribe(() => localStorage.removeItem("ROTEIRO"));
 
