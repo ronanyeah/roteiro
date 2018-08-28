@@ -38,6 +38,7 @@ type Msg
     = AddTag Info
     | Cancel
     | CbAuth (GqlResult Auth)
+      -- TODO: Replace Bool with ()
     | CbChangePassword (GqlResult Bool)
     | CbCreateOrUpdatePosition (GqlResult Position)
     | CbCreateOrUpdateSubmission (GqlResult Submission)
