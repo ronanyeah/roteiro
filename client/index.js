@@ -9,6 +9,7 @@ const app = Elm.Main.embed(document.body, {
     width: window.innerWidth,
     height: window.innerHeight
   },
+  // eslint-disable-next-line no-undef
   apiUrl: API_URL
 });
 
