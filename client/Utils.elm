@@ -216,7 +216,7 @@ isPositionView view =
 isSubmissionView : AppView -> Bool
 isSubmissionView view =
     case view of
-        ViewSubmissions _ ->
+        ViewSubmissions ->
             True
 
         ViewSubmission _ ->
@@ -254,7 +254,7 @@ isTagView view =
 isTopicView : AppView -> Bool
 isTopicView view =
     case view of
-        ViewTopics _ ->
+        ViewTopics ->
             True
 
         ViewTopic _ ->
@@ -273,7 +273,7 @@ isTopicView view =
 isTransitionView : AppView -> Bool
 isTransitionView view =
     case view of
-        ViewTransitions _ ->
+        ViewTransitions ->
             True
 
         ViewTransition _ ->
@@ -464,7 +464,10 @@ emptyModel =
     , auth = Nothing
     , previousRoute = Nothing
     , positions = RemoteData.NotAsked
+    , submissions = RemoteData.NotAsked
     , tags = RemoteData.NotAsked
+    , transitions = RemoteData.NotAsked
+    , topics = RemoteData.NotAsked
     , device = Desktop
     , size = Window.Size 0 0
     , confirm = Nothing

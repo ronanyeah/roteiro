@@ -350,16 +350,11 @@ update msg model =
                     ( model, log err )
 
         CbPositions res ->
-            case res of
-                Ok data ->
-                    ( { model
-                        | positions = RemoteData.Success data
-                      }
-                    , Cmd.none
-                    )
-
-                Err err ->
-                    ( model, log err )
+            ( { model
+                | positions = RemoteData.fromResult res
+              }
+            , Cmd.none
+            )
 
         CbSubmission res ->
             case res of
@@ -379,16 +374,11 @@ update msg model =
                     ( model, log err )
 
         CbSubmissions res ->
-            case res of
-                Ok data ->
-                    ( { model
-                        | view = ViewApp <| ViewSubmissions <| RemoteData.Success data
-                      }
-                    , Cmd.none
-                    )
-
-                Err err ->
-                    ( model, log err )
+            ( { model
+                | submissions = RemoteData.fromResult res
+              }
+            , Cmd.none
+            )
 
         CbTag res ->
             case res of
@@ -437,16 +427,11 @@ update msg model =
                     ( model, log err )
 
         CbTopics res ->
-            case res of
-                Ok data ->
-                    ( { model
-                        | view = ViewApp <| ViewTopics <| RemoteData.Success data
-                      }
-                    , Cmd.none
-                    )
-
-                Err err ->
-                    ( model, log err )
+            ( { model
+                | topics = RemoteData.fromResult res
+              }
+            , Cmd.none
+            )
 
         CbTransition res ->
             case res of
@@ -466,16 +451,11 @@ update msg model =
                     ( model, log err )
 
         CbTransitions res ->
-            case res of
-                Ok data ->
-                    ( { model
-                        | view = ViewApp <| ViewTransitions <| RemoteData.Success data
-                      }
-                    , Cmd.none
-                    )
-
-                Err err ->
-                    ( model, log err )
+            ( { model
+                | transitions = RemoteData.fromResult res
+              }
+            , Cmd.none
+            )
 
         ChangePasswordSubmit ->
             protect
@@ -1213,8 +1193,14 @@ update msg model =
                 Positions ->
                     protect
                         (\auth ->
-                            ( { model | view = ViewApp ViewPositions, positions = Loading }
-                            , Api.fetch model.apiUrl auth.token (Api.Query.positions Api.positionInfo) CbPositions
+                            ( { model
+                                | view = ViewApp ViewPositions
+                                , positions = Loading
+                              }
+                            , Api.fetch model.apiUrl
+                                auth.token
+                                (Api.Query.positions Api.positionInfo)
+                                CbPositions
                             )
                         )
 
@@ -1237,8 +1223,14 @@ update msg model =
                 Submissions ->
                     protect
                         (\auth ->
-                            ( { model | view = ViewApp <| ViewSubmissions Loading }
-                            , Api.fetch model.apiUrl auth.token (Api.Query.submissions Api.submission) CbSubmissions
+                            ( { model
+                                | view = ViewApp ViewSubmissions
+                                , submissions = Loading
+                              }
+                            , Api.fetch model.apiUrl
+                                auth.token
+                                (Api.Query.submissions Api.submission)
+                                CbSubmissions
                             )
                         )
 
@@ -1256,8 +1248,14 @@ update msg model =
                 TagsRoute ->
                     protect
                         (\auth ->
-                            ( { model | view = ViewApp ViewTags, tags = Loading }
-                            , Api.fetch model.apiUrl auth.token (Api.Query.tags Api.tagInfo) CbTags
+                            ( { model
+                                | view = ViewApp ViewTags
+                                , tags = Loading
+                              }
+                            , Api.fetch model.apiUrl
+                                auth.token
+                                (Api.Query.tags Api.tagInfo)
+                                CbTags
                             )
                         )
 
@@ -1275,8 +1273,14 @@ update msg model =
                 Topics ->
                     protect
                         (\auth ->
-                            ( { model | view = ViewApp <| ViewTopics Loading }
-                            , Api.fetch model.apiUrl auth.token (Api.Query.topics Api.topicInfo) CbTopics
+                            ( { model
+                                | view = ViewApp ViewTopics
+                                , topics = Loading
+                              }
+                            , Api.fetch model.apiUrl
+                                auth.token
+                                (Api.Query.topics Api.topicInfo)
+                                CbTopics
                             )
                         )
 
@@ -1294,8 +1298,14 @@ update msg model =
                 Transitions ->
                     protect
                         (\auth ->
-                            ( { model | view = ViewApp <| ViewTransitions Loading }
-                            , Api.fetch model.apiUrl auth.token (Api.Query.transitions Api.transition) CbTransitions
+                            ( { model
+                                | view = ViewApp ViewTransitions
+                                , transitions = Loading
+                              }
+                            , Api.fetch model.apiUrl
+                                auth.token
+                                (Api.Query.transitions Api.transition)
+                                CbTransitions
                             )
                         )
 
@@ -1323,7 +1333,7 @@ saveAuth auth =
         |> Ports.saveAuth
 
 
-maybeFetchTags : Url -> Token -> RemoteData.WebData a -> Cmd Msg
+maybeFetchTags : Url -> Token -> GqlRemote a -> Cmd Msg
 maybeFetchTags apiUrl token data =
     if
         case data of
@@ -1344,7 +1354,7 @@ maybeFetchTags apiUrl token data =
         Cmd.none
 
 
-maybeFetchPositions : Url -> Token -> RemoteData.WebData a -> Cmd Msg
+maybeFetchPositions : Url -> Token -> GqlRemote a -> Cmd Msg
 maybeFetchPositions apiUrl token data =
     if
         case data of

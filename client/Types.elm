@@ -5,7 +5,7 @@ import Array exposing (Array)
 import Graphqelm.Http
 import List.Nonempty exposing (Nonempty(Nonempty))
 import Navigation exposing (Location)
-import RemoteData exposing (WebData)
+import RemoteData exposing (RemoteData, WebData)
 import Window
 
 
@@ -32,6 +32,10 @@ type alias Flags =
 
 type alias GqlResult a =
     Result (Graphqelm.Http.Error a) a
+
+
+type alias GqlRemote a =
+    RemoteData (Graphqelm.Http.Error a) a
 
 
 type Msg
@@ -120,13 +124,13 @@ type AppView
     | ViewSettings
     | ViewStart
     | ViewSubmission (WebData Submission)
-    | ViewSubmissions (WebData (List Submission))
+    | ViewSubmissions
     | ViewTag (WebData Tag)
     | ViewTags
     | ViewTopic (WebData Topic)
-    | ViewTopics (WebData (List Info))
+    | ViewTopics
     | ViewTransition (WebData Transition)
-    | ViewTransitions (WebData (List Transition))
+    | ViewTransitions
 
 
 type FaIcon
@@ -168,8 +172,11 @@ type alias Model =
     , apiUrl : Url
     , auth : Maybe Auth
     , previousRoute : Maybe Route
-    , positions : WebData (List Info)
-    , tags : WebData (List Info)
+    , positions : GqlRemote (List Info)
+    , topics : GqlRemote (List Info)
+    , tags : GqlRemote (List Info)
+    , submissions : GqlRemote (List Submission)
+    , transitions : GqlRemote (List Transition)
     , device : Device
     , size : Window.Size
     , confirm : Maybe Msg

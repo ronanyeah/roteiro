@@ -496,8 +496,8 @@ viewApp model appView =
                             ]
                     )
 
-        ViewSubmissions data ->
-            data
+        ViewSubmissions ->
+            model.submissions
                 |> viewRemote
                     (\submissions ->
                         col
@@ -581,8 +581,8 @@ viewApp model appView =
                             ]
                     )
 
-        ViewTopics data ->
-            data
+        ViewTopics ->
+            model.topics
                 |> viewRemote
                     (\topics ->
                         col
@@ -604,8 +604,8 @@ viewApp model appView =
                             ]
                     )
 
-        ViewTransitions data ->
-            data
+        ViewTransitions ->
+            model.transitions
                 |> viewRemote
                     (\transitions ->
                         col
@@ -827,7 +827,7 @@ block txt msg =
         }
 
 
-viewPickPosition : (Info -> Msg) -> RemoteData.WebData (List Info) -> Element Msg
+viewPickPosition : (Info -> Msg) -> GqlRemote (List Info) -> Element Msg
 viewPickPosition msg ps =
     el [ width fill, height fill, Background.color Style.c ] <|
         paragraph [ padding 20 ]
@@ -846,7 +846,7 @@ viewPickPosition msg ps =
             )
 
 
-viewRemote : (a -> Element Msg) -> RemoteData.WebData a -> Element Msg
+viewRemote : (a -> Element Msg) -> RemoteData e a -> Element Msg
 viewRemote fn data =
     case data of
         NotAsked ->
@@ -1173,7 +1173,7 @@ viewTechList route xs =
             )
 
 
-editTags : RemoteData.WebData (List Info) -> List Info -> Element Msg
+editTags : GqlRemote (List Info) -> List Info -> Element Msg
 editTags tags xs =
     column [ spacing 30, width shrink, centerX ]
         [ el [ centerX ] <| icon Tags Style.mattIcon
