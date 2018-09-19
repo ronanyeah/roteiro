@@ -17,7 +17,7 @@ import Regex
 import RemoteData exposing (RemoteData(..))
 import Style
 import Types exposing (..)
-import Utils exposing (icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, when, whenJust)
+import Utils exposing (formatHttpError, icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, when, whenJust)
 
 
 view : Model -> Document Msg
@@ -878,7 +878,11 @@ viewRemote fn data =
                 spinner
 
         Failure err ->
-            err |> Debug.toString |> Ne.fromElement |> Errors |> viewErrors
+            --err
+            --|> formatHttpError
+            --|> Errors
+            --|> viewErrors
+            el [] <| text "uh oh"
 
         Success a ->
             fn a
@@ -1101,7 +1105,7 @@ viewSteps =
                 row [ fill |> maximum 500 |> width ]
                     [ el [ Font.color Style.e, Element.alignTop ] <|
                         text <|
-                            (Debug.toString (i + 1) ++ ".")
+                            (String.fromInt (i + 1) ++ ".")
                     , paragraph
                         [ width fill ]
                         [ text step

@@ -1,4 +1,4 @@
-module Utils exposing (addErrors, arrayRemove, authDecoder, classifyDevice, clearErrors, del, emptyForm, emptyModel, filterEmpty, formatErrors, get, goTo, icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, listRemove, listToDict, log, matchDomain, matchLink, noLabel, notEditing, set, setWaiting, sort, unwrap, when, whenJust)
+module Utils exposing (addErrors, arrayRemove, authDecoder, classifyDevice, clearErrors, del, emptyForm, emptyModel, filterEmpty, formatErrors, formatHttpError, get, goTo, icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, listRemove, listToDict, matchDomain, matchLink, noLabel, notEditing, set, setWaiting, sort, unwrap, when, whenJust)
 
 import Api.Scalar exposing (Id(..))
 import Array exposing (Array)
@@ -16,7 +16,7 @@ import List.Nonempty as Ne
 import Ports
 import Regex exposing (Regex)
 import RemoteData
-import Types exposing (AppView(..), Auth, Device(..), Icon(..), Form, Model, Route(..), Size, Status(..), View(..))
+import Types exposing (AppView(..), Auth, Device(..), Form, Icon(..), Model, Route(..), Size, Status(..), View(..))
 import Url.Builder exposing (absolute)
 
 
@@ -155,27 +155,32 @@ classifyDevice { width } =
         Desktop
 
 
+formatHttpError : Http.Error -> List String
+formatHttpError e =
+    case e of
+        Http.BadStatus { status } ->
+            [ "Http Code: " ++ String.fromInt status.code
+            , "Message: " ++ status.message
+            ]
+
+        Http.BadPayload _ _ ->
+            [ "Bad Payload" ]
+
+        Http.BadUrl _ ->
+            [ "Bad Url" ]
+
+        Http.NetworkError ->
+            [ "Network Error" ]
+
+        Http.Timeout ->
+            [ "Timeout" ]
+
+
 formatErrors : Graphql.Http.Error a -> List String
 formatErrors err =
     case err of
         Graphql.Http.HttpError e ->
-            case e of
-                Http.BadStatus { status } ->
-                    [ "Http Code: " ++ String.fromInt status.code
-                    , "Message: " ++ status.message
-                    ]
-
-                Http.BadPayload _ _ ->
-                    [ "Bad Payload" ]
-
-                Http.BadUrl _ ->
-                    [ "Bad Url" ]
-
-                Http.NetworkError ->
-                    [ "Network Error" ]
-
-                Http.Timeout ->
-                    [ "Timeout" ]
+            formatHttpError e
 
         Graphql.Http.GraphqlError _ errs ->
             errs
@@ -436,11 +441,6 @@ unwrap : b -> (a -> b) -> Maybe a -> b
 unwrap default fn =
     Maybe.map fn
         >> Maybe.withDefault default
-
-
-log : a -> Cmd msg
-log =
-    Debug.toString >> Ports.log
 
 
 listToDict : List { r | id : Id } -> Dict String { r | id : Id }

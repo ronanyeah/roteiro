@@ -7,6 +7,8 @@ import Api.Scalar exposing (Id(..))
 import Array
 import Browser
 import Browser.Navigation as Navigation
+import Graphql.Http
+import Http
 import Json.Encode as Encode
 import List.Nonempty as Ne
 import Ports
@@ -14,8 +16,13 @@ import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Types exposing (..)
 import Url
-import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, setWaiting, unwrap)
+import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, setWaiting, unwrap)
 import Validate
+
+
+log : Graphql.Http.Error a -> Cmd msg
+log =
+    formatErrors >> String.join ", " >> Ports.log
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -26,15 +33,12 @@ update msg model =
 
         protect =
             \a ->
-                unwrap
-                    ( model
-                    , Cmd.batch
-                        [ goTo model.key Login
-                        , log <| "Message interrupted: " ++ Debug.toString msg
-                        ]
-                    )
-                    a
-                    model.auth
+                model.auth
+                    |> unwrap
+                        ( model
+                        , goTo model.key Login
+                        )
+                        a
     in
     case msg of
         AddTag tag ->
@@ -1177,7 +1181,7 @@ update msg model =
                 NotFound ->
                     ( model
                     , Cmd.batch
-                        [ log "redirecting..."
+                        [ Ports.log "redirecting..."
                         , goTo model.key
                             (model.auth |> unwrap Login (always Start))
                         ]

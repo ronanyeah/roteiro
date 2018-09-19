@@ -16,7 +16,7 @@ import Graphql.Http
 import Graphql.Operation exposing (RootMutation, RootQuery)
 import Graphql.SelectionSet exposing (SelectionSet, with)
 import Types exposing (ApiUrl(..), Auth, Form, GqlResult, Info, Msg(..), Position, Submission, Tag, Token(..), Topic, Transition)
-import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, unwrap)
+import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, unwrap)
 
 
 topicInfo : SelectionSet Info Api.Object.Topic
