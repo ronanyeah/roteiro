@@ -1,4 +1,4 @@
-module Types exposing (ApiUrl(..), AppView(..), Auth, Device(..), FaIcon(..), Flags, Form, GqlRemote, GqlResult, Info, Model, Msg(..), Position, Route(..), Size, Status(..), Submission, Tag, Token(..), Topic, Transition, User, View(..))
+module Types exposing (ApiUrl(..), AppView(..), Auth, Device(..), Icon(..), Flags, Form, GqlRemote, GqlResult, Info, Model, Msg(..), Position, Route(..), Size, Status(..), Submission, Tag, Token(..), Topic, Transition, User, View(..))
 
 import Api.Scalar exposing (Id)
 import Array exposing (Array)
@@ -135,7 +135,7 @@ type AppView
     | ViewTransitions
 
 
-type FaIcon
+type Icon
     = Flag
     | Arrow
     | ArrowDown

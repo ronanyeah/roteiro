@@ -80,12 +80,6 @@ module.exports = {
     }),
     new webpack.NamedModulesPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
-    new CopyWebpackPlugin([
-      "static",
-      {
-        from: "./node_modules/@fortawesome/fontawesome-free/webfonts",
-        to: "webfonts"
-      }
-    ])
+    new CopyWebpackPlugin(["static"])
   ]
 };

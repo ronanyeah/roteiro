@@ -668,7 +668,7 @@ viewApp model appView =
                     )
 
 
-createHeader : FaIcon -> Element msg
+createHeader : Icon -> Element msg
 createHeader fa =
     el [ centerX ] <|
         row [ spacing 20, padding 20 ]
@@ -677,7 +677,7 @@ createHeader fa =
             ]
 
 
-editHeader : FaIcon -> Element msg
+editHeader : Icon -> Element msg
 editHeader fa =
     el [ centerX ] <|
         row [ spacing 20, padding 20 ]
@@ -918,7 +918,7 @@ pickPosition msg position =
                 }
 
 
-editRow : String -> FaIcon -> Msg -> Element Msg
+editRow : String -> Icon -> Msg -> Element Msg
 editRow name fa editMsg =
     row
         [ width shrink, height shrink, spacing 20, centerX ]
@@ -933,7 +933,7 @@ editRow name fa editMsg =
         ]
 
 
-addNewRow : FaIcon -> Msg -> Element Msg
+addNewRow : Icon -> Msg -> Element Msg
 addNewRow fa msg =
     row [ spacing 20, width shrink, centerX ]
         [ icon fa Style.mattIcon
@@ -1324,7 +1324,7 @@ domain s =
         |> Maybe.withDefault s
 
 
-actionIcon : FaIcon -> Maybe msg -> Element msg
+actionIcon : Icon -> Maybe msg -> Element msg
 actionIcon fa msg =
     Input.button
         [ Font.color Style.e

@@ -6,6 +6,7 @@ import Browser.Navigation exposing (Key)
 import Dict exposing (Dict)
 import Element exposing (Attribute, Element, el, html, none)
 import Element.Input as Input exposing (Label)
+import FeatherIcons as F
 import Graphql.Http
 import Html
 import Html.Attributes
@@ -15,7 +16,7 @@ import List.Nonempty as Ne
 import Ports
 import Regex exposing (Regex)
 import RemoteData
-import Types exposing (AppView(..), Auth, Device(..), FaIcon(..), Form, Model, Route(..), Size, Status(..), View(..))
+import Types exposing (AppView(..), Auth, Device(..), Icon(..), Form, Model, Route(..), Size, Status(..), View(..))
 import Url.Builder exposing (absolute)
 
 
@@ -291,90 +292,89 @@ isTransitionView view =
             False
 
 
-icon : FaIcon -> List (Attribute msg) -> Element msg
-icon fa attrs =
+icon : Icon -> List (Attribute msg) -> Element msg
+icon i attrs =
     let
-        faClass =
-            (case fa of
+        markup =
+            (case i of
                 Flag ->
-                    "fa-flag-checkered"
+                    F.flag
 
                 Arrow ->
-                    "fa-long-arrow-alt-right"
+                    F.arrowRight
 
                 ArrowDown ->
-                    "fa-long-arrow-alt-down"
+                    F.arrowDown
 
                 Bolt ->
-                    "fa-bolt"
+                    F.zap
 
                 Lock ->
-                    "fa-lock"
+                    F.lock
 
                 Book ->
-                    "fa-book"
+                    F.book
 
                 Plus ->
-                    "fa-plus"
+                    F.plus
 
                 Globe ->
-                    "fa-globe"
+                    F.globe
 
                 Email ->
-                    "fa-at"
+                    F.atSign
 
                 SignIn ->
-                    "fa-sign-in-alt"
+                    F.logIn
 
                 SignOut ->
-                    "fa-sign-out-alt"
+                    F.logOut
 
                 Home ->
-                    "fa-home"
+                    F.home
 
                 Minus ->
-                    "fa-minus"
+                    F.minus
 
                 Notes ->
-                    "fa-sticky-note"
+                    F.archive
 
                 NewUser ->
-                    "fa-user-plus"
+                    F.userPlus
 
                 Cross ->
-                    "fa-times"
+                    F.x
 
                 Spinner ->
-                    "fa-circle-notch"
+                    F.loader
 
                 Warning ->
-                    "fa-exclamation"
+                    F.alertCircle
 
                 Tags ->
-                    "fa-tags"
+                    F.tag
 
                 Tick ->
-                    "fa-check"
+                    F.check
 
                 Question ->
-                    "fa-question"
+                    F.helpCircle
 
                 Trash ->
-                    "fa-trash"
+                    F.trash2
 
                 Write ->
-                    "fa-edit"
+                    F.edit
 
                 Cogs ->
-                    "fa-cogs"
+                    F.settings
 
                 Bars ->
-                    "fa-bars"
+                    F.menu
             )
-                |> (++) "fas fa-fw "
-                |> Html.Attributes.class
+                |> F.toHtml []
     in
-    el attrs <| html <| Html.span [ faClass ] []
+    el attrs <| html markup
 
 
 sort : List { r | name : String } -> List { r | name : String }

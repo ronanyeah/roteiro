@@ -1,6 +1,3 @@
-require("../node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss");
-require("../node_modules/@fortawesome/fontawesome-free/scss/solid.scss");
-
 const { Elm } = require("./Main.elm");
 
 const app = Elm.Main.init({
