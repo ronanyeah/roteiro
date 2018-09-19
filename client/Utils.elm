@@ -1,22 +1,22 @@
-module Utils exposing (..)
+module Utils exposing (addErrors, arrayRemove, authDecoder, classifyDevice, clearErrors, del, emptyForm, emptyModel, filterEmpty, formatErrors, get, goTo, icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, listRemove, listToDict, log, matchDomain, matchLink, noLabel, notEditing, set, setWaiting, sort, unwrap, when, whenJust)
 
 import Api.Scalar exposing (Id(..))
 import Array exposing (Array)
+import Browser.Navigation exposing (Key)
 import Dict exposing (Dict)
 import Element exposing (Attribute, Element, el, html, none)
 import Element.Input as Input exposing (Label)
-import Graphqelm.Http
+import Graphql.Http
 import Html
 import Html.Attributes
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import List.Nonempty as Ne
-import Navigation
 import Ports
 import Regex exposing (Regex)
 import RemoteData
-import Types exposing (AppView(..), Auth, Device(Desktop, Mobile), FaIcon(..), Form, Model, Route(..), Status(..), View(..))
-import Window
+import Types exposing (AppView(..), Auth, Device(..), FaIcon(..), Form, Model, Route(..), Size, Status(..), View(..))
+import Url.Builder exposing (absolute)
 
 
 authDecoder : Decoder Auth
@@ -39,8 +39,8 @@ arrayRemove i =
         >> Array.fromList
 
 
-goTo : Route -> Cmd msg
-goTo route =
+goTo : Key -> Route -> Cmd msg
+goTo key route =
     (case route of
         CreatePositionRoute ->
             "/positions/new"
@@ -118,7 +118,7 @@ goTo route =
             "/transitions"
     )
         |> (++) "/app"
-        |> Navigation.newUrl
+        |> Browser.Navigation.pushUrl key
 
 
 isJust : Maybe a -> Bool
@@ -135,6 +135,7 @@ when : Bool -> Element msg -> Element msg
 when b elem =
     if b then
         elem
+
     else
         none
 
@@ -144,21 +145,22 @@ whenJust =
     unwrap none
 
 
-classifyDevice : Window.Size -> Device
+classifyDevice : Size -> Device
 classifyDevice { width } =
     if width <= 600 then
         Mobile
+
     else
         Desktop
 
 
-formatErrors : Graphqelm.Http.Error a -> List String
+formatErrors : Graphql.Http.Error a -> List String
 formatErrors err =
     case err of
-        Graphqelm.Http.HttpError e ->
+        Graphql.Http.HttpError e ->
             case e of
                 Http.BadStatus { status } ->
-                    [ "Http Code: " ++ toString status.code
+                    [ "Http Code: " ++ String.fromInt status.code
                     , "Message: " ++ status.message
                     ]
 
@@ -174,7 +176,7 @@ formatErrors err =
                 Http.Timeout ->
                     [ "Timeout" ]
 
-        Graphqelm.Http.GraphqlError _ errs ->
+        Graphql.Http.GraphqlError _ errs ->
             errs
                 |> List.map .message
 
@@ -438,7 +440,7 @@ unwrap default fn =
 
 log : a -> Cmd msg
 log =
-    toString >> Ports.log
+    Debug.toString >> Ports.log
 
 
 listToDict : List { r | id : Id } -> Dict String { r | id : Id }
@@ -457,10 +459,10 @@ filterEmpty =
     List.filter (String.isEmpty >> not)
 
 
-emptyModel : Model
-emptyModel =
+emptyModel : Key -> Model
+emptyModel key =
     { view = ViewLogin
-    , apiUrl = Types.Url ""
+    , apiUrl = Types.ApiUrl ""
     , auth = Nothing
     , previousRoute = Nothing
     , positions = RemoteData.NotAsked
@@ -469,12 +471,13 @@ emptyModel =
     , transitions = RemoteData.NotAsked
     , topics = RemoteData.NotAsked
     , device = Desktop
-    , size = Window.Size 0 0
+    , size = Size 0 0
     , confirm = Nothing
     , form = emptyForm
     , sidebarOpen = False
     , selectingStartPosition = False
     , selectingEndPosition = False
+    , key = key
     }
 
 
@@ -496,11 +499,13 @@ emptyForm =
 
 matchLink : Regex
 matchLink =
-    Regex.regex
+    Regex.fromString
         "^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"
+        |> Maybe.withDefault Regex.never
 
 
 matchDomain : Regex
 matchDomain =
-    Regex.regex
+    Regex.fromString
         "(?:[-a-zA-Z0-9@:%_\\+~.#=]{2,256}\\.)?([-a-zA-Z0-9@:%_\\+~#=]*)\\.[a-z]{2,6}\\b(?:[-a-zA-Z0-9@:%_\\+.~#?&\\/\\/=]*)"
+        |> Maybe.withDefault Regex.never

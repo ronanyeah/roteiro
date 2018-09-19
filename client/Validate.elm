@@ -1,4 +1,4 @@
-module Validate exposing (..)
+module Validate exposing (emptyNameField, endPositionMissing, position, startPositionMissing, submission, tag, topic, transition)
 
 import Api.Scalar exposing (Id(..))
 import Array
@@ -25,11 +25,12 @@ position : Form -> Result (List String) ( String, List String )
 position { name, notes } =
     if String.isEmpty name then
         Err [ emptyNameField ]
+
     else
         Ok ( name, notes |> Array.toList |> filterEmpty )
 
 
-submission : Form -> Result (List String) ( String, Id, List String, List String, List Id )
+submission : Form -> Result (List String) ( ( String, Id, List String ), ( List String, List Id ) )
 submission { name, startPosition, steps, notes, tags } =
     case ( name, startPosition ) of
         ( "", Nothing ) ->
@@ -43,11 +44,13 @@ submission { name, startPosition, steps, notes, tags } =
 
         ( str, Just { id } ) ->
             Ok
-                ( str
-                , id
-                , steps |> Array.toList |> filterEmpty
-                , notes |> Array.toList |> filterEmpty
-                , tags |> Array.toList |> List.map .id
+                ( ( str
+                  , id
+                  , steps |> Array.toList |> filterEmpty
+                  )
+                , ( notes |> Array.toList |> filterEmpty
+                  , tags |> Array.toList |> List.map .id
+                  )
                 )
 
 
@@ -55,6 +58,7 @@ tag : Form -> Result (List String) String
 tag { name } =
     if String.isEmpty name then
         Err [ emptyNameField ]
+
     else
         Ok name
 
@@ -63,14 +67,16 @@ topic : Form -> Result (List String) ( String, List String )
 topic { name, notes } =
     if String.isEmpty name then
         Err [ emptyNameField ]
+
     else
         Ok ( name, notes |> Array.toList |> filterEmpty )
 
 
-transition : Form -> Result (List String) ( String, Id, Id, List String, List String, List Id )
+transition : Form -> Result (List String) ( ( String, Id, Id ), ( List String, List String, List Id ) )
 transition { name, startPosition, endPosition, tags, steps, notes } =
     [ if String.isEmpty name then
         Just emptyNameField
+
       else
         Nothing
     , case startPosition of
@@ -92,16 +98,19 @@ transition { name, startPosition, endPosition, tags, steps, notes } =
                     case ( startPosition, endPosition ) of
                         ( Just start, Just end ) ->
                             Ok
-                                ( name
-                                , start.id
-                                , end.id
-                                , steps |> Array.toList |> filterEmpty
-                                , notes |> Array.toList |> filterEmpty
-                                , tags |> Array.toList |> List.map .id
+                                ( ( name
+                                  , start.id
+                                  , end.id
+                                  )
+                                , ( steps |> Array.toList |> filterEmpty
+                                  , notes |> Array.toList |> filterEmpty
+                                  , tags |> Array.toList |> List.map .id
+                                  )
                                 )
 
                         _ ->
                             Err [ "oops" ]
+
                 else
                     Err errs
            )

@@ -1,16 +1,17 @@
-module Types exposing (..)
+module Types exposing (ApiUrl(..), AppView(..), Auth, Device(..), FaIcon(..), Flags, Form, GqlRemote, GqlResult, Info, Model, Msg(..), Position, Route(..), Size, Status(..), Submission, Tag, Token(..), Topic, Transition, User, View(..))
 
 import Api.Scalar exposing (Id)
 import Array exposing (Array)
-import Graphqelm.Http
-import List.Nonempty exposing (Nonempty(Nonempty))
-import Navigation exposing (Location)
+import Browser
+import Browser.Navigation exposing (Key)
+import Graphql.Http
+import List.Nonempty exposing (Nonempty(..))
 import RemoteData exposing (RemoteData, WebData)
-import Window
+import Url exposing (Url)
 
 
-type Url
-    = Url String
+type ApiUrl
+    = ApiUrl String
 
 
 type Token
@@ -25,17 +26,17 @@ type Status
 
 type alias Flags =
     { maybeAuth : Maybe String
-    , size : Window.Size
+    , size : Size
     , apiUrl : String
     }
 
 
 type alias GqlResult a =
-    Result (Graphqelm.Http.Error a) a
+    Result (Graphql.Http.Error a) a
 
 
 type alias GqlRemote a =
-    RemoteData (Graphqelm.Http.Error a) a
+    RemoteData (Graphql.Http.Error a) a
 
 
 type Msg
@@ -98,8 +99,9 @@ type Msg
     | UpdatePassword String
     | UpdateConfirmPassword String
     | UpdateStartPosition Info
-    | UrlChange Location
-    | WindowSize Window.Size
+    | UrlChange Url
+    | UrlRequest Browser.UrlRequest
+    | WindowSize Int Int
 
 
 type View
@@ -169,7 +171,7 @@ type alias Info =
 
 type alias Model =
     { view : View
-    , apiUrl : Url
+    , apiUrl : ApiUrl
     , auth : Maybe Auth
     , previousRoute : Maybe Route
     , positions : GqlRemote (List Info)
@@ -178,12 +180,19 @@ type alias Model =
     , submissions : GqlRemote (List Submission)
     , transitions : GqlRemote (List Transition)
     , device : Device
-    , size : Window.Size
+    , size : Size
     , confirm : Maybe Msg
     , form : Form
     , sidebarOpen : Bool
     , selectingEndPosition : Bool
     , selectingStartPosition : Bool
+    , key : Key
+    }
+
+
+type alias Size =
+    { height : Int
+    , width : Int
     }
 
 

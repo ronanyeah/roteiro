@@ -1,17 +1,19 @@
-module Update exposing (..)
+module Update exposing (dataIsLoaded, maybeFetchPositions, maybeFetchTags, saveAuth, update)
 
 import Api
 import Api.Mutation
 import Api.Query
 import Api.Scalar exposing (Id(..))
 import Array
+import Browser
+import Browser.Navigation as Navigation
 import Json.Encode as Encode
 import List.Nonempty as Ne
-import Navigation
 import Ports
 import RemoteData exposing (RemoteData(..))
 import Router exposing (router)
 import Types exposing (..)
+import Url
 import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, setWaiting, unwrap)
 import Validate
 
@@ -23,16 +25,16 @@ update msg model =
             ( model, Cmd.none )
 
         protect =
-            flip
-                (unwrap
+            \a ->
+                unwrap
                     ( model
                     , Cmd.batch
-                        [ goTo Login
-                        , log <| "Message interrupted: " ++ toString msg
+                        [ goTo model.key Login
+                        , log <| "Message interrupted: " ++ Debug.toString msg
                         ]
                     )
-                )
-                model.auth
+                    a
+                    model.auth
     in
     case msg of
         AddTag tag ->
@@ -52,64 +54,64 @@ update msg model =
                     ( { model | previousRoute = Nothing }
                     , model.previousRoute
                         |> Maybe.withDefault Positions
-                        |> goTo
+                        |> goTo model.key
                     )
 
                 ViewApp ViewCreateSubmission ->
                     ( { model | previousRoute = Nothing }
                     , model.previousRoute
                         |> Maybe.withDefault Submissions
-                        |> goTo
+                        |> goTo model.key
                     )
 
                 ViewApp ViewCreateTag ->
                     ( { model | previousRoute = Nothing }
                     , model.previousRoute
                         |> Maybe.withDefault TagsRoute
-                        |> goTo
+                        |> goTo model.key
                     )
 
                 ViewApp ViewCreateTopic ->
                     ( { model | previousRoute = Nothing }
                     , model.previousRoute
                         |> Maybe.withDefault Topics
-                        |> goTo
+                        |> goTo model.key
                     )
 
                 ViewApp ViewCreateTransition ->
                     ( { model | previousRoute = Nothing }
                     , model.previousRoute
                         |> Maybe.withDefault Transitions
-                        |> goTo
+                        |> goTo model.key
                     )
 
                 ViewApp (ViewEditPosition p) ->
                     ( { model | confirm = Nothing, view = ViewApp (ViewPosition (Success p)) }
-                    , goTo <| PositionRoute p.id
+                    , goTo model.key <| PositionRoute p.id
                     )
 
                 ViewApp (ViewEditSubmission s) ->
                     ( { model | confirm = Nothing, view = ViewApp (ViewSubmission (Success s)) }
-                    , goTo <| SubmissionRoute s.id
+                    , goTo model.key <| SubmissionRoute s.id
                     )
 
                 ViewApp (ViewEditTag t) ->
                     ( { model | confirm = Nothing, view = ViewApp (ViewTag (Success t)) }
-                    , goTo <| TagRoute t.id
+                    , goTo model.key <| TagRoute t.id
                     )
 
                 ViewApp (ViewEditTopic t) ->
                     ( { model | confirm = Nothing, view = ViewApp (ViewTopic (Success t)) }
-                    , goTo <| TopicRoute t.id
+                    , goTo model.key <| TopicRoute t.id
                     )
 
                 ViewApp (ViewEditTransition t) ->
                     ( { model | confirm = Nothing, view = ViewApp (ViewTransition (Success t)) }
-                    , goTo <| TransitionRoute t.id
+                    , goTo model.key <| TransitionRoute t.id
                     )
 
                 _ ->
-                    ( model, goTo Start )
+                    ( model, goTo model.key Start )
 
         CbAuth res ->
             case res of
@@ -117,7 +119,7 @@ update msg model =
                     ( { model | auth = Just auth }
                     , Cmd.batch
                         [ saveAuth auth
-                        , goTo Start
+                        , goTo model.key Start
                         ]
                     )
 
@@ -134,7 +136,7 @@ update msg model =
             case res of
                 Ok _ ->
                     ( model
-                    , goTo Start
+                    , goTo model.key Start
                     )
 
                 Err err ->
@@ -153,7 +155,7 @@ update msg model =
                         | view = ViewApp <| ViewPosition <| Success a
                         , confirm = Nothing
                       }
-                    , goTo <| PositionRoute a.id
+                    , goTo model.key <| PositionRoute a.id
                     )
 
                 Err err ->
@@ -173,7 +175,7 @@ update msg model =
                         | view = ViewApp <| ViewSubmission <| Success a
                         , confirm = Nothing
                       }
-                    , goTo <| SubmissionRoute a.id
+                    , goTo model.key <| SubmissionRoute a.id
                     )
 
                 Err err ->
@@ -193,7 +195,7 @@ update msg model =
                         | view = ViewApp <| ViewTag <| Success a
                         , confirm = Nothing
                       }
-                    , goTo <| TagRoute a.id
+                    , goTo model.key <| TagRoute a.id
                     )
 
                 Err err ->
@@ -213,7 +215,7 @@ update msg model =
                         | view = ViewApp <| ViewTopic <| Success a
                         , confirm = Nothing
                       }
-                    , goTo <| TopicRoute a.id
+                    , goTo model.key <| TopicRoute a.id
                     )
 
                 Err err ->
@@ -233,7 +235,7 @@ update msg model =
                         | view = ViewApp <| ViewTransition <| Success a
                         , confirm = Nothing
                       }
-                    , goTo <| TransitionRoute a.id
+                    , goTo model.key <| TransitionRoute a.id
                     )
 
                 Err err ->
@@ -251,7 +253,7 @@ update msg model =
                 Ok _ ->
                     ( { model | confirm = Nothing }
                       -- Forces reload of previous page so deleted data won't be visible.
-                    , Navigation.back 1
+                    , Navigation.back model.key 1
                     )
 
                 Err err ->
@@ -268,7 +270,7 @@ update msg model =
             case res of
                 Ok _ ->
                     ( { model | confirm = Nothing }
-                    , goTo Submissions
+                    , goTo model.key Submissions
                     )
 
                 Err err ->
@@ -285,7 +287,7 @@ update msg model =
             case res of
                 Ok _ ->
                     ( { model | confirm = Nothing }
-                    , goTo TagsRoute
+                    , goTo model.key TagsRoute
                     )
 
                 Err err ->
@@ -302,7 +304,7 @@ update msg model =
             case res of
                 Ok _ ->
                     ( { model | confirm = Nothing }
-                    , goTo Topics
+                    , goTo model.key Topics
                     )
 
                 Err err ->
@@ -319,7 +321,7 @@ update msg model =
             case res of
                 Ok _ ->
                     ( { model | confirm = Nothing }
-                    , goTo Transitions
+                    , goTo model.key Transitions
                     )
 
                 Err err ->
@@ -343,7 +345,7 @@ update msg model =
 
                 Ok Nothing ->
                     ( model
-                    , goTo Start
+                    , goTo model.key Start
                     )
 
                 Err err ->
@@ -367,7 +369,7 @@ update msg model =
 
                 Ok Nothing ->
                     ( model
-                    , goTo Start
+                    , goTo model.key Start
                     )
 
                 Err err ->
@@ -391,7 +393,7 @@ update msg model =
 
                 Ok Nothing ->
                     ( model
-                    , goTo Start
+                    , goTo model.key Start
                     )
 
                 Err err ->
@@ -420,7 +422,7 @@ update msg model =
 
                 Ok Nothing ->
                     ( model
-                    , goTo Start
+                    , goTo model.key Start
                     )
 
                 Err err ->
@@ -444,7 +446,7 @@ update msg model =
 
                 Ok Nothing ->
                     ( model
-                    , goTo Start
+                    , goTo model.key Start
                     )
 
                 Err err ->
@@ -473,6 +475,7 @@ update msg model =
                             (Api.Mutation.changePassword { password = model.form.password })
                             CbChangePassword
                         )
+
                     else
                         ( { model
                             | form =
@@ -562,12 +565,12 @@ update msg model =
             ( { model | auth = Nothing, sidebarOpen = False, confirm = Nothing }
             , Cmd.batch
                 [ Ports.clearAuth ()
-                , goTo Login
+                , goTo model.key Login
                 ]
             )
 
         NavigateTo route ->
-            ( model, goTo route )
+            ( model, goTo model.key route )
 
         RemoveTag i ->
             ( { model
@@ -608,7 +611,7 @@ update msg model =
             protect
                 (\auth ->
                     case Validate.submission model.form of
-                        Ok ( name, startId, steps, notes, tags ) ->
+                        Ok ( ( name, startId, steps ), ( notes, tags ) ) ->
                             ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
@@ -680,7 +683,7 @@ update msg model =
             protect
                 (\auth ->
                     case Validate.transition model.form of
-                        Ok ( name, startId, endId, steps, notes, tags ) ->
+                        Ok ( ( name, startId, endId ), ( steps, notes, tags ) ) ->
                             ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
@@ -733,7 +736,7 @@ update msg model =
             protect
                 (\auth ->
                     case Validate.submission model.form of
-                        Ok ( name, position, steps, notes, tags ) ->
+                        Ok ( ( name, position, steps ), ( notes, tags ) ) ->
                             ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
@@ -810,7 +813,7 @@ update msg model =
             protect
                 (\auth ->
                     case Validate.transition model.form of
-                        Ok ( name, startId, endId, steps, notes, tags ) ->
+                        Ok ( ( name, startId, endId ), ( steps, notes, tags ) ) ->
                             ( { model | form = setWaiting model.form }
                             , Api.mutation
                                 model.apiUrl
@@ -836,7 +839,7 @@ update msg model =
                 )
 
         SetRouteThenNavigate route nextRoute ->
-            ( { model | previousRoute = Just route }, goTo nextRoute )
+            ( { model | previousRoute = Just route }, goTo model.key nextRoute )
 
         SidebarSignOut ->
             update Logout { model | sidebarOpen = False }
@@ -908,12 +911,24 @@ update msg model =
             in
             ( { model | form = form, selectingStartPosition = False }, Cmd.none )
 
-        UrlChange location ->
-            case router location of
+        UrlRequest req ->
+            ( model
+            , (case req of
+                Browser.Internal url ->
+                    Url.toString url
+
+                Browser.External str ->
+                    str
+              )
+                |> Navigation.load
+            )
+
+        UrlChange url ->
+            case router url of
                 Login ->
                     case model.auth of
                         Just _ ->
-                            ( model, goTo Start )
+                            ( model, goTo model.key Start )
 
                         Nothing ->
                             ( { model | view = ViewLogin, form = emptyForm }, Cmd.none )
@@ -921,7 +936,7 @@ update msg model =
                 SignUp ->
                     case model.auth of
                         Just _ ->
-                            ( model, goTo Start )
+                            ( model, goTo model.key Start )
 
                         Nothing ->
                             ( { model | view = ViewSignUp, form = emptyForm }, Cmd.none )
@@ -1011,13 +1026,14 @@ update msg model =
                         ViewApp (ViewPosition (Success x)) ->
                             if x.id == id then
                                 Just x
+
                             else
                                 Nothing
 
                         _ ->
                             Nothing
                     )
-                        |> unwrap ( model, goTo <| PositionRoute id )
+                        |> unwrap ( model, goTo model.key <| PositionRoute id )
                             (\x ->
                                 ( { model
                                     | view = ViewApp (ViewEditPosition x)
@@ -1039,13 +1055,14 @@ update msg model =
                                 ViewApp (ViewSubmission (Success x)) ->
                                     if x.id == id then
                                         Just x
+
                                     else
                                         Nothing
 
                                 _ ->
                                     Nothing
                             )
-                                |> unwrap ( model, goTo <| SubmissionRoute id )
+                                |> unwrap ( model, goTo model.key <| SubmissionRoute id )
                                     (\x ->
                                         ( { model
                                             | view = ViewApp (ViewEditSubmission x)
@@ -1074,13 +1091,14 @@ update msg model =
                                 ViewApp (ViewTransition (Success x)) ->
                                     if x.id == id then
                                         Just x
+
                                     else
                                         Nothing
 
                                 _ ->
                                     Nothing
                             )
-                                |> unwrap ( model, goTo <| TransitionRoute id )
+                                |> unwrap ( model, goTo model.key <| TransitionRoute id )
                                     (\x ->
                                         ( { model
                                             | view = ViewApp (ViewEditTransition x)
@@ -1108,13 +1126,14 @@ update msg model =
                         ViewApp (ViewTag (Success x)) ->
                             if x.id == id then
                                 Just x
+
                             else
                                 Nothing
 
                         _ ->
                             Nothing
                     )
-                        |> unwrap ( model, goTo <| TagRoute id )
+                        |> unwrap ( model, goTo model.key <| TagRoute id )
                             (\x ->
                                 ( { model
                                     | view = ViewApp (ViewEditTag x)
@@ -1133,13 +1152,14 @@ update msg model =
                         ViewApp (ViewTopic (Success x)) ->
                             if x.id == id then
                                 Just x
+
                             else
                                 Nothing
 
                         _ ->
                             Nothing
                     )
-                        |> unwrap ( model, goTo <| TopicRoute id )
+                        |> unwrap ( model, goTo model.key <| TopicRoute id )
                             (\x ->
                                 ( { model
                                     | view = ViewApp (ViewEditTopic x)
@@ -1158,7 +1178,7 @@ update msg model =
                     ( model
                     , Cmd.batch
                         [ log "redirecting..."
-                        , goTo
+                        , goTo model.key
                             (model.auth |> unwrap Login (always Start))
                         ]
                     )
@@ -1166,6 +1186,7 @@ update msg model =
                 PositionRoute id ->
                     if dataIsLoaded model.view id then
                         doNothing
+
                     else
                         protect
                             (\auth ->
@@ -1173,6 +1194,7 @@ update msg model =
                                     ViewApp (ViewEditPosition position) ->
                                         if position.id == id then
                                             Just position
+
                                         else
                                             Nothing
 
@@ -1212,6 +1234,7 @@ update msg model =
                 SubmissionRoute id ->
                     if dataIsLoaded model.view id then
                         doNothing
+
                     else
                         protect
                             (\auth ->
@@ -1262,6 +1285,7 @@ update msg model =
                 TopicRoute id ->
                     if dataIsLoaded model.view id then
                         doNothing
+
                     else
                         protect
                             (\auth ->
@@ -1287,6 +1311,7 @@ update msg model =
                 TransitionRoute id ->
                     if dataIsLoaded model.view id then
                         doNothing
+
                     else
                         protect
                             (\auth ->
@@ -1309,13 +1334,16 @@ update msg model =
                             )
                         )
 
-        WindowSize size ->
-            ( { model
-                | device = size |> Utils.classifyDevice
-                , size = size
-              }
-            , Cmd.none
-            )
+        WindowSize width height ->
+            Size width height
+                |> (\size ->
+                        ( { model
+                            | device = size |> Utils.classifyDevice
+                            , size = size
+                          }
+                        , Cmd.none
+                        )
+                   )
 
 
 saveAuth : Auth -> Cmd msg
@@ -1333,7 +1361,7 @@ saveAuth auth =
         |> Ports.saveAuth
 
 
-maybeFetchTags : Url -> Token -> GqlRemote a -> Cmd Msg
+maybeFetchTags : ApiUrl -> Token -> GqlRemote a -> Cmd Msg
 maybeFetchTags apiUrl token data =
     if
         case data of
@@ -1350,11 +1378,12 @@ maybeFetchTags apiUrl token data =
                 False
     then
         Api.fetch apiUrl token (Api.Query.tags Api.tagInfo) CbTags
+
     else
         Cmd.none
 
 
-maybeFetchPositions : Url -> Token -> GqlRemote a -> Cmd Msg
+maybeFetchPositions : ApiUrl -> Token -> GqlRemote a -> Cmd Msg
 maybeFetchPositions apiUrl token data =
     if
         case data of
@@ -1371,6 +1400,7 @@ maybeFetchPositions apiUrl token data =
                 False
     then
         Api.fetch apiUrl token (Api.Query.positions Api.positionInfo) CbPositions
+
     else
         Cmd.none
 

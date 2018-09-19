@@ -1,10 +1,10 @@
 module Router exposing (router)
 
 import Api.Scalar exposing (Id(..))
-import Navigation exposing (Location)
 import RemoteData exposing (RemoteData(..))
-import Types exposing (..)
-import UrlParser exposing ((</>), Parser, map, oneOf, parsePath, s, string)
+import Types exposing (Route(..))
+import Url exposing (Url)
+import Url.Parser exposing ((</>), Parser, map, oneOf, parse, s, string)
 
 
 routes : List (Parser (Route -> a) a)
@@ -36,7 +36,7 @@ routes =
     ]
 
 
-router : Location -> Route
+router : Url -> Route
 router =
-    parsePath (oneOf routes)
+    parse (oneOf routes)
         >> Maybe.withDefault NotFound

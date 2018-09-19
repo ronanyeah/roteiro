@@ -1,50 +1,57 @@
 module Main exposing (main)
 
+import Browser
+import Browser.Events
+import Browser.Navigation exposing (Key)
 import Json.Decode
-import Navigation exposing (Location)
 import Router exposing (router)
-import Types exposing (Flags, Model, Msg(..), Url(Url))
+import Types exposing (ApiUrl(..), Flags, Model, Msg(..))
 import Update exposing (update)
+import Url exposing (Url)
 import Utils exposing (authDecoder, emptyModel, goTo, unwrap)
 import View exposing (view)
-import Window
 
 
 main : Program Flags Model Msg
 main =
-    Navigation.programWithFlags UrlChange
+    Browser.application
         { init = init
-        , subscriptions = always <| Window.resizes WindowSize
+        , subscriptions = always <| Browser.Events.onResize WindowSize
         , update = update
         , view = view
+        , onUrlRequest = UrlRequest
+        , onUrlChange = UrlChange
         }
 
 
-init : Flags -> Location -> ( Model, Cmd Msg )
-init { maybeAuth, size, apiUrl } location =
+init : Flags -> Url -> Key -> ( Model, Cmd Msg )
+init { maybeAuth, size, apiUrl } url key =
     let
         startModel =
-            { emptyModel
-                | device = size |> Utils.classifyDevice
-                , size = size
-                , apiUrl = Url apiUrl
-            }
+            emptyModel key
+                |> (\m ->
+                        { m
+                            | device = size |> Utils.classifyDevice
+                            , size = size
+                            , apiUrl = ApiUrl apiUrl
+                        }
+                   )
     in
     maybeAuth
         |> Maybe.andThen
             (Json.Decode.decodeString authDecoder >> Result.toMaybe)
         |> unwrap
             ( startModel
-            , (case router location of
+            , (case router url of
                 Types.SignUp ->
                     Types.SignUp
 
                 _ ->
                     Types.Login
               )
-                |> goTo
+                |> goTo key
             )
             (\auth ->
-                update (UrlChange location)
+                update (UrlChange url)
                     { startModel | auth = Just auth }
             )

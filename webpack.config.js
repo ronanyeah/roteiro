@@ -51,13 +51,13 @@ module.exports = {
         test: /\.elm$/,
         exclude: [/elm-stuff/, /node_modules/],
         use: [
-          ...(production ? [] : [{ loader: "elm-hot-loader" }]),
+          ...(production ? [] : [{ loader: "elm-hot-webpack-loader" }]),
           {
             loader: "elm-webpack-loader",
             options: {
               cwd: __dirname,
               debug: DEBUG === "true",
-              warn: NODE_ENV === "development"
+              optimize: production
             }
           }
         ]

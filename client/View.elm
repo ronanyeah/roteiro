@@ -1,10 +1,10 @@
-module View exposing (..)
+module View exposing (actionIcon, addNewRow, ballIcon, block, blocks, createButtons, createHeader, domain, editButtons, editHeader, editRow, editTags, icons, links, minus, nameEdit, notesEditor, pickPosition, plus, sidebar, spinner, stepsEditor, transitionPositions, view, viewApp, viewErrors, viewNotes, viewPickPosition, viewRemote, viewSteps, viewSubmissionPicker, viewTags, viewTechList, viewTransitionPickers, viewTransitionPositions, viewTransitions)
 
 import Api.Scalar exposing (Id(..))
 import Array exposing (Array)
-import Color
+import Browser exposing (Document)
 import Dict
-import Element exposing (Attribute, Element, alignRight, behind, centerX, centerY, column, decorativeImage, el, fill, fillPortion, focused, height, htmlAttribute, inFront, layoutWith, maximum, mouseOver, newTabLink, noHover, none, padding, paragraph, px, row, scrollbarY, shrink, spaceEvenly, spacing, text, width)
+import Element exposing (Attribute, Element, alignRight, behindContent, centerX, centerY, column, el, fill, fillPortion, focused, height, htmlAttribute, image, inFront, layoutWith, maximum, mouseOver, newTabLink, noHover, none, padding, paragraph, px, row, scrollbarY, shrink, spaceEvenly, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
@@ -20,7 +20,7 @@ import Types exposing (..)
 import Utils exposing (icon, isJust, isPositionView, isSubmissionView, isTagView, isTopicView, isTransitionView, matchDomain, matchLink, noLabel, when, whenJust)
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
     let
         content =
@@ -40,6 +40,7 @@ view model =
                               <|
                                 viewApp model appView
                             ]
+
                     else
                         viewApp model appView
 
@@ -48,6 +49,7 @@ view model =
                         inputWidth =
                             if model.device == Desktop then
                                 px <| model.size.width // 3
+
                             else
                                 fill
                     in
@@ -59,12 +61,12 @@ view model =
                             , width fill
                             , height fill
                             ]
-                            [ decorativeImage
+                            [ image
                                 [ height <| px 100
                                 , width <| px 100
                                 , centerX
                                 ]
-                                { src = "/map.svg" }
+                                { src = "/map.svg", description = "Map" }
                             , el
                                 [ Font.size 45, Font.color Style.e, centerX ]
                               <|
@@ -83,7 +85,7 @@ view model =
                                  ]
                                     ++ Style.field
                                 )
-                                { onChange = Just UpdateEmail
+                                { onChange = UpdateEmail
                                 , text = model.form.email
                                 , label =
                                     Input.labelLeft [] <|
@@ -96,7 +98,7 @@ view model =
                                  ]
                                     ++ Style.field
                                 )
-                                { onChange = Just UpdatePassword
+                                { onChange = UpdatePassword
                                 , text = model.form.password
                                 , label =
                                     Input.labelLeft [] <|
@@ -107,6 +109,7 @@ view model =
                             , el [ centerX ] <|
                                 if model.form.status == Waiting then
                                     spinner
+
                                 else
                                     actionIcon Arrow (Just <| LoginSubmit)
                             , button [ centerX, Font.underline ]
@@ -120,6 +123,7 @@ view model =
                         inputWidth =
                             if model.device == Desktop then
                                 px <| model.size.width // 3
+
                             else
                                 fill
                     in
@@ -131,12 +135,12 @@ view model =
                             , width fill
                             , height fill
                             ]
-                            [ decorativeImage
+                            [ image
                                 [ height <| px 100
                                 , width <| px 100
                                 , centerX
                                 ]
-                                { src = "/map.svg" }
+                                { src = "/map.svg", description = "Map" }
                             , el
                                 [ Font.size 45, Font.color Style.e, centerX ]
                               <|
@@ -151,7 +155,7 @@ view model =
                             , viewErrors model.form.status
                             , Input.email
                                 ([ centerX, width inputWidth ] ++ Style.field)
-                                { onChange = Just UpdateEmail
+                                { onChange = UpdateEmail
                                 , text = model.form.email
                                 , label =
                                     Input.labelLeft [] <|
@@ -160,7 +164,7 @@ view model =
                                 }
                             , Input.currentPassword
                                 ([ centerX, width inputWidth ] ++ Style.field)
-                                { onChange = Just UpdatePassword
+                                { onChange = UpdatePassword
                                 , text = model.form.password
                                 , label =
                                     Input.labelLeft [] <|
@@ -171,6 +175,7 @@ view model =
                             , el [ centerX ] <|
                                 if model.form.status == Waiting then
                                     spinner
+
                                 else
                                     actionIcon Arrow (Just <| SignUpSubmit)
                             , button [ centerX, Font.underline ]
@@ -210,41 +215,50 @@ view model =
             if isJust model.confirm then
                 confirm
                     |> inFront
+
             else if model.selectingEndPosition then
                 viewPickPosition UpdateEndPosition model.positions
                     |> inFront
+
             else if model.selectingStartPosition then
                 viewPickPosition UpdateStartPosition model.positions
                     |> inFront
+
             else if model.device == Mobile then
                 case model.view of
                     ViewApp appView ->
                         sidebar model.sidebarOpen appView
 
                     _ ->
-                        behind none
+                        behindContent none
+
             else
-                behind none
+                behindContent none
     in
-    layoutWith
-        { options =
-            [ Element.focusStyle
-                { borderColor = Nothing
-                , backgroundColor = Nothing
-                , shadow = Nothing
-                }
+    { title = "ROTEIRO"
+    , body =
+        [ layoutWith
+            { options =
+                [ Element.focusStyle
+                    { borderColor = Nothing
+                    , backgroundColor = Nothing
+                    , shadow = Nothing
+                    }
+                ]
+                    |> (if model.device == Mobile then
+                            (::) noHover
+
+                        else
+                            identity
+                       )
+            }
+            [ Background.color Style.c
+            , Style.font
+            , modal
             ]
-                |> (if model.device == Mobile then
-                        (::) noHover
-                    else
-                        identity
-                   )
-        }
-        [ Background.color Style.c
-        , Style.font
-        , modal
+            content
         ]
-        content
+    }
 
 
 viewApp : Model -> AppView -> Element Msg
@@ -265,12 +279,12 @@ viewApp model appView =
         ViewStart ->
             el [ centerY, centerX ] <|
                 column [ spacing 20 ]
-                    [ decorativeImage
+                    [ image
                         [ height <| px 100
                         , width <| px 100
                         , centerX
                         ]
-                        { src = "/map.svg" }
+                        { src = "/map.svg", description = "Map" }
                     , el
                         [ Font.size 45, Font.color Style.e, centerX ]
                       <|
@@ -421,6 +435,7 @@ viewApp model appView =
                                         && List.isEmpty transitionsTo
                                   then
                                     none
+
                                   else
                                     column [ spacing 10 ]
                                         [ column [ spacing 10 ]
@@ -458,14 +473,14 @@ viewApp model appView =
                 , el [] <| text "Change Password:"
                 , viewErrors model.form.status
                 , Input.newPassword style
-                    { onChange = Just UpdatePassword
+                    { onChange = UpdatePassword
                     , text = model.form.password
                     , label = Input.labelLeft [] none
                     , placeholder = Nothing
                     , show = False
                     }
                 , Input.newPassword style
-                    { onChange = Just UpdateConfirmPassword
+                    { onChange = UpdateConfirmPassword
                     , text = model.form.confirmPassword
                     , label = Input.labelLeft [] none
                     , placeholder = Nothing
@@ -683,24 +698,23 @@ ballIcon =
         [ Font.color Style.a
         ]
     , focused
-        [ Border.glow Color.white 0
+        [ Border.glow Style.a 0
         ]
     ]
 
 
 links : AppView -> Element Msg
-links view =
-    el [ centerX, centerY ] <|
-        column
+links =
+    icons NavigateTo
+        >> column
             [ padding 20
             , spacing 20
             ]
-        <|
-            icons NavigateTo view
+        >> el [ centerX, centerY ]
 
 
 sidebar : Bool -> AppView -> Attribute Msg
-sidebar isOpen view =
+sidebar isOpen v =
     if isOpen then
         row [ height fill ]
             [ button [ width <| fillPortion 1, height fill ]
@@ -718,7 +732,7 @@ sidebar isOpen view =
                 , spaceEvenly
                 ]
               <|
-                (icons SidebarNavigate view
+                (icons SidebarNavigate v
                     ++ [ Input.button (centerX :: Style.actionIcon)
                             { onPress =
                                 Just <| ToggleSidebar
@@ -728,6 +742,7 @@ sidebar isOpen view =
                 )
             ]
             |> inFront
+
     else
         button
             ([ alignRight
@@ -744,39 +759,40 @@ sidebar isOpen view =
 
 
 icons : (Route -> Msg) -> AppView -> List (Element Msg)
-icons nav view =
+icons nav v =
     let
         active isActive =
             if isActive then
                 centerX :: ballIcon
+
             else
                 centerX :: Style.actionIcon
     in
-    [ button (active <| view == ViewStart)
+    [ button (active <| v == ViewStart)
         { onPress = Just <| nav Start
         , label = icon Home []
         }
-    , button (active <| isPositionView view)
+    , button (active <| isPositionView v)
         { onPress = Just <| nav Positions
         , label = icon Flag []
         }
-    , button (active <| isTransitionView view)
+    , button (active <| isTransitionView v)
         { onPress = Just <| nav Transitions
         , label = icon Arrow []
         }
-    , button (active <| isSubmissionView view)
+    , button (active <| isSubmissionView v)
         { onPress = Just <| nav Submissions
         , label = icon Bolt []
         }
-    , button (active <| isTagView view)
+    , button (active <| isTagView v)
         { onPress = Just <| nav TagsRoute
         , label = icon Tags []
         }
-    , button (active <| isTopicView view)
+    , button (active <| isTopicView v)
         { onPress = Just <| nav Topics
         , label = icon Book []
         }
-    , button (active <| view == ViewSettings)
+    , button (active <| v == ViewSettings)
         { onPress = Just <| nav SettingsRoute
         , label = icon Cogs []
         }
@@ -862,7 +878,7 @@ viewRemote fn data =
                 spinner
 
         Failure err ->
-            err |> toString |> Ne.fromElement |> Errors |> viewErrors
+            err |> Debug.toString |> Ne.fromElement |> Errors |> viewErrors
 
         Success a ->
             fn a
@@ -929,7 +945,7 @@ nameEdit : Form -> Element Msg
 nameEdit form =
     Input.text
         ([ centerX, fill |> maximum 500 |> width ] ++ Style.field)
-        { onChange = Just <| \str -> UpdateForm { form | name = str }
+        { onChange = \str -> UpdateForm { form | name = str }
         , text = form.name
         , label = noLabel
         , placeholder = Nothing
@@ -951,6 +967,7 @@ editButtons waiting save delete =
     el [ centerX ] <|
         if waiting then
             spinner
+
         else
             row
                 [ spacing 20 ]
@@ -965,6 +982,7 @@ createButtons waiting save =
     el [ centerX ] <|
         if waiting then
             spinner
+
         else
             row
                 [ spacing 20 ]
@@ -986,16 +1004,15 @@ stepsEditor form =
                                 (Style.field
                                     ++ [ htmlAttribute <| Html.Attributes.rows 4
                                        , htmlAttribute <| Html.Attributes.wrap "hard"
-                                       , htmlAttribute <| Html.Attributes.style [ ( "white-space", "normal" ) ]
+                                       , htmlAttribute <| Html.Attributes.style "white-space" "normal"
                                        , centerX
                                        , fill |> maximum 500 |> width
                                        ]
                                 )
                                 { onChange =
-                                    Just <|
-                                        \str ->
-                                            UpdateForm
-                                                { form | steps = Array.set i str form.steps }
+                                    \str ->
+                                        UpdateForm
+                                            { form | steps = Array.set i str form.steps }
                                 , text = v
                                 , label = noLabel
                                 , placeholder = Nothing
@@ -1038,16 +1055,15 @@ notesEditor form =
                                 (Style.field
                                     ++ [ htmlAttribute <| Html.Attributes.rows 4
                                        , htmlAttribute <| Html.Attributes.wrap "hard"
-                                       , htmlAttribute <| Html.Attributes.style [ ( "white-space", "normal" ) ]
+                                       , htmlAttribute <| Html.Attributes.style "white-space" "normal"
                                        , centerX
                                        , fill |> maximum 500 |> width
                                        ]
                                 )
                                 { onChange =
-                                    Just <|
-                                        \str ->
-                                            UpdateForm
-                                                { form | notes = Array.set i str form.notes }
+                                    \str ->
+                                        UpdateForm
+                                            { form | notes = Array.set i str form.notes }
                                 , text = v
                                 , label = noLabel
                                 , placeholder = Nothing
@@ -1085,7 +1101,7 @@ viewSteps =
                 row [ fill |> maximum 500 |> width ]
                     [ el [ Font.color Style.e, Element.alignTop ] <|
                         text <|
-                            (toString (i + 1) ++ ".")
+                            (Debug.toString (i + 1) ++ ".")
                     , paragraph
                         [ width fill ]
                         [ text step
@@ -1107,6 +1123,7 @@ viewNotes =
                             { url = note
                             , label = text <| domain note
                             }
+
                       else
                         paragraph
                             [ width fill
@@ -1153,6 +1170,7 @@ viewTechList : (Id -> Route) -> List { r | name : String, id : Id } -> Element M
 viewTechList route xs =
     if List.isEmpty xs then
         none
+
     else
         column
             []
@@ -1186,7 +1204,7 @@ editTags tags xs =
         , tags
             |> viewRemote
                 (List.filter
-                    (flip List.member xs >> not)
+                    (\x -> List.member x xs |> not)
                     >> List.map
                         (\tag ->
                             block (tag.name ++ " +") <| AddTag tag
@@ -1202,6 +1220,7 @@ viewTags tags =
         [ icon Tags Style.mattIcon
         , if List.isEmpty tags then
             el [] <| text "None!"
+
           else
             column
                 []
@@ -1279,6 +1298,7 @@ viewTransitionPositions showHeader linkFrom linkTo transition =
                     el Style.link <|
                         text transition.startPosition.name
                 }
+
           else
             el [ Font.color Style.e, centerX ] <| text transition.startPosition.name
         , el [ centerX ] <| icon ArrowDown Style.mattIcon
@@ -1289,6 +1309,7 @@ viewTransitionPositions showHeader linkFrom linkTo transition =
                     el Style.link <|
                         text transition.endPosition.name
                 }
+
           else
             el [ Font.color Style.e, centerX ] <| text transition.endPosition.name
         ]
@@ -1296,7 +1317,7 @@ viewTransitionPositions showHeader linkFrom linkTo transition =
 
 domain : String -> String
 domain s =
-    Regex.find (Regex.AtMost 10) matchDomain s
+    Regex.findAtMost 10 matchDomain s
         |> List.head
         |> Maybe.andThen (.submatches >> List.head)
         |> Maybe.andThen identity
@@ -1326,10 +1347,8 @@ spinner : Element msg
 spinner =
     icon Spinner
         ((Html.Attributes.style
-            [ ( "animation"
-              , "rotation 2s infinite linear"
-              )
-            ]
+            "animation"
+            "rotation 2s infinite linear"
             |> Element.htmlAttribute
          )
             :: Style.mattIcon

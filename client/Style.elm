@@ -1,7 +1,6 @@
-module Style exposing (..)
+module Style exposing (a, actionIcon, b, bigIcon, block, c, choice, d, e, field, font, header, link, mattIcon)
 
-import Color exposing (Color, rgb)
-import Element exposing (Attribute, fill, height, mouseOver, padding, pointer, px, width)
+import Element exposing (Attribute, Color, fill, height, mouseOver, padding, pointer, px, rgb255, width)
 import Element.Background as Background
 import Element.Font as Font
 
@@ -21,7 +20,7 @@ block =
     , Background.color e
     , Font.color c
     , mouseOver
-        [ Font.color Color.darkGrey
+        [ Font.color a
         ]
     , padding 10
     , width fill
@@ -33,7 +32,7 @@ choice =
     [ Font.size 50
     , font
     , pointer
-    , Font.color Color.darkGrey
+    , Font.color a
     , width fill
     , mouseOver
         [ Font.color e
@@ -96,32 +95,32 @@ font =
 -}
 a : Color
 a =
-    rgb 195 106 104
+    rgb255 195 106 104
 
 
 {-| grey
 -}
 b : Color
 b =
-    rgb 108 109 104
+    rgb255 108 109 104
 
 
 {-| red
 -}
 c : Color
 c =
-    rgb 182 55 48
+    rgb255 182 55 48
 
 
 {-| bright red
 -}
 d : Color
 d =
-    rgb 217 56 49
+    rgb255 217 56 49
 
 
 {-| yellow
 -}
 e : Color
 e =
-    rgb 231 191 122
+    rgb255 231 191 122

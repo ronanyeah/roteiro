@@ -1,4 +1,4 @@
-module Api exposing (..)
+module Api exposing (auth, fetch, login, mutation, position, positionInfo, signUp, submission, submissionInfo, tag, tagInfo, topic, topicInfo, transition, transitionInfo)
 
 import Api.Mutation
 import Api.Object
@@ -11,11 +11,11 @@ import Api.Object.Transition
 import Api.Query
 import Api.Scalar exposing (Id(..))
 import Array
-import Graphqelm.Field
-import Graphqelm.Http
-import Graphqelm.Operation exposing (RootMutation, RootQuery)
-import Graphqelm.SelectionSet exposing (SelectionSet, with)
-import Types exposing (Auth, Form, GqlResult, Info, Msg(..), Position, Submission, Tag, Token(Token), Topic, Transition, Url(Url))
+import Graphql.Field
+import Graphql.Http
+import Graphql.Operation exposing (RootMutation, RootQuery)
+import Graphql.SelectionSet exposing (SelectionSet, with)
+import Types exposing (ApiUrl(..), Auth, Form, GqlResult, Info, Msg(..), Position, Submission, Tag, Token(..), Topic, Transition)
 import Utils exposing (addErrors, arrayRemove, clearErrors, emptyForm, formatErrors, goTo, log, unwrap)
 
 
@@ -31,7 +31,7 @@ topic =
     Api.Object.Topic.selection Topic
         |> with Api.Object.Topic.id
         |> with Api.Object.Topic.name
-        |> with (Api.Object.Topic.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Topic.notes |> Graphql.Field.map (unwrap Array.empty Array.fromList))
 
 
 positionInfo : SelectionSet Info Api.Object.Position
@@ -46,10 +46,10 @@ position =
     Api.Object.Position.selection Position
         |> with Api.Object.Position.id
         |> with Api.Object.Position.name
-        |> with (Api.Object.Position.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Position.submissions identity submissionInfo |> Graphqelm.Field.map (Maybe.withDefault []))
-        |> with (Api.Object.Position.transitionsFrom identity transition |> Graphqelm.Field.map (Maybe.withDefault []))
-        |> with (Api.Object.Position.transitionsTo identity transition |> Graphqelm.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Position.notes |> Graphql.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Position.submissions identity submissionInfo |> Graphql.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Position.transitionsFrom identity transition |> Graphql.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Position.transitionsTo identity transition |> Graphql.Field.map (Maybe.withDefault []))
 
 
 transition : SelectionSet Transition Api.Object.Transition
@@ -59,9 +59,9 @@ transition =
         |> with Api.Object.Transition.name
         |> with (Api.Object.Transition.startPosition identity positionInfo)
         |> with (Api.Object.Transition.endPosition identity positionInfo)
-        |> with (Api.Object.Transition.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Transition.steps |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Transition.tags identity tagInfo |> Graphqelm.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Transition.notes |> Graphql.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Transition.steps |> Graphql.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Transition.tags identity tagInfo |> Graphql.Field.map (Maybe.withDefault []))
 
 
 transitionInfo : SelectionSet Info Api.Object.Transition
@@ -83,10 +83,10 @@ submission =
     Api.Object.Submission.selection Submission
         |> with Api.Object.Submission.id
         |> with Api.Object.Submission.name
-        |> with (Api.Object.Submission.steps |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Submission.notes |> Graphqelm.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Submission.steps |> Graphql.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Submission.notes |> Graphql.Field.map (unwrap Array.empty Array.fromList))
         |> with (Api.Object.Submission.position identity positionInfo)
-        |> with (Api.Object.Submission.tags identity tagInfo |> Graphqelm.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Submission.tags identity tagInfo |> Graphql.Field.map (Maybe.withDefault []))
 
 
 tagInfo : SelectionSet Info Api.Object.Tag
@@ -101,8 +101,8 @@ tag =
     Api.Object.Tag.selection Tag
         |> with Api.Object.Tag.id
         |> with Api.Object.Tag.name
-        |> with (Api.Object.Tag.submissions identity submissionInfo |> Graphqelm.Field.map (Maybe.withDefault []))
-        |> with (Api.Object.Tag.transitions identity transitionInfo |> Graphqelm.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Tag.submissions identity submissionInfo |> Graphql.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Tag.transitions identity transitionInfo |> Graphql.Field.map (Maybe.withDefault []))
 
 
 auth : SelectionSet Auth Api.Object.AuthResponse
@@ -119,47 +119,47 @@ auth =
         |> with Api.Object.AuthResponse.token
 
 
-fetch : Url -> Token -> Graphqelm.Field.Field a RootQuery -> (GqlResult a -> Msg) -> Cmd Msg
-fetch (Url apiUrl) (Token token) sel msg =
+fetch : ApiUrl -> Token -> Graphql.Field.Field a RootQuery -> (GqlResult a -> Msg) -> Cmd Msg
+fetch (ApiUrl apiUrl) (Token token) sel msg =
     Api.Query.selection identity
         |> with sel
-        |> Graphqelm.Http.queryRequest apiUrl
-        |> Graphqelm.Http.withHeader "authorization" ("Bearer " ++ token)
-        |> Graphqelm.Http.send msg
+        |> Graphql.Http.queryRequest apiUrl
+        |> Graphql.Http.withHeader "authorization" ("Bearer " ++ token)
+        |> Graphql.Http.send msg
 
 
-mutation : Url -> Token -> Graphqelm.Field.Field a RootMutation -> (GqlResult a -> Msg) -> Cmd Msg
-mutation (Url apiUrl) (Token token) sel msg =
+mutation : ApiUrl -> Token -> Graphql.Field.Field a RootMutation -> (GqlResult a -> Msg) -> Cmd Msg
+mutation (ApiUrl apiUrl) (Token token) sel msg =
     Api.Mutation.selection identity
         |> with sel
-        |> Graphqelm.Http.mutationRequest apiUrl
-        |> Graphqelm.Http.withHeader "authorization" ("Bearer " ++ token)
-        |> Graphqelm.Http.send msg
+        |> Graphql.Http.mutationRequest apiUrl
+        |> Graphql.Http.withHeader "authorization" ("Bearer " ++ token)
+        |> Graphql.Http.send msg
 
 
-login : Url -> Form -> Cmd Msg
-login (Url apiUrl) form =
+login : ApiUrl -> Form -> Cmd Msg
+login (ApiUrl apiUrl) form =
     Api.Mutation.selection identity
-        |> Graphqelm.SelectionSet.with
+        |> Graphql.SelectionSet.with
             (Api.Mutation.authenticateUser
                 { email = form.email
                 , password = form.password
                 }
                 auth
             )
-        |> Graphqelm.Http.mutationRequest apiUrl
-        |> Graphqelm.Http.send CbAuth
+        |> Graphql.Http.mutationRequest apiUrl
+        |> Graphql.Http.send CbAuth
 
 
-signUp : Url -> Form -> Cmd Msg
-signUp (Url apiUrl) form =
+signUp : ApiUrl -> Form -> Cmd Msg
+signUp (ApiUrl apiUrl) form =
     Api.Mutation.selection identity
-        |> Graphqelm.SelectionSet.with
+        |> Graphql.SelectionSet.with
             (Api.Mutation.signUpUser
                 { email = form.email
                 , password = form.password
                 }
                 auth
             )
-        |> Graphqelm.Http.mutationRequest apiUrl
-        |> Graphqelm.Http.send CbAuth
+        |> Graphql.Http.mutationRequest apiUrl
+        |> Graphql.Http.send CbAuth
