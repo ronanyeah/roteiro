@@ -1,4 +1,5 @@
-type AggregatePosition {
+module.exports = {
+        typeDefs: /* GraphQL */ `type AggregatePosition {
   count: Int!
 }
 
@@ -23,53 +24,50 @@ type AggregateUser {
 }
 
 type BatchPayload {
-  # The number of nodes that have been affected by the Batch operation.
   count: Long!
 }
 
 scalar DateTime
 
-# The `Long` scalar type represents non-fractional signed whole numeric values.
-# Long can represent values between -(2^63) and 2^63 - 1.
 scalar Long
 
 type Mutation {
-  createUser(data: UserCreateInput!): User!
   createPosition(data: PositionCreateInput!): Position!
-  createSubmission(data: SubmissionCreateInput!): Submission!
-  createTransition(data: TransitionCreateInput!): Transition!
-  createTopic(data: TopicCreateInput!): Topic!
-  createTag(data: TagCreateInput!): Tag!
-  updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
   updatePosition(data: PositionUpdateInput!, where: PositionWhereUniqueInput!): Position
-  updateSubmission(data: SubmissionUpdateInput!, where: SubmissionWhereUniqueInput!): Submission
-  updateTransition(data: TransitionUpdateInput!, where: TransitionWhereUniqueInput!): Transition
-  updateTopic(data: TopicUpdateInput!, where: TopicWhereUniqueInput!): Topic
-  updateTag(data: TagUpdateInput!, where: TagWhereUniqueInput!): Tag
-  deleteUser(where: UserWhereUniqueInput!): User
-  deletePosition(where: PositionWhereUniqueInput!): Position
-  deleteSubmission(where: SubmissionWhereUniqueInput!): Submission
-  deleteTransition(where: TransitionWhereUniqueInput!): Transition
-  deleteTopic(where: TopicWhereUniqueInput!): Topic
-  deleteTag(where: TagWhereUniqueInput!): Tag
-  upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
-  upsertPosition(where: PositionWhereUniqueInput!, create: PositionCreateInput!, update: PositionUpdateInput!): Position!
-  upsertSubmission(where: SubmissionWhereUniqueInput!, create: SubmissionCreateInput!, update: SubmissionUpdateInput!): Submission!
-  upsertTransition(where: TransitionWhereUniqueInput!, create: TransitionCreateInput!, update: TransitionUpdateInput!): Transition!
-  upsertTopic(where: TopicWhereUniqueInput!, create: TopicCreateInput!, update: TopicUpdateInput!): Topic!
-  upsertTag(where: TagWhereUniqueInput!, create: TagCreateInput!, update: TagUpdateInput!): Tag!
-  updateManyUsers(data: UserUpdateInput!, where: UserWhereInput): BatchPayload!
   updateManyPositions(data: PositionUpdateInput!, where: PositionWhereInput): BatchPayload!
-  updateManySubmissions(data: SubmissionUpdateInput!, where: SubmissionWhereInput): BatchPayload!
-  updateManyTransitions(data: TransitionUpdateInput!, where: TransitionWhereInput): BatchPayload!
-  updateManyTopics(data: TopicUpdateInput!, where: TopicWhereInput): BatchPayload!
-  updateManyTags(data: TagUpdateInput!, where: TagWhereInput): BatchPayload!
-  deleteManyUsers(where: UserWhereInput): BatchPayload!
+  upsertPosition(where: PositionWhereUniqueInput!, create: PositionCreateInput!, update: PositionUpdateInput!): Position!
+  deletePosition(where: PositionWhereUniqueInput!): Position
   deleteManyPositions(where: PositionWhereInput): BatchPayload!
+  createSubmission(data: SubmissionCreateInput!): Submission!
+  updateSubmission(data: SubmissionUpdateInput!, where: SubmissionWhereUniqueInput!): Submission
+  updateManySubmissions(data: SubmissionUpdateInput!, where: SubmissionWhereInput): BatchPayload!
+  upsertSubmission(where: SubmissionWhereUniqueInput!, create: SubmissionCreateInput!, update: SubmissionUpdateInput!): Submission!
+  deleteSubmission(where: SubmissionWhereUniqueInput!): Submission
   deleteManySubmissions(where: SubmissionWhereInput): BatchPayload!
-  deleteManyTransitions(where: TransitionWhereInput): BatchPayload!
-  deleteManyTopics(where: TopicWhereInput): BatchPayload!
+  createTag(data: TagCreateInput!): Tag!
+  updateTag(data: TagUpdateInput!, where: TagWhereUniqueInput!): Tag
+  updateManyTags(data: TagUpdateInput!, where: TagWhereInput): BatchPayload!
+  upsertTag(where: TagWhereUniqueInput!, create: TagCreateInput!, update: TagUpdateInput!): Tag!
+  deleteTag(where: TagWhereUniqueInput!): Tag
   deleteManyTags(where: TagWhereInput): BatchPayload!
+  createTopic(data: TopicCreateInput!): Topic!
+  updateTopic(data: TopicUpdateInput!, where: TopicWhereUniqueInput!): Topic
+  updateManyTopics(data: TopicUpdateInput!, where: TopicWhereInput): BatchPayload!
+  upsertTopic(where: TopicWhereUniqueInput!, create: TopicCreateInput!, update: TopicUpdateInput!): Topic!
+  deleteTopic(where: TopicWhereUniqueInput!): Topic
+  deleteManyTopics(where: TopicWhereInput): BatchPayload!
+  createTransition(data: TransitionCreateInput!): Transition!
+  updateTransition(data: TransitionUpdateInput!, where: TransitionWhereUniqueInput!): Transition
+  updateManyTransitions(data: TransitionUpdateInput!, where: TransitionWhereInput): BatchPayload!
+  upsertTransition(where: TransitionWhereUniqueInput!, create: TransitionCreateInput!, update: TransitionUpdateInput!): Transition!
+  deleteTransition(where: TransitionWhereUniqueInput!): Transition
+  deleteManyTransitions(where: TransitionWhereInput): BatchPayload!
+  createUser(data: UserCreateInput!): User!
+  updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
+  updateManyUsers(data: UserUpdateInput!, where: UserWhereInput): BatchPayload!
+  upsertUser(where: UserWhereUniqueInput!, create: UserCreateInput!, update: UserUpdateInput!): User!
+  deleteUser(where: UserWhereUniqueInput!): User
+  deleteManyUsers(where: UserWhereInput): BatchPayload!
 }
 
 enum MutationType {
@@ -78,45 +76,31 @@ enum MutationType {
   DELETED
 }
 
-# An object with an ID
 interface Node {
-  # The id of the object.
   id: ID!
 }
 
-# Information about pagination in a connection.
 type PageInfo {
-  # When paginating forwards, are there more items?
   hasNextPage: Boolean!
-
-  # When paginating backwards, are there more items?
   hasPreviousPage: Boolean!
-
-  # When paginating backwards, the cursor to continue.
   startCursor: String
-
-  # When paginating forwards, the cursor to continue.
   endCursor: String
 }
 
-type Position implements Node {
+type Position {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
-  notes: [String!]
+  notes: [String!]!
   submissions(where: SubmissionWhereInput, orderBy: SubmissionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Submission!]
   transitionsFrom(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Transition!]
   transitionsTo(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Transition!]
-  user(where: UserWhereInput): User!
+  user: User!
 }
 
-# A connection to a list of items.
 type PositionConnection {
-  # Information to aid in pagination.
   pageInfo: PageInfo!
-
-  # A list of edges.
   edges: [PositionEdge]!
   aggregate: AggregatePosition!
 }
@@ -186,12 +170,8 @@ input PositionCreateWithoutUserInput {
   transitionsTo: TransitionCreateManyWithoutEndPositionInput
 }
 
-# An edge in a connection.
 type PositionEdge {
-  # The item at the end of the edge.
   node: Position!
-
-  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -211,7 +191,7 @@ type PositionPreviousValues {
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
-  notes: [String!]
+  notes: [String!]!
 }
 
 type PositionSubscriptionPayload {
@@ -222,27 +202,14 @@ type PositionSubscriptionPayload {
 }
 
 input PositionSubscriptionWhereInput {
-  # Logical AND on all given filters.
-  AND: [PositionSubscriptionWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [PositionSubscriptionWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [PositionSubscriptionWhereInput!]
-
-  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
-
-  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
-
-  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
-
-  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: PositionWhereInput
+  AND: [PositionSubscriptionWhereInput!]
+  OR: [PositionSubscriptionWhereInput!]
+  NOT: [PositionSubscriptionWhereInput!]
 }
 
 input PositionUpdateInput {
@@ -256,9 +223,9 @@ input PositionUpdateInput {
 
 input PositionUpdateManyWithoutUserInput {
   create: [PositionCreateWithoutUserInput!]
+  delete: [PositionWhereUniqueInput!]
   connect: [PositionWhereUniqueInput!]
   disconnect: [PositionWhereUniqueInput!]
-  delete: [PositionWhereUniqueInput!]
   update: [PositionUpdateWithWhereUniqueWithoutUserInput!]
   upsert: [PositionUpsertWithWhereUniqueWithoutUserInput!]
 }
@@ -269,26 +236,26 @@ input PositionUpdatenotesInput {
 
 input PositionUpdateOneWithoutSubmissionsInput {
   create: PositionCreateWithoutSubmissionsInput
-  connect: PositionWhereUniqueInput
-  delete: Boolean
   update: PositionUpdateWithoutSubmissionsDataInput
   upsert: PositionUpsertWithoutSubmissionsInput
+  delete: Boolean
+  connect: PositionWhereUniqueInput
 }
 
 input PositionUpdateOneWithoutTransitionsFromInput {
   create: PositionCreateWithoutTransitionsFromInput
-  connect: PositionWhereUniqueInput
-  delete: Boolean
   update: PositionUpdateWithoutTransitionsFromDataInput
   upsert: PositionUpsertWithoutTransitionsFromInput
+  delete: Boolean
+  connect: PositionWhereUniqueInput
 }
 
 input PositionUpdateOneWithoutTransitionsToInput {
   create: PositionCreateWithoutTransitionsToInput
-  connect: PositionWhereUniqueInput
-  delete: Boolean
   update: PositionUpdateWithoutTransitionsToDataInput
   upsert: PositionUpsertWithoutTransitionsToInput
+  delete: Boolean
+  connect: PositionWhereUniqueInput
 }
 
 input PositionUpdateWithoutSubmissionsDataInput {
@@ -350,137 +317,49 @@ input PositionUpsertWithWhereUniqueWithoutUserInput {
 }
 
 input PositionWhereInput {
-  # Logical AND on all given filters.
-  AND: [PositionWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [PositionWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [PositionWhereInput!]
   id: ID
-
-  # All values that are not equal to given value.
   id_not: ID
-
-  # All values that are contained in given list.
   id_in: [ID!]
-
-  # All values that are not contained in given list.
   id_not_in: [ID!]
-
-  # All values less than the given value.
   id_lt: ID
-
-  # All values less than or equal the given value.
   id_lte: ID
-
-  # All values greater than the given value.
   id_gt: ID
-
-  # All values greater than or equal the given value.
   id_gte: ID
-
-  # All values containing the given string.
   id_contains: ID
-
-  # All values not containing the given string.
   id_not_contains: ID
-
-  # All values starting with the given string.
   id_starts_with: ID
-
-  # All values not starting with the given string.
   id_not_starts_with: ID
-
-  # All values ending with the given string.
   id_ends_with: ID
-
-  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
-
-  # All values that are not equal to given value.
   createdAt_not: DateTime
-
-  # All values that are contained in given list.
   createdAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   createdAt_lt: DateTime
-
-  # All values less than or equal the given value.
   createdAt_lte: DateTime
-
-  # All values greater than the given value.
   createdAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
-
-  # All values that are not equal to given value.
   updatedAt_not: DateTime
-
-  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   updatedAt_lt: DateTime
-
-  # All values less than or equal the given value.
   updatedAt_lte: DateTime
-
-  # All values greater than the given value.
   updatedAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   name: String
-
-  # All values that are not equal to given value.
   name_not: String
-
-  # All values that are contained in given list.
   name_in: [String!]
-
-  # All values that are not contained in given list.
   name_not_in: [String!]
-
-  # All values less than the given value.
   name_lt: String
-
-  # All values less than or equal the given value.
   name_lte: String
-
-  # All values greater than the given value.
   name_gt: String
-
-  # All values greater than or equal the given value.
   name_gte: String
-
-  # All values containing the given string.
   name_contains: String
-
-  # All values not containing the given string.
   name_not_contains: String
-
-  # All values starting with the given string.
   name_starts_with: String
-
-  # All values not starting with the given string.
   name_not_starts_with: String
-
-  # All values ending with the given string.
   name_ends_with: String
-
-  # All values not ending with the given string.
   name_not_ends_with: String
   submissions_every: SubmissionWhereInput
   submissions_some: SubmissionWhereInput
@@ -492,6 +371,9 @@ input PositionWhereInput {
   transitionsTo_some: TransitionWhereInput
   transitionsTo_none: TransitionWhereInput
   user: UserWhereInput
+  AND: [PositionWhereInput!]
+  OR: [PositionWhereInput!]
+  NOT: [PositionWhereInput!]
 }
 
 input PositionWhereUniqueInput {
@@ -499,50 +381,41 @@ input PositionWhereUniqueInput {
 }
 
 type Query {
-  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
-  positions(where: PositionWhereInput, orderBy: PositionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Position]!
-  submissions(where: SubmissionWhereInput, orderBy: SubmissionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Submission]!
-  transitions(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Transition]!
-  topics(where: TopicWhereInput, orderBy: TopicOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Topic]!
-  tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag]!
-  user(where: UserWhereUniqueInput!): User
   position(where: PositionWhereUniqueInput!): Position
-  submission(where: SubmissionWhereUniqueInput!): Submission
-  transition(where: TransitionWhereUniqueInput!): Transition
-  topic(where: TopicWhereUniqueInput!): Topic
-  tag(where: TagWhereUniqueInput!): Tag
-  usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
+  positions(where: PositionWhereInput, orderBy: PositionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Position]!
   positionsConnection(where: PositionWhereInput, orderBy: PositionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PositionConnection!
+  submission(where: SubmissionWhereUniqueInput!): Submission
+  submissions(where: SubmissionWhereInput, orderBy: SubmissionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Submission]!
   submissionsConnection(where: SubmissionWhereInput, orderBy: SubmissionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): SubmissionConnection!
-  transitionsConnection(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TransitionConnection!
-  topicsConnection(where: TopicWhereInput, orderBy: TopicOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TopicConnection!
+  tag(where: TagWhereUniqueInput!): Tag
+  tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag]!
   tagsConnection(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TagConnection!
-
-  # Fetches an object given its ID
-  node(
-    # The ID of an object
-    id: ID!
-  ): Node
+  topic(where: TopicWhereUniqueInput!): Topic
+  topics(where: TopicWhereInput, orderBy: TopicOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Topic]!
+  topicsConnection(where: TopicWhereInput, orderBy: TopicOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TopicConnection!
+  transition(where: TransitionWhereUniqueInput!): Transition
+  transitions(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Transition]!
+  transitionsConnection(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): TransitionConnection!
+  user(where: UserWhereUniqueInput!): User
+  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
+  usersConnection(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): UserConnection!
+  node(id: ID!): Node
 }
 
-type Submission implements Node {
+type Submission {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
-  steps: [String!]
-  notes: [String!]
-  position(where: PositionWhereInput): Position!
+  steps: [String!]!
+  notes: [String!]!
+  position: Position!
   tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag!]
-  user(where: UserWhereInput): User!
+  user: User!
 }
 
-# A connection to a list of items.
 type SubmissionConnection {
-  # Information to aid in pagination.
   pageInfo: PageInfo!
-
-  # A list of edges.
   edges: [SubmissionEdge]!
   aggregate: AggregateSubmission!
 }
@@ -603,12 +476,8 @@ input SubmissionCreateWithoutUserInput {
   tags: TagCreateManyWithoutSubmissionsInput
 }
 
-# An edge in a connection.
 type SubmissionEdge {
-  # The item at the end of the edge.
   node: Submission!
-
-  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -628,8 +497,8 @@ type SubmissionPreviousValues {
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
-  steps: [String!]
-  notes: [String!]
+  steps: [String!]!
+  notes: [String!]!
 }
 
 type SubmissionSubscriptionPayload {
@@ -640,27 +509,14 @@ type SubmissionSubscriptionPayload {
 }
 
 input SubmissionSubscriptionWhereInput {
-  # Logical AND on all given filters.
-  AND: [SubmissionSubscriptionWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [SubmissionSubscriptionWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [SubmissionSubscriptionWhereInput!]
-
-  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
-
-  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
-
-  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
-
-  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: SubmissionWhereInput
+  AND: [SubmissionSubscriptionWhereInput!]
+  OR: [SubmissionSubscriptionWhereInput!]
+  NOT: [SubmissionSubscriptionWhereInput!]
 }
 
 input SubmissionUpdateInput {
@@ -674,27 +530,27 @@ input SubmissionUpdateInput {
 
 input SubmissionUpdateManyWithoutPositionInput {
   create: [SubmissionCreateWithoutPositionInput!]
+  delete: [SubmissionWhereUniqueInput!]
   connect: [SubmissionWhereUniqueInput!]
   disconnect: [SubmissionWhereUniqueInput!]
-  delete: [SubmissionWhereUniqueInput!]
   update: [SubmissionUpdateWithWhereUniqueWithoutPositionInput!]
   upsert: [SubmissionUpsertWithWhereUniqueWithoutPositionInput!]
 }
 
 input SubmissionUpdateManyWithoutTagsInput {
   create: [SubmissionCreateWithoutTagsInput!]
+  delete: [SubmissionWhereUniqueInput!]
   connect: [SubmissionWhereUniqueInput!]
   disconnect: [SubmissionWhereUniqueInput!]
-  delete: [SubmissionWhereUniqueInput!]
   update: [SubmissionUpdateWithWhereUniqueWithoutTagsInput!]
   upsert: [SubmissionUpsertWithWhereUniqueWithoutTagsInput!]
 }
 
 input SubmissionUpdateManyWithoutUserInput {
   create: [SubmissionCreateWithoutUserInput!]
+  delete: [SubmissionWhereUniqueInput!]
   connect: [SubmissionWhereUniqueInput!]
   disconnect: [SubmissionWhereUniqueInput!]
-  delete: [SubmissionWhereUniqueInput!]
   update: [SubmissionUpdateWithWhereUniqueWithoutUserInput!]
   upsert: [SubmissionUpsertWithWhereUniqueWithoutUserInput!]
 }
@@ -765,143 +621,58 @@ input SubmissionUpsertWithWhereUniqueWithoutUserInput {
 }
 
 input SubmissionWhereInput {
-  # Logical AND on all given filters.
-  AND: [SubmissionWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [SubmissionWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [SubmissionWhereInput!]
   id: ID
-
-  # All values that are not equal to given value.
   id_not: ID
-
-  # All values that are contained in given list.
   id_in: [ID!]
-
-  # All values that are not contained in given list.
   id_not_in: [ID!]
-
-  # All values less than the given value.
   id_lt: ID
-
-  # All values less than or equal the given value.
   id_lte: ID
-
-  # All values greater than the given value.
   id_gt: ID
-
-  # All values greater than or equal the given value.
   id_gte: ID
-
-  # All values containing the given string.
   id_contains: ID
-
-  # All values not containing the given string.
   id_not_contains: ID
-
-  # All values starting with the given string.
   id_starts_with: ID
-
-  # All values not starting with the given string.
   id_not_starts_with: ID
-
-  # All values ending with the given string.
   id_ends_with: ID
-
-  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
-
-  # All values that are not equal to given value.
   createdAt_not: DateTime
-
-  # All values that are contained in given list.
   createdAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   createdAt_lt: DateTime
-
-  # All values less than or equal the given value.
   createdAt_lte: DateTime
-
-  # All values greater than the given value.
   createdAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
-
-  # All values that are not equal to given value.
   updatedAt_not: DateTime
-
-  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   updatedAt_lt: DateTime
-
-  # All values less than or equal the given value.
   updatedAt_lte: DateTime
-
-  # All values greater than the given value.
   updatedAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   name: String
-
-  # All values that are not equal to given value.
   name_not: String
-
-  # All values that are contained in given list.
   name_in: [String!]
-
-  # All values that are not contained in given list.
   name_not_in: [String!]
-
-  # All values less than the given value.
   name_lt: String
-
-  # All values less than or equal the given value.
   name_lte: String
-
-  # All values greater than the given value.
   name_gt: String
-
-  # All values greater than or equal the given value.
   name_gte: String
-
-  # All values containing the given string.
   name_contains: String
-
-  # All values not containing the given string.
   name_not_contains: String
-
-  # All values starting with the given string.
   name_starts_with: String
-
-  # All values not starting with the given string.
   name_not_starts_with: String
-
-  # All values ending with the given string.
   name_ends_with: String
-
-  # All values not ending with the given string.
   name_not_ends_with: String
   position: PositionWhereInput
   tags_every: TagWhereInput
   tags_some: TagWhereInput
   tags_none: TagWhereInput
   user: UserWhereInput
+  AND: [SubmissionWhereInput!]
+  OR: [SubmissionWhereInput!]
+  NOT: [SubmissionWhereInput!]
 }
 
 input SubmissionWhereUniqueInput {
@@ -909,30 +680,26 @@ input SubmissionWhereUniqueInput {
 }
 
 type Subscription {
-  user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
   position(where: PositionSubscriptionWhereInput): PositionSubscriptionPayload
   submission(where: SubmissionSubscriptionWhereInput): SubmissionSubscriptionPayload
-  transition(where: TransitionSubscriptionWhereInput): TransitionSubscriptionPayload
-  topic(where: TopicSubscriptionWhereInput): TopicSubscriptionPayload
   tag(where: TagSubscriptionWhereInput): TagSubscriptionPayload
+  topic(where: TopicSubscriptionWhereInput): TopicSubscriptionPayload
+  transition(where: TransitionSubscriptionWhereInput): TransitionSubscriptionPayload
+  user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
 }
 
-type Tag implements Node {
+type Tag {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   submissions(where: SubmissionWhereInput, orderBy: SubmissionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Submission!]
   transitions(where: TransitionWhereInput, orderBy: TransitionOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Transition!]
-  user(where: UserWhereInput): User!
+  user: User!
 }
 
-# A connection to a list of items.
 type TagConnection {
-  # Information to aid in pagination.
   pageInfo: PageInfo!
-
-  # A list of edges.
   edges: [TagEdge]!
   aggregate: AggregateTag!
 }
@@ -977,12 +744,8 @@ input TagCreateWithoutUserInput {
   transitions: TransitionCreateManyWithoutTagsInput
 }
 
-# An edge in a connection.
 type TagEdge {
-  # The item at the end of the edge.
   node: Tag!
-
-  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -1012,27 +775,14 @@ type TagSubscriptionPayload {
 }
 
 input TagSubscriptionWhereInput {
-  # Logical AND on all given filters.
-  AND: [TagSubscriptionWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [TagSubscriptionWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [TagSubscriptionWhereInput!]
-
-  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
-
-  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
-
-  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
-
-  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: TagWhereInput
+  AND: [TagSubscriptionWhereInput!]
+  OR: [TagSubscriptionWhereInput!]
+  NOT: [TagSubscriptionWhereInput!]
 }
 
 input TagUpdateInput {
@@ -1044,27 +794,27 @@ input TagUpdateInput {
 
 input TagUpdateManyWithoutSubmissionsInput {
   create: [TagCreateWithoutSubmissionsInput!]
+  delete: [TagWhereUniqueInput!]
   connect: [TagWhereUniqueInput!]
   disconnect: [TagWhereUniqueInput!]
-  delete: [TagWhereUniqueInput!]
   update: [TagUpdateWithWhereUniqueWithoutSubmissionsInput!]
   upsert: [TagUpsertWithWhereUniqueWithoutSubmissionsInput!]
 }
 
 input TagUpdateManyWithoutTransitionsInput {
   create: [TagCreateWithoutTransitionsInput!]
+  delete: [TagWhereUniqueInput!]
   connect: [TagWhereUniqueInput!]
   disconnect: [TagWhereUniqueInput!]
-  delete: [TagWhereUniqueInput!]
   update: [TagUpdateWithWhereUniqueWithoutTransitionsInput!]
   upsert: [TagUpsertWithWhereUniqueWithoutTransitionsInput!]
 }
 
 input TagUpdateManyWithoutUserInput {
   create: [TagCreateWithoutUserInput!]
+  delete: [TagWhereUniqueInput!]
   connect: [TagWhereUniqueInput!]
   disconnect: [TagWhereUniqueInput!]
-  delete: [TagWhereUniqueInput!]
   update: [TagUpdateWithWhereUniqueWithoutUserInput!]
   upsert: [TagUpsertWithWhereUniqueWithoutUserInput!]
 }
@@ -1121,137 +871,49 @@ input TagUpsertWithWhereUniqueWithoutUserInput {
 }
 
 input TagWhereInput {
-  # Logical AND on all given filters.
-  AND: [TagWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [TagWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [TagWhereInput!]
   id: ID
-
-  # All values that are not equal to given value.
   id_not: ID
-
-  # All values that are contained in given list.
   id_in: [ID!]
-
-  # All values that are not contained in given list.
   id_not_in: [ID!]
-
-  # All values less than the given value.
   id_lt: ID
-
-  # All values less than or equal the given value.
   id_lte: ID
-
-  # All values greater than the given value.
   id_gt: ID
-
-  # All values greater than or equal the given value.
   id_gte: ID
-
-  # All values containing the given string.
   id_contains: ID
-
-  # All values not containing the given string.
   id_not_contains: ID
-
-  # All values starting with the given string.
   id_starts_with: ID
-
-  # All values not starting with the given string.
   id_not_starts_with: ID
-
-  # All values ending with the given string.
   id_ends_with: ID
-
-  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
-
-  # All values that are not equal to given value.
   createdAt_not: DateTime
-
-  # All values that are contained in given list.
   createdAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   createdAt_lt: DateTime
-
-  # All values less than or equal the given value.
   createdAt_lte: DateTime
-
-  # All values greater than the given value.
   createdAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
-
-  # All values that are not equal to given value.
   updatedAt_not: DateTime
-
-  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   updatedAt_lt: DateTime
-
-  # All values less than or equal the given value.
   updatedAt_lte: DateTime
-
-  # All values greater than the given value.
   updatedAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   name: String
-
-  # All values that are not equal to given value.
   name_not: String
-
-  # All values that are contained in given list.
   name_in: [String!]
-
-  # All values that are not contained in given list.
   name_not_in: [String!]
-
-  # All values less than the given value.
   name_lt: String
-
-  # All values less than or equal the given value.
   name_lte: String
-
-  # All values greater than the given value.
   name_gt: String
-
-  # All values greater than or equal the given value.
   name_gte: String
-
-  # All values containing the given string.
   name_contains: String
-
-  # All values not containing the given string.
   name_not_contains: String
-
-  # All values starting with the given string.
   name_starts_with: String
-
-  # All values not starting with the given string.
   name_not_starts_with: String
-
-  # All values ending with the given string.
   name_ends_with: String
-
-  # All values not ending with the given string.
   name_not_ends_with: String
   submissions_every: SubmissionWhereInput
   submissions_some: SubmissionWhereInput
@@ -1260,27 +922,26 @@ input TagWhereInput {
   transitions_some: TransitionWhereInput
   transitions_none: TransitionWhereInput
   user: UserWhereInput
+  AND: [TagWhereInput!]
+  OR: [TagWhereInput!]
+  NOT: [TagWhereInput!]
 }
 
 input TagWhereUniqueInput {
   id: ID
 }
 
-type Topic implements Node {
+type Topic {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
-  notes: [String!]
-  user(where: UserWhereInput): User!
+  notes: [String!]!
+  user: User!
 }
 
-# A connection to a list of items.
 type TopicConnection {
-  # Information to aid in pagination.
   pageInfo: PageInfo!
-
-  # A list of edges.
   edges: [TopicEdge]!
   aggregate: AggregateTopic!
 }
@@ -1305,12 +966,8 @@ input TopicCreateWithoutUserInput {
   notes: TopicCreatenotesInput
 }
 
-# An edge in a connection.
 type TopicEdge {
-  # The item at the end of the edge.
   node: Topic!
-
-  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -1330,7 +987,7 @@ type TopicPreviousValues {
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
-  notes: [String!]
+  notes: [String!]!
 }
 
 type TopicSubscriptionPayload {
@@ -1341,27 +998,14 @@ type TopicSubscriptionPayload {
 }
 
 input TopicSubscriptionWhereInput {
-  # Logical AND on all given filters.
-  AND: [TopicSubscriptionWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [TopicSubscriptionWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [TopicSubscriptionWhereInput!]
-
-  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
-
-  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
-
-  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
-
-  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: TopicWhereInput
+  AND: [TopicSubscriptionWhereInput!]
+  OR: [TopicSubscriptionWhereInput!]
+  NOT: [TopicSubscriptionWhereInput!]
 }
 
 input TopicUpdateInput {
@@ -1372,9 +1016,9 @@ input TopicUpdateInput {
 
 input TopicUpdateManyWithoutUserInput {
   create: [TopicCreateWithoutUserInput!]
+  delete: [TopicWhereUniqueInput!]
   connect: [TopicWhereUniqueInput!]
   disconnect: [TopicWhereUniqueInput!]
-  delete: [TopicWhereUniqueInput!]
   update: [TopicUpdateWithWhereUniqueWithoutUserInput!]
   upsert: [TopicUpsertWithWhereUniqueWithoutUserInput!]
 }
@@ -1400,164 +1044,75 @@ input TopicUpsertWithWhereUniqueWithoutUserInput {
 }
 
 input TopicWhereInput {
-  # Logical AND on all given filters.
-  AND: [TopicWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [TopicWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [TopicWhereInput!]
   id: ID
-
-  # All values that are not equal to given value.
   id_not: ID
-
-  # All values that are contained in given list.
   id_in: [ID!]
-
-  # All values that are not contained in given list.
   id_not_in: [ID!]
-
-  # All values less than the given value.
   id_lt: ID
-
-  # All values less than or equal the given value.
   id_lte: ID
-
-  # All values greater than the given value.
   id_gt: ID
-
-  # All values greater than or equal the given value.
   id_gte: ID
-
-  # All values containing the given string.
   id_contains: ID
-
-  # All values not containing the given string.
   id_not_contains: ID
-
-  # All values starting with the given string.
   id_starts_with: ID
-
-  # All values not starting with the given string.
   id_not_starts_with: ID
-
-  # All values ending with the given string.
   id_ends_with: ID
-
-  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
-
-  # All values that are not equal to given value.
   createdAt_not: DateTime
-
-  # All values that are contained in given list.
   createdAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   createdAt_lt: DateTime
-
-  # All values less than or equal the given value.
   createdAt_lte: DateTime
-
-  # All values greater than the given value.
   createdAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
-
-  # All values that are not equal to given value.
   updatedAt_not: DateTime
-
-  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   updatedAt_lt: DateTime
-
-  # All values less than or equal the given value.
   updatedAt_lte: DateTime
-
-  # All values greater than the given value.
   updatedAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   name: String
-
-  # All values that are not equal to given value.
   name_not: String
-
-  # All values that are contained in given list.
   name_in: [String!]
-
-  # All values that are not contained in given list.
   name_not_in: [String!]
-
-  # All values less than the given value.
   name_lt: String
-
-  # All values less than or equal the given value.
   name_lte: String
-
-  # All values greater than the given value.
   name_gt: String
-
-  # All values greater than or equal the given value.
   name_gte: String
-
-  # All values containing the given string.
   name_contains: String
-
-  # All values not containing the given string.
   name_not_contains: String
-
-  # All values starting with the given string.
   name_starts_with: String
-
-  # All values not starting with the given string.
   name_not_starts_with: String
-
-  # All values ending with the given string.
   name_ends_with: String
-
-  # All values not ending with the given string.
   name_not_ends_with: String
   user: UserWhereInput
+  AND: [TopicWhereInput!]
+  OR: [TopicWhereInput!]
+  NOT: [TopicWhereInput!]
 }
 
 input TopicWhereUniqueInput {
   id: ID
 }
 
-type Transition implements Node {
+type Transition {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
-  steps: [String!]
-  notes: [String!]
-  startPosition(where: PositionWhereInput): Position!
-  endPosition(where: PositionWhereInput): Position!
+  steps: [String!]!
+  notes: [String!]!
+  startPosition: Position!
+  endPosition: Position!
   tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag!]
-  user(where: UserWhereInput): User!
+  user: User!
 }
 
-# A connection to a list of items.
 type TransitionConnection {
-  # Information to aid in pagination.
   pageInfo: PageInfo!
-
-  # A list of edges.
   edges: [TransitionEdge]!
   aggregate: AggregateTransition!
 }
@@ -1636,12 +1191,8 @@ input TransitionCreateWithoutUserInput {
   tags: TagCreateManyWithoutTransitionsInput
 }
 
-# An edge in a connection.
 type TransitionEdge {
-  # The item at the end of the edge.
   node: Transition!
-
-  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -1661,8 +1212,8 @@ type TransitionPreviousValues {
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
-  steps: [String!]
-  notes: [String!]
+  steps: [String!]!
+  notes: [String!]!
 }
 
 type TransitionSubscriptionPayload {
@@ -1673,27 +1224,14 @@ type TransitionSubscriptionPayload {
 }
 
 input TransitionSubscriptionWhereInput {
-  # Logical AND on all given filters.
-  AND: [TransitionSubscriptionWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [TransitionSubscriptionWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [TransitionSubscriptionWhereInput!]
-
-  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
-
-  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
-
-  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
-
-  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: TransitionWhereInput
+  AND: [TransitionSubscriptionWhereInput!]
+  OR: [TransitionSubscriptionWhereInput!]
+  NOT: [TransitionSubscriptionWhereInput!]
 }
 
 input TransitionUpdateInput {
@@ -1708,36 +1246,36 @@ input TransitionUpdateInput {
 
 input TransitionUpdateManyWithoutEndPositionInput {
   create: [TransitionCreateWithoutEndPositionInput!]
+  delete: [TransitionWhereUniqueInput!]
   connect: [TransitionWhereUniqueInput!]
   disconnect: [TransitionWhereUniqueInput!]
-  delete: [TransitionWhereUniqueInput!]
   update: [TransitionUpdateWithWhereUniqueWithoutEndPositionInput!]
   upsert: [TransitionUpsertWithWhereUniqueWithoutEndPositionInput!]
 }
 
 input TransitionUpdateManyWithoutStartPositionInput {
   create: [TransitionCreateWithoutStartPositionInput!]
+  delete: [TransitionWhereUniqueInput!]
   connect: [TransitionWhereUniqueInput!]
   disconnect: [TransitionWhereUniqueInput!]
-  delete: [TransitionWhereUniqueInput!]
   update: [TransitionUpdateWithWhereUniqueWithoutStartPositionInput!]
   upsert: [TransitionUpsertWithWhereUniqueWithoutStartPositionInput!]
 }
 
 input TransitionUpdateManyWithoutTagsInput {
   create: [TransitionCreateWithoutTagsInput!]
+  delete: [TransitionWhereUniqueInput!]
   connect: [TransitionWhereUniqueInput!]
   disconnect: [TransitionWhereUniqueInput!]
-  delete: [TransitionWhereUniqueInput!]
   update: [TransitionUpdateWithWhereUniqueWithoutTagsInput!]
   upsert: [TransitionUpsertWithWhereUniqueWithoutTagsInput!]
 }
 
 input TransitionUpdateManyWithoutUserInput {
   create: [TransitionCreateWithoutUserInput!]
+  delete: [TransitionWhereUniqueInput!]
   connect: [TransitionWhereUniqueInput!]
   disconnect: [TransitionWhereUniqueInput!]
-  delete: [TransitionWhereUniqueInput!]
   update: [TransitionUpdateWithWhereUniqueWithoutUserInput!]
   upsert: [TransitionUpsertWithWhereUniqueWithoutUserInput!]
 }
@@ -1831,137 +1369,49 @@ input TransitionUpsertWithWhereUniqueWithoutUserInput {
 }
 
 input TransitionWhereInput {
-  # Logical AND on all given filters.
-  AND: [TransitionWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [TransitionWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [TransitionWhereInput!]
   id: ID
-
-  # All values that are not equal to given value.
   id_not: ID
-
-  # All values that are contained in given list.
   id_in: [ID!]
-
-  # All values that are not contained in given list.
   id_not_in: [ID!]
-
-  # All values less than the given value.
   id_lt: ID
-
-  # All values less than or equal the given value.
   id_lte: ID
-
-  # All values greater than the given value.
   id_gt: ID
-
-  # All values greater than or equal the given value.
   id_gte: ID
-
-  # All values containing the given string.
   id_contains: ID
-
-  # All values not containing the given string.
   id_not_contains: ID
-
-  # All values starting with the given string.
   id_starts_with: ID
-
-  # All values not starting with the given string.
   id_not_starts_with: ID
-
-  # All values ending with the given string.
   id_ends_with: ID
-
-  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
-
-  # All values that are not equal to given value.
   createdAt_not: DateTime
-
-  # All values that are contained in given list.
   createdAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   createdAt_lt: DateTime
-
-  # All values less than or equal the given value.
   createdAt_lte: DateTime
-
-  # All values greater than the given value.
   createdAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
-
-  # All values that are not equal to given value.
   updatedAt_not: DateTime
-
-  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   updatedAt_lt: DateTime
-
-  # All values less than or equal the given value.
   updatedAt_lte: DateTime
-
-  # All values greater than the given value.
   updatedAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   name: String
-
-  # All values that are not equal to given value.
   name_not: String
-
-  # All values that are contained in given list.
   name_in: [String!]
-
-  # All values that are not contained in given list.
   name_not_in: [String!]
-
-  # All values less than the given value.
   name_lt: String
-
-  # All values less than or equal the given value.
   name_lte: String
-
-  # All values greater than the given value.
   name_gt: String
-
-  # All values greater than or equal the given value.
   name_gte: String
-
-  # All values containing the given string.
   name_contains: String
-
-  # All values not containing the given string.
   name_not_contains: String
-
-  # All values starting with the given string.
   name_starts_with: String
-
-  # All values not starting with the given string.
   name_not_starts_with: String
-
-  # All values ending with the given string.
   name_ends_with: String
-
-  # All values not ending with the given string.
   name_not_ends_with: String
   startPosition: PositionWhereInput
   endPosition: PositionWhereInput
@@ -1969,13 +1419,16 @@ input TransitionWhereInput {
   tags_some: TagWhereInput
   tags_none: TagWhereInput
   user: UserWhereInput
+  AND: [TransitionWhereInput!]
+  OR: [TransitionWhereInput!]
+  NOT: [TransitionWhereInput!]
 }
 
 input TransitionWhereUniqueInput {
   id: ID
 }
 
-type User implements Node {
+type User {
   id: ID!
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -1988,12 +1441,8 @@ type User implements Node {
   tags(where: TagWhereInput, orderBy: TagOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Tag!]
 }
 
-# A connection to a list of items.
 type UserConnection {
-  # Information to aid in pagination.
   pageInfo: PageInfo!
-
-  # A list of edges.
   edges: [UserEdge]!
   aggregate: AggregateUser!
 }
@@ -2078,12 +1527,8 @@ input UserCreateWithoutTransitionsInput {
   tags: TagCreateManyWithoutUserInput
 }
 
-# An edge in a connection.
 type UserEdge {
-  # The item at the end of the edge.
   node: User!
-
-  # A cursor for use in pagination.
   cursor: String!
 }
 
@@ -2116,27 +1561,14 @@ type UserSubscriptionPayload {
 }
 
 input UserSubscriptionWhereInput {
-  # Logical AND on all given filters.
-  AND: [UserSubscriptionWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [UserSubscriptionWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [UserSubscriptionWhereInput!]
-
-  # The subscription event gets dispatched when it's listed in mutation_in
   mutation_in: [MutationType!]
-
-  # The subscription event gets only dispatched when one of the updated fields names is included in this list
   updatedFields_contains: String
-
-  # The subscription event gets only dispatched when all of the field names included in this list have been updated
   updatedFields_contains_every: [String!]
-
-  # The subscription event gets only dispatched when some of the field names included in this list have been updated
   updatedFields_contains_some: [String!]
   node: UserWhereInput
+  AND: [UserSubscriptionWhereInput!]
+  OR: [UserSubscriptionWhereInput!]
+  NOT: [UserSubscriptionWhereInput!]
 }
 
 input UserUpdateInput {
@@ -2151,42 +1583,42 @@ input UserUpdateInput {
 
 input UserUpdateOneWithoutPositionsInput {
   create: UserCreateWithoutPositionsInput
-  connect: UserWhereUniqueInput
-  delete: Boolean
   update: UserUpdateWithoutPositionsDataInput
   upsert: UserUpsertWithoutPositionsInput
+  delete: Boolean
+  connect: UserWhereUniqueInput
 }
 
 input UserUpdateOneWithoutSubmissionsInput {
   create: UserCreateWithoutSubmissionsInput
-  connect: UserWhereUniqueInput
-  delete: Boolean
   update: UserUpdateWithoutSubmissionsDataInput
   upsert: UserUpsertWithoutSubmissionsInput
+  delete: Boolean
+  connect: UserWhereUniqueInput
 }
 
 input UserUpdateOneWithoutTagsInput {
   create: UserCreateWithoutTagsInput
-  connect: UserWhereUniqueInput
-  delete: Boolean
   update: UserUpdateWithoutTagsDataInput
   upsert: UserUpsertWithoutTagsInput
+  delete: Boolean
+  connect: UserWhereUniqueInput
 }
 
 input UserUpdateOneWithoutTopicsInput {
   create: UserCreateWithoutTopicsInput
-  connect: UserWhereUniqueInput
-  delete: Boolean
   update: UserUpdateWithoutTopicsDataInput
   upsert: UserUpsertWithoutTopicsInput
+  delete: Boolean
+  connect: UserWhereUniqueInput
 }
 
 input UserUpdateOneWithoutTransitionsInput {
   create: UserCreateWithoutTransitionsInput
-  connect: UserWhereUniqueInput
-  delete: Boolean
   update: UserUpdateWithoutTransitionsDataInput
   upsert: UserUpsertWithoutTransitionsInput
+  delete: Boolean
+  connect: UserWhereUniqueInput
 }
 
 input UserUpdateWithoutPositionsDataInput {
@@ -2260,177 +1692,63 @@ input UserUpsertWithoutTransitionsInput {
 }
 
 input UserWhereInput {
-  # Logical AND on all given filters.
-  AND: [UserWhereInput!]
-
-  # Logical OR on all given filters.
-  OR: [UserWhereInput!]
-
-  # Logical NOT on all given filters combined by AND.
-  NOT: [UserWhereInput!]
   id: ID
-
-  # All values that are not equal to given value.
   id_not: ID
-
-  # All values that are contained in given list.
   id_in: [ID!]
-
-  # All values that are not contained in given list.
   id_not_in: [ID!]
-
-  # All values less than the given value.
   id_lt: ID
-
-  # All values less than or equal the given value.
   id_lte: ID
-
-  # All values greater than the given value.
   id_gt: ID
-
-  # All values greater than or equal the given value.
   id_gte: ID
-
-  # All values containing the given string.
   id_contains: ID
-
-  # All values not containing the given string.
   id_not_contains: ID
-
-  # All values starting with the given string.
   id_starts_with: ID
-
-  # All values not starting with the given string.
   id_not_starts_with: ID
-
-  # All values ending with the given string.
   id_ends_with: ID
-
-  # All values not ending with the given string.
   id_not_ends_with: ID
   createdAt: DateTime
-
-  # All values that are not equal to given value.
   createdAt_not: DateTime
-
-  # All values that are contained in given list.
   createdAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   createdAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   createdAt_lt: DateTime
-
-  # All values less than or equal the given value.
   createdAt_lte: DateTime
-
-  # All values greater than the given value.
   createdAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   createdAt_gte: DateTime
   updatedAt: DateTime
-
-  # All values that are not equal to given value.
   updatedAt_not: DateTime
-
-  # All values that are contained in given list.
   updatedAt_in: [DateTime!]
-
-  # All values that are not contained in given list.
   updatedAt_not_in: [DateTime!]
-
-  # All values less than the given value.
   updatedAt_lt: DateTime
-
-  # All values less than or equal the given value.
   updatedAt_lte: DateTime
-
-  # All values greater than the given value.
   updatedAt_gt: DateTime
-
-  # All values greater than or equal the given value.
   updatedAt_gte: DateTime
   email: String
-
-  # All values that are not equal to given value.
   email_not: String
-
-  # All values that are contained in given list.
   email_in: [String!]
-
-  # All values that are not contained in given list.
   email_not_in: [String!]
-
-  # All values less than the given value.
   email_lt: String
-
-  # All values less than or equal the given value.
   email_lte: String
-
-  # All values greater than the given value.
   email_gt: String
-
-  # All values greater than or equal the given value.
   email_gte: String
-
-  # All values containing the given string.
   email_contains: String
-
-  # All values not containing the given string.
   email_not_contains: String
-
-  # All values starting with the given string.
   email_starts_with: String
-
-  # All values not starting with the given string.
   email_not_starts_with: String
-
-  # All values ending with the given string.
   email_ends_with: String
-
-  # All values not ending with the given string.
   email_not_ends_with: String
   password: String
-
-  # All values that are not equal to given value.
   password_not: String
-
-  # All values that are contained in given list.
   password_in: [String!]
-
-  # All values that are not contained in given list.
   password_not_in: [String!]
-
-  # All values less than the given value.
   password_lt: String
-
-  # All values less than or equal the given value.
   password_lte: String
-
-  # All values greater than the given value.
   password_gt: String
-
-  # All values greater than or equal the given value.
   password_gte: String
-
-  # All values containing the given string.
   password_contains: String
-
-  # All values not containing the given string.
   password_not_contains: String
-
-  # All values starting with the given string.
   password_starts_with: String
-
-  # All values not starting with the given string.
   password_not_starts_with: String
-
-  # All values ending with the given string.
   password_ends_with: String
-
-  # All values not ending with the given string.
   password_not_ends_with: String
   positions_every: PositionWhereInput
   positions_some: PositionWhereInput
@@ -2447,10 +1765,15 @@ input UserWhereInput {
   tags_every: TagWhereInput
   tags_some: TagWhereInput
   tags_none: TagWhereInput
+  AND: [UserWhereInput!]
+  OR: [UserWhereInput!]
+  NOT: [UserWhereInput!]
 }
 
 input UserWhereUniqueInput {
   id: ID
   email: String
 }
-
+`
+      }
+    

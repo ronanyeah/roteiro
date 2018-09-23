@@ -1,6 +1,7 @@
 const { GraphQLServer } = require("graphql-yoga");
 const { Prisma } = require("prisma-binding");
 const { resolve } = require("path");
+const prisma = require("../prisma-client/prisma-schema.js");
 
 const Query = require("./resolvers/query.js");
 const Mutation = require("./resolvers/mutation.js");
@@ -16,7 +17,7 @@ new GraphQLServer({
   context: req => ({
     ...req,
     db: new Prisma({
-      typeDefs: resolve(__dirname, "./prisma.graphql"),
+      typeDefs: prisma.typeDefs,
       endpoint: PRISMA_ENDPOINT,
       secret: PRISMA_SECRET,
       debug: PRISMA_DEBUG === "true"

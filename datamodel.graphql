@@ -1,68 +1,68 @@
-type User @model {
+type User {
   id: ID! @unique
   createdAt: DateTime!
   updatedAt: DateTime!
   email: String! @unique
   password: String!
-  positions: [Position!]! @relation(name: "UserPositions")
-  submissions: [Submission!]! @relation(name: "UserSubmissions")
-  transitions: [Transition!]! @relation(name: "UserTransitions")
-  topics: [Topic!]! @relation(name: "UserTopics")
-  tags: [Tag!]! @relation(name: "UserTags")
+  positions: [Position!]!
+  submissions: [Submission!]!
+  transitions: [Transition!]!
+  topics: [Topic!]!
+  tags: [Tag!]!
 }
 
-type Position @model {
+type Position {
   id: ID! @unique
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   notes: [String!]!
-  submissions: [Submission!]! @relation(name: "PositionHasSubmissions")
-  transitionsFrom: [Transition!]! @relation(name: "PositionHasTransitionsFrom")
-  transitionsTo: [Transition!]! @relation(name: "PositionHasTransitionsTo")
-  user: User! @relation(name: "UserPositions")
+  submissions: [Submission!]!
+  transitionsFrom: [Transition!]! @relation(name: "StartPosition")
+  transitionsTo: [Transition!]! @relation(name: "EndPosition")
+  user: User!
 }
 
-type Submission @model {
+type Submission {
   id: ID! @unique
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   steps: [String!]!
   notes: [String!]!
-  position: Position! @relation(name: "PositionHasSubmissions")
-  tags: [Tag!]! @relation(name: "SubmissionHasTags")
-  user: User! @relation(name: "UserSubmissions")
+  position: Position!
+  tags: [Tag!]!
+  user: User!
 }
 
-type Transition @model {
+type Transition {
   id: ID! @unique
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   steps: [String!]!
   notes: [String!]!
-  startPosition: Position! @relation(name: "PositionHasTransitionsFrom")
-  endPosition: Position! @relation(name: "PositionHasTransitionsTo")
-  tags: [Tag!]! @relation(name: "TransitionHasTags")
-  user: User! @relation(name: "UserTransitions")
+  startPosition: Position! @relation(name: "StartPosition")
+  endPosition: Position! @relation(name: "EndPosition")
+  tags: [Tag!]!
+  user: User!
 }
 
-type Topic @model {
+type Topic {
   id: ID! @unique
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
   notes: [String!]!
-  user: User! @relation(name: "UserTopics")
+  user: User!
 }
 
-type Tag @model {
+type Tag {
   id: ID! @unique
   createdAt: DateTime!
   updatedAt: DateTime!
   name: String!
-  submissions: [Submission!]! @relation(name: "SubmissionHasTags")
-  transitions: [Transition!]! @relation(name: "TransitionHasTags")
-  user: User! @relation(name: "UserTags")
+  submissions: [Submission!]!
+  transitions: [Transition!]!
+  user: User!
 }

@@ -90,7 +90,7 @@ update msg model =
                     )
 
                 ViewApp (ViewEditPosition p) ->
-                    ( { model | confirm = Nothing, view = ViewApp (ViewPosition (Success p)) }
+                    ( { model | confirm = Nothing, view = ViewApp ViewPosition }
                     , goTo model.key <| PositionRoute p.id
                     )
 
@@ -156,8 +156,9 @@ update msg model =
             case res of
                 Ok a ->
                     ( { model
-                        | view = ViewApp <| ViewPosition <| Success a
+                        | view = ViewApp ViewPosition
                         , confirm = Nothing
+                        , position = Success a
                       }
                     , goTo model.key <| PositionRoute a.id
                     )
@@ -342,7 +343,8 @@ update msg model =
             case res of
                 Ok (Just data) ->
                     ( { model
-                        | view = ViewApp <| ViewPosition <| RemoteData.Success data
+                        | view = ViewApp ViewPosition
+                        , position = Success data
                       }
                     , Cmd.none
                     )
@@ -958,8 +960,8 @@ update msg model =
                         (\auth ->
                             let
                                 start =
-                                    case model.view of
-                                        ViewApp (ViewPosition (Success { id, name })) ->
+                                    case model.position of
+                                        Success { id, name } ->
                                             Just <| Info id name
 
                                         _ ->
@@ -1002,8 +1004,8 @@ update msg model =
                         (\auth ->
                             let
                                 start =
-                                    case model.view of
-                                        ViewApp (ViewPosition (Success { id, name })) ->
+                                    case model.position of
+                                        Success { id, name } ->
                                             Just <| Info id name
 
                                         _ ->
@@ -1026,8 +1028,8 @@ update msg model =
                         )
 
                 EditPositionRoute id ->
-                    (case model.view of
-                        ViewApp (ViewPosition (Success x)) ->
+                    (case model.position of
+                        Success x ->
                             if x.id == id then
                                 Just x
 
@@ -1206,11 +1208,11 @@ update msg model =
                                         Nothing
                                 )
                                     |> unwrap
-                                        ( { model | view = ViewApp <| ViewPosition Loading }
+                                        ( { model | view = ViewApp ViewPosition, position = RemoteData.Loading }
                                         , Api.fetch model.apiUrl auth.token (Api.Query.position { id = id } Api.position) CbPosition
                                         )
                                         (\p ->
-                                            ( { model | view = ViewApp <| ViewPosition <| Success p }
+                                            ( { model | view = ViewApp ViewPosition, position = Success p }
                                             , Cmd.none
                                             )
                                         )
@@ -1412,9 +1414,9 @@ maybeFetchPositions apiUrl token data =
 dataIsLoaded : View -> Id -> Bool
 dataIsLoaded view id =
     case view of
-        ViewApp (ViewPosition (Success d)) ->
-            id == d.id
-
+        -- TODO
+        --ViewApp (ViewPosition (Success d)) ->
+        --id == d.id
         ViewApp (ViewSubmission (Success d)) ->
             id == d.id
 

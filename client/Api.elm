@@ -31,7 +31,7 @@ topic =
     Api.Object.Topic.selection Topic
         |> with Api.Object.Topic.id
         |> with Api.Object.Topic.name
-        |> with (Api.Object.Topic.notes |> Graphql.Field.map (unwrap Array.empty Array.fromList))
+        |> with (Api.Object.Topic.notes |> Graphql.Field.map Array.fromList)
 
 
 positionInfo : SelectionSet Info Api.Object.Position
@@ -46,10 +46,10 @@ position =
     Api.Object.Position.selection Position
         |> with Api.Object.Position.id
         |> with Api.Object.Position.name
-        |> with (Api.Object.Position.notes |> Graphql.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Position.submissions identity submissionInfo |> Graphql.Field.map (Maybe.withDefault []))
-        |> with (Api.Object.Position.transitionsFrom identity transition |> Graphql.Field.map (Maybe.withDefault []))
-        |> with (Api.Object.Position.transitionsTo identity transition |> Graphql.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Position.notes |> Graphql.Field.map Array.fromList)
+        |> with (Api.Object.Position.submissions submissionInfo)
+        |> with (Api.Object.Position.transitionsFrom transition)
+        |> with (Api.Object.Position.transitionsTo transition)
 
 
 transition : SelectionSet Transition Api.Object.Transition
@@ -57,11 +57,11 @@ transition =
     Api.Object.Transition.selection Transition
         |> with Api.Object.Transition.id
         |> with Api.Object.Transition.name
-        |> with (Api.Object.Transition.startPosition identity positionInfo)
-        |> with (Api.Object.Transition.endPosition identity positionInfo)
-        |> with (Api.Object.Transition.notes |> Graphql.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Transition.steps |> Graphql.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Transition.tags identity tagInfo |> Graphql.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Transition.startPosition positionInfo)
+        |> with (Api.Object.Transition.endPosition positionInfo)
+        |> with (Api.Object.Transition.notes |> Graphql.Field.map Array.fromList)
+        |> with (Api.Object.Transition.steps |> Graphql.Field.map Array.fromList)
+        |> with (Api.Object.Transition.tags tagInfo)
 
 
 transitionInfo : SelectionSet Info Api.Object.Transition
@@ -83,10 +83,10 @@ submission =
     Api.Object.Submission.selection Submission
         |> with Api.Object.Submission.id
         |> with Api.Object.Submission.name
-        |> with (Api.Object.Submission.steps |> Graphql.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Submission.notes |> Graphql.Field.map (unwrap Array.empty Array.fromList))
-        |> with (Api.Object.Submission.position identity positionInfo)
-        |> with (Api.Object.Submission.tags identity tagInfo |> Graphql.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Submission.steps |> Graphql.Field.map Array.fromList)
+        |> with (Api.Object.Submission.notes |> Graphql.Field.map Array.fromList)
+        |> with (Api.Object.Submission.position positionInfo)
+        |> with (Api.Object.Submission.tags tagInfo)
 
 
 tagInfo : SelectionSet Info Api.Object.Tag
@@ -101,8 +101,8 @@ tag =
     Api.Object.Tag.selection Tag
         |> with Api.Object.Tag.id
         |> with Api.Object.Tag.name
-        |> with (Api.Object.Tag.submissions identity submissionInfo |> Graphql.Field.map (Maybe.withDefault []))
-        |> with (Api.Object.Tag.transitions identity transitionInfo |> Graphql.Field.map (Maybe.withDefault []))
+        |> with (Api.Object.Tag.submissions submissionInfo)
+        |> with (Api.Object.Tag.transitions transitionInfo)
 
 
 auth : SelectionSet Auth Api.Object.AuthResponse

@@ -61,12 +61,12 @@ view model =
                             , width fill
                             , height fill
                             ]
-                            [ image
+                            [ el
                                 [ height <| px 100
                                 , width <| px 100
                                 , centerX
                                 ]
-                                { src = "/map.svg", description = "Map" }
+                                Utils.map
                             , el
                                 [ Font.size 45, Font.color Style.e, centerX ]
                               <|
@@ -135,12 +135,12 @@ view model =
                             , width fill
                             , height fill
                             ]
-                            [ image
+                            [ el
                                 [ height <| px 100
                                 , width <| px 100
                                 , centerX
                                 ]
-                                { src = "/map.svg", description = "Map" }
+                                Utils.map
                             , el
                                 [ Font.size 45, Font.color Style.e, centerX ]
                               <|
@@ -279,12 +279,12 @@ viewApp model appView =
         ViewStart ->
             el [ centerY, centerX ] <|
                 column [ spacing 20 ]
-                    [ image
+                    [ el
                         [ height <| px 100
                         , width <| px 100
                         , centerX
                         ]
-                        { src = "/map.svg", description = "Map" }
+                        Utils.map
                     , el
                         [ Font.size 45, Font.color Style.e, centerX ]
                       <|
@@ -389,8 +389,8 @@ viewApp model appView =
                 , editButtons waiting SaveEditTransition <| DeleteTransition model.form.id
                 ]
 
-        ViewPosition data ->
-            data
+        ViewPosition ->
+            model.position
                 |> viewRemote
                     (\({ name, notes, submissions, transitionsFrom, transitionsTo, id } as position) ->
                         col
@@ -716,7 +716,7 @@ links =
 sidebar : Bool -> AppView -> Attribute Msg
 sidebar isOpen v =
     if isOpen then
-        row [ height fill ]
+        row [ height fill, width fill ]
             [ button [ width <| fillPortion 1, height fill ]
                 { onPress = Just ToggleSidebar
                 , label = none
@@ -736,7 +736,7 @@ sidebar isOpen v =
                     ++ [ Input.button (centerX :: Style.actionIcon)
                             { onPress =
                                 Just <| ToggleSidebar
-                            , label = icon Cross []
+                            , label = icon Cross [ centerX, centerY ]
                             }
                        ]
                 )
@@ -753,7 +753,7 @@ sidebar isOpen v =
                 ++ ballIcon
             )
             { onPress = Just ToggleSidebar
-            , label = icon Bars []
+            , label = icon Bars [ centerX, centerY ]
             }
             |> inFront
 
@@ -770,35 +770,35 @@ icons nav v =
     in
     [ button (active <| v == ViewStart)
         { onPress = Just <| nav Start
-        , label = icon Home []
+        , label = icon Home [ centerX, centerY ]
         }
     , button (active <| isPositionView v)
         { onPress = Just <| nav Positions
-        , label = icon Flag []
+        , label = icon Flag [ centerX, centerY ]
         }
     , button (active <| isTransitionView v)
         { onPress = Just <| nav Transitions
-        , label = icon Arrow []
+        , label = icon Arrow [ centerX, centerY ]
         }
     , button (active <| isSubmissionView v)
         { onPress = Just <| nav Submissions
-        , label = icon Bolt []
+        , label = icon Bolt [ centerX, centerY ]
         }
     , button (active <| isTagView v)
         { onPress = Just <| nav TagsRoute
-        , label = icon Tags []
+        , label = icon Tags [ centerX, centerY ]
         }
     , button (active <| isTopicView v)
         { onPress = Just <| nav Topics
-        , label = icon Book []
+        , label = icon Book [ centerX, centerY ]
         }
     , button (active <| v == ViewSettings)
         { onPress = Just <| nav SettingsRoute
-        , label = icon Cogs []
+        , label = icon Cogs [ centerX, centerY ]
         }
     , button (centerX :: Style.actionIcon)
         { onPress = Just <| Logout
-        , label = icon SignOut []
+        , label = icon SignOut [ centerX, centerY ]
         }
     ]
 

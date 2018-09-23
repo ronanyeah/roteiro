@@ -1,16 +1,6 @@
 const { getUserId } = require("../utils.js");
 
 module.exports = {
-  user: async (_, __, ctx, info) =>
-    ctx.db.query.user(
-      {
-        where: {
-          id: await getUserId(ctx.request)
-        }
-      },
-      info
-    ),
-
   positions: async (_, args, ctx, info) =>
     ctx.db.query.positions(
       {

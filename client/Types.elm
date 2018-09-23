@@ -1,4 +1,4 @@
-module Types exposing (ApiUrl(..), AppView(..), Auth, Device(..), Icon(..), Flags, Form, GqlRemote, GqlResult, Info, Model, Msg(..), Position, Route(..), Size, Status(..), Submission, Tag, Token(..), Topic, Transition, User, View(..))
+module Types exposing (ApiUrl(..), AppView(..), Auth, Device(..), Flags, Form, GqlRemote, GqlResult, Icon(..), Info, Model, Msg(..), Position, Route(..), Size, Status(..), Submission, Tag, Token(..), Topic, Transition, User, View(..))
 
 import Api.Scalar exposing (Id)
 import Array exposing (Array)
@@ -121,7 +121,7 @@ type AppView
     | ViewEditTag Tag
     | ViewEditTopic Topic
     | ViewEditTransition Transition
-    | ViewPosition (WebData Position)
+    | ViewPosition
     | ViewPositions
     | ViewSettings
     | ViewStart
@@ -175,6 +175,7 @@ type alias Model =
     , auth : Maybe Auth
     , previousRoute : Maybe Route
     , positions : GqlRemote (List Info)
+    , position : GqlRemote Position
     , topics : GqlRemote (List Info)
     , tags : GqlRemote (List Info)
     , submissions : GqlRemote (List Submission)

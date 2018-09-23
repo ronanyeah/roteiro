@@ -1,4 +1,43 @@
-# import User from './prisma.graphql'
+type Position {
+  id: ID!
+  name: String!
+  notes: [String!]!
+  submissions: [Submission!]!
+  transitionsFrom: [Transition!]!
+  transitionsTo: [Transition!]!
+}
+
+type Submission {
+  id: ID!
+  name: String!
+  steps: [String!]!
+  notes: [String!]!
+  position: Position!
+  tags: [Tag!]!
+}
+
+type Transition {
+  id: ID!
+  name: String!
+  steps: [String!]!
+  notes: [String!]!
+  startPosition: Position!
+  endPosition: Position!
+  tags: [Tag!]!
+}
+
+type Topic {
+  id: ID!
+  name: String!
+  notes: [String!]!
+}
+
+type Tag {
+  id: ID!
+  name: String!
+  submissions: [Submission!]!
+  transitions: [Transition!]!
+}
 
 type AuthResponse {
   id: ID!
@@ -7,7 +46,6 @@ type AuthResponse {
 }
 
 type Query {
-  user: User
   position(id: ID!): Position
   positions: [Position!]!
   transition(id: ID!): Transition
